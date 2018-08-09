@@ -41,19 +41,19 @@ def getReward(stateaction, window):
             max = obs[1]
             max_i = index
         # compara con el high de cada obs (worst case), index 0
-        if min < obs[0]: 
+        if min > obs[0]: 
             min = obs[0]
             min_i = index
             
     # busca dd (max antes de min o vice versa)
     for index, obs in enumerate(window):
         print ("index=",index," obs[0]=", obs[0], "obs[1]=", obs[1])
-        # compara con el low de cada obs (worst case), index 1
+        # busca min antes de max compara con el low de cada obs (worst case), index 1
         if (dd_max > obs[1]) and (index <= max_i): 
             dd_max = obs[1]
             dd_max_i = index
         # compara con el high de cada obs (worst case), index 0
-        if (dd_min > obs[0]) and (index <= min_i): 
+        if (dd_min < obs[0]) and (index <= min_i): 
             dd_min = obs[0]
             dd_min_i = index
     print ("max=", max, " max_i=",max_i, " min=",min, " min_i=", min_i)
