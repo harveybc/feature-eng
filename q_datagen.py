@@ -80,7 +80,7 @@ if __name__ == '__main__':
             my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
     
     # lee window inicial
-    window = deque(my_data_n[0:window_size, :].copy(), window_size)
+    window = deque(window_size * [0.0], window_size)
     for i in range(0, window_size - 1):
         window.append(my_data_n[i, :].copy())
       
