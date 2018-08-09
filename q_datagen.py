@@ -93,7 +93,7 @@ if __name__ == '__main__':
         window.append(tick_data)
     
         w_shape = len(window)
-        print ("Shape: rows=",w_shape[0]," cols=",w_shape[1])
+        print ("Shape: rows=",w_shape)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         reward = getReward(int(sys.argv[1]), window[0:3].copy())
