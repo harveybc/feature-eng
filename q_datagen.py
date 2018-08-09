@@ -91,7 +91,10 @@ if __name__ == '__main__':
     for i in range(window_size, num_ticks - 1):
         tick_data = my_data_n[i, :].copy()
         window.append(tick_data)
-        
+    
+        w_shape = window.shape
+        print ("Shape: rows=",w_shape[0]," cols=",w_shape[1])
+    
         # calcula reward para el estado/acción especificado como primer cmdline param
         reward = getReward(int(sys.argv[1]), window[0:3].copy())
         
