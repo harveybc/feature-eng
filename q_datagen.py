@@ -24,12 +24,39 @@ from itertools import islice
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
 # @param: window = High, Low, Close, nextOpen timeseries
 def getReward(stateaction, window):
-    w_shape = len(window)
-    print ("Window Shape: rows=",w_shape)
-
-    # busca max y su dd (min antes de max)
-    
-    # busca min y su dd (max antes de min)
+    l_w = len(window)
+    print ("Window Shape: len=",l_w)
+    max = -9999999
+    min = 9999999
+    max_i = -1
+    min_i = -1
+    dd_max = 999999
+    dd_min = -9999999
+    dd_max_i = -1
+    dd_min_i = -1
+    # busca max y min
+    for index, obs in enumerate(window):
+        # compara con el low de cada obs (worst case), index 1
+        if max < obs[1]: 
+            max = obs[1]
+            max_i = index
+        # compara con el high de cada obs (worst case), index 0
+        if min < obs[0]: 
+            min = obs[0]
+            min_i = index
+            
+    # busca dd (max antes de min o vice versa)
+    for index, obs in enumerate(window):
+        # compara con el low de cada obs (worst case), index 1
+        if (dd_max > obs[1]) and (index <= max_i): 
+            dd_max = obs[1]
+            dd_max_i = index
+        # compara con el high de cada obs (worst case), index 0
+        if (dd_min > obs[0]) and (index <= min_i): 
+            dd_min = obs[0]
+            dd_min_i = index
+    print ("max=", max, " max_i=",max_i, " min=",min, " min_i=", min_i)
+    print ("dd_max=", dd_max, " dd_max_i=",dd_max_i, " dd_min=",dd_min, " dd_min_i=", dd_min_i)
     
     pip_cost = 0.00001
     # case 0: Open Buy, previous state = no order opened 
