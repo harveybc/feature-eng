@@ -1,6 +1,8 @@
 # -*- coding: utf-8 
 ## @package q_datagen
 #  
+# usage: python3 q-dataset <stateaction> <dataset> <output>
+#
 #  Crates a dataset with observations and the reward for a state action (first command line parameter)
 #  stateaction = 0: NoOrder/OpenBuy
 #  stateaction = 1: NoOrder/OpenSell
@@ -45,6 +47,8 @@ def getReward(stateaction, window):
 if __name__ == '__main__':
     # initializations
     window_size = 300
+    csv_f =  sys.argv[2]
+    #out_f = sys.argv[3]
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
     my_data_n = genfromtxt(csv_f, delimiter=',')
