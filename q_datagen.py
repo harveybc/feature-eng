@@ -18,13 +18,15 @@ from numpy import genfromtxt
 from numpy import shape
 from collections import deque
 import sys
+from itertools import islice
 
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
 # @param: window = High, Low, Close, nextOpen timeseries
 def getReward(stateaction, window):
-    w_shape = window.shape
-    print ("Shape: rows=",w_shape[0]," cols=",w_shape[1])
+    w_shape = len(window)
+    print ("Window Shape: rows=",w_shape)
+
     # busca max y su dd (min antes de max)
     
     # busca min y su dd (max antes de min)
@@ -92,11 +94,8 @@ if __name__ == '__main__':
         tick_data = my_data_n[i, :].copy()
         window.append(tick_data)
     
-        w_shape = len(window)
-        print ("Shape: rows=",w_shape)
-    
         # calcula reward para el estado/acción especificado como primer cmdline param
-        reward = getReward(int(sys.argv[1]), window[0:3].copy())
+        reward = getReward(int(sys.argv[1]), window)
         
         # append obs, reward a output
         tick_data.append(reward)
