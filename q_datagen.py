@@ -92,7 +92,7 @@ if __name__ == '__main__':
         tick_data = my_data_n[i, :].copy()
         window.append(tick_data)
     
-        w_shape = window.shape
+        w_shape = len(deque)
         print ("Shape: rows=",w_shape[0]," cols=",w_shape[1])
     
         # calcula reward para el estado/acción especificado como primer cmdline param
