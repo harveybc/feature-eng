@@ -36,6 +36,8 @@ def getReward(stateaction, window):
     dd_min_i = -1
     # busca max y min
     for index, obs in enumerate(window):
+        if index == 0:
+            open_price = window[0, 0]
         # compara con el low de cada obs (worst case), index 1
         if max < obs[1]: 
             max = obs[1]
@@ -47,7 +49,6 @@ def getReward(stateaction, window):
             
     # busca dd (max antes de min o vice versa)
     for index, obs in enumerate(window):
-        print ("index=",index," obs[0]=", obs[0], "obs[1]=", obs[1])
         # busca min antes de max compara con el low de cada obs (worst case), index 1
         if (dd_max > obs[1]) and (index <= max_i): 
             dd_max = obs[1]
@@ -56,15 +57,13 @@ def getReward(stateaction, window):
         if (dd_min < obs[0]) and (index <= min_i): 
             dd_min = obs[0]
             dd_min_i = index
-    print ("max=", max, " max_i=",max_i, " min=",min, " min_i=", min_i)
-    print ("dd_max=", dd_max, " dd_max_i=",dd_max_i, " dd_min=",dd_min, " dd_min_i=", dd_min_i)
     
     pip_cost = 0.00001
     # case 0: Open Buy, previous state = no order opened 
     # (reward=ganancia-dd en pips si se abre ahora y se cierra en el mejor caso
     if stateaction == 0:
         # toma como open el high para buy (peor caso)
-        open_price = window[0, 0]
+        
         # buscar el máximo y su index
         # buscar el mínimo antes del máximo
         # profit = (max-open)/ pip_cost
@@ -111,8 +110,6 @@ if __name__ == '__main__':
     
     # lee window inicial
     window = deque(my_data_n[0:window_size, :], window_size)
-    for i in range(0, window_size - 1):
-        window.append(my_data_n[i, :].copy())
       
     # inicializa output   
     output = []
