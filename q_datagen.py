@@ -37,7 +37,7 @@ def getReward(stateaction, window):
     dd_min_i = -1
     # busca max y min
     for index, obs in enumerate(window):
-        print("obs[0]=",obs[0]," obs[1]=",obs[1])
+        # print("obs[0]=",obs[0]," obs[1]=",obs[1])
         # compara con el low de cada obs (worst case), index 1
         if max < obs[1]: 
             max = obs[1]
