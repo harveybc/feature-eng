@@ -56,7 +56,8 @@ def getReward(stateaction, window):
         if (dd_min < obs[0]) and (index <= min_i): 
             dd_min = obs[0]
             dd_min_i = index
-    
+    print("max=",max," max_i=",max_i," max_dd=",max_dd, " max_dd_i=", max_dd_i)
+    print("min=",min," min_i=",min_i," min_dd=",min_dd, " min_dd_i=", min_dd_i)
     pip_cost = 0.00001
     # case 0: Open Buy, previous state = no order opened 
     # (reward=ganancia-dd en pips si se abre ahora y se cierra en el mejor caso
