@@ -76,7 +76,7 @@ def getReward(stateaction, window):
 # parameters: state/action code: 0..3 for open, 4..7 for close 
 if __name__ == '__main__':
     # initializations
-    window_size = 30
+    window_size = 300
     csv_f =  sys.argv[2]
     #out_f = sys.argv[3]
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
