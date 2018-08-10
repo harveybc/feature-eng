@@ -16,6 +16,7 @@
 #  For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
 from numpy import genfromtxt
 from numpy import shape
+from numpy import concatenate
 from collections import deque
 import sys
 from itertools import islice
@@ -123,5 +124,5 @@ if __name__ == '__main__':
         reward = getReward(int(sys.argv[1]), window)
         
         # append obs, reward a output
-        tick_data.append(reward)
+        concatenate (tick_data,reward)
         output.append(tick_data)
