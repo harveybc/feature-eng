@@ -36,8 +36,7 @@ def getReward(stateaction, window):
     dd_min_i = -1
     # busca max y min
     for index, obs in enumerate(window):
-        if index == 0:
-            open_price = window[0, 0]
+        print("obs[0]=",obs[0]," obs[1]=",obs[1])
         # compara con el low de cada obs (worst case), index 1
         if max < obs[1]: 
             max = obs[1]
@@ -63,7 +62,7 @@ def getReward(stateaction, window):
     # (reward=ganancia-dd en pips si se abre ahora y se cierra en el mejor caso
     if stateaction == 0:
         # toma como open el high para buy (peor caso)
-        
+        open_price = window[0][0]
         # buscar el máximo y su index
         # buscar el mínimo antes del máximo
         # profit = (max-open)/ pip_cost
