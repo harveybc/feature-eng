@@ -19,14 +19,13 @@ from numpy import shape
 from numpy import concatenate
 from collections import deque
 import sys
-from itertools import islice
+from itertools import islice 
 
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
 # @param: window = High, Low, Close, nextOpen timeseries
 def getReward(stateaction, window):
     l_w = len(window)
-    print ("Window Shape: len=",l_w)
     max = -9999999
     min = 9999999
     max_i = -1
@@ -60,17 +59,51 @@ def getReward(stateaction, window):
     print("max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
     print("min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
     pip_cost = 0.00001
-    # case 0: Open Buy, previous state = no order opened 
-    # (reward=ganancia-dd en pips si se abre ahora y se cierra en el mejor caso
+
+    # case 0: Open Buy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
     if stateaction == 0:
         # toma como open el high para buy (peor caso)
-        open_price = window[0][0]
-        # buscar el máximo y su index
-        # buscar el mínimo antes del máximo
+        open = window[0][0]
         # profit = (max-open)/ pip_cost
+        profit  = (max-open)/pip_cost
         # dd = (open-min) / pip_cost
-        # profit_pips = ((Low - open_price) / pip_cost)
+        dd = (open-dd_max) / pip_cost
         # reward = profit - dd
+        reward = profit - dd
+
+    # case 1: Open Sell, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    if stateaction == 1:
+        # toma como open el high para buy (peor caso)
+        open = window[0][1]
+        # profit = (open-min)/ pip_cost
+        profit  = (open-min)/pip_cost
+        # dd = (max-open) / pip_cost
+        dd = (dd_min-open) / pip_cost
+        # reward = profit - dd
+        reward = profit - dd
+
+    # case 2: No Open Buy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    if stateaction == 2:
+        # toma como open el high para buy (peor caso)
+        open = window[0][0]
+        # profit = (max-open)/ pip_cost
+        profit  = (max-open)/pip_cost
+        # dd = (open-min) / pip_cost
+        dd = (open-dd_max) / pip_cost
+        # reward = profit - dd
+        reward = profit - dd
+
+    # case 3: No Open Sell, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    if stateaction == 3:
+        # toma como open el high para buy (peor caso)
+        open = window[0][1]
+        # profit = (open-min)/ pip_cost
+        profit  = (open-min)/pip_cost
+        # dd = (max-open) / pip_cost
+        dd = (dd_min-open) / pip_cost
+        # reward = profit - dd
+        reward = profit - dd
+
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
