@@ -24,7 +24,7 @@ from itertools import islice
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
 # @param: window = High, Low, Close, nextOpen timeseries
-def getReward(stateaction, window):
+def getReward(stateaction, window, nop_delay):
     l_w = len(window)
     max = -9999999
     min = 9999999
@@ -34,36 +34,91 @@ def getReward(stateaction, window):
     dd_min = -9999999
     dd_max_i = -1
     dd_min_i = -1
+    open_index = 0    
     # busca max y min
-    for index, obs in enumerate(window):
-        # print("obs[0]=",obs[0]," obs[1]=",obs[1])
-        # compara con el low de cada obs (worst case), index 1
-        if max < obs[1]: 
-            max = obs[1]
-            max_i = index
-        # compara con el high de cada obs (worst case), index 0
-        if min > obs[0]: 
-            min = obs[0]
-            min_i = index
-            
-    # busca dd (max antes de min o vice versa)
-    for index, obs in enumerate(window):
-        # busca min antes de max compara con el low de cada obs (worst case), index 1
-        if (dd_max > obs[1]) and (index <= max_i): 
-            dd_max = obs[1]
-            dd_max_i = index
-        # compara con el high de cada obs (worst case), index 0
-        if (dd_min < obs[0]) and (index <= min_i): 
-            dd_min = obs[0]
-            dd_min_i = index
+    start_tick = 0
+    if stateaction == 0:
+        # toma como open para Buy el high del tick actual para buy (peor caso)
+        open = window[0][0]
+    elif stateaction == 1:
+        # toma como open para Sell el low del tick actual para sell (peor caso)
+        open = window[0][1]
+    elif stateaction == 2:
+        start_tick = nop_delay
+        # toma como open para nopBuy el high del mínimo antes de windowsize/2 y después de start_tick  
+        for index, obs in enumerate(window):
+            # busca min entre nop_delay  y len_window/2
+            if (index < int(l_w/2)) and (index >= nop_delay): 
+                # compara con el high de cada obs (worst case), index 0
+                if min > obs[0]: 
+                    min = obs[0]
+                    open_index = index
+        open = min
+    else:
+        start_tick = nop_delay
+        # toma como open para nopSell el low del máximo antes de windowsize/2 y después de start_tick  
+        for index, obs in enumerate(window):
+            # busca min entre nop_delay  y len_window/2
+            if (index < int(l_w/2)) and (index >= nop_delay): 
+                # compara con el low de cada obs (worst case), index 1
+                if max < obs[1]: 
+                    max = obs[1]
+                    open_index = index
+        open = max
+        
+    # search for max/min and drawdown for open buy and sell    
+    if stateaction < 2:
+        for index, obs in enumerate(window):
+            # print("obs[0]=",obs[0]," obs[1]=",obs[1])
+            # compara con el low de cada obs (worst case), index 1
+            if max < obs[1]: 
+                max = obs[1]
+                max_i = index
+            # compara con el high de cada obs (worst case), index 0
+            if min > obs[0]: 
+                min = obs[0]
+                min_i = index  
+        # busca dd (max antes de min o vice versa)
+        for index, obs in enumerate(window):
+            # busca min antes de max compara con el low de cada obs (worst case), index 1
+            if (dd_max > obs[1]) and (index <= max_i): 
+                dd_max = obs[1]
+                dd_max_i = index
+            # compara con el high de cada obs (worst case), index 0
+            if (dd_min < obs[0]) and (index <= min_i): 
+                dd_min = obs[0]
+                dd_min_i = index
+    # search for max/min and drawdown for nop open buy and sell    
+    else:
+        # busca min y max después de open
+        for index, obs in enumerate(window):
+            if index >= open_index:
+                # compara con el low de cada obs (worst case), index 1
+                if max < obs[1]: 
+                    max = obs[1]
+                    max_i = index
+                # compara con el high de cada obs (worst case), index 0
+                if min > obs[0]: 
+                    min = obs[0]
+                    min_i = index  
+        # busca dd (max antes de min o vice versa)
+        for index, obs in enumerate(window):
+            if index >= open_index:
+                # busca min antes de max compara con el low de cada obs (worst case), index 1
+                if (dd_max > obs[1]) and (index <= max_i): 
+                    dd_max = obs[1]
+                    dd_max_i = index
+                # compara con el high de cada obs (worst case), index 0
+                if (dd_min < obs[0]) and (index <= min_i): 
+                    dd_min = obs[0]
+                    dd_min_i = index
+
     print("max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
     print("min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
     pip_cost = 0.00001
 
-    # case 0: Open Buy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    # case 0: Open Buy/CloseSell/nopCloseBuy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
     if stateaction == 0:
-        # toma como open el high para buy (peor caso)
-        open = window[0][0]
         # profit = (max-open)/ pip_cost
         profit  = (max-open)/pip_cost
         # dd = (open-min) / pip_cost
@@ -71,10 +126,9 @@ def getReward(stateaction, window):
         # reward = profit - dd
         reward = profit - dd
 
-    # case 1: Open Sell, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    # case 1: Open Sell/CloseBuy/nopCloseSell, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
     if stateaction == 1:
-        # toma como open el high para buy (peor caso)
-        open = window[0][1]
+
         # profit = (open-min)/ pip_cost
         profit  = (open-min)/pip_cost
         # dd = (max-open) / pip_cost
@@ -82,10 +136,10 @@ def getReward(stateaction, window):
         # reward = profit - dd
         reward = profit - dd
 
-    # case 2: No Open Buy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    # case 2: No Open Buy, previous state = buy (reward=ganancia-dd) en pips si se abre luego de window_skip ticks y se cierra en el mejor caso
     if stateaction == 2:
         # toma como open el high para buy (peor caso)
-        open = window[0][0]
+        open = window[start_tick][0]
         # profit = (max-open)/ pip_cost
         profit  = (max-open)/pip_cost
         # dd = (open-min) / pip_cost
@@ -93,10 +147,10 @@ def getReward(stateaction, window):
         # reward = profit - dd
         reward = profit - dd
 
-    # case 3: No Open Sell, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
+    # case 3: No Open Sell, previous state = state = sell (reward=ganancia-dd) en pips si se abre luego de window_skip ticks y se cierra en el mejor caso
     if stateaction == 3:
         # toma como open el high para buy (peor caso)
-        open = window[0][1]
+        open = window[start_tick][1]
         # profit = (open-min)/ pip_cost
         profit  = (open-min)/pip_cost
         # dd = (max-open) / pip_cost
@@ -110,6 +164,8 @@ def getReward(stateaction, window):
 if __name__ == '__main__':
     # initializations
     window_size = 300
+    # delay for open in nopbuy and nopsell actions
+    nop_delay = 5
     csv_f =  sys.argv[2]
     #out_f = sys.argv[3]
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
@@ -154,7 +210,7 @@ if __name__ == '__main__':
         window.append(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
-        reward = getReward(int(sys.argv[1]), window)
+        reward = getReward(int(sys.argv[1]), window, nop_delay)
         
         # append obs, reward a output
         concatenate (tick_data,reward)
