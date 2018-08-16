@@ -40,9 +40,11 @@ def getReward(stateaction, window, nop_delay):
     if stateaction == 0:
         # toma como open para Buy el high del tick actual para buy (peor caso)
         open = window[0][0]
+        open_index = 0
     elif stateaction == 1:
         # toma como open para Sell el low del tick actual para sell (peor caso)
         open = window[0][1]
+        open_index = 0
     elif stateaction == 2:
         start_tick = nop_delay
         # toma como open para nopBuy el high del mínimo antes de windowsize/2 y después de start_tick  
@@ -69,7 +71,6 @@ def getReward(stateaction, window, nop_delay):
     # search for max/min and drawdown for open buy and sell    
     if stateaction < 2:
         for index, obs in enumerate(window):
-            # print("obs[0]=",obs[0]," obs[1]=",obs[1])
             # compara con el low de cada obs (worst case), index 1
             if max < obs[1]: 
                 max = obs[1]
@@ -88,6 +89,7 @@ def getReward(stateaction, window, nop_delay):
             if (dd_min < obs[0]) and (index <= min_i): 
                 dd_min = obs[0]
                 dd_min_i = index
+                
     # search for max/min and drawdown for nop open buy and sell    
     else:
         # busca min y max después de open
@@ -113,8 +115,8 @@ def getReward(stateaction, window, nop_delay):
                     dd_min = obs[0]
                     dd_min_i = index
 
-    print("max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
-    print("min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
+    print("s=",stateaction, "oi=",open_index, " max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
+    print("s=",stateaction, "oi=",open_index, " min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
     pip_cost = 0.00001
 
     # case 0: Open Buy/CloseSell/nopCloseBuy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
