@@ -20,6 +20,7 @@ from numpy import concatenate
 from collections import deque
 import sys
 from itertools import islice 
+import csv 
 
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
@@ -159,6 +160,8 @@ def getReward(stateaction, window, nop_delay):
         dd = (dd_min-open) / pip_cost
         # reward = profit - dd
         reward = profit - dd
+        
+    return {'reward':reward , 'profit':profit, 'dd':dd ,'min':min ,'max':max, 'dd_min':dd_min,'dd_max':dd_max}
 
 
 # main function
@@ -169,7 +172,7 @@ if __name__ == '__main__':
     # delay for open in nopbuy and nopsell actions
     nop_delay = 5
     csv_f =  sys.argv[2]
-    #out_f = sys.argv[3]
+    out_f = sys.argv[3]
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
     my_data_n = genfromtxt(csv_f, delimiter=',')
@@ -212,8 +215,14 @@ if __name__ == '__main__':
         window.append(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
-        reward = getReward(int(sys.argv[1]), window, nop_delay)
+        res = getReward(int(sys.argv[1]), window, nop_delay)
         
         # append obs, reward a output
-        concatenate (tick_data,reward)
+        concatenate (tick_data, res['reward'], res['profit'], res['dd'], res['min'], res['max'], res['dd_min'], res['dd_max'])
         output.append(tick_data)
+        
+        #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
+    with open(out_f , 'wb', newline='') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr.writerows(output)
+        
