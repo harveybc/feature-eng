@@ -204,14 +204,16 @@ if __name__ == '__main__':
             my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
     
     # lee window inicial
-    window = deque(my_data_n[0:window_size-1, :], window_size)
-      
+    # window = deque(my_data_n[0:window_size-1, :], window_size)
+    window = deque(my_data[0:window_size-1, :], window_size)
+    
     # inicializa output   
     output = []
     
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks - 1):
-        tick_data = my_data_n[i, :].copy()
+        # tick_data = my_data_n[i, :].copy()
+        tick_data = my_data[i, :].copy()
         window.append(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
