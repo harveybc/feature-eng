@@ -223,6 +223,6 @@ if __name__ == '__main__':
         
         #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
     with open(out_f , 'w', newline='') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+        wr = csv.writer(myfile)
         wr.writerows(output)
         
