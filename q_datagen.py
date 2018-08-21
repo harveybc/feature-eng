@@ -218,8 +218,9 @@ if __name__ == '__main__':
         res = getReward(int(sys.argv[1]), window, nop_delay)
         
         # append obs, reward a output
-        concatenate ((tick_data, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
-        output.append(tick_data)
+        tick_data_c = concatenate ((tick_data, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
+        output.append(tick_data_c)
+        print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
         #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
     with open(out_f , 'w', newline='') as myfile:
