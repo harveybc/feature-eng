@@ -218,7 +218,7 @@ if __name__ == '__main__':
         res = getReward(int(sys.argv[1]), window, nop_delay)
         
         # append obs, reward a output
-        concatenate ((tick_data, res['reward'], res['profit'], res['dd'], res['min'], res['max'], res['dd_min'], res['dd_max']))
+        concatenate ((tick_data, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
         output.append(tick_data)
         
         #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
