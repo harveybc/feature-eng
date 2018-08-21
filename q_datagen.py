@@ -222,7 +222,7 @@ if __name__ == '__main__':
         output.append(tick_data)
         
         #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
-    with open(out_f , 'wb', newline='') as myfile:
+    with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
         wr.writerows(output)
         
