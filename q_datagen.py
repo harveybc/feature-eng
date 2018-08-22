@@ -116,8 +116,8 @@ def getReward(stateaction, window, nop_delay):
                     dd_min = obs[0]
                     dd_min_i = index
 
-    print("s=",stateaction, "oi=",open_index, " max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
-    print("s=",stateaction, "oi=",open_index, " min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
+    # print("s=",stateaction, "oi=",open_index, " max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
+    # print("s=",stateaction, "oi=",open_index, " min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
     pip_cost = 0.00001
 
     # case 0: Open Buy/CloseSell/nopCloseBuy, previous state = no order opened (reward=ganancia-dd) en pips si se abre ahora y se cierra en el mejor caso
@@ -222,7 +222,12 @@ if __name__ == '__main__':
         # append obs, reward a output
         tick_data_c = concatenate ((tick_data, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
         output.append(tick_data_c)
-        print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
+        # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
+        
+        if i % 100 == 0.0:
+            progress = i*100/num_ticks
+            sys.stdout.write("Tick: %d Progress: %d%%   \r" % (i, progress) )
+            sys.stdout.flush()
         
         #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
     with open(out_f , 'w', newline='') as myfile:
