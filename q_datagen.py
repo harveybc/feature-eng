@@ -226,7 +226,7 @@ if __name__ == '__main__':
         
         if i % 100 == 0.0:
             progress = i*100/num_ticks
-            sys.stdout.write("Tick: %d Progress: %d%%   \r" % (i, progress) )
+            sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, num_ticks, progress) )
             sys.stdout.flush()
         
         #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
