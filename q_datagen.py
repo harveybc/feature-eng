@@ -233,4 +233,5 @@ if __name__ == '__main__':
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
         wr.writerows(output)
+    print("Finished generating extended dataset.")
     print("Done.")
