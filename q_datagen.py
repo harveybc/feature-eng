@@ -1,6 +1,6 @@
 # -*- coding: utf-8 
 ## @package q_datagen
-#  
+# q_datagen -> <Windowed Datasets whith reward> -> q_pretrainer -> <Pre-Trained model> -> q_agent -> <Performance> -> q_mlo -> <Optimal Net per Action>
 # usage: python3 q-dataset <stateaction> <dataset> <output>
 #
 #  Crates a dataset with observations and the reward for a state action (first command line parameter)
@@ -17,6 +17,7 @@
 from numpy import genfromtxt
 from numpy import shape
 from numpy import concatenate
+from numpy import transpose
 from collections import deque
 import sys
 from itertools import islice 
@@ -197,6 +198,7 @@ if __name__ == '__main__':
                 # incrementa acumulador
                 promedio[j] = promedio[j] + my_data[i, j]
     
+    # TODO: output csv file with normalization factors per feature
     # normalize data
     for i in range(0, num_ticks - 1):
         # para cada columna
@@ -206,10 +208,9 @@ if __name__ == '__main__':
     # lee window inicial
     # window = deque(my_data_n[0:window_size-1, :], window_size)
     window = deque(my_data[0:window_size-1, :], window_size)
-    
+
     # inicializa output   
     output = []
-    
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks - 1):
         # tick_data = my_data_n[i, :].copy()
@@ -219,9 +220,20 @@ if __name__ == '__main__':
         # calcula reward para el estado/acción especificado como primer cmdline param
         res = getReward(int(sys.argv[1]), window, nop_delay)
         
-        # append obs, reward a output
-        tick_data_c = concatenate ((tick_data, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
-        output.append(tick_data_c)
+        #TODO:  append window of observations per feature, reward as output (CAMBIAR TICK  DATA por vector de window por feature y un for de features)
+        # expand window array to include a window of ticks per feature in the expanded_tick_data
+        for t,v in enumerate(tick_data):
+            # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
+            # expanded_tick_data = my_data[i, :].copy()
+            window_column_t = transpose(window[:, t].copy())
+            if t==1:
+                tick_data_r = window_column_t.copy()
+            else:
+                tick_data_r = concatenate (tick_data_r, window_column_t)
+                
+        # concatenate expanded tick data per feature with reward and oher trading info         
+        output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
+        output.append(output_row)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
         if i % 100 == 0.0:
@@ -235,3 +247,6 @@ if __name__ == '__main__':
         wr.writerows(output)
     print("Finished generating extended dataset.")
     print("Done.")
+    
+    
+    # Esto es para tí mi padre, nos veremos algún día y sonreiremos una vez más por siempre.
