@@ -222,11 +222,11 @@ if __name__ == '__main__':
         
         #TODO:  append window of observations per feature, reward as output (CAMBIAR TICK  DATA por vector de window por feature y un for de features)
         # expand window array to include a window of ticks per feature in the expanded_tick_data
-        for t,v in enumerate(tick_data):
+        for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # expanded_tick_data = my_data[i, :].copy()
-            window_column_t = transpose(window[:, t].copy())
-            if t==1:
+            window_column_t = transpose(window[:, it].copy())
+            if it==1:
                 tick_data_r = window_column_t.copy()
             else:
                 tick_data_r = concatenate (tick_data_r, window_column_t)
