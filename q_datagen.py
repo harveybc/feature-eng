@@ -225,7 +225,7 @@ if __name__ == '__main__':
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # expanded_tick_data = my_data[i, :].copy()
-            window_column_t = transpose(window[:, it].copy())
+            #window_column_t = transpose(window[:, it].copy())
             if it==1:
                 tick_data_r = window_column_t.copy()
             else:
