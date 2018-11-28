@@ -207,14 +207,14 @@ if __name__ == '__main__':
     
     # lee window inicial
     # window = deque(my_data_n[0:window_size-1, :], window_size)
-    window = deque(my_data[0:window_size-1, :], window_size)
+    window = deque(my_data_n[0:window_size-1, :], window_size)
 
     # inicializa output   
     output = []
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks - 1):
         # tick_data = my_data_n[i, :].copy()
-        tick_data = my_data[i, :].copy()
+        tick_data = my_data_n[i, :].copy()
         window.append(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
@@ -239,7 +239,7 @@ if __name__ == '__main__':
             if it==0:
                 tick_data_r = window_column_t.copy()
             else:
-                tick_data_r = concatenate (tick_data_r, window_column_t)
+                tick_data_r = concatenate ((tick_data_r, window_column_t))
                 
         # concatenate expanded tick data per feature with reward and oher trading info         
         output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
