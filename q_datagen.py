@@ -244,6 +244,7 @@ if __name__ == '__main__':
         output.append(output_row)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
+        # TODO: ADICIONAR HEADER DE CSV CON NOMBRES DE CADA COLUMNA
         if i % 100 == 0.0:
             progress = i*100/num_ticks
             sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, num_ticks, progress) )
