@@ -229,9 +229,9 @@ if __name__ == '__main__':
             w_count = 0
             for w in window:
                 if w_count == 0:
-                    window_column_t = w[0,it]
+                    window_column_t = w[it]
                 else:
-                    window_column_t = concatenate(window_column_t, w[0,it])
+                    window_column_t = concatenate(window_column_t, w[it])
                 
             print("window_column_t = ", window_column_t)
             # concatenate all window_column_t for  each feature
