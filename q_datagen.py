@@ -224,7 +224,6 @@ if __name__ == '__main__':
         # expand window array to include a window of ticks per feature in the expanded_tick_data
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
-            print("it = ",it)
             # window_column_t = transpose(window[:, 0])
             w_count = 0
             for w in window:
@@ -234,7 +233,6 @@ if __name__ == '__main__':
                     window_column_t = concatenate((window_column_t, [w[it]]))
                 w_count = w_count + 1
                 
-            print("window_column_t = ", window_column_t)
             # concatenate all window_column_t for  each feature
             if it==0:
                 tick_data_r = window_column_t.copy()
