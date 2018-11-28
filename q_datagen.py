@@ -225,7 +225,8 @@ if __name__ == '__main__':
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             print("it = ",it)
-            window_column_t = transpose(window[:, 0])
+            # window_column_t = transpose(window[:, 0])
+            window_column_t = window[:, 0]
             print("window_column_t = ", window_column_t)
             
             #if it==1:
