@@ -231,7 +231,7 @@ if __name__ == '__main__':
                 if w_count == 0:
                     window_column_t = w[it]
                 else:
-                    window_column_t = concatenate(window_column_t, w[it])
+                    window_column_t = concatenate([window_column_t], w[it])
                 w_count = w_count + 1
                 
             print("window_column_t = ", window_column_t)
