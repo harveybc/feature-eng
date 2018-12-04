@@ -213,7 +213,7 @@ if __name__ == '__main__':
 
     # inicializa output   
     output = []
-    print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + "\n" )
+    print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + " columns. \n" )
     
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks - 1):
