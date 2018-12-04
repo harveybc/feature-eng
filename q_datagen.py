@@ -205,7 +205,9 @@ if __name__ == '__main__':
         for j in range(0, num_columns - 1):
             my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
     
+    
     # lee window inicial
+    
     # window = deque(my_data_n[0:window_size-1, :], window_size)
     window = deque(my_data_n[0:window_size-1, :], window_size)
 
@@ -220,8 +222,6 @@ if __name__ == '__main__':
         # calcula reward para el estado/acción especificado como primer cmdline param
         res = getReward(int(sys.argv[1]), window, nop_delay)
         
-        #TODO:  append window of observations per feature, reward as output (CAMBIAR TICK  DATA por vector de window por feature y un for de features)
-        # expand window array to include a window of ticks per feature in the expanded_tick_data
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # window_column_t = transpose(window[:, 0])
@@ -250,9 +250,21 @@ if __name__ == '__main__':
             sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, num_ticks, progress) )
             sys.stdout.flush()
         
-        #ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
+    #TODO: ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
+
+        
+    # calculate header names as F0-0-min-max
+    headers = []
+    for i in range(0, len(tick_data)-1):
+        for j in range(0, len(window)-1):
+            headers = concatenate((headers,["F"+i+"-"+j+"-"+min[i]+"-"+min[i]]))
+            
+        
+        
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
+        # TODO: hacer vector de headers.
+        wr.writerow(headers)
         wr.writerows(output)
     print("Finished generating extended dataset.")
     print("Done.")
