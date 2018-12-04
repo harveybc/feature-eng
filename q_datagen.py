@@ -213,6 +213,8 @@ if __name__ == '__main__':
 
     # inicializa output   
     output = []
+    print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + "\n" )
+    
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks - 1):
         # tick_data = my_data_n[i, :].copy()
