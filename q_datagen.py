@@ -257,7 +257,7 @@ if __name__ == '__main__':
     headers = []
     for i in range(0, len(tick_data)-1):
         for j in range(0, len(window)-1):
-            headers = concatenate((headers,["F"+i+"-"+j+"-"+min[i]+"-"+min[i]]))
+            headers = concatenate((headers,["F"+str(i)+"-"+str(j)+"-"+str(min[i])+"-"+str(min[i])]))
             
         
         
