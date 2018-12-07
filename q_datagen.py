@@ -224,8 +224,7 @@ if __name__ == '__main__':
         window.append(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
-        #res = getReward(int(sys.argv[1]), window, nop_delay)
-        # Calcula reward relativo a take_profit
+        res = getReward(int(sys.argv[1]), window, nop_delay)
         
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
