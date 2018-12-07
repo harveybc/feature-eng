@@ -174,7 +174,7 @@ if __name__ == '__main__':
     nop_delay = 5
     csv_f =  sys.argv[2]
     out_f = sys.argv[3]
-    take_profit = int(sys.argv[4])
+    # take_profit = int(sys.argv[4])
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
