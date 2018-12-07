@@ -174,6 +174,8 @@ if __name__ == '__main__':
     nop_delay = 5
     csv_f =  sys.argv[2]
     out_f = sys.argv[3]
+    take_profit = int(sys.argv[4])
+    
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
     my_data_n = genfromtxt(csv_f, delimiter=',')
@@ -222,7 +224,8 @@ if __name__ == '__main__':
         window.append(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
-        res = getReward(int(sys.argv[1]), window, nop_delay)
+        #res = getReward(int(sys.argv[1]), window, nop_delay)
+        # Calcula reward relativo a take_profit
         
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
@@ -242,7 +245,8 @@ if __name__ == '__main__':
                 tick_data_r = concatenate ((tick_data_r, window_column_t))
                 
         # concatenate expanded tick data per feature with reward and oher trading info         
-        output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
+        # output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
+        output_row = concatenate ((tick_data_r, [res['reward']]))
         output.append(output_row)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
