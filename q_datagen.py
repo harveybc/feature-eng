@@ -231,18 +231,20 @@ if __name__ == '__main__':
             # window_column_t = transpose(window[:, 0])
             w_count = 0
             for w in window:
-                if w_count == 0:
+                if (w_count == 0) and (it==0):
                     window_column_t = [w[it]]
                 else:
                     window_column_t = concatenate((window_column_t, [w[it]]))
                 w_count = w_count + 1
                 
             # concatenate all window_column_t for  each feature
-            if it==0:
-                tick_data_r = window_column_t.copy()
-            else:
-                tick_data_r = concatenate ((tick_data_r, window_column_t))
-                
+            #if it==0:
+            #    tick_data_r = window_column_t.copy()
+            #else:
+            #    tick_data_r = concatenate ((tick_data_r, window_column_t))
+            #
+            tick_data_r = window_column_t.copy()
+            
         # concatenate expanded tick data per feature with reward and oher trading info         
         # output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
         output_row = concatenate ((tick_data_r, [res['reward']]))
