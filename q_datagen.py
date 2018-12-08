@@ -189,9 +189,9 @@ if __name__ == '__main__':
     promedio = num_columns * [0.0]
     
     # calcula max y min para normalización
-    for i in range(0, num_ticks - 1):
+    for i in range(0, num_ticks):
         # para cada columna
-        for j in range(0, num_columns - 1):
+        for j in range(0, num_columns):
             # actualiza max y min
             if my_data[i, j] > max[j]:
                 max[j] = my_data[i, j]
@@ -201,9 +201,9 @@ if __name__ == '__main__':
                 promedio[j] = promedio[j] + my_data[i, j]
     
     # normalize data
-    for i in range(0, num_ticks - 1):
+    for i in range(0, num_ticks):
         # para cada columna
-        for j in range(0, num_columns - 1):
+        for j in range(0, num_columns):
             my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
     
     
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + " columns.  \n" )
     
     # para cada tick desde window_size hasta num_ticks - 1
-    for i in range(window_size, num_ticks - 1):
+    for i in range(window_size, num_ticks):
         # tick_data = my_data_n[i, :].copy()
         tick_data = my_data_n[i, :].copy()
         window.append(tick_data)
@@ -261,8 +261,8 @@ if __name__ == '__main__':
         
     # calculate header names as F0-0-min-max
     headers = []
-    for i in range(0, num_columns-1):
-        for j in range(0, window_size-1):
+    for i in range(0, num_columns):
+        for j in range(0, window_size):
             headers = concatenate((headers,["F_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
             
         
