@@ -263,7 +263,7 @@ if __name__ == '__main__':
     # calculate header names as F0-0-min-max
     headers = []
     for i in range(0, len(tick_data)-1):
-        for j in range(0, len(window)-1):
+        for j in range(0, window_size-1):
             headers = concatenate((headers,["F_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
             
         
@@ -277,4 +277,3 @@ if __name__ == '__main__':
     print("Done.")
     
     
-    # Esto es para tí mi padre, nos veremos algún día y sonreiremos una vez más por siempre.
