@@ -200,7 +200,6 @@ if __name__ == '__main__':
                 # incrementa acumulador
                 promedio[j] = promedio[j] + my_data[i, j]
     
-    # TODO: output csv file with normalization factors per feature
     # normalize data
     for i in range(0, num_ticks - 1):
         # para cada columna
@@ -262,7 +261,7 @@ if __name__ == '__main__':
         
     # calculate header names as F0-0-min-max
     headers = []
-    for i in range(0, len(tick_data)-1):
+    for i in range(0, num_columns-1):
         for j in range(0, window_size-1):
             headers = concatenate((headers,["F_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
             
