@@ -268,7 +268,10 @@ if __name__ == '__main__':
     for i in range(0, num_columns):
         for j in range(0, window_size):
             headers = concatenate((headers,["F_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
-            
+    headers = concatenate((headers,["Reward_OpenBuy/CloseSell/nopCloseBuy/100000"]))        
+    headers = concatenate((headers,["Reward_OpenSell/CloseBuy/nopCloseSell/100000"]))        
+    headers = concatenate((headers,["Reward_NoOpenBuy/100000"]))        
+    headers = concatenate((headers,["Reward_NoOpenSell/100000"]))        
         
         
     with open(out_f , 'w', newline='') as myfile:
