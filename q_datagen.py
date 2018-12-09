@@ -224,10 +224,10 @@ if __name__ == '__main__':
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         #res = getReward(int(sys.argv[1]), window, nop_delay)
-        res_0 = getReward(0, window, nop_delay)/100000
-        res_1 = getReward(1, window, nop_delay)/100000
-        res_2 = getReward(2, window, nop_delay)/100000
-        res_3 = getReward(3, window, nop_delay)/100000
+        res_0 = getReward(0, window, nop_delay)
+        res_1 = getReward(1, window, nop_delay)
+        res_2 = getReward(2, window, nop_delay)
+        res_3 = getReward(3, window, nop_delay)
         
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
@@ -250,7 +250,7 @@ if __name__ == '__main__':
             
         # concatenate expanded tick data per feature with reward and oher trading info         
         # output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
-        output_row = concatenate ((tick_data_r, [res_0['reward']], [res_1['reward']], [res_2['reward']], [res_3['reward']]))
+        output_row = concatenate ((tick_data_r, [res_0['reward']/100000], [res_1['reward']/100000], [res_2['reward']/100000], [res_3['reward']/100000]))
         output.append(output_row)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
