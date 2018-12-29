@@ -204,8 +204,8 @@ if __name__ == '__main__':
     for i in range(0, num_ticks):
         # para cada columna
         for j in range(0, num_columns):
+            # normalize each element
             my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
-    
     
     # lee window inicial
     
