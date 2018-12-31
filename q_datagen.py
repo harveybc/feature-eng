@@ -169,9 +169,9 @@ def getReward(stateaction, window, nop_delay):
 # parameters: state/action code: 0..3 for open, 4..7 for close 
 if __name__ == '__main__':
     # initializations
-    window_size = 30
+    window_size = 7
     # delay for open in nopbuy and nopsell actions
-    nop_delay = 5
+    nop_delay = 2
     csv_f =  sys.argv[2]
     out_f = sys.argv[3]
     # take_profit = int(sys.argv[4])
