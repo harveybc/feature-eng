@@ -3,15 +3,15 @@
 # q_datagen -> <Windowed Datasets whith reward> -> q_pretrainer -> <Pre-Trained model> -> q_agent -> <Performance> -> q_mlo -> <Optimal Net per Action>
 # usage: python3 q-dataset <stateaction> <dataset> <output>
 #
-#  Crates a dataset with observations and the reward for a state action (first command line parameter)
-#  stateaction = 0: NoOrder/OpenBuy
-#  stateaction = 1: NoOrder/OpenSell
-#  stateaction = 2: NoOrder/NopBuy
-#  stateaction = 3: NoOrder/NopSell
-#  stateaction = 4: BuyOrder/Close
-#  stateaction = 5: SellOrder/Close
-#  stateaction = 6: BuyOrder/NoClose
-#  stateaction = 7: SellOrder/NoClose
+#  Creates a dataset with observations and the reward for an action (first command line parameter)
+#  assumes an order can be open in each tick and calculates the StopLoss, TakeProfit and Volume parameters of an 
+#  optimal order (TPr, SLr, Vol) with the maximum of these parameters (max_TP, max_SL, max_Vol) given via 
+#  command-line and method parameters. 
+#
+#  stateaction = 0: TP --- TPr = SL/max_TP 
+#  stateaction = 1: SL --- SLr = SL/max_SL
+#  stateaction = 2: dInv/max_dInv --- Vol = max_Vol / dInv con abs(dInv >= 1)
+
 #
 #  For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
 from numpy import genfromtxt
