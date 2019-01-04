@@ -8,10 +8,9 @@
 #  optimal order (TPr, SLr, Vol) with the maximum of these parameters (max_TP, max_SL, max_Vol) given via 
 #  command-line and method parameters. 
 #
-#  stateaction = 0: TP --- TPr = SL/max_TP 
-#  stateaction = 1: SL --- SLr = SL/max_SL
-#  stateaction = 2: dInv/max_dInv --- Vol = max_Vol / dInv con abs(dInv >= 1)
-
+#  action = 0: TP --- TPr = SL/max_TP 
+#  action = 1: SL --- SLr = SL/max_SL
+#  action = 2: dInv/max_dInv --- Vol = max_Vol / dInv con abs(dInv >= 1)
 #
 #  For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
 from numpy import genfromtxt
@@ -36,7 +35,7 @@ def getReward(stateaction, window, nop_delay):
     dd_min = -9999999
     dd_max_i = -1
     dd_min_i = -1
-    open_index = 0    
+    open_index = 0
     # busca max y min
     start_tick = 0
     if stateaction == 0:
