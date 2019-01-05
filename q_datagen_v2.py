@@ -99,7 +99,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = direction * (max_i - open_buy_index) / max_dInv
             if  (max_i - open_buy_index) < min_dInv:
                 reward = 0
-        return {'reward':reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+        return {'reward':reward * pip_cost, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
     elif reward_buy < reward_sell:
         direction = -1
         # case 0: TP, if dir = buy, reward es el profit de buy
@@ -209,7 +209,7 @@ if __name__ == '__main__':
             
         # concatenate expanded tick data per feature with reward and oher trading info         
         # output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
-        output_row = concatenate ((tick_data_r, [res_0['reward']/100000], [res_1['reward']/100000], [res_2['reward']/100000]))
+        output_row = concatenate ((tick_data_r, [res_0['reward']], [res_1['reward']], [res_2['reward']]))
         output.append(output_row)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
