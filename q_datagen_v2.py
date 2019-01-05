@@ -128,13 +128,13 @@ if __name__ == '__main__':
     # initializations
     csv_f =  sys.argv[1]
     out_f = sys.argv[2]
-    window_size = sys.argv[3]
-    min_TP = sys.argv[4]
-    max_TP = sys.argv[5]
-    min_SL = sys.argv[6]
-    max_SL = sys.argv[7]
-    min_dInv = sys.argv[8]
-    max_dInv = sys.argv[9]
+    window_size = int(sys.argv[3])
+    min_TP = int(sys.argv[4])
+    max_TP = int(sys.argv[5])
+    min_SL = int(sys.argv[6])
+    max_SL = int(sys.argv[7])
+    min_dInv = int(sys.argv[8])
+    max_dInv = int(sys.argv[9])
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
