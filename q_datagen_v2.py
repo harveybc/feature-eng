@@ -209,7 +209,7 @@ if __name__ == '__main__':
             
         # concatenate expanded tick data per feature with reward and oher trading info         
         # output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
-        output_row = concatenate ((tick_data_r, [res_0['reward']], [res_1['reward']], [res_2['reward']]))
+        output_row = concatenate ((tick_data_r, [res_0['reward']], [res_1['reward']], [res_2['reward']], [res_0['direction']]))
         output.append(output_row)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
