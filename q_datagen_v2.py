@@ -184,9 +184,9 @@ if __name__ == '__main__':
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         #res = getReward(int(sys.argv[1]), window, nop_delay)
-        res_0 = getReward(0, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_1 = getReward(1, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_2 = getReward(2, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
+        res_0 = get_reward(0, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
+        res_1 = get_reward(1, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
+        res_2 = get_reward(2, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
         
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
