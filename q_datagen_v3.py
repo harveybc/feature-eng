@@ -230,7 +230,7 @@ if __name__ == '__main__':
             headers = concatenate((headers,["F_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
     headers = concatenate((headers,["TP_"+str(min_TP)+"_"+str(max_TP)]))        
     headers = concatenate((headers,["SL_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInv"+str(min_dInv)+"_"+str(max_dInv)]))         
+    headers = concatenate((headers,["dInv_"+str(min_dInv)+"_"+str(max_dInv)]))         
     headers = concatenate((headers,["direction"]))
         
     with open(out_f , 'w', newline='') as myfile:
