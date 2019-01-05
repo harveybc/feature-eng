@@ -230,6 +230,7 @@ if __name__ == '__main__':
     headers = concatenate((headers,["TP/"+str(max_TP)]))        
     headers = concatenate((headers,["SL/"+str(max_SL)]))        
     headers = concatenate((headers,["dInv/"+str(max_dInv)]))         
+    headers = concatenate((headers,["direction"]))
         
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
