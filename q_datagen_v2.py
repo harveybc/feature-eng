@@ -99,7 +99,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = direction * (max_i - open_buy_index) / max_dInv
             if  (max_i - open_buy_index) < min_dInv:
                 reward = 0
-        return {'reward':reward * pip_cost, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+        return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
     elif reward_buy < reward_sell:
         direction = -1
         # case 0: TP, if dir = buy, reward es el profit de buy
