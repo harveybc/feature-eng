@@ -195,7 +195,7 @@ if __name__ == '__main__':
         # fills the training window with past data
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
-        window_future.appendleft(tick_data_future.copy())
+        window_future.append(tick_data_future.copy())
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         #res = getReward(int(sys.argv[1]), window, nop_delay)
