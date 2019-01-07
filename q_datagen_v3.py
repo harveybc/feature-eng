@@ -181,7 +181,7 @@ if __name__ == '__main__':
     for i in range(window_size, num_ticks):
         # tick_data = my_data_n[i, :].copy()
         tick_data = my_data_n[i, :].copy()
-        window.append(tick_data)
+        window.appendleft(tick_data)
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         #res = getReward(int(sys.argv[1]), window, nop_delay)
