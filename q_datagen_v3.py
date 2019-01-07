@@ -186,12 +186,20 @@ if __name__ == '__main__':
     # inicializa output   
     output = []
     print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + " columns.  \n" )
+    # initialize window and window_future para cada tick desde 0 hasta window_size-1
+    for i in range(0, window_size):
+        tick_data = my_data_n[i, :].copy()
+        tick_data_future = my_data_n[i+window_size, :].copy()
+        # fills the training window with past data
+        window.appendleft(tick_data.copy())
+        # fills the future dataset to search for optimal order
+        window_future.append(tick_data_future.copy())
     
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks-window_size):
         # tick_data = my_data_n[i, :].copy()
         tick_data = my_data_n[i, :].copy()
-        tick_data_future = my_data_n[i+window_size-1, :].copy()
+        tick_data_future = my_data_n[i+window_size, :].copy()
         # fills the training window with past data
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
