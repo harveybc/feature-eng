@@ -178,19 +178,20 @@ if __name__ == '__main__':
     
     # window = deque(my_data_n[0:window_size-1, :], window_size)
     window = deque(my_data_n[0:window_size-1, :], window_size)
-    window_future = deque(my_data_n[0:window_size-1, :], window_size)
+    window_future = deque(my_data_n[window_size:(2*window_size)-1, :], window_size)
     # inicializa output   
     output = []
     print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + " columns.  \n" )
     
     # para cada tick desde window_size hasta num_ticks - 1
-    for i in range(window_size, num_ticks):
+    for i in range(window_size, num_ticks-window_size):
         # tick_data = my_data_n[i, :].copy()
         tick_data = my_data_n[i, :].copy()
+        tick_data_future = my_data_n[i+window_size, :].copy()
         # fills the training window with past data
         window.appendleft(tick_data)
         # fills the future dataset to search for optimal order
-        window_future.append(tick_data.copy())
+        window_future.append(tick_data_future.copy())
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         #res = getReward(int(sys.argv[1]), window, nop_delay)
