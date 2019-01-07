@@ -191,11 +191,11 @@ if __name__ == '__main__':
     for i in range(window_size, num_ticks-window_size):
         # tick_data = my_data_n[i, :].copy()
         tick_data = my_data_n[i, :].copy()
-        tick_data_future = my_data_n[i+window_size, :].copy()
+        tick_data_future = my_data_n[i+window_size-1, :].copy()
         # fills the training window with past data
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
-        window_future.appendleft(tick_data_future.copy())
+        window_future.append(tick_data_future.copy())
     
         # calcula reward para el estado/acción especificado como primer cmdline param
         #res = getReward(int(sys.argv[1]), window, nop_delay)
