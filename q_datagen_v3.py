@@ -189,7 +189,7 @@ if __name__ == '__main__':
         tick_data = my_data_n[i, :].copy()
         tick_data_future = my_data_n[i+window_size, :].copy()
         # fills the training window with past data
-        window.appendleft(tick_data)
+        window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
         window_future.append(tick_data_future.copy())
     
