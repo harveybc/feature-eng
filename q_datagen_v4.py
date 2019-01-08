@@ -87,37 +87,45 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         direction = 1
         # case 0: TP, if dir = buy, reward es el profit de buy
         if action == 0:
-            reward = direction * profit_buy / max_TP
             if profit_buy < min_TP:
                 reward = 0
-   
+            elif profit_buy > max_TP:
+                reward = 1
+            else:
+                reward = direction * profit_buy / max_TP
         # case 1: SL, if dir = buy, reward es el dd de buy 
         elif action == 1:
-            reward = direction * dd_buy / max_SL
             if dd_buy < min_SL:
                 reward = 0
-
-            
+            elif dd_buy > max_SL:
+                reward = 0
+            else:
+                reward = direction * dd_buy / max_SL    
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         else:
             reward = direction * (max_i - open_buy_index) / max_dInv
             if  (max_i - open_buy_index) < min_dInv:
                 reward = 0
         return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+    # para cuando conviene mas sell que buy
     elif reward_buy < reward_sell:
         direction = -1
         # case 0: TP, if dir = buy, reward es el profit de buy
         if action == 0:
-            reward = direction * profit_sell / max_TP
             if profit_sell < min_TP:
                 reward = 0
-            
+            elif profit_sell > max_TP:
+                reward = -1
+            else:
+                reward = direction * profit_sell / max_TP    
         # case 1: SL, if dir = buy, reward es el dd de buy
         elif action == 1:
-            reward = direction * dd_sell / max_SL
             if dd_sell < min_SL:
                 reward = 0
-           
+            elif dd_sell > max_SL:
+                reward = 0
+            else:
+                reward = direction * dd_sell / max_SL    
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         else:
             reward = direction * (min_i - open_sell_index) / max_dInv
