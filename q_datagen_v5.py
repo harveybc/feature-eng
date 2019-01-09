@@ -45,14 +45,15 @@ def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_d
     open_sell_index = 0
     # search for max/min and drawdown for open buy and sell    
     for index, obs in enumerate(window):
-        # compara con el low de cada obs (worst case), index 1
-        if max < obs[1]: 
-            max = obs[1]
-            max_i = index
-        # compara con el high de cada obs (worst case), index 0
-        if min > obs[0]: 
-            min = obs[0]
-            min_i = index  
+        if index <= max_dInv:
+            # compara con el low de cada obs (worst case), index 1
+            if (max < obs[1]): 
+                max = obs[1]
+                max_i = index
+            # compara con el high de cada obs (worst case), index 0
+            if min > obs[0]: 
+                min = obs[0]
+                min_i = index  
     # busca dd (max antes de min o vice versa)
     for index, obs in enumerate(window):
         # busca min antes de max compara con el low de cada obs (worst case), index 1
