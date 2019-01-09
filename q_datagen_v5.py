@@ -23,10 +23,8 @@ import sys
 from itertools import islice 
 import csv 
 
-# getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
-# @param: stateaction = state action code (0..3) open order, (4..7) close existing
-# @param: window = High, Low, Close, nextOpen timeseries
-def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
+# search_order function: search for the optimal search and buy order in the given time window,
+def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
     max = -9999999
     min = 9999999
     max_i = -1
@@ -82,7 +80,27 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     dd_sell = (dd_min-open_sell) / pip_cost
     # reward_sell = profit - dd
     reward_sell = profit_sell - dd_sell
-    # calculate the direction of the optimal order to be opened in the current tick
+    return max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell 
+
+# getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
+# @param: stateaction = state action code (0..3) open order, (4..7) close existing
+# @param: window = High, Low, Close, nextOpen timeseries
+def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
+    # if the draw down of the highest between buy and sell profits, is more than max_SL, 
+    # search for the best order before the dd
+    last_dd = max_SL
+    i_dd = max_dInv
+    while last_dd <= max_SL:
+        max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, 
+        dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+        if reward_buy > reward_sell:
+            last_dd = dd_buy
+            i_dd = dd_max_i
+        else:
+            last_dd = dd_sell
+            i_dd = dd_min_i
+    
+    # if a buy order gives more profit, with less risk 
     if reward_buy > reward_sell:
         direction = 1
         # case 0: TP, if dir = buy, reward es el profit de buy
