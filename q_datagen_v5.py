@@ -98,6 +98,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         else:
             last_dd = dd_sell
             i_dd = dd_min_i
+        if i_dd <= min_dInv:
+            break
     
     # if a buy order gives more profit, with less risk 
     if reward_buy > reward_sell:
