@@ -117,10 +117,10 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         elif action == 1:
             if dd_buy < min_SL:
                 reward = 0
-            if dd_buy > max_SL:
+            if dd_buy > max_SL//2:
                 reward = 1
             else:
-                reward = direction * dd_buy / max_SL    
+                reward = direction * dd_buy / (max_SL//2)    
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         else:
             reward = direction * (max_i - open_buy_index) / max_dInv
@@ -142,10 +142,10 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         elif action == 1:
             if dd_sell < min_SL:
                 reward = 0
-            if dd_sell > max_SL:
+            if dd_sell > max_SL//2:
                 reward = -1
             else:
-                reward = direction * dd_sell / max_SL    
+                reward = direction * dd_sell / (max_SL//2)   
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         else:
             reward = direction * (min_i - open_sell_index) / max_dInv
