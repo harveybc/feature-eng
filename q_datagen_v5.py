@@ -80,7 +80,7 @@ def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_d
     dd_sell = (dd_min-open_sell) / pip_cost
     # reward_sell = profit - dd
     reward_sell = profit_sell - dd_sell
-    return max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell 
+    return open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell 
 
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
@@ -91,7 +91,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     last_dd = max_SL
     i_dd = max_dInv
     while last_dd <= max_SL:
-        max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+        open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
         if reward_buy > reward_sell:
             last_dd = dd_buy
             i_dd = dd_max_i
