@@ -91,8 +91,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     last_dd = max_SL
     i_dd = max_dInv
     while last_dd <= max_SL:
-        max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, 
-        dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+        max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
         if reward_buy > reward_sell:
             last_dd = dd_buy
             i_dd = dd_max_i
