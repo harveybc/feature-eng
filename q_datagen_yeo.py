@@ -283,8 +283,9 @@ if __name__ == '__main__':
     
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
-    output_bc=pt.fit_transform(output) 
-    
+    output_b=pt.fit_transform(output) 
+    scaler = preprocessing.StandardScaler()
+    output_bc = scaler.fit_transform(output_b)
     
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
