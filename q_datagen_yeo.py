@@ -198,11 +198,11 @@ if __name__ == '__main__':
                 promedio[j] = promedio[j] + my_data[i, j]
     
     # normalize data
-    for i in range(0, num_ticks):
+    #for i in range(0, num_ticks):
         # para cada columna
-        for j in range(0, num_columns):
+        #for j in range(0, num_columns):
             # normalize each element
-            my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
+            # my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
     
     # lee window inicial
     
@@ -280,12 +280,18 @@ if __name__ == '__main__':
     headers = concatenate((headers,["SL_"+str(min_SL)+"_"+str(max_SL)]))        
     headers = concatenate((headers,["dInv_"+str(min_dInv)+"_"+str(max_dInv)]))         
     headers = concatenate((headers,["direction"]))
-        
+    
+    # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
+    pt = preprocessing.PowerTransformer()
+    output_bc=pt.fit_transform(output) 
+    
+    
+    # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
         # TODO: hacer vector de headers.
         wr.writerow(headers)
-        wr.writerows(output)
+        wr.writerows(output_bc)
     print("Finished generating extended dataset.")
     print("Done.")
     
