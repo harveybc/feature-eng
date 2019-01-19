@@ -358,7 +358,6 @@ if __name__ == '__main__':
     featureSelector = SelectKBest(score_func=f_regression,k=2)
     featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
     mask = concatenate((featureSelector.get_support(), np.full(num_signals, True) ))
-    headers_bf = ([headers[0:num_columns * window_size]])
     headers_b = headers[mask]  
     output_b = output_bt[:, mask]
     # Save output_bc to a file
