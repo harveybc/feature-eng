@@ -242,7 +242,7 @@ if __name__ == '__main__':
                 promedio[j] = promedio[j] + my_data[i, j]
     
     # concatenate the data and the returned values
-    my_data = np.concatenate((my_data, my_data_r), axis=1)
+    my_data = concatenate((my_data, my_data_r), axis=1)
     
     # window = deque(my_data[0:window_size-1, :], window_size)
     window = deque(my_data[0:window_size-1, :], window_size)
