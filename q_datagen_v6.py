@@ -359,8 +359,8 @@ if __name__ == '__main__':
     featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
     mask = concatenate((featureSelector.get_support(), np.ones(num_signals) ))
     headers_bf = ([headers[0:num_columns * window_size]])
-    headers_b = headers[:, mask]  
-    output_b = output_bt[:, mask]
+    headers_b = np.array(headers)[:, np.array(mask)]  
+    output_b = np.array(output_bt)[:, np.array(mask)]
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
