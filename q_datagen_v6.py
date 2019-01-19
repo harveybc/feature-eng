@@ -41,6 +41,11 @@ import sys
 from itertools import islice 
 import csv 
 from sklearn import preprocessing
+from sklearn.feature_selection import SelectKBest
+
+def f_regression(X,Y):
+   import sklearn
+   return sklearn.feature_selection.f_regression(X,Y,center=False) #center=True (the default) would not work ("ValueError: center=True only allowed for dense data") but should presumably work in general
 
 # search_order function: search for the optimal search and buy order in the given time window,
 def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
@@ -215,6 +220,12 @@ if __name__ == '__main__':
     min_dInv = 2
     max_dInv = window_size
     
+    # Number of training signals
+    num_signals = 6
+    
+    # number of desired output features
+    d_f = 100
+    
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
     # returned values (vf-vi)/vi
@@ -286,7 +297,7 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
-        for j in range (0,6):
+        for j in range (0,sum_signals):
             res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
 
         for it,v in enumerate(tick_data):
@@ -309,7 +320,7 @@ if __name__ == '__main__':
             tick_data_r = window_column_t.copy()
             
         # concatenate expanded tick data per feature with reward 
-        for j in range (0,6):
+        for j in range (0,num_signals):
             tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
         output.append(tick_data_r)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
@@ -340,15 +351,21 @@ if __name__ == '__main__':
     
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
-    output_b=pt.fit_transform(output) 
+    output_bt=pt.fit_transform(output) 
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
-    
+    featureSelector = SelectKBest(score_func=f_regression,k=2)
+    featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
+    print [1+zero_based_index for zero_based_index in list(featureSelector.get_support(indices=True))]
+    headers_bf = featureSelector.transform([headers[0:num_columns * window_size]])
+    headers_b = concatenate((headers_bf,[headers[num_columns * window_size: num_columns*window_size + num_signals]]))  
+    output_bf = featureSelector.transform(output_bt[0:, 0:num_columns * window_size])
+    output_b = concatenate((output_bf,[output_bt[num_columns * window_size: num_columns*window_size + num_signals]]))  
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
         # TODO: hacer vector de headers.
-        wr.writerow(headers)
+        wr.writerow(headers_)
         wr.writerows(output_b)
     print("Finished generating extended dataset.")
     print("Done.")
