@@ -203,10 +203,13 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         else:
             return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # the actions for sell:  3:TP, 4:SL and 5:dInv
-    if (action >= 3) and (action <6):
-    # RETURN DE  EMA ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-    
-    
+    if action == 6:
+        # RETURN DE  EMA ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
+        return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+    if action == 7:
+        # RETURN DE  RSI ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
+        return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
