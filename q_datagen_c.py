@@ -202,9 +202,10 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # sino, retorna 0 a todas las acciones
         else:
             return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-        
-        #TODO: RETURN DE  EMA ADELANTADO
-            
+        # the actions for sell:  3:TP, 4:SL and 5:dInv
+    if (action >= 3) and (action <6):
+    # RETURN DE  EMA ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
+    
     
 
 # main function
@@ -266,13 +267,12 @@ if __name__ == '__main__':
             if my_data[i, j] < min[j]:
                 min[j] = my_data[i, j]
                 # incrementa acumulador
-                promedio[j] = promedio[j] + my_data[i, j]
-    
-    
+                promedio[j] = promedio[j] + my_data[i, j]   
     
     # window = deque(my_data[0:window_size-1, :], window_size)
     window = deque(my_data[0:window_size-1, :], window_size)
     window_future = deque(my_data[window_size:(2*window_size)-1, :], window_size)
+    
     # inicializa output   
     output = []
     print("Generating dataset with " + str(len(my_data[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data[0, :]) * window_size)+14) + " columns.  \n" )
@@ -332,9 +332,6 @@ if __name__ == '__main__':
             sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, num_ticks, progress) )
             sys.stdout.flush()
         
-    #TODO: ADICIONAR MIN, MAX Y DD A OUTPUT PARA GRAFICARLOS
-
-        
     # calculate header names as F0-0-min-max
     headers = []
     for i in range(0, num_columns):
@@ -355,6 +352,7 @@ if __name__ == '__main__':
     output_bt=pt.fit_transform(output) 
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
+    #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
     featureSelector = SelectKBest(score_func=f_regression,k=num_columns*window_size//2)
     featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
     mask = concatenate((featureSelector.get_support(), np.full(num_signals, True) ))
