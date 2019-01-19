@@ -35,7 +35,7 @@ from numpy import genfromtxt
 from numpy import shape
 from numpy import concatenate
 from numpy import transpose
-from numpy import concatentate
+from numpy import concatenate
 from collections import deque
 import sys
 from itertools import islice 
