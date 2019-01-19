@@ -355,7 +355,7 @@ if __name__ == '__main__':
     output_bt=pt.fit_transform(output) 
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
-    featureSelector = SelectKBest(score_func=f_regression,k=2)
+    featureSelector = SelectKBest(score_func=f_regression,k=200)
     featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
     mask = concatenate((featureSelector.get_support(), np.full(num_signals, True) ))
     headers_b = headers[mask]  
