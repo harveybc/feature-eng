@@ -328,15 +328,16 @@ if __name__ == '__main__':
     for i in range(0, num_columns):
         for j in range(0, window_size):
             headers = concatenate((headers,["F_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
-    headers = concatenate((headers,["TP_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["SL_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInv_"+str(min_dInv)+"_"+str(max_dInv)]))         
     for i in range(0, num_columns):
         for j in range(0, window_size):
             headers = concatenate((headers,["Fr_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
-    headers = concatenate((headers,["TP_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["SL_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInv_"+str(min_dInv)+"_"+str(max_dInv)]))         
+    headers = concatenate((headers,["TPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
+    headers = concatenate((headers,["SLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
+    headers = concatenate((headers,["dInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
+    headers = concatenate((headers,["TPsell_"+str(min_TP)+"_"+str(max_TP)]))        
+    headers = concatenate((headers,["SLsell_"+str(min_SL)+"_"+str(max_SL)]))        
+    headers = concatenate((headers,["dInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))         
+    
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
     output_b=pt.fit_transform(output) 
