@@ -356,7 +356,7 @@ if __name__ == '__main__':
     #output_bc = scaler.fit_transform(output_b)
     featureSelector = SelectKBest(score_func=f_regression,k=2)
     featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
-    print [1+zero_based_index for zero_based_index in list(featureSelector.get_support(indices=True))]
+    #print [1+zero_based_index for zero_based_index in list(featureSelector.get_support(indices=True))]
     headers_bf = featureSelector.transform([headers[0:num_columns * window_size]])
     headers_b = concatenate((headers_bf,[headers[num_columns * window_size: num_columns*window_size + num_signals]]))  
     output_bf = featureSelector.transform(output_bt[0:, 0:num_columns * window_size])
