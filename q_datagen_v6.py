@@ -189,8 +189,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
                     reward = dd_sell / max_SL    
             # case 2: dInv, if dir = sell, reward es el index del max menos el de open.
             elif action == 5:
-                reward = (max_i - open_sell_index) / max_dInv
-                if  (max_i - open_sell_index) < min_dInv:
+                reward = (min_i - open_sell_index) / max_dInv
+                if  (min_i - open_sell_index) < min_dInv:
                     reward = 0
             return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # sino, retorna 0 a todas las acciones
