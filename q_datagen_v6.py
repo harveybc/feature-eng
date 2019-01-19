@@ -333,7 +333,7 @@ if __name__ == '__main__':
         wr = csv.writer(myfile)
         # TODO: hacer vector de headers.
         wr.writerow(headers)
-        wr.writerows(output_bc)
+        wr.writerows(output_b)
     print("Finished generating extended dataset.")
     print("Done.")
     
