@@ -295,7 +295,7 @@ if __name__ == '__main__':
             tick_data_r = window_column_t.copy()
             
         # concatenate expanded tick data per feature with reward 
-        for j in range (0,14):
+        for j in range (0,6):
             tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
         output.append(tick_data_r)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
