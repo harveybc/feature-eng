@@ -10,15 +10,32 @@
 #  training signals are continuous around 0 (for testing if this transform improves q-pretrainer performance). 
 #  applies Box-Cox transform for gaussian aproximation and standarization into all signals.
 #
-#  action = 0: TP --- TPr = SL/max_TP 
-#  action = 1: SL --- SLr = SL/max_SL
-#  action = 2: dInv/max_dInv --- Vol = max_Vol / dInv con abs(dInv >= 1)
+#  Also calculate the same for the returned values of the features and generate independent regression 
+#  training signals for buy and sell, and also classification signals for: direction(0,1) ,  
+#  TP>max_TP/2, SL>max_SL/2, volume>max_volume/2, ema adelantado (#TODO: Buscar columna de EMA en mql script)
+#  y se asume que se el dataset de entrada tiene valores no-retornados, incluyendo
+#  las dimensiones por candlestick para input selection.
+#
+# Continuous actions
+#  action = 0: TP_buy   action = 3: TP_sell     
+#  action = 1: SL_buy   action = 4: SL_sell
+#  action = 2: dInv_buy action = 5: dInv_sell
+#
+# Discrete actions
+#  action = 6: TP_buy   action = 9: TP_sell     
+#  action = 7: SL_buy   action = 10: SL_sell
+#  action = 8: dInv_buy action = 11: dInv_sell
+#  action = 12: direction
+#
+# Differentiable continuous actions
+#  action = 13: forward EMA return 
 #
 #  For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
 from numpy import genfromtxt
 from numpy import shape
 from numpy import concatenate
 from numpy import transpose
+from numpy import concatentate
 from collections import deque
 import sys
 from itertools import islice 
@@ -76,13 +93,13 @@ def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_d
     # dd_buy = (open-min) / pip_cost
     dd_buy = (open_buy-dd_max) / pip_cost
     # reward_buy = profit - dd
-    reward_buy = profit_buy - dd_buy
+    reward_buy = profit_buy / (dd_buy + 1)
     # profit_sell = (open-min)/ pip_cost
     profit_sell  = (open_sell-min)/pip_cost
     # dd_sell = (max-open) / pip_cost
     dd_sell = (dd_min-open_sell) / pip_cost
     # reward_sell = profit - dd
-    reward_sell = profit_sell - dd_sell
+    reward_sell = profit_sell / (dd_sell + 1)
     return open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell 
 
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
@@ -93,71 +110,96 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     # search for the best order before the dd
     last_dd = max_SL
     i_dd = max_dInv
-    while last_dd >= max_SL:
-        open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+    reward_buy  = 0.0
+    reward_sell = 0.0
+    direction = 0
+    # the first 3 actions for buy:  0:TP, 1:SL and 2:dInv
+    if action < 3:
+        # search for the best buy order on the current window
+        while (last_dd >= max_SL) and (reward_buy <= reward_sell):
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            if reward_buy > reward_sell:
+                last_dd = dd_buy 
+                i_dd = dd_max_i
+            else:
+                last_dd = dd_sell
+                i_dd = dd_min_i
+            if i_dd <= min_dInv:
+                break
+        # Buy continuous actions (0:TP, 1:SL, 2:dInv proportional to max vol), else search the next best buy order before the dd 
         if reward_buy > reward_sell:
-            last_dd = dd_buy 
-            i_dd = dd_max_i
+            direction = 1
+            # case 0: TP buy, reward es el profit de buy
+            # en clasification, para tp y sl ya dos niveles:0=bajo y 1=alto
+            if action == 0:
+                if profit_buy < min_TP:
+                    reward = 0
+                if profit_buy > max_TP:
+                    reward = 1
+                else:
+                    reward = profit_buy / max_TP
+            # case 1: SL buy, if dir = buy, reward es el dd de buy 
+            elif action == 1:
+                if dd_buy < min_SL:
+                    reward = 0
+                if dd_buy > max_SL:
+                    reward = 1
+                else:
+                    reward = dd_buy / max_SL    
+            # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
+            elif action == 2:
+                reward = (max_i - open_buy_index) / max_dInv
+                if  (max_i - open_buy_index) < min_dInv:
+                    reward = 0
+            return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+        # sino, retorna 0 a todas las acciones
         else:
-            last_dd = dd_sell
-            i_dd = dd_min_i
-        if i_dd <= min_dInv:
-            break
+            return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+    # the actions for sell:  3:TP, 4:SL and 5:dInv
+    if (action >= 3) and (action <6):
+        # search for the best sell order on the current window
+        while (last_dd >= max_SL) and (reward_sell <= reward_buy):
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            if reward_sell> reward_buy :
+                last_dd = dd_sell 
+                i_dd = dd_min_i
+            else:
+                last_dd = dd_buy
+                i_dd = dd_max_i
+            if i_dd <= min_dInv:
+                break
+        # Sell continuous actions (3:TP, 4:SL, 5:dInv proportional to max vol), else search the next best buy order before the dd 
+        if reward_sell > reward_buy:
+            direction = -1
+            # case 0: TP sell, reward es el profit de sell
+            if action == 3:
+                if profit_sell < min_TP:
+                    reward = 0
+                if profit_sell > max_TP:
+                    reward = 1
+                else:
+                    reward = profit_sell / max_TP
+            # case 1: SL sell, if dir = sell, reward es el dd de sell 
+            elif action == 4:
+                if dd_sell < min_SL:
+                    reward = 0
+                if dd_sell > max_SL:
+                    reward = 1
+                else:
+                    reward = dd_sell / max_SL    
+            # case 2: dInv, if dir = sell, reward es el index del max menos el de open.
+            elif action == 5:
+                reward = (max_i - open_sell_index) / max_dInv
+                if  (max_i - open_sell_index) < min_dInv:
+                    reward = 0
+            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+        # sino, retorna 0 a todas las acciones
+        else:
+            return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+        
+        #TODO: RETURN DE  EMA ADELANTADO
+            
     
-    # if a buy order gives more profit, with less risk 
-    if reward_buy > reward_sell:
-        direction = 1
-        # case 0: TP buy, if dir = buy, reward es el profit de buy
-        # en clasification, para tp y sl ya dos niveles:0=bajo y 1=alto
-        if action == 0:
-            if profit_buy < min_TP:
-                reward = 0
-            if profit_buy > max_TP:
-                reward = 1
-            else:
-                reward = direction * profit_buy / max_TP
-        # case 1: SL, if dir = buy, reward es el dd de buy 
-        elif action == 1:
-            if dd_buy < min_SL:
-                reward = 0
-            if dd_buy > max_SL//2:
-                reward = 1
-            else:
-                reward = direction * dd_buy / (max_SL//2)    
-        # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
-        else:
-            reward = direction * (max_i - open_buy_index) / max_dInv
-            if  (max_i - open_buy_index) < min_dInv:
-                reward = 0
-        return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-    # para cuando conviene mas sell que buy
-    elif reward_buy < reward_sell:
-        direction = -1
-        # case 0: TP, if dir = buy, reward es el profit de buy
-        if action == 0:
-            if profit_sell < min_TP:
-                reward = 0
-            if profit_sell > max_TP:
-                reward = -1
-            else:
-                reward = direction * profit_sell / max_TP    
-        # case 1: SL, if dir = buy, reward es el dd de buy
-        elif action == 1:
-            if dd_sell < min_SL:
-                reward = 0
-            if dd_sell > max_SL//2:
-                reward = -1
-            else:
-                reward = direction * dd_sell / (max_SL//2)   
-        # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
-        else:
-            reward = direction * (min_i - open_sell_index) / max_dInv
-            if (min_i - open_sell_index) < min_dInv:
-                reward = 0
-        return {'reward':reward , 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-    else:
-        direction = 0
-        return {'reward':0 , 'profit':0, 'dd':0 ,'min':min ,'max':max, 'direction':direction}  
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
@@ -175,7 +217,8 @@ if __name__ == '__main__':
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
-    my_data_n = genfromtxt(csv_f, delimiter=',')
+    # returned values (vf-vi)/vi
+    my_data_r = genfromtxt(csv_f, delimiter=',')
     # get the number of observations
     num_ticks = len(my_data)
     num_columns = len(my_data[0])
@@ -185,10 +228,11 @@ if __name__ == '__main__':
     min = num_columns * [999999.0]
     promedio = num_columns * [0.0]
     
-    # calcula max y min para normalización
-    for i in range(0, num_ticks):
-        # para cada columna
+    # calcula el return usando el valor anterior de cada feature y max,min para headers de output (TODO: VERIFICAR INVERSA DE PowerTransformer Y GUARDAR DATOS RELEVANTES EN LUGAR DE MAX, MIN EN HEADERS DE OUTPUT)
+    for i in range(1, num_ticks):        
         for j in range(0, num_columns):
+            # asigna valor en matrix para valores retornados
+            my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) / my_data[i-1,j]
             # actualiza max y min
             if my_data[i, j] > max[j]:
                 max[j] = my_data[i, j]
@@ -197,25 +241,19 @@ if __name__ == '__main__':
                 # incrementa acumulador
                 promedio[j] = promedio[j] + my_data[i, j]
     
-    # normalize data
-    #for i in range(0, num_ticks):
-        # para cada columna
-        #for j in range(0, num_columns):
-            # normalize each element
-            # my_data_n[i, j] = (2.0 * (my_data[i, j] - min[j]) / (max[j] - min[j])) - 1.0
+    # concatenate the data and the returned values
+    my_data = np.concatenate((my_data, my_data_r), axis=1)
     
-    # lee window inicial
-    
-    # window = deque(my_data_n[0:window_size-1, :], window_size)
-    window = deque(my_data_n[0:window_size-1, :], window_size)
-    window_future = deque(my_data_n[window_size:(2*window_size)-1, :], window_size)
+    # window = deque(my_data[0:window_size-1, :], window_size)
+    window = deque(my_data[0:window_size-1, :], window_size)
+    window_future = deque(my_data[window_size:(2*window_size)-1, :], window_size)
     # inicializa output   
     output = []
-    print("Generating dataset with " + str(len(my_data_n[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data_n[0, :]) * window_size)+7) + " columns.  \n" )
+    print("Generating dataset with " + str(len(my_data[0, :])) + " features with " + str(window_size) + " past ticks per feature and 7 reward related features. Total: " + str((len(my_data[0, :]) * window_size)+14) + " columns.  \n" )
     # initialize window and window_future para cada tick desde 0 hasta window_size-1
-    for i in range(0, window_size):
-        tick_data = my_data_n[i, :].copy()
-        tick_data_future = my_data_n[i+window_size, :].copy()
+    for i in range(1, window_size+1):
+        tick_data = my_data[i, :].copy()
+        tick_data_future = my_data[i+window_size, :].copy()
         # fills the training window with past data
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
@@ -223,9 +261,9 @@ if __name__ == '__main__':
     
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks-window_size):
-        # tick_data = my_data_n[i, :].copy()
-        tick_data = my_data_n[i, :].copy()
-        tick_data_future = my_data_n[i+window_size, :].copy()
+        # tick_data = my_data[i, :].copy()
+        tick_data = my_data[i, :].copy()
+        tick_data_future = my_data[i+window_size, :].copy()
         # fills the training window with past data
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
@@ -233,13 +271,10 @@ if __name__ == '__main__':
     
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
-        res_0 = get_reward(0, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_1 = get_reward(1, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_2 = get_reward(2, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_3 = get_reward(0, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_4 = get_reward(1, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        res_5 = get_reward(2, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)
-        
+        res = []
+        for j in range (0,14):
+            res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
+
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # window_column_t = transpose(window[:, 0])
@@ -259,10 +294,10 @@ if __name__ == '__main__':
             #
             tick_data_r = window_column_t.copy()
             
-        # concatenate expanded tick data per feature with reward and oher trading info         
-        # output_row = concatenate ((tick_data_r, [res['reward']], [res['profit']], [res['dd']], [res['min']], [res['max']], [res['dd_min']], [res['dd_max']]))
-        output_row = concatenate ((tick_data_r, [res_0['reward']], [res_1['reward']], [res_2['reward']], [res_3['reward']], [res_4['reward']], [res_5['reward']]))
-        output.append(output_row)
+        # concatenate expanded tick data per feature with reward 
+        for j in range (0,14):
+            tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
+        output.append(tick_data_r)
         # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
         
         # TODO: ADICIONAR HEADER DE CSV CON NOMBRES DE CADA COLUMNA
