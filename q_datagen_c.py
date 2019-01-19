@@ -46,7 +46,7 @@ from sklearn.feature_selection import SelectKBest
 
 def f_regression(X,Y):
    import sklearn
-   return sklearn.feature_selection.f_regression(X,Y,center=False) #center=True (the default) would not work ("ValueError: center=True only allowed for dense data") but should presumably work in general
+   return sklearn.feature_selection.mutual_info_regression(X,Y,discrete_features=False) #center=True (the default) would not work ("ValueError: center=True only allowed for dense data") but should presumably work in general
 
 # search_order function: search for the optimal search and buy order in the given time window,
 def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
