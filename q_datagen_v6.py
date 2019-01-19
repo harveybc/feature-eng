@@ -297,7 +297,7 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
-        for j in range (0,sum_signals):
+        for j in range (0,num_signals):
             res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
 
         for it,v in enumerate(tick_data):
