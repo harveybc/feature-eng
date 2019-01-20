@@ -44,6 +44,8 @@ import csv
 from sklearn import preprocessing
 from sklearn.feature_selection import SelectKBest
 import matplotlib.pyplot as plt
+from sklearn.feature_selection import SelectPercentile, f_classif
+
 
 def f_regression(X,Y):
    import sklearn
