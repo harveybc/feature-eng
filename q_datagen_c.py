@@ -462,7 +462,7 @@ if __name__ == '__main__':
     # #############################################################################
     # Univariate feature selection with F-test for feature scoring
     # We use the default selection function: the 10% most significant features
-    selector = SelectPercentile(f_classif, percentile=10)
+    selector = SelectPercentile(f_classif, percentile=20)
     selector.fit(X, y)
     scores = -np.log10(selector.pvalues_)
     scores /= scores.max()
@@ -472,7 +472,8 @@ if __name__ == '__main__':
 
     # #############################################################################
     # Compare to the weights of an SVM
-    clf = svm.SVC(kernel='linear')
+    clf = svm.SVR(gamma="auto", C=0.2, epsilon=0.2)
+    
     clf.fit(X, y)
 
     svm_weights = (clf.coef_ ** 2).sum(axis=0)
