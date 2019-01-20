@@ -447,8 +447,8 @@ if __name__ == '__main__':
     pt = preprocessing.PowerTransformer()
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
-    output_bt = pt.fit_transform(to_t)
-    output_bc = concatenate((output_bt,output[: , ((2 * num_columns * window_size) + 10):]))
+    output_bt = pt.fit_transform(to_tn)
+    output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10):]))
     
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
