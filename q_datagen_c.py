@@ -205,16 +205,16 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
    # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
         # RETURN DE EMA no normalizado (EMAf-EMAini) ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-        return {'reward':(window[3][7] - window[0][7]), 'profit':profit_sell, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[3][7] - window[0][7]), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
         # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        return {'reward':(window[1][8] - window[0][8]), 'profit':profit_sell, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[1][8] - window[0][8]), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
         # RETURN DE EMA normalizado (EMAf-EMAini)/EMAini ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-        return {'reward':(window[3][7] - window[0][7])/window[0][7], 'profit':profit_sell, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[3][7] - window[0][7])/window[0][7], 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 9:
         # RETURN DE  RSI normalizado (RSIf - RSI ACTUAL)/RSIActual ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        return {'reward':(window[1][8] - window[0][8])/window[0][8], 'profit':profit_sell, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[1][8] - window[0][8])/window[0][8], 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     
 
 # main function
