@@ -472,7 +472,7 @@ if __name__ == '__main__':
 
     # #############################################################################
     # Compare to the weights of an SVM
-    clf = svm.SVR(gamma="auto", C=0.2, epsilon=0.2)
+    clf = svm.SVR(kernel='linear')
     
     clf.fit(X, y)
 
