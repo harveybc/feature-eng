@@ -286,7 +286,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             # case 15: dInv, if dir = sell, reward es el index del max menos el de open.
             elif action == 15:
                 # TODO:  Probar con otros valores aparte de 8 para el divisor de d_inv
-                if  (min_i - open_sell_index) < (max_dInv // 8):
+                if  (min_i - open_sell_index) > (max_dInv // 8):
                     reward = 1
                 else:
                     reward = 0
