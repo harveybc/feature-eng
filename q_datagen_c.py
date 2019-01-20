@@ -366,17 +366,17 @@ if __name__ == '__main__':
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
-    featureSelector = SelectKBest(score_func=f_regression,k=num_columns*window_size//2)
-    featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
-    mask = concatenate((featureSelector.get_support(), np.full(num_signals, True) ))
-    headers_b = headers[mask]  
-    output_b = output_bt[:, mask]
+   # featureSelector = SelectKBest(score_func=f_regression,k=num_columns*window_size//2)
+   # featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
+   # mask = concatenate((featureSelector.get_support(), np.full(num_signals, True) ))
+   # headers_b = headers[mask]  
+   # output_b = output_bt[:, mask]
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
         # TODO: hacer vector de headers.
-        wr.writerow(headers_b)
-        wr.writerows(output_b)
+        wr.writerow(headers)
+        wr.writerows(output_bt)
     print("Finished generating extended dataset.")
     print("Done.")
     
