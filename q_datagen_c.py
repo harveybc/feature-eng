@@ -202,14 +202,20 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # sino, retorna 0 a todas las acciones
         else:
             return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-        # the actions for sell:  3:TP, 4:SL and 5:dInv
+   # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
-        # RETURN DE  EMA ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-        return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+        # RETURN DE EMA no normalizado (EMAf-EMAini) ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
+        return {'reward':(window[3][7] - window[0][7]), 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
     if action == 7:
-        # RETURN DE  RSI ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-
+        # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
+        return {'reward':(window[1][8] - window[0][8]), 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+    if action == 8:
+        # RETURN DE EMA normalizado (EMAf-EMAini)/EMAini ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
+        return {'reward':(window[3][7] - window[0][7])/window[0][7], 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+    if action == 9:
+        # RETURN DE  RSI normalizado (RSIf - RSI ACTUAL)/RSIActual ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
+        return {'reward':(window[1][8] - window[0][8])/window[0][8], 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+    
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
@@ -301,7 +307,8 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
-        for j in range (0,num_signals):
+        #for j in range (0,num_signals):
+        for j in range (6,10):
             res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
 
         for it,v in enumerate(tick_data):
@@ -343,12 +350,16 @@ if __name__ == '__main__':
     for i in range(0, num_columns):
         for j in range(0, window_size):
             headers = concatenate((headers,["Fr_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
-    headers = concatenate((headers,["TPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["SLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
-    headers = concatenate((headers,["TPsell_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["SLsell_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))         
+    headers = concatenate((headers,["rEMA4d"]))        
+    headers = concatenate((headers,["rRSI1d"]))        
+    headers = concatenate((headers,["rnEMA4d"]))        
+    headers = concatenate((headers,["rnRSI1d"]))        
+    #headers = concatenate((headers,["TPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
+    #headers = concatenate((headers,["SLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
+    #headers = concatenate((headers,["dInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
+    #headers = concatenate((headers,["TPsell_"+str(min_TP)+"_"+str(max_TP)]))        
+    #headers = concatenate((headers,["SLsell_"+str(min_SL)+"_"+str(max_SL)]))        
+    #headers = concatenate((headers,["dInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))         
     
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
