@@ -254,7 +254,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # sino, retorna 0 a todas las acciones
         else:
-            return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':0}
     # classification actions for sell:  13:TP, 14:SL and 15:dInv
     if (action >= 13) and (action <16):
         # search for the best sell order on the current window
@@ -293,7 +293,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # sino, retorna 0 a todas las acciones
         else:
-            return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':0}
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
@@ -449,7 +449,52 @@ if __name__ == '__main__':
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     output_bt = pt.fit_transform(to_tn)
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + 16)]),1)
-    
+    plt.figure(1)
+    plt.clf()
+
+    X = output_bt[:,0:2*num_columns*window_size]
+    y = to_t[: , ((2 * num_columns * window_size) + 10) ]
+    X_indices = np.arange(X.shape[-1])
+
+    # #############################################################################
+    # Univariate feature selection with F-test for feature scoring
+    # We use the default selection function: the 10% most significant features
+    selector = SelectPercentile(f_classif, percentile=10)
+    selector.fit(X, y)
+    scores = -np.log10(selector.pvalues_)
+    scores /= scores.max()
+    plt.bar(X_indices - .45, scores, width=.2,
+            label=r'Univariate score ($-Log(p_{value})$)', color='darkorange',
+            edgecolor='black')
+
+    # #############################################################################
+    # Compare to the weights of an SVM
+    clf = svm.SVC(kernel='linear')
+    clf.fit(X, y)
+
+    svm_weights = (clf.coef_ ** 2).sum(axis=0)
+    svm_weights /= svm_weights.max()
+
+    plt.bar(X_indices - .25, svm_weights, width=.2, label='SVM weight',
+            color='navy', edgecolor='black')
+
+    clf_selected = svm.SVC(kernel='linear')
+    clf_selected.fit(selector.transform(X), y)
+
+    svm_weights_selected = (clf_selected.coef_ ** 2).sum(axis=0)
+    svm_weights_selected /= svm_weights_selected.max()
+
+    plt.bar(X_indices[selector.get_support()] - .05, svm_weights_selected,
+            width=.2, label='SVM weights after selection', color='c',
+            edgecolor='black')
+
+
+    plt.title("Comparing feature selection")
+    plt.xlabel('Feature number')
+    plt.yticks(())
+    plt.axis('tight')
+    plt.legend(loc='upper right')
+    plt.show()
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
