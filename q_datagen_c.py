@@ -215,7 +215,85 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     if action == 9:
         # RETURN DE  RSI normalizado (RSIf - RSI ACTUAL)/RSIActual ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
         return {'reward':(window[1][8] - window[0][8])/window[0][8], 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-    
+    # classification actions for buy:  10:TP, 11:SL and 12:dInv
+    if (action >= 10) and (action < 13):
+        # search for the best buy order on the current window
+        while (last_dd >= max_SL) and (reward_buy <= reward_sell):
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            if reward_buy > reward_sell:
+                last_dd = dd_buy 
+                i_dd = dd_max_i
+            else:
+                last_dd = dd_sell
+                i_dd = dd_min_i
+            if i_dd <= min_dInv:
+                break
+        # Buy continuous actions (10:TP, 11:SL, 12:dInv proportional to max vol), else search the next best buy order before the dd 
+        if reward_buy > reward_sell:
+            direction = 1
+            # case 10: TP buy, reward es el profit de buy
+            # en clasification, para tp y sl ya dos niveles:0=bajo y 1=alto
+            if action == 10:
+                if profit_buy > (max_TP//2):
+                    reward = 1
+                else:
+                    reward = 0
+            # case 11: SL buy, if dir = buy, reward es el dd de buy 
+            elif action == 11:
+                if dd_buy > (max_SL//2):
+                    reward = 1
+                else:
+                    reward = 0
+            # case 12: dInv, if dir = buy, reward es el index del max menos el de open.
+            elif action == 12:
+                # TODO: Probar con otros valores en lugar de 8 para establecer como 1 la acción
+                if  (max_i - open_buy_index) > (max_dInv // 8):
+                    reward = 1
+                else:
+                    reward = 0
+            return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+        # sino, retorna 0 a todas las acciones
+        else:
+            return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+    # classification actions for sell:  13:TP, 14:SL and 15:dInv
+    if (action >= 13) and (action <16):
+        # search for the best sell order on the current window
+        while (last_dd >= max_SL) and (reward_sell <= reward_buy):
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            if reward_sell> reward_buy :
+                last_dd = dd_sell 
+                i_dd = dd_min_i
+            else:
+                last_dd = dd_buy
+                i_dd = dd_max_i
+            if i_dd <= min_dInv:
+                break
+        # Sell continuous actions (13:TP, 14:SL, 15:dInv proportional to max vol), else search the next best buy order before the dd 
+        if reward_sell > reward_buy:
+            direction = -1
+            # case 13: TP sell, reward es el profit de sell
+            if action == 13:
+                if profit_sell > (max_TP // 2):
+                    reward = 1
+                else:
+                    reward = 0
+            # case 14: SL sell, if dir = sell, reward es el dd de sell 
+            elif action == 14:
+                if dd_sell > (max_SL // 2):
+                    reward = 1
+                else:
+                    reward = 0
+            # case 15: dInv, if dir = sell, reward es el index del max menos el de open.
+            elif action == 15:
+                # TODO:  Probar con otros valores aparte de 8 para el divisor de d_inv
+                if  (min_i - open_sell_index) < (max_dInv // 8):
+                    reward = 1
+                else:
+                    reward = 0
+            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+        # sino, retorna 0 a todas las acciones
+        else:
+            return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
@@ -232,7 +310,7 @@ if __name__ == '__main__':
     max_dInv = window_size
     
     # Number of training signals
-    num_signals = 10
+    num_signals = 16
     
     # number of desired output features
     d_f = 100
@@ -359,10 +437,16 @@ if __name__ == '__main__':
     headers = concatenate((headers,["rRSI1d"]))        
     headers = concatenate((headers,["rnEMA4d"]))        
     headers = concatenate((headers,["rnRSI1d"]))        
-    
+    headers = concatenate((headers,["cTPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
+    headers = concatenate((headers,["cSLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
+    headers = concatenate((headers,["cdInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
+    headers = concatenate((headers,["cTPsell_"+str(min_TP)+"_"+str(max_TP)]))        
+    headers = concatenate((headers,["cSLsell_"+str(min_SL)+"_"+str(max_SL)]))        
+    headers = concatenate((headers,["cdInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))  
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
-    output_bt=pt.fit_transform(output) 
+    output_bt = pt.fit_transform(output[: , 0: (2 * num_columns * window_size)+10])
+    output_bc = concatenate((output_bt,output[: , ((2 * num_columns * window_size) + 10):]))
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
@@ -376,7 +460,7 @@ if __name__ == '__main__':
         wr = csv.writer(myfile)
         # TODO: hacer vector de headers.
         wr.writerow(headers)
-        wr.writerows(output_bt)
+        wr.writerows(output_bc)
     print("Finished generating extended dataset.")
     print("Done.")
     
