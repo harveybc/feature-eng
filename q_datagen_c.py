@@ -232,7 +232,7 @@ if __name__ == '__main__':
     max_dInv = window_size
     
     # Number of training signals
-    num_signals = 6
+    num_signals = 10
     
     # number of desired output features
     d_f = 100
@@ -307,8 +307,7 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
-        #for j in range (0,num_signals):
-        for j in range (6,10):
+        for j in range (0,num_signals):
             res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
 
         for it,v in enumerate(tick_data):
