@@ -445,7 +445,8 @@ if __name__ == '__main__':
     headers = concatenate((headers,["cdInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))  
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
-    to_t = output[: , 0: (2 * num_columns * window_size)+10]
+    to_t = np.array(output)
+    to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     output_bt = pt.fit_transform(to_t)
     output_bc = concatenate((output_bt,output[: , ((2 * num_columns * window_size) + 10):]))
     
