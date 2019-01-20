@@ -43,6 +43,7 @@ from itertools import islice
 import csv 
 from sklearn import preprocessing
 from sklearn.feature_selection import SelectKBest
+import matplotlib.pyplot as plt
 
 def f_regression(X,Y):
    import sklearn
