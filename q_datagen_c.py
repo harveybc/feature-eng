@@ -482,7 +482,7 @@ if __name__ == '__main__':
     plt.clf()
 
     X = output_bt[:,0:2*num_columns*window_size]
-    # hace la selección de características respecto a predicción del RSI
+    # hace la selección de características respecto a predicción del RSI (17)
     y = to_t[: , ((2 * num_columns * window_size) + 17) ]
     X_indices = np.arange(X.shape[-1])
 
