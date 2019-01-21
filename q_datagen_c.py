@@ -481,7 +481,7 @@ if __name__ == '__main__':
     plt.clf()
 
     X = output_bt[:,0:2*num_columns*window_size]
-    y = to_t[: , ((2 * num_columns * window_size) + 10) ]
+    y = to_t[: , ((2 * num_columns * window_size) + 17) ]
     X_indices = np.arange(X.shape[-1])
 
     # #############################################################################
@@ -497,7 +497,7 @@ if __name__ == '__main__':
 
     # #############################################################################
     # Compare to the weights of an SVM
-    clf = svm.SVR(kernel='linear')
+    clf = svm.SVC(kernel='linear')
     
     clf.fit(X, y)
 
