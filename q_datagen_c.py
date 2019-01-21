@@ -476,12 +476,13 @@ if __name__ == '__main__':
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     output_bt = pt.fit_transform(to_tn)
-    output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + 16)]),1)
+    output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
     plt.figure(1)
     plt.clf()
 
     X = output_bt[:,0:2*num_columns*window_size]
+    # hace la selección de características respecto a predicción del RSI
     y = to_t[: , ((2 * num_columns * window_size) + 17) ]
     X_indices = np.arange(X.shape[-1])
 
