@@ -491,8 +491,8 @@ if __name__ == '__main__':
 
     # #############################################################################
     # Univariate feature selection with mutual information (bext than ANOVA for non-linear inputs) for feature scoring
-    # We use the default selection function: the 10,80% most significant features
-    selector = SelectPercentile(mutual_info_classif, percentile=30)
+    # We use the default selection function: the 30=0.52,  most significant features
+    selector = SelectPercentile(mutual_info_classif, percentile=10)
     selector.fit(X, y)
     scores = -np.log10(selector.scores_)
     scores /= scores.max()
