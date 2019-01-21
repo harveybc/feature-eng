@@ -323,8 +323,9 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             else:
                 last_dd = dd_sell
                 i_dd = dd_min_i
-                direction = 0
-                break        
+                direction = 0  
+            if i_dd <= min_dInv:
+                break
         return {'reward':direction, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':direction} 
 
 # main function
