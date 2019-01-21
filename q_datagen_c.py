@@ -44,7 +44,7 @@ import csv
 from sklearn import preprocessing
 from sklearn.feature_selection import SelectKBest
 import matplotlib.pyplot as plt
-from sklearn.feature_selection import SelectPercentile, f_classif
+from sklearn.feature_selection import SelectPercentile, f_classif, mutual_info_classif
 from sklearn import svm
 
 def f_regression(X,Y):
@@ -490,7 +490,7 @@ if __name__ == '__main__':
     X_indices = np.arange(X.shape[-1])
 
     # #############################################################################
-    # Univariate feature selection with F-test for feature scoring
+    # Univariate feature selection with mutual information (bext than ANOVA for non-linear inputs) for feature scoring
     # We use the default selection function: the 20% most significant features
     selector = SelectPercentile(mutual_info_classif, percentile=20)
     selector.fit(X, y)
