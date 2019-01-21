@@ -477,6 +477,7 @@ if __name__ == '__main__':
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     output_bt = pt.fit_transform(to_tn)
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + 16)]),1)
+    # plots  the data selection graphic
     plt.figure(1)
     plt.clf()
 
@@ -486,7 +487,7 @@ if __name__ == '__main__':
 
     # #############################################################################
     # Univariate feature selection with F-test for feature scoring
-    # We use the default selection function: the 10% most significant features
+    # We use the default selection function: the 20% most significant features
     selector = SelectPercentile(f_classif, percentile=20)
     selector.fit(X, y)
     scores = -np.log10(selector.pvalues_)
@@ -509,15 +510,11 @@ if __name__ == '__main__':
 
     clf_selected = svm.SVC(kernel='linear')
     clf_selected.fit(selector.transform(X), y)
-
     svm_weights_selected = (clf_selected.coef_ ** 2).sum(axis=0)
     svm_weights_selected /= svm_weights_selected.max()
-
     plt.bar(X_indices[selector.get_support()] - .05, svm_weights_selected,
             width=.2, label='SVM weights after selection', color='c',
             edgecolor='black')
-
-
     plt.title("Comparing feature selection")
     plt.xlabel('Feature number')
     plt.yticks(())
@@ -527,17 +524,15 @@ if __name__ == '__main__':
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
-   # featureSelector = SelectKBest(score_func=f_regression,k=num_columns*window_size//2)
-   # featureSelector.fit(output_bt[0:,0:2*num_columns*window_size],output_bt[0:,2*num_columns*window_size])
-   # mask = concatenate((featureSelector.get_support(), np.full(num_signals, True) ))
-   # headers_b = headers[mask]  
-   # output_b = output_bt[:, mask]
+    mask = concatenate((selector.get_support(), np.full(num_signals, True) ))
+    headers_b = headers[mask]  
+    output_b = output_bc[:, mask]
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
         # TODO: hacer vector de headers.
-        wr.writerow(headers)
-        wr.writerows(output_bc)
+        wr.writerow(headers_b)
+        wr.writerows(output_b)
     print("Finished generating extended dataset.")
     print("Done.")
     
