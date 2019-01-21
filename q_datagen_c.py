@@ -366,9 +366,9 @@ if __name__ == '__main__':
         for j in range(0, num_columns):
             # asigna valor en matrix para valores retornados
             if my_data[i-1,j] != 0:
-                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) / my_data[i-1,j]
+                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
             else:
-                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j] + 1) / (my_data[i-1,j]+1)
+                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
     
     # concatenate the data and the returned values
     my_data = concatenate((my_data, my_data_r), axis=1)
@@ -376,11 +376,6 @@ if __name__ == '__main__':
     # calcula  max,min para headers de output (TODO: VERIFICAR INVERSA DE PowerTransformer Y GUARDAR DATOS RELEVANTES EN LUGAR DE MAX, MIN EN HEADERS DE OUTPUT)
     for i in range(1, num_ticks):        
         for j in range(0, num_columns):
-            # asigna valor en matrix para valores retornados
-            if my_data[i-1,j] != 0:
-                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) / my_data[i-1,j]
-            else:
-                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j] + 1) / (my_data[i-1,j]+1)
             # actualiza max y min
             if my_data[i, j] > max[j]:
                 max[j] = my_data[i, j]
