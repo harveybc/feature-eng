@@ -494,7 +494,7 @@ if __name__ == '__main__':
     # We use the default selection function: the 20% most significant features
     selector = SelectPercentile(mutual_info_classif, percentile=20)
     selector.fit(X, y)
-    scores = selector.pvalues_
+    scores = -np.log10(selector.scores_)
     scores /= scores.max()
     plt.bar(X_indices - .45, scores, width=.2,
             label=r'Univariate score ($-Log(p_{value})$)', color='darkorange',
