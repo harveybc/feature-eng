@@ -492,7 +492,7 @@ if __name__ == '__main__':
     # #############################################################################
     # Univariate feature selection with F-test for feature scoring
     # We use the default selection function: the 20% most significant features
-    selector = SelectPercentile(f_classif, percentile=20)
+    selector = SelectPercentile(mutual_info_classif, percentile=20)
     selector.fit(X, y)
     scores = -np.log10(selector.pvalues_)
     scores /= scores.max()
