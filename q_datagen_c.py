@@ -496,7 +496,7 @@ if __name__ == '__main__':
     selector.fit(X, y)
     scores = selector.scores_
     scores /= scores.max()
-    plt.bar(X_indices, scores, width=1,
+    plt.bar(X_indices+0.5, scores, width=1,
             label=r'Mutual information ', color='c',
             edgecolor='black')
     plt.title("Feature Selection")
