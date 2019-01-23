@@ -298,7 +298,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         else:
             return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':0}
     if action == 16:
-        # RETURN DE EMA no normalizado (EMAf-EMAini) ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
+        # RETURN DE MACD signal no normalizado (EMAf-EMAini) ADELANTADO 15 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
         if (window[3][7] - window[2][7]) > 0:
             rew = 1
         else:
