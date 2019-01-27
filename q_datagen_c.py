@@ -490,19 +490,19 @@ if __name__ == '__main__':
     # #############################################################################
     # Univariate feature selection with mutual information (best than ANOVA for non-linear inputs) for feature scoring
     # We use the default selection function: the 10=0.55,20=0.54, 25=0.51 30=0.52, 50=0.53  most significant features
-    #selector = SelectPercentile(mutual_info_classif, percentile=25)
-    #selector.fit(X, y)
-    #scores = selector.scores_
-    #scores /= scores.max()
-    #plt.bar(X_indices, scores, width=0.7,
-    #        label=r'Mutual information ', color='c',
-    #        edgecolor='black')
-    #plt.title("Feature Selection")
-    #plt.xlabel('Feature number')
-    #plt.yticks(())
-    #plt.axis('tight')
-    #plt.legend(loc='upper right')
-    #plt.show()
+    selector = SelectPercentile(mutual_info_classif, percentile=25)
+    selector.fit(X, y)
+    scores = selector.scores_
+    scores /= scores.max()
+    plt.bar(X_indices, scores, width=0.7,
+            label=r'Mutual information ', color='c',
+            edgecolor='black')
+    plt.title("Feature Selection")
+    plt.xlabel('Feature number')
+    plt.yticks(())
+    plt.axis('tight')
+    plt.legend(loc='upper right')
+    plt.show()
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
