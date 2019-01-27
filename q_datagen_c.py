@@ -462,9 +462,9 @@ if __name__ == '__main__':
     headers = concatenate((headers,["cTPsell_"+str(min_TP)+"_"+str(max_TP)]))        
     headers = concatenate((headers,["cSLsell_"+str(min_SL)+"_"+str(max_SL)]))        
     headers = concatenate((headers,["cdInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))  
-    headers = concatenate((headers,["cEMA4d"]))  
+    headers = concatenate((headers,["cEMA10d"]))  
     headers = concatenate((headers,["cRSI1d"]))  
-    headers = concatenate((headers,["cDirection"]))  
+    headers = concatenate((headers,["cEMAdiff10d"]))  
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
     to_t = np.array(output)
@@ -490,19 +490,19 @@ if __name__ == '__main__':
     # #############################################################################
     # Univariate feature selection with mutual information (best than ANOVA for non-linear inputs) for feature scoring
     # We use the default selection function: the 10=0.55,20=0.54, 25=0.51 30=0.52, 50=0.53  most significant features
-    selector = SelectPercentile(mutual_info_classif, percentile=25)
-    selector.fit(X, y)
-    scores = selector.scores_
-    scores /= scores.max()
-    plt.bar(X_indices, scores, width=0.7,
-            label=r'Mutual information ', color='c',
-            edgecolor='black')
-    plt.title("Feature Selection")
-    plt.xlabel('Feature number')
-    plt.yticks(())
-    plt.axis('tight')
-    plt.legend(loc='upper right')
-    plt.show()
+    #selector = SelectPercentile(mutual_info_classif, percentile=25)
+    #selector.fit(X, y)
+    #scores = selector.scores_
+    #scores /= scores.max()
+    #plt.bar(X_indices, scores, width=0.7,
+    #        label=r'Mutual information ', color='c',
+    #        edgecolor='black')
+    #plt.title("Feature Selection")
+    #plt.xlabel('Feature number')
+    #plt.yticks(())
+    #plt.axis('tight')
+    #plt.legend(loc='upper right')
+    #plt.show()
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
