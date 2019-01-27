@@ -470,9 +470,9 @@ if __name__ == '__main__':
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     # probando con min-max antes de prowertransform en las 3 últimas features
-    # sin min-max : TODO
-    # con min-max : eva= 0.44
-    #from sklearn.preprocessing import MinMaxScaler
+    # con min-max : TODO
+    # sin min-max : eva= 0.44
+    from sklearn.preprocessing import MinMaxScaler
     sc = MinMaxScaler(feature_range = (0, 1))
     training_set_scaled = sc.fit_transform(to_tn)
     
