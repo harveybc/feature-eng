@@ -478,7 +478,14 @@ if __name__ == '__main__':
     pt = preprocessing.PowerTransformer()
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
-    output_bt = pt.fit_transform(to_tn)
+    # probando con min-max antes de prowertransform en las 3 últimas features
+    # antes : eva=0.1 
+    # con min-max : eva= TODO
+    from sklearn.preprocessing import MinMaxScaler
+    sc = MinMaxScaler(feature_range = (0, 1))
+    training_set_scaled = sc.fit_transform(to_tn)
+    
+    output_bt = pt.fit_transform(training_set_scaled)
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
     plt.figure(1)
@@ -508,9 +515,9 @@ if __name__ == '__main__':
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
     #TODO: CAMBIAR SELECT K BEST POR UNIVARIATE SVM MODEL SELECT
-    mask = concatenate((selector.get_support(), np.full(num_signals, True) ))
-    headers_b = headers[mask]  
-    output_b = output_bc[:, mask]
+    #mask = concatenate((selector.get_support(), np.full(num_signals, True) ))
+    #headers_b = headers[mask]  
+    #output_b = output_bc[:, mask]
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
