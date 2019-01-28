@@ -517,6 +517,9 @@ if __name__ == '__main__':
             accum_r+=1
             for j in range (0, window_size):
                 mask[(i*window_size)+j] = False
+        else:
+            for j in range (0, window_size):
+                mask[(i*window_size)+j] = True
         print("Total: ",accum_r," features removed (", accum_r*window_size," output columns)")
     headers_b = headers[mask]  
     output_b = output_bc[:, mask]
