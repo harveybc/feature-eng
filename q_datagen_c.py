@@ -511,7 +511,7 @@ if __name__ == '__main__':
     # con feature selection, e= TODO 
     # removes all features with less than selection_score
     accum_r = 0
-    for i in range(0,num_columns):
+    for i in range(0,2*num_columns):
         if scores[i*window_size] < selection_score:
             print("removed feature: ",i)
             accum_r+=1
