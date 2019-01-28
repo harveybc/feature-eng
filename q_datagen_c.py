@@ -506,7 +506,7 @@ if __name__ == '__main__':
     plt.show()
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
-    mask = concatenate((selector.get_support(), np.full(num_signals, True) ))
+    mask = concatenate((selector.get_support().copy(), np.full(num_signals, True) ))
     # sin feature selection, e=0.37
     # con feature selection, e= TODO 
     # removes all features with less than selection_score
