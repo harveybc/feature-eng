@@ -521,7 +521,7 @@ if __name__ == '__main__':
         else:
             for j in range (0, window_size):
                 mask[(i*window_size)+j] = True
-        print("Total: ",accum_r," features removed (", accum_r*window_size," output columns)")
+    print("Total: ",accum_r," features removed (", accum_r*window_size," output columns)")
     headers_b = headers[mask]  
     output_b = output_bc[:, mask]
     # Save output_bc to a file
