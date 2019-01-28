@@ -479,7 +479,7 @@ if __name__ == '__main__':
     output_bt = pt.fit_transform(to_tn)
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
-    plt.figure(1)
+    fig=plt.figure(1)
     plt.clf()
 
     X = output_bt[:,0:2*num_columns*window_size]
@@ -502,6 +502,7 @@ if __name__ == '__main__':
     plt.yticks(())
     plt.axis('tight')
     plt.legend(loc='upper right')
+    fig.savefig('predict_' + str(signal) + '.png')
     plt.show()
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
@@ -511,7 +512,7 @@ if __name__ == '__main__':
     # removes all features with less than selection_score
     accum_r = 0
     for i in range(0,num_columns):
-        if score[i*window_size] < selection_score:
+        if scores[i*window_size] < selection_score:
             print("removed feature: ",i)
             accum_r+=1
             for j in range (0, window_size):
