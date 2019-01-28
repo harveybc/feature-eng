@@ -502,7 +502,7 @@ if __name__ == '__main__':
     plt.yticks(())
     plt.axis('tight')
     plt.legend(loc='upper right')
-    fig.savefig('mutual_information_' + str(signal) + '.png')
+    fig.savefig('mutual_information.png')
     plt.show()
     #scaler = preprocessing.StandardScaler()
     #output_bc = scaler.fit_transform(output_b)
