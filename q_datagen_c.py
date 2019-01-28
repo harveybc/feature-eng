@@ -337,7 +337,7 @@ if __name__ == '__main__':
     num_signals = 19
     
     # feature selection threshold
-    selection_score = 0.4
+    selection_score = 0.25
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
