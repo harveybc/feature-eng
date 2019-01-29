@@ -337,7 +337,7 @@ if __name__ == '__main__':
     num_signals = 19
     
     # feature selection threshold
-    selection_score = 0.10
+    selection_score = 0.6
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
@@ -470,11 +470,11 @@ if __name__ == '__main__':
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     # probando con min-max antes de prowertransform en las 3 últimas features
-    from sklearn.preprocessing import MinMaxScaler
-    sc = MinMaxScaler(feature_range = (0, 1))
-    training_set_scaled = sc.fit_transform(to_tn)
+    #from sklearn.preprocessing import MinMaxScaler
+    #sc = MinMaxScaler(feature_range = (0, 1))
+    #training_set_scaled = sc.fit_transform(to_tn)
     
-    output_bt = pt.fit_transform(training_set_scaled)
+    output_bt = pt.fit_transform(to_tn)
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
     fig=plt.figure(1)
