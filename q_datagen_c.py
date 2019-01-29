@@ -470,13 +470,11 @@ if __name__ == '__main__':
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
     # probando con min-max antes de prowertransform en las 3 últimas features
-    # con min-max : 0.124
-    # sin min-max : eva=  0.107
-    #from sklearn.preprocessing import MinMaxScaler
-    #sc = MinMaxScaler(feature_range = (0, 1))
-    #training_set_scaled = sc.fit_transform(to_tn)
+    from sklearn.preprocessing import MinMaxScaler
+    sc = MinMaxScaler(feature_range = (0, 1))
+    training_set_scaled = sc.fit_transform(to_tn)
     
-    output_bt = pt.fit_transform(to_tn)
+    output_bt = pt.fit_transform(training_set_scaled)
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
     fig=plt.figure(1)
