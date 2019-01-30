@@ -46,6 +46,7 @@ from sklearn.feature_selection import SelectKBest
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import SelectPercentile, f_classif, mutual_info_classif
 from sklearn import svm
+from joblib import dump, load
 
 def f_regression(X,Y):
    import sklearn
@@ -475,6 +476,11 @@ if __name__ == '__main__':
     #training_set_scaled = sc.fit_transform(to_tn)
     
     output_bt = pt.fit_transform(to_tn)
+    # save the preprocessing settings
+    print("saving pre-processing.PowerTransformer() settings for the generated dataset")
+    pt_params=pt.get_params()
+    dump(pt, out_f+'.powertransformer')
+
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
     fig=plt.figure(1)
