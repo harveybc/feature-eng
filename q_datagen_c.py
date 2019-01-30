@@ -528,6 +528,10 @@ if __name__ == '__main__':
     print("Total: ",accum_r," features removed (", accum_r*window_size," output columns)")
     headers_b = headers[mask]  
     output_b = output_bc[:, mask]
+    # save the feature selection mask settings
+    print("saving feature_selection.SelectPercentile() feature selection mask for selection_score > ",selection_score)
+    dump(mask, out_f+'.feature_selection_mask')
+    
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
