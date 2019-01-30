@@ -478,7 +478,6 @@ if __name__ == '__main__':
     output_bt = pt.fit_transform(to_tn)
     # save the preprocessing settings
     print("saving pre-processing.PowerTransformer() settings for the generated dataset")
-    pt_params=pt.get_params()
     dump(pt, out_f+'.powertransformer')
 
     output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
