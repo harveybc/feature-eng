@@ -261,46 +261,46 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':0}
     
     if action == 13:
-        # RETURN DE MACD ADELANTADO 14 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[15][9] - window[14][9]) > 0:
+        # RETURN DE MACD ADELANTADO 21 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[22][9] - window[21][9]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     
     if action == 14:
-        # RETURN DE MACD ADELANTADO 16 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[17][9] - window[16][9]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    
-    elif action == 15:
-        # RETURN DE MACD ADELANTADO 18 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[19][9] - window[18][9]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    
-    if action == 16:
-        # RETURN DE MACD ADELANTADO 20 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[21][9] - window[20][9]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 17:
         # RETURN DE MACD ADELANTADO 22 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[23][9] - window[22][9]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 18:
+    
+    elif action == 15:
+        # RETURN DE MACD ADELANTADO 23 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[24][9] - window[23][9]) > 0:
+            rew = 1
+        else:
+            rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    
+    if action == 16:
         # RETURN DE MACD ADELANTADO 24 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[25][9] - window[24][9]) > 0:
+            rew = 1
+        else:
+            rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    if action == 17:
+        # RETURN DE MACD ADELANTADO 25 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[26][9] - window[25][9]) > 0:
+            rew = 1
+        else:
+            rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    if action == 18:
+        # RETURN DE MACD ADELANTADO 26 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[27][9] - window[26][9]) > 0:
             rew = 1
         else:
             rew = 0
