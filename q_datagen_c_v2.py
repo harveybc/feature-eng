@@ -259,45 +259,31 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # sino, retorna 0 a todas las acciones
         else:
             return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':0}
-    # classification actions for sell:  13:TP, 14:SL and 15:dInv
-    if (action >= 13) and (action <16):
-        # search for the best sell order on the current window
-        while (last_dd >= max_SL) and (reward_sell <= reward_buy):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
-            if reward_sell> reward_buy :
-                last_dd = dd_sell 
-                i_dd = dd_min_i
-            else:
-                last_dd = dd_buy
-                i_dd = dd_max_i
-            if i_dd <= min_dInv:
-                break
-        # Sell continuous actions (13:TP, 14:SL, 15:dInv proportional to max vol), else search the next best buy order before the dd 
-        if reward_sell > reward_buy:
-            direction = -1
-            # case 13: TP sell, reward es el profit de sell
-            if action == 13:
-                if profit_sell > (max_TP // 2):
-                    reward = 1
-                else:
-                    reward = 0
-            # case 14: SL sell, if dir = sell, reward es el dd de sell 
-            elif action == 14:
-                if dd_sell > (max_SL // 2):
-                    reward = 1
-                else:
-                    reward = 0
-            # case 15: dInv, if dir = sell, reward es el index del max menos el de open.
-            elif action == 15:
-                # TODO:  Probar con otros valores aparte de 8 para el divisor de d_inv
-                if  (min_i - open_sell_index) > (max_dInv // 8):
-                    reward = 1
-                else:
-                    reward = 0
-            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-        # sino, retorna 0 a todas las acciones
+    
+    if action == 13:
+        # RETURN DE MACD ADELANTADO 5 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[6][9] - window[5][9]) > 0:
+            rew = 1
         else:
-            return {'reward':0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':0}
+            rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    
+    if action == 14:
+        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[11][9] - window[10][9]) > 0:
+            rew = 1
+        else:
+            rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    
+    elif action == 15:
+        # RETURN DE MACD ADELANTADO 15 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[16][9] - window[15][9]) > 0:
+            rew = 1
+        else:
+            rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    
     if action == 16:
         # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[11][9] - window[10][9]) > 0:
