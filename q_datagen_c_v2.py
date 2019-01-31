@@ -261,7 +261,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':0}
     
     if action == 13:
-        # RETURN DE MACD ADELANTADO 5 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 4 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[6][9] - window[5][9]) > 0:
             rew = 1
         else:
@@ -269,7 +269,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     
     if action == 14:
-        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 6 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[11][9] - window[10][9]) > 0:
             rew = 1
         else:
@@ -277,7 +277,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     
     elif action == 15:
-        # RETURN DE MACD ADELANTADO 15 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 8 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[16][9] - window[15][9]) > 0:
             rew = 1
         else:
@@ -292,19 +292,19 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 17:
-        # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        if (window[1][8] - window[0][8]) > 0:
+        # RETURN DE MACD ADELANTADO 12 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[11][9] - window[10][9]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 18:
-        # DIFERENCIA ENTRE MACD MAIN Y SIGNAL ADELANTADO 10 ticks (TODO: Probar con period =7 y no 14 como el actual dataset)
-        if (window[11][10] - window[10][10]) > 0:
+        # RETURN DE MACD ADELANTADO 14 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[11][9] - window[10][9]) > 0:
             rew = 1
         else:
             rew = 0
-        return {'reward':rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew} 
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
