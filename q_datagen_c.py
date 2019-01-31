@@ -318,7 +318,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             rew = 1
         else:
             rew = 0
-        return {'reward':direction, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':direction} 
+        return {'reward':rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew} 
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
