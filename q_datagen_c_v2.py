@@ -321,7 +321,9 @@ if __name__ == '__main__':
     num_signals = 19
     
     # feature selection threshold
-    selection_score = 0.2
+    # con 0.2 en el h4_2018_50 señal 10 daba ave5 = 0.346
+    # con 0.25 ave5=?
+    selection_score = 0.25
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
@@ -469,7 +471,7 @@ if __name__ == '__main__':
     plt.clf()
 
     X = output_bt[:,0:2*num_columns*window_size]
-    # hace la selección de características respecto a predicción del RSI (17)
+    # hace la selección de características respecto a predicción del MACD(50) adelantado 10 ticks
     y = to_t[: , ((2 * num_columns * window_size) + 10) ]
     X_indices = np.arange(X.shape[-1])
 
