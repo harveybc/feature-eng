@@ -480,18 +480,16 @@ if __name__ == '__main__':
     selector.fit(X, y)
     scores = selector.scores_
     scores /= scores.max()
-    plt.bar(X_indices, scores, width=0.7,
-            label=r'Mutual information ', color='c',
-            edgecolor='black')
-    plt.title("Feature Selection")
-    plt.xlabel('Feature number')
-    plt.yticks(())
-    plt.axis('tight')
-    plt.legend(loc='upper right')
-    fig.savefig('mutual_information.png')
-    plt.show()
-    #scaler = preprocessing.StandardScaler()
-    #output_bc = scaler.fit_transform(output_b)
+    #plt.bar(X_indices, scores, width=0.7,
+    #        label=r'Mutual information ', color='c',
+    #        edgecolor='black')
+    #plt.title("Feature Selection")
+    #plt.xlabel('Feature number')
+    #plt.yticks(())
+    #plt.axis('tight')
+    #plt.legend(loc='upper right')
+    #fig.savefig('mutual_information.png')
+    #plt.show()
     mask = concatenate((selector.get_support().copy(), np.full(num_signals, True) ))
     # sin feature selection, e=0.37
     # con feature selection, e= TODO 
