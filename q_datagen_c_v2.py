@@ -214,17 +214,17 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
         return {'reward':(window[1][8] - window[0][8]), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
-        # RETURN DE MACD ADELANTADO 16 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 8 ticks (TODO: Probar otros valores para etrategia de prueba)
         # este tiene la menor relación balance(4219)/error(0.152)  
-        if (window[17][9] - window[16][9]) > 0:
+        if (window[9][9] - window[8][9]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
-        # RETURN DE MACD ADELANTADO 26 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 9 ticks (TODO: Probar otros valores para etrategia de prueba)
         # tiene max balance 800-16k en 1y pero error=0.278 con indicator_period=77 sin short-long term data
-        if (window[27][9] - window[26][9]) > 0:
+        if (window[10][9] - window[9][9]) > 0:
             rew = 1
         else:
             rew = 0
@@ -239,8 +239,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
 
     # case 11: SL buy, if dir = buy, reward es el dd de buy 
     if action == 11:
-        # RETURN DE MACD ADELANTADO 12 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[13][9] - window[12][9]) > 0:
+        # RETURN DE MACD ADELANTADO 11 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[12][9] - window[11][9]) > 0:
             rew = 1
         else:
             rew = 0
@@ -470,7 +470,7 @@ if __name__ == '__main__':
 
     X = output_bt[:,0:2*num_columns*window_size]
     # hace la selección de características respecto a predicción del RSI (17)
-    y = to_t[: , ((2 * num_columns * window_size) + 16) ]
+    y = to_t[: , ((2 * num_columns * window_size) + 10) ]
     X_indices = np.arange(X.shape[-1])
 
     # #############################################################################
