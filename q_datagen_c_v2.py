@@ -314,16 +314,14 @@ if __name__ == '__main__':
     max_TP = int(sys.argv[5])
     min_SL = int(sys.argv[6])
     max_SL = int(sys.argv[7])
+    # feature selection threshold, con 0.2 daba ave5 = 0.31
+    selection_score = float(sys.argv[8])
     min_dInv = 2
     max_dInv = window_size
     
     # Number of training signals
     num_signals = 19
     
-    # feature selection threshold
-    # con 0.2 en el h4_2018_50 señal 10 daba ave5 = 0.346
-    # con 0.25 ave5=?
-    selection_score = 0.20
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
@@ -499,7 +497,7 @@ if __name__ == '__main__':
     accum_r = 0
     # busca hasta 2*num_columns porque también busca en los returns
     for i in range(0,2*num_columns):
-        if scores[i*window_size] < selection_score:
+        if (scores[i*window_size] < selection_score) or (i==1) or (i==2) or (i==num_columns+1) or (i==num_columns+2):
             print("removed feature: ",i)
             accum_r+=1
             for j in range (0, window_size):
