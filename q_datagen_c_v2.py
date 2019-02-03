@@ -231,7 +231,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 10:
         # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[11][6] - window[10][6]) > 0:
+        if (window[11][8] - window[10][8]) > 0:
             rew = 1
         else:
             rew = 0
