@@ -498,7 +498,7 @@ if __name__ == '__main__':
     # busca hasta 2*num_columns porque también busca en los returns
     for i in range(0,2*num_columns):
         if (scores[i*window_size] < selection_score) or (i==1) or (i==2) or (i==num_columns+1) or (i==num_columns+2):
-            print("removed feature: ",i)
+            # print("removed feature: ",i)
             accum_r+=1
             for j in range (0, window_size):
                 mask[(i*window_size)+j] = False
