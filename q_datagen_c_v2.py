@@ -239,8 +239,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
 
     # case 11: SL buy, if dir = buy, reward es el dd de buy 
     if action == 11:
-        # RETURN DE MACD ADELANTADO 11 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[11][4] - window[10][4]) > 0:
+        # RETURN DE MACD ADELANTADO 12 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[13][5] - window[12][5]) > 0:
             rew = 1
         else:
             rew = 0
@@ -248,24 +248,24 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
 
     # case 12: dInv, if dir = buy, reward es el index del max menos el de open.
     if action == 12:
-        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[11][6] - window[10][6]) > 0:
+        # RETURN DE MACD ADELANTADO 14 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[15][5] - window[14][5]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
 
     if action == 13:
-        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[11][7] - window[10][7]) > 0:
+        # RETURN DE MACD ADELANTADO 16 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[17][5] - window[16][5]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     
     if action == 14:
-        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[11][8] - window[10][8]) > 0:
+        # RETURN DE MACD ADELANTADO 18 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[19][5] - window[18][5]) > 0:
             rew = 1
         else:
             rew = 0
