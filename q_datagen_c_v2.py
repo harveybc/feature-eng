@@ -272,32 +272,32 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     
     if action == 15:
-        # RETURN DE MACD ADELANTADO 20 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[21][5] - window[20][5]) > 0:
+        # RETURN DE MACD ADELANTADO 6 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[7][5] - window[6][5]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     
     if action == 16:
-        # RETURN DE MACD ADELANTADO 22 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[23][5] - window[22][5]) > 0:
+        # RETURN DE MACD ADELANTADO 7 ticks (TODO: Probar otros valores para etrategia de prueba)
+        if (window[8][5] - window[7][5]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 17:
-        # RETURN DE MACD ADELANTADO 24 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 8 ticks (TODO: Probar otros valores para etrategia de prueba)
         # este tiene la menor relación balance(4219)/error(0.152)  
-        if (window[25][5] - window[24][5]) > 0:
+        if (window[9][5] - window[8][5]) > 0:
             rew = 1
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 18:
-        # RETURN DE MACD ADELANTADO 26 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 9 ticks (TODO: Probar otros valores para etrategia de prueba)
         # tiene max balance 800-16k en 1y pero error=0.278 con indicator_period=77 sin short-long term data
-        if (window[27][5] - window[26][5]) > 0:
+        if (window[10][5] - window[9][5]) > 0:
             rew = 1
         else:
             rew = 0
