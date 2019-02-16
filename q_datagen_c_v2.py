@@ -452,7 +452,7 @@ if __name__ == '__main__':
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
     to_t = np.array(output)
-    to_tn = to_t[: , 0: (2 * num_columns * window_size)+10]
+    to_tn = to_t[: , 0: (2 * num_columns * window_size)]
     # probando con min-max antes de prowertransform en las 3 últimas features
     #from sklearn.preprocessing import MinMaxScaler
     #sc = MinMaxScaler(feature_range = (0, 1))
@@ -463,7 +463,7 @@ if __name__ == '__main__':
     print("saving pre-processing.PowerTransformer() settings for the generated dataset")
     dump(pt, out_f+'.powertransformer')
 
-    output_bc = concatenate((output_bt,to_t[: , ((2 * num_columns * window_size) + 10) : ((2 * num_columns * window_size) + num_signals)]),1)
+    output_bc = concatenate((output_bt,to_t[: , (2 * num_columns * window_size) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
     fig=plt.figure(1)
     plt.clf()
