@@ -510,7 +510,7 @@ if __name__ == '__main__':
     output_b = output_bc[:, mask]
     # save the feature selection mask settings
     print("saving feature_selection.SelectPercentile() feature selection mask for selection_score > ",selection_score)
-    dump(mask[0 : 2 * num_columns], out_f+'.feature_selection_mask')
+    dump(mask[0 : 2 * num_columns * window_size], out_f+'.feature_selection_mask')
     
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
