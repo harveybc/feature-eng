@@ -461,6 +461,7 @@ if __name__ == '__main__':
     #training_set_scaled = sc.fit_transform(to_tn)
     
     #output_bt = pt.fit_transform(to_tn) 
+    output_bt = to_tn
     # save the preprocessing settings
     print("saving pre-processing.PowerTransformer() settings for the generated dataset")
     #dump(pt, out_f+'.powertransformer')
