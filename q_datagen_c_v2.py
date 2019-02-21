@@ -450,7 +450,9 @@ if __name__ == '__main__':
     headers = concatenate((headers,["cRSI1d"]))  
     headers = concatenate((headers,["cEMAdiff10d"]))  
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
-    pt = preprocessing.PowerTransformer()
+    #pt = preprocessing.PowerTransformer()
+    pt = preprocessing.StandardScaler()
+    
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)]
     # probando con min-max antes de prowertransform en las 3 últimas features
