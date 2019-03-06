@@ -11,7 +11,7 @@
 #  applies Box-Cox transform for gaussian aproximation and standarization into all signals.
 #
 #  Also calculate the same for the returned values of the features and generate 
-# independent classification signals for: direction(0,1) ,  
+#  independent classification signals for: direction(0,1) ,  
 #  TP>max_TP/2, SL>max_SL/2, volume>max_volume/2, ema adelantado (#TODO: Buscar columna de EMA en mql script)
 #  y se asume que se el dataset de entrada tiene valores no-retornados, incluyendo
 #  las dimensiones por candlestick para input selection.
@@ -336,7 +336,8 @@ if __name__ == '__main__':
     min = num_columns * [999999.0]
     promedio = num_columns * [0.0]
     
-    # calcula el return usando el valor anterior de cada feature y max,min para headers de output (TODO: VERIFICAR INVERSA DE PowerTransformer Y GUARDAR DATOS RELEVANTES EN LUGAR DE MAX, MIN EN HEADERS DE OUTPUT)
+    #TODO: VERIFICAR QUE SE LEAN window_size+1 datos y que se genere datos iguales a las observaciones del agente DCN
+    # calcula el return usando el valor anterior de cada feature y max,min para headers de output 
     for i in range(1, num_ticks):        
         for j in range(0, num_columns):
             # asigna valor en matrix para valores retornados
@@ -344,11 +345,12 @@ if __name__ == '__main__':
                 my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
             else:
                 my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
+    # so far my_data_r has data from 1 tonum_ticks, 0 does not have a return
     
     # concatenate the data and the returned values
-    my_data = concatenate((my_data, my_data_r), axis=1)
+    my_data = concatenate((my_data[1:num_ticks,:], my_data_r[1:num_ticks,:]), axis=1)
     
-    # calcula  max,min para headers de output (TODO: VERIFICAR INVERSA DE PowerTransformer Y GUARDAR DATOS RELEVANTES EN LUGAR DE MAX, MIN EN HEADERS DE OUTPUT)
+    # calcula  max,min para headers de output 
     for i in range(1, num_ticks):        
         for j in range(0, num_columns):
             # actualiza max y min
@@ -363,6 +365,9 @@ if __name__ == '__main__':
     window = deque(my_data[0:window_size-1, :], window_size)
     window_future = deque(my_data[window_size:(2*window_size)-1, :], window_size)
     
+    
+    
+    # TODO: probar y comparar con datos de agent
     # inicializa output   
     output = []
     print("Generating dataset with " + str(len(my_data[0, :])) + " features with " + str(window_size) + " past ticks per feature and ",num_signals," reward related features. Total: " + str((len(my_data[0, :]) * window_size)+num_signals) + " columns.  \n" )
@@ -396,7 +401,8 @@ if __name__ == '__main__':
             # window_column_t = transpose(window[:, 0])
             w_count = 0
             for w in window:
-                if (w_count == 0) and (it==0):
+                if (w_count == 0) and (it==0):  
+                #ERROR
                     window_column_t = [w[it]]
                 else:
                     window_column_t = concatenate((window_column_t, [w[it]]))
