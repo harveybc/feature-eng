@@ -372,7 +372,7 @@ if __name__ == '__main__':
     output = []
     print("Generating dataset with " + str(len(my_data[0, :])) + " features with " + str(window_size) + " past ticks per feature and ",num_signals," reward related features. Total: " + str((len(my_data[0, :]) * window_size)+num_signals) + " columns.  \n" )
     # initialize window and window_future para cada tick desde 0 hasta window_size-1
-    for i in range(1, window_size+1):
+    for i in range(0, window_size):
         tick_data = my_data[i, :].copy()
         tick_data_future = my_data[i+window_size, :].copy()
         # fills the training window with past data
