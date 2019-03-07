@@ -352,7 +352,7 @@ if __name__ == '__main__':
     
     # so fara my_data has valid records from 1 to num_ticks for both original and returned values
     # calcula  max,min para headers de output 
-    for i in range(1, num_ticks):        
+    for i in range(0, num_ticks-1):        
         for j in range(0, num_columns):
             # actualiza max y min
             if my_data[i, j] > max[j]:
