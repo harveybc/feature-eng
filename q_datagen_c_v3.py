@@ -381,7 +381,7 @@ if __name__ == '__main__':
         window_future.append(tick_data_future.copy())
     
     # para cada tick desde window_size hasta num_ticks - 1
-    for i in range(window_size, num_ticks-window_size):
+    for i in range(window_size, num_ticks-window_size-1):
         # tick_data = my_data[i, :].copy()
         tick_data = my_data[i, :].copy()
         tick_data_future = my_data[i+window_size, :].copy()
