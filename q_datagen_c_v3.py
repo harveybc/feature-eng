@@ -318,7 +318,6 @@ if __name__ == '__main__':
     selection_score = float(sys.argv[8])
     min_dInv = 2
     max_dInv = window_size
-    
     # Number of training signals
     num_signals = 19
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
@@ -328,12 +327,10 @@ if __name__ == '__main__':
     # get the number of observations
     num_ticks = len(my_data)
     num_columns = len(my_data[0])
-    
     # initialize maximum and minimum
     max = num_columns * [-999999.0]
     min = num_columns * [999999.0]
     promedio = num_columns * [0.0]
-    
     #TODO: VERIFICAR QUE SE LEAN window_size+1 datos y que se genere datos iguales a las observaciones del agente DCN
     # calcula el return usando el valor anterior de cada feature y max,min para headers de output 
     for i in range(1, num_ticks):        
@@ -344,10 +341,8 @@ if __name__ == '__main__':
             else:
                 my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
     # so far my_data_r has data from 1 tonum_ticks, 0 does not have a return
-    
     # concatenate the data and the returned values
     my_data = concatenate((my_data[1:num_ticks,:], my_data_r[1:num_ticks,:]), axis=1)
-    
     # so fara my_data has valid records from 1 to num_ticks for both original and returned values
     # calcula  max,min para headers de output 
     for i in range(0, num_ticks-1):        
@@ -359,12 +354,9 @@ if __name__ == '__main__':
                 min[j] = my_data[i, j]
                 # incrementa acumulador
                 promedio[j] = promedio[j] + my_data[i, j]   
-    
     # window = deque(my_data[0:window_size-1, :], window_size)
     window = deque(my_data[0:window_size-1, :], window_size)
     window_future = deque(my_data[window_size:(2*window_size)-1, :], window_size)
-    
-    
     # TODO: probar y comparar con datos de agent
     # inicializa output   
     output = []
@@ -377,7 +369,6 @@ if __name__ == '__main__':
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
         window_future.append(tick_data_future.copy())
-    
     # para cada tick desde window_size hasta num_ticks - 1
     for i in range(window_size, num_ticks-window_size-1):
         # tick_data = my_data[i, :].copy()
@@ -387,13 +378,11 @@ if __name__ == '__main__':
         window.appendleft(tick_data.copy())
         # fills the future dataset to search for optimal order
         window_future.append(tick_data_future.copy())
-    
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
         for j in range (0,num_signals):
             res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
-
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # window_column_t = transpose(window[:, 0])
@@ -405,7 +394,6 @@ if __name__ == '__main__':
                 else:
                     window_column_t = concatenate((window_column_t, [w[it]]))
                 w_count = w_count + 1
-                
             # concatenate all window_column_t for  each feature
             #if it==0:
             #    tick_data_r = window_column_t.copy()
@@ -413,7 +401,6 @@ if __name__ == '__main__':
             #    tick_data_r = concatenate ((tick_data_r, window_column_t))
             #
             tick_data_r = window_column_t.copy()
-            
         # concatenate expanded tick data per feature with reward 
         for j in range (0,num_signals):
             tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
@@ -454,8 +441,8 @@ if __name__ == '__main__':
     headers = concatenate((headers,["cRSI1d"]))  
     headers = concatenate((headers,["cEMAdiff10d"]))  
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
-    #pt = preprocessing.PowerTransformer()
-    pt = preprocessing.StandardScaler()
+    pt = preprocessing.PowerTransformer()
+    #pt = preprocessing.StandardScaler()
     
     to_t = np.array(output)
     to_tn = to_t[: , 0: (2 * num_columns * window_size)]
@@ -464,12 +451,12 @@ if __name__ == '__main__':
     #sc = MinMaxScaler(feature_range = (0, 1))
     #training_set_scaled = sc.fit_transform(to_tn)
     
-    #output_bt = pt.fit_transform(to_tn)  TODO QUITAR PARA PRUEBA
-    output_bt = to_tn
+    output_bt = pt.fit_transform(to_tn) 
+    #output_bt = to_tn
     # save the preprocessing settings
     print("saving pre-processing.PowerTransformer() settings for the generated dataset")
     
-    #dump(pt, out_f+'.powertransformer')  TODO VOLVER A COLOCAR PARA PRUEBA
+    dump(pt, out_f+'.powertransformer')  
 
     output_bc = concatenate((output_bt,to_t[: , (2 * num_columns * window_size) : ((2 * num_columns * window_size) + num_signals)]),1)
     # plots  the data selection graphic
@@ -519,7 +506,6 @@ if __name__ == '__main__':
     # save the feature selection mask settings
     print("saving feature_selection.SelectPercentile() feature selection mask for selection_score > ",selection_score)
     dump(mask[0 : 2 * num_columns * window_size], out_f+'.feature_selection_mask')
-    
     # Save output_bc to a file
     with open(out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
