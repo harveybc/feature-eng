@@ -117,7 +117,7 @@ def discretize_reward(reward, increment, max_r, min_r):
     # calculate the number of increments, ie: (1 - -1)/0.1 = 20
     num_i = (max_r - min_r) / increment
     # ret = (min_r + max_r)/2
-    print ("num_i = ", num_i)
+    #print ("num_i = ", num_i)
     for i in range(0,int(num_i+1)):
         # start the first range in min_r - increment/2
         r_min = min_r - (increment/2) + (i * increment)
