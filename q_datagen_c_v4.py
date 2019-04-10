@@ -169,12 +169,14 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             # case 0: TP buy, reward es el profit de buy
             # en clasification, para tp y sl ya dos niveles:0=bajo y 1=alto
             if action == 0:
-                if profit_buy < min_TP:
-                    reward = 0
-                if profit_buy > max_TP:
-                    reward = 1
-                else:
-                    reward = profit_buy / max_TP
+                # TODO: Prueba comentando condiciones límite para profit_buy
+                # if profit_buy < min_TP:
+                #    reward = 0
+                #if profit_buy > max_TP:
+                #    reward = 1
+                #else:
+                #    reward = profit_buy / max_TP
+                reward = profit_buy / max_TP
             # case 1: SL buy, if dir = buy, reward es el dd de buy 
             elif action == 1:
                 if dd_buy < min_SL:
