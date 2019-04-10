@@ -125,9 +125,11 @@ def discretize_reward(reward, increment, max_r, min_r):
         r_min = min_r - (increment/2) + (i * increment)
         r_max = min_r - (increment/2) + ((i+1) * increment) 
         # verify if the reward is in the range range_min to range_max = range
-        if (reward >= r_min) and (reward < r_max):
+        # TODO: Prueba quitando condiciones de límite
+        #if (reward >= r_min) and (reward < r_max):
             # if it is in range, return the range_min+ increment/2
-            ret = (r_min + (increment/2))         
+        #    ret = (r_min + (increment/2))         
+        ret = (r_min + (increment/2))         
         # return limit values if reward is beyond limits
         
         # TODO: Prueba quitando condiciones de límite
