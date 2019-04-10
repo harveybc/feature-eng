@@ -352,7 +352,7 @@ if __name__ == '__main__':
     max_SL = int(sys.argv[7])
     # feature selection threshold, con 0.2 daba ave5 = 0.31
     selection_score = float(sys.argv[8])
-    min_dInv = 0
+    min_dInv = 5
     max_dInv = window_size
     # Number of training signals
     num_signals = 19
