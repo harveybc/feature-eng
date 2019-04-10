@@ -196,7 +196,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
                     reward = 0
             # TODO: discretizar reward
             
-            return {'reward': discretize_reward(reward, increment, max_r, min_r), 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            #return {'reward': discretize_reward(reward, increment, max_r, min_r), 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # sino, retorna 0 a todas las acciones
         else:
             return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':0}
