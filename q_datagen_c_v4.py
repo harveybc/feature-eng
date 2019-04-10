@@ -180,7 +180,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
                 #    reward = 1
                 #else:
                 #    reward = profit_buy / max_TP
-                reward = profit_buy / max_TP
+                #TEST reward = profit_buy / max_TP
+                reward = 0
             # case 1: SL buy, if dir = buy, reward es el dd de buy 
             elif action == 1:
                 if dd_buy < min_SL:
