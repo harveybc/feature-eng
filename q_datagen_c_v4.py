@@ -180,7 +180,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
                 #    reward = 1
                 #else:
                 #    reward = profit_buy / max_TP
-                reward = profit_buy / max_TP
+                reward = (profit_buy - profit_sell) / max_TP
             # case 1: SL buy, if dir = buy, reward es el dd de buy 
             elif action == 1:
                 if dd_buy < min_SL:
@@ -352,7 +352,7 @@ if __name__ == '__main__':
     max_SL = int(sys.argv[7])
     # feature selection threshold, con 0.2 daba ave5 = 0.31
     selection_score = float(sys.argv[8])
-    min_dInv = 5
+    min_dInv = 2
     max_dInv = window_size
     # Number of training signals
     num_signals = 19
