@@ -31,6 +31,8 @@
 #  action = 13: forward EMA return 
 #
 #  For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
+# v4 has  discrete and continuous training signals and both classification and regression signals
+
 import numpy as np
 from numpy import genfromtxt
 from numpy import shape
@@ -112,6 +114,28 @@ def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_d
     reward_sell = profit_sell / (dd_sell + 1)
     return open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell 
 
+# returns a value between -1,1 using an increment via parameters
+def discretize_reward(reward, increment, max_r, min_r):
+    # calculate the number of increments, ie: (1 - -1)/0.1 = 20
+    num_i = (max_r - min_r) / increment
+    # ret = (min_r + max_r)/2
+    #print ("num_i = ", num_i)
+    for i in range(0,int(num_i+1)):
+        # start the first range in min_r - increment/2
+        r_min = min_r - (increment/2) + (i * increment)
+        r_max = min_r - (increment/2) + ((i+1) * increment) 
+        # verify if the reward is in the range range_min to range_max = range
+        if (reward >= r_min) and (reward < r_max):
+            # if it is in range, return the range_min+ increment/2
+            ret = (r_min + (increment/2))         
+        # return limit values if reward is beyond limits
+        if (reward >= max_r):
+            ret = max_r
+        if (reward <= min_r):
+            ret = min_r
+        
+    return ret
+        
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
 # @param: window = High, Low, Close, nextOpen timeseries
@@ -120,8 +144,11 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     # search for the best order before the dd
     last_dd = max_SL
     i_dd = max_dInv
+    max_r = 1.0
+    min_r = -1.0
     reward_buy  = 0.0
     reward_sell = 0.0
+    increment = 0.1
     direction = 0
     # the first 3 actions for buy:  0:TP, 1:SL and 2:dInv
     if action < 3:
@@ -161,7 +188,9 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
                 reward = (max_i - open_buy_index) / max_dInv
                 if  (max_i - open_buy_index) < min_dInv:
                     reward = 0
-            return {'reward':reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            # TODO: discretizar reward
+            
+            return {'reward': discretize_reward(reward, increment, max_r, min_r), 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # sino, retorna 0 a todas las acciones
         else:
             return {'reward':0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':0}
@@ -316,7 +345,7 @@ if __name__ == '__main__':
     max_SL = int(sys.argv[7])
     # feature selection threshold, con 0.2 daba ave5 = 0.31
     selection_score = float(sys.argv[8])
-    min_dInv = 2
+    min_dInv = 0
     max_dInv = window_size
     # Number of training signals
     num_signals = 19
