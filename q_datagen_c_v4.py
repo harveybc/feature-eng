@@ -118,25 +118,21 @@ def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_d
 def discretize_reward(reward, increment, max_r, min_r):
     # calculate the number of increments, ie: (1 - -1)/0.1 = 20
     num_i = (max_r - min_r) / increment
-    # ret = (min_r + max_r)/2
+    ret = (min_r + max_r)/2
     print ("num_i = ", num_i)
     for i in range(0,int(num_i+1)):
         # start the first range in min_r - increment/2
         r_min = min_r - (increment/2) + (float(i) * increment)
-        r_max = min_r - (increment/2) + ((float(i)+1) * increment) 
+        r_max = min_r - (increment/2) + ((float(i)+1.0) * increment) 
         # verify if the reward is in the range range_min to range_max = range
-        # TODO: Prueba quitando condiciones de límite
-        #if (reward >= r_min) and (reward < r_max):
+        if (reward >= r_min) and (reward < r_max):
             # if it is in range, return the range_min+ increment/2
-        #    ret = (r_min + (increment/2))         
-        ret = (r_min + (increment/2))         
+            ret = (r_min + (increment/2))         
         # return limit values if reward is beyond limits
-        
-        # TODO: Prueba quitando condiciones de límite
-        #if (reward >= max_r):
-        #    ret = max_r
-        #if (reward <= min_r):
-        #    ret = min_r
+        if (reward >= max_r):
+            ret = max_r
+        if (reward <= min_r):
+            ret = min_r
         
     return ret
         
