@@ -119,11 +119,11 @@ def discretize_reward(reward, increment, max_r, min_r):
     # calculate the number of increments, ie: (1 - -1)/0.1 = 20
     num_i = (max_r - min_r) / increment
     # ret = (min_r + max_r)/2
-    #print ("num_i = ", num_i)
+    print ("num_i = ", num_i)
     for i in range(0,int(num_i+1)):
         # start the first range in min_r - increment/2
-        r_min = min_r - (increment/2) + (i * increment)
-        r_max = min_r - (increment/2) + ((i+1) * increment) 
+        r_min = min_r - (increment/2) + (float(i) * increment)
+        r_max = min_r - (increment/2) + ((float(i)+1) * increment) 
         # verify if the reward is in the range range_min to range_max = range
         # TODO: Prueba quitando condiciones de límite
         #if (reward >= r_min) and (reward < r_max):
@@ -253,8 +253,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
         # este tiene la menor relación balance(4219)/error(0.152)  
         rew = (window[11][5] - window[10][5])/0.0003
-        #return {'reward': discretize_reward(rew, 0.1, 1.0, -1.0), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+        return {'reward': discretize_reward(rew, 0.1, 1.0, -1.0), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+        #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
         # RETURN DE MACD ADELANTADO 9 ticks (TODO: Probar otros valores para etrategia de prueba)
         # tiene max balance 800-16k en 1y pero error=0.278 con indicator_period=77 sin short-long term data
