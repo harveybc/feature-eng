@@ -239,14 +239,14 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
    # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
         # RETURN DE EMA no normalizado (EMAf-EMAini) ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-        return {'reward':(window[11][5] - window[10][5])/0.00015, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[5][10] - window[4][10]), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
         # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        return {'reward':(window[1][5] - window[0][5])/0.00015, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':((window[3][4])/100)*2-1, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
-        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 3 ticks (TODO: Probar otros valores para etrategia de prueba)
         # este tiene la menor relación balance(4219)/error(0.152)  
-        rew = (window[11][5] - window[10][5])/0.00015
+        rew = (window[4][5] - window[3][5])/0.00015
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
         #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
