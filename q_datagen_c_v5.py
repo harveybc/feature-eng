@@ -195,7 +195,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # TODO: discretizar reward
 
         #return {'reward': discretize_reward(reward, increment, max_r, min_r), 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-        return {'reward': reward/0.1, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+        return {'reward': reward/0.15, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         
     # the actions for sell:  3:TP, 4:SL and 5:dInv
     if (action >= 3) and (action <6):
@@ -234,19 +234,19 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = (min_i - open_sell_index) / max_dInv
             if  (min_i - open_sell_index) < min_dInv:
                 reward = 0
-        return {'reward':reward/0.1, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+        return {'reward':reward/0.15, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
 
    # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
         # RETURN DE EMA no normalizado (EMAf-EMAini) ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-        return {'reward':(window[11][5] - window[10][5])/0.0001, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[11][5] - window[10][5])/0.00015, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
         # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        return {'reward':(window[1][5] - window[0][5])/0.0001, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':(window[1][5] - window[0][5])/0.00015, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
         # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
         # este tiene la menor relación balance(4219)/error(0.152)  
-        rew = (window[11][5] - window[10][5])/0.0001
+        rew = (window[11][5] - window[10][5])/0.00015
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
         #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
