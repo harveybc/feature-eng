@@ -187,7 +187,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #if dd_buy > max_SL:
             #    reward = 1
             #else:
-            reward = ((dd_buy / max_SL)*2)-1
+            reward = (dd_buy / max_SL)
             return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         elif action == 2:
