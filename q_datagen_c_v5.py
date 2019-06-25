@@ -179,23 +179,22 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #else:
             #    reward = profit_buy / max_TP
             reward = (profit_buy - dd_buy) / max_TP 
+            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL buy, if dir = buy, reward es el dd de buy 
         elif action == 1:
-            if dd_buy < min_SL:
-                reward = 0
-            if dd_buy > max_SL:
-                reward = 1
-            else:
-                reward = dd_buy / max_SL    
+            #if dd_buy < min_SL:
+            #    reward = 0
+            #if dd_buy > max_SL:
+            #    reward = 1
+            #else:
+            reward = ((dd_buy / max_SL)*2)-1
+            return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         elif action == 2:
             reward = (max_i - open_buy_index) / max_dInv
             if  (max_i - open_buy_index) < min_dInv:
                 reward = 0
-        # TODO: discretizar reward
-
-        #return {'reward': discretize_reward(reward, increment, max_r, min_r), 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-        return {'reward': reward/0.15, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            return {'reward': ((reward/6.45)*2)-1, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         
     # the actions for sell:  3:TP, 4:SL and 5:dInv
     if (action >= 3) and (action <6):
@@ -215,26 +214,28 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             direction = -1
         # case 0: TP sell, reward es el profit de sell
         if action == 3:
-            if profit_sell < min_TP:
-                reward = 0
-            if profit_sell > max_TP:
-                reward = 1
-            else:
-                reward = profit_sell / max_TP
+            #if profit_sell < min_TP:
+            #    reward = 0
+            #if profit_sell > max_TP:
+            #    reward = 1
+            #else:
+            reward = profit_sell / max_TP
+            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL sell, if dir = sell, reward es el dd de sell 
         elif action == 4:
-            if dd_sell < min_SL:
-                reward = 0
-            if dd_sell > max_SL:
-                reward = 1
-            else:
-                reward = dd_sell / max_SL    
+            #if dd_sell < min_SL:
+            #    reward = 0
+            #if dd_sell > max_SL:
+            #    reward = 1
+            #else:
+            reward = dd_sell / max_SL    
+            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # case 2: dInv, if dir = sell, reward es el index del max menos el de open.
         elif action == 5:
             reward = (min_i - open_sell_index) / max_dInv
             if  (min_i - open_sell_index) < min_dInv:
                 reward = 0
-        return {'reward':reward/0.15, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':reward/6.45, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
 
    # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
@@ -242,20 +243,17 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward':(window[5][10] - window[4][10]), 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
         # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        return {'reward':((window[3][4])/100)*2-1, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+        return {'reward':((window[2][4])/100)*2-1, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
         # RETURN DE MACD ADELANTADO 3 ticks (TODO: Probar otros valores para etrategia de prueba)
         # este tiene la menor relación balance(4219)/error(0.152)  
-        rew = (window[4][5] - window[3][5])/0.00015
+        rew = (window[3][5] - window[2][5])
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
         #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
-        # RETURN DE MACD ADELANTADO 9 ticks (TODO: Probar otros valores para etrategia de prueba)
+        # RETURN DE MACD ADELANTADO 2 ticks (TODO: Probar otros valores para etrategia de prueba)
         # tiene max balance 800-16k en 1y pero error=0.278 con indicator_period=77 sin short-long term data
-        if (window[10][5] - window[9][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
+        rew = ( window[2][5])
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 10:
         # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
@@ -455,10 +453,10 @@ if __name__ == '__main__':
     headers = concatenate((headers,["TPsell_"+str(min_TP)+"_"+str(max_TP)]))        
     headers = concatenate((headers,["SLsell_"+str(min_SL)+"_"+str(max_SL)]))        
     headers = concatenate((headers,["dInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))         
-    headers = concatenate((headers,["rMACD4d"]))        
-    headers = concatenate((headers,["rRSI1d"]))        
-    headers = concatenate((headers,["rnMACD10d"]))        
-    headers = concatenate((headers,["rnRSI1d"]))        
+    headers = concatenate((headers,["rEMA1h"]))        
+    headers = concatenate((headers,["RSI1h"]))        
+    headers = concatenate((headers,["rnMACD1h"]))        
+    headers = concatenate((headers,["nMACD1h"]))        
     headers = concatenate((headers,["cTPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
     headers = concatenate((headers,["cSLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
     headers = concatenate((headers,["cdInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
