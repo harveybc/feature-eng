@@ -194,7 +194,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = (max_i - open_buy_index) / max_dInv
             if  (max_i - open_buy_index) < min_dInv:
                 reward = 0
-            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            return {'reward': (2*reward)-1, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         
     # the actions for sell:  3:TP, 4:SL and 5:dInv
     if (action >= 3) and (action <6):
@@ -235,7 +235,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = (min_i - open_sell_index) / max_dInv
             if  (min_i - open_sell_index) < min_dInv:
                 reward = 0
-            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':(2*reward)-1, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
 
    # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
