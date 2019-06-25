@@ -219,7 +219,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #if profit_sell > max_TP:
             #    reward = 1
             #else:
-            reward = profit_sell / max_TP
+            reward = (profit_sell - dd_sell)/ max_TP
             return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL sell, if dir = sell, reward es el dd de sell 
         elif action == 4:
