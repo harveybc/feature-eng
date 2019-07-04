@@ -134,8 +134,7 @@ def discretize_reward(reward, increment, max_r, min_r):
         if (reward >= max_r):
             ret = max_r
         if (reward <= min_r):
-            ret = min_r
-        
+            ret = min_r     
     return ret
         
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
