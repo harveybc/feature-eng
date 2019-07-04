@@ -292,7 +292,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = 1.5
         if reward <-1.5:
             reward = -1.5
-        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
         #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
         # RETURN DE MACD ADELANTADO 2 ticks (TODO: Probar otros valores para etrategia de prueba)
@@ -302,7 +302,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = 1.5
         if reward <-1.5:
             reward = -1.5
-        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 10:
         # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
         if (window[11][5] - window[10][5]) > 0:
