@@ -178,7 +178,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #else:
             #    reward = profit_buy / max_TP
             reward = (profit_buy - dd_buy) / max_TP 
-            reward = reward / 10.0
+            reward = reward / 2.0
             # rescale outliers
             #if reward > 1.5:
             #    reward = 1.5
@@ -235,7 +235,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1
             #else:
             reward = (profit_sell - dd_sell)/ max_TP
-            reward = reward / 10.0
+            reward = reward / 2.0
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
