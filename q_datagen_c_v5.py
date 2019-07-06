@@ -267,31 +267,32 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = -1.5
             return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
 
-   # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
+   # Continuous indicators =    6:EMA(10)delayed 5 - EMA(20), 
+   #                            7:EMA(20)delayed 5 - EMA(40),
+   #                            7:EMA(10)delayed 5 - EMA(40),
     if action == 6:
-        # RETURN DE EMA no normalizado (EMAf-EMAini) ADELANTADO 4 dias (TODO: Probar con period =7 y no 14 como el actual dataset)
-        reward = (window[5][10] - window[4][10])/0.001
-        if reward > 1.5:
-            reward = 1.5
-        if reward <-1.5:
-            reward = -1.5
+        # EMA(10)delayed 5 - EMA(20) : positive = buy
+        reward = (window[5][17] - window[0][10])
+        #if reward > 1.5:
+        #    reward = 1.5
+        #if reward <-1.5:
+        #    reward = -1.5
         return {'reward':reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
-        # RETURN DE  RSI no normalizado (RSIf - RSI ACTUAL) ADELANTADO 1 día, strat: cierra en cambio de signo de pendiente 
-        reward = ((window[2][4])/100)*2-1
-        if reward > 1.5:
-            reward = 1.5
-        if reward <-1.5:
-            reward = -1.5
+        # EMA(20)delayed 5 - EMA(40) : positive = buy
+        reward = (window[5][10] - window[0][24])
+        #if reward > 1.5:
+        #    reward = 1.5
+        #if reward <-1.5:
+        #    reward = -1.5
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
-        # RETURN DE MACD ADELANTADO 3 ticks (TODO: Probar otros valores para etrategia de prueba)
-        # este tiene la menor relación balance(4219)/error(0.152)  
-        reward = (window[3][5] - window[2][5])/0.0004
-        if reward > 1.5:
-            reward = 1.5
-        if reward <-1.5:
-            reward = -1.5
+        # EMA(20)delayed 5 - EMA(40) : positive = buy
+        reward = (window[5][17] - window[0][24])
+        #if reward > 1.5:
+        #    reward = 1.5
+        #if reward <-1.5:
+        #    reward = -1.5
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
         #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
     if action == 9:
