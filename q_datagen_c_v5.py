@@ -154,7 +154,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     # the first 3 actions for buy:  0:TP, 1:SL and 2:dInv
     if action < 3:
         # search for the best buy order on the current window
-        while (last_dd >= max_SL) and (reward_buy <= reward_sell):
+        while (reward_buy <= reward_sell):
             open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
             if reward_buy > reward_sell:
                 last_dd = dd_buy 
@@ -177,8 +177,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1
             #else:
             #    reward = profit_buy / max_TP
-            reward = (profit_buy - dd_buy) / max_TP 
-            reward = reward / 3.0
+            reward = profit_buy
+            reward = reward * 1.0
             # rescale outliers
             #if reward > 1.5:
             #    reward = 1.5
@@ -192,8 +192,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #if dd_buy > max_SL:
             #    reward = 1
             #else:
-            reward = (dd_buy / max_SL)
-            reward = ((reward/0.15)*2)-1
+            reward = dd_buy
+            reward = reward * 1.0
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
@@ -201,10 +201,10 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
         elif action == 2:
-            reward = (max_i - open_buy_index) / max_dInv
-            if  (max_i - open_buy_index) < min_dInv:
-                reward = 0
-            reward = ((reward/0.15)*2)-1
+            reward = (max_i - open_buy_index) 
+            #if  (max_i - open_buy_index) < min_dInv:
+            #    reward = 0
+            reward = reward * 1.0
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
@@ -214,7 +214,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     # the actions for sell:  3:TP, 4:SL and 5:dInv
     if (action >= 3) and (action <6):
         # search for the best sell order on the current window
-        while (last_dd >= max_SL) and (reward_sell <= reward_buy):
+        while (reward_sell <= reward_buy):
             open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
             if reward_sell> reward_buy :
                 last_dd = dd_sell 
@@ -234,8 +234,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #if profit_sell > max_TP:
             #    reward = 1
             #else:
-            reward = (profit_sell - dd_sell)/ max_TP
-            reward = reward / 3.0
+            reward = profit_sell
+            reward = reward * 1.0
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
@@ -248,8 +248,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #if dd_sell > max_SL:
             #    reward = 1
             #else:
-            reward = dd_sell / max_SL   
-            reward = ((reward/0.15)*2)-1
+            reward = dd_sell 
+            reward = reward * 1.0
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
@@ -257,15 +257,15 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # case 2: dInv, if dir = sell, reward es el index del max menos el de open.
         elif action == 5:
-            reward = (min_i - open_sell_index) / max_dInv
-            if  (min_i - open_sell_index) < min_dInv:
-                reward = 0
-            reward = (2*reward)-1    
+            reward = (min_i - open_sell_index) 
+            #if  (min_i - open_sell_index) < min_dInv:
+            #    reward = 0
+            reward = reward * 1.0    
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
             #    reward = -1.5
-            return {'reward':(2*reward)-1, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
 
    # Continuous indicators = 6:rEMA, 7:rRSI, 8:rnEMA,9 rnRSI
     if action == 6:
