@@ -272,7 +272,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
    #                            7:EMA(10)delayed 5 - EMA(40),
     if action == 6:
         # EMA(10)delayed 5 - EMA(20) : positive = buy
-        reward = (window[5][17] - window[0][10]) / 0.01
+        reward = (window[5][17] - window[0][10])
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
@@ -280,7 +280,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward':reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
         # EMA(20)delayed 5 - EMA(40) : positive = buy
-        reward = (window[5][10] - window[0][24]) / 0.01
+        reward = (window[5][10] - window[0][24])
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
@@ -288,7 +288,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
         # EMA(10)delayed 5 - EMA(40) : positive = buy
-        reward = (window[5][17] - window[0][24]) / 0.01
+        reward = (window[5][17] - window[0][24])
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     # feature selection threshold, con 0.2 daba ave5 = 0.31
     selection_score = float(sys.argv[8])
     min_dInv = 0
-    max_dInv = window_size//2
+    max_dInv = window_size
     # Number of training signals
     num_signals = 19
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
