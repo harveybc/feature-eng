@@ -184,7 +184,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1.5
             #if reward <-1.5:
             #    reward = -1.5
-            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            return {'reward': (reward+1)/2.0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL buy, if dir = buy, reward es el dd de buy 
         elif action == 1:
             #if dd_buy < min_SL:
@@ -240,7 +240,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1.5
             #if reward <-1.5:
             #    reward = -1.5
-            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':(reward+1)/2.0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL sell, if dir = sell, reward es el dd de sell 
         elif action == 4:
             #if dd_sell < min_SL:
