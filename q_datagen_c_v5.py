@@ -178,13 +178,13 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #else:
             #    reward = profit_buy / max_TP
             reward = profit_buy
-            reward = reward / 2000.0
+            reward = reward
             # rescale outliers
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
             #    reward = -1.5
-            return {'reward': (reward+1)/2.0, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
+            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL buy, if dir = buy, reward es el dd de buy 
         elif action == 1:
             #if dd_buy < min_SL:
@@ -193,7 +193,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1
             #else:
             reward = dd_buy
-            reward = reward /1500.0
+            reward = reward 
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
@@ -235,12 +235,12 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1
             #else:
             reward = profit_sell
-            reward = reward / 2000.0
+            reward = reward 
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
             #    reward = -1.5
-            return {'reward':(reward+1)/2.0, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL sell, if dir = sell, reward es el dd de sell 
         elif action == 4:
             #if dd_sell < min_SL:
@@ -249,7 +249,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             #    reward = 1
             #else:
             reward = dd_sell 
-            reward = reward / 1500.0
+            reward = reward 
             #if reward > 1.5:
             #    reward = 1.5
             #if reward <-1.5:
@@ -392,7 +392,7 @@ if __name__ == '__main__':
     # feature selection threshold, con 0.2 daba ave5 = 0.31
     selection_score = float(sys.argv[8])
     min_dInv = 0
-    max_dInv = window_size
+    max_dInv = window_size//2
     # Number of training signals
     num_signals = 19
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
