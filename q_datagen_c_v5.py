@@ -272,7 +272,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
    #                            7:EMA(10)delayed 5 - EMA(40),
     if action == 6:
         # EMA(10)delayed 5 - EMA(20) : positive = buy
-        reward = (window[5][17] - window[0][10])
+        reward = (window[5][17] - window[0][10])/0.01
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
@@ -280,7 +280,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward':reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 7:
         # EMA(20)delayed 5 - EMA(40) : positive = buy
-        reward = (window[5][10] - window[0][24])
+        reward = (window[5][10] - window[0][24])/0.01
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
@@ -288,7 +288,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 8:
         # EMA(10)delayed 5 - EMA(40) : positive = buy
-        reward = (window[5][17] - window[0][24])
+        reward = (window[5][17] - window[0][24])/0.01
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
