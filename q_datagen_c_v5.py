@@ -305,8 +305,8 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
             reward = -1.5
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 10:
-        # RETURN DE MACD ADELANTADO 10 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[11][5] - window[10][5]) > 0:
+        # EMA(10)delayed 5 - EMA(20) : positive = buy else sell
+        if (window[5][10] - window[0][24]) > 0:
             rew = 1
         else:
             rew = 0
