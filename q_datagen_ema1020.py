@@ -74,7 +74,7 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     # Continuous indicators =    0:EMA(10) delayed 5 - EMA(20),
     if action == 0:
         # EMA(10) delayed 5 - EMA(20) : positive = buy
-        reward = (window[2][17] - window[0][10])/0.006
+        reward = (window[5][0] - window[0][1])/0.006
         #if reward > 1.5:
         #    reward = 1.5
         #if reward <-1.5:
