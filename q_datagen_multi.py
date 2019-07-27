@@ -307,7 +307,7 @@ if __name__ == '__main__':
             try:
                 tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
             except :
-                print ("len(tick_data_r)=",tick_data_r," len(res)=", len(res), " j=",j)
+                print ("len(tick_data_r)=",len(tick_data_r)," len(res)=", len(res), " j=",j)
             
             
         output.append(tick_data_r)
