@@ -300,12 +300,13 @@ if __name__ == '__main__':
             #    tick_data_r = concatenate ((tick_data_r, window_column_t))
             #
             tick_data_r = window_column_t.copy()
-        # concatenate expanded tick data per feature with reward 
+        
+        print('len(tick_data_r) = ', len(tick_data_r), ' len(tick_data_r[0]) = ', len(tick_data_r[0]))
+                # concatenate expanded tick data per feature with reward 
         for j in range (0,num_signals):
             tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
         output.append(tick_data_r)
-        # print('len(tick_data) = ', len(tick_data), ' len(tick_data_c) = ', len(tick_data_c))
-        
+         
         # TODO: ADICIONAR HEADER DE CSV CON NOMBRES DE CADA COLUMNA
         if i % 100 == 0.0:
             progress = i*100/num_ticks
