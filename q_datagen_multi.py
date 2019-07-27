@@ -354,7 +354,7 @@ if __name__ == '__main__':
 
     X = output_bt[:,0:2*num_columns*window_size]
     # hace la selección de características respecto a predicción del MACD(50) adelantado 10 ticks
-    y = to_t[: , ((2 * num_columns * window_size) + 4) ]
+    y = to_t[: , ((2 * num_columns * window_size) + 3) ]
     X_indices = np.arange(X.shape[-1])
 
     # #############################################################################
