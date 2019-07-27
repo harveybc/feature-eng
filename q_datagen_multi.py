@@ -3,7 +3,7 @@
 # q_datagen -> <Windowed Datasets whith reward> -> q_pretrainer -> <Pre-Trained model> -> q_agent -> <Performance> -> q_mlo -> <Optimal Net per Action>
 # usage: python3 q_datagen_multi <csv_dataset> <output> <window_size> <min_TP> <max_TP> <min_SL> <max_SL> 
 
-# version "multi" uses regression for: sl, profit, ema_10(-5)20, and classification for: ema_10(-5)20
+# version "multi" uses regression for 5 symbols: sl, profit, ema_10(-5)20, and classification for: ema_10(-5)20
 # to be used in q-pretrainer-multi for feature extraction for a neuroevolution-based agent 
 # to be used both in simulation and live testing. 
 
@@ -145,7 +145,7 @@ def discretize_reward(reward, increment, max_r, min_r):
 # getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
 # @param: stateaction = state action code (0..3) open order, (4..7) close existing
 # @param: window = High, Low, Close, nextOpen timeseries
-def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
+def get_reward(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
     # if the draw down of the highest between buy and sell profits, is more than max_SL, 
     # search for the best order before the dd
     last_dd = max_SL
@@ -156,11 +156,12 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
     reward_sell = 0.0
     increment = 0.1
     direction = 0
+    
     # the first 3 actions for buy:  0:TP, 1:SL and 2:dInv
-    if action < 3:
+    if action < 2:
         # search for the best buy order on the current window
         while (reward_buy <= reward_sell):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(um_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
             if reward_buy > reward_sell:
                 last_dd = dd_buy 
                 i_dd = dd_max_i
@@ -176,208 +177,20 @@ def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dIn
         # en clasification, para tp y sl ya dos niveles:0=bajo y 1=alto
         if action == 0:
             # TODO: Prueba comentando condiciones límite para profit_buy
-            # if profit_buy < min_TP:
-            #    reward = 0
-            #if profit_buy > max_TP:
-            #    reward = 1
-            #else:
-            #    reward = profit_buy / max_TP
             reward = profit_buy
-            reward = reward
-            # rescale outliers
-            #if reward > 1.5:
-            #    reward = 1.5
-            #if reward <-1.5:
-            #    reward = -1.5
             return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
         # case 1: SL buy, if dir = buy, reward es el dd de buy 
         elif action == 1:
-            #if dd_buy < min_SL:
-            #    reward = 0
-            #if dd_buy > max_SL:
-            #    reward = 1
-            #else:
             reward = dd_buy
-            reward = reward/1000 
-            #if reward > 1.5:
-            #    reward = 1.5
-            #if reward <-1.5:
-            #    reward = -1.5
             return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-        # case 2: dInv, if dir = buy, reward es el index del max menos el de open.
-        elif action == 2:
-            reward = (max_i - open_buy_index) 
-            #if  (max_i - open_buy_index) < min_dInv:
-            #    reward = 0
-            reward = reward / 29
-            #if reward > 1.5:
-            #    reward = 1.5
-            #if reward <-1.5:
-            #    reward = -1.5
-            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-        
-    # the actions for sell:  3:TP, 4:SL and 5:dInv
-    if (action >= 3) and (action <6):
-        # search for the best sell order on the current window
-        while (reward_sell <= reward_buy):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
-            if reward_sell> reward_buy :
-                last_dd = dd_sell 
-                i_dd = dd_min_i
-            else: 
-                last_dd = dd_buy
-                i_dd = dd_max_i
-            if i_dd <= min_dInv:
-                break
-        # Sell continuous actions (3:TP, 4:SL, 5:dInv proportional to max vol), else search the next best buy order before the dd 
-        if reward_sell > reward_buy:
-            direction = -1
-        # case 0: TP sell, reward es el profit de sell
-        if action == 3:
-            #if profit_sell < min_TP:
-            #    reward = 0
-            #if profit_sell > max_TP:
-            #    reward = 1
-            #else:
-            reward = profit_sell
-            reward = reward 
-            #if reward > 1.5:
-            #    reward = 1.5
-            #if reward <-1.5:
-            #    reward = -1.5
-            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-        # case 1: SL sell, if dir = sell, reward es el dd de sell 
-        elif action == 4:
-            #if dd_sell < min_SL:
-            #    reward = 0
-            #if dd_sell > max_SL:
-            #    reward = 1
-            #else:
-            reward = dd_sell 
-            reward = reward/1000 
-            #if reward > 1.5:
-            #    reward = 1.5
-            #if reward <-1.5:
-            #    reward = -1.5
-            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-        # case 2: dInv, if dir = sell, reward es el index del max menos el de open.
-        elif action == 5:
-            reward = (min_i - open_sell_index) 
-            #if  (min_i - open_sell_index) < min_dInv:
-            #    reward = 0
-            reward = reward / 29    
-            #if reward > 1.5:
-            #    reward = 1.5
-            #if reward <-1.5:
-            #    reward = -1.5
-            return {'reward':reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-
-   # Continuous indicators =    6:EMA(10)delayed 5 - EMA(20), 
-   #                            7:EMA(20)delayed 5 - EMA(40),
-   #                            7:EMA(10)delayed 5 - EMA(40),
-    if action == 6:
-        # variation of  (EMA(5)delayed 5 - EMA(10) delayed 5) : positive = buy
-        reward = ((window[5][17] - window[5][10])-(window[0][17] - window[0][10]))/0.002
-        #if reward > 1.5:
-        #    reward = 1.5
-        #if reward <-1.5:
-        #    reward = -1.5
-        return {'reward':reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-    if action == 7:
-        # variation of (EMA(10)delayed 5 - EMA(20)delayed 5) : positive = buy
-        reward = ((window[5][10] - window[5][24])-(window[0][10] - window[0][24]))/0.0018
-        #if reward > 1.5:
-        #    reward = 1.5
-        #if reward <-1.5:
-        #    reward = -1.5
+    if action == 2:
+        # regression: (EMA(10)delayed 5 - EMA(20)) : positive = buy
+        reward = ((window[5][(symbol*num_features)+10] - window[0][(symbol*num_features)+24]))
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-    if action == 8:
-        # vatriation of (EMA(5)delayed 5 - EMA(20)delayed 5) : positive = buy
-        reward = ((window[5][17] - window[5][24])-(window[0][17] - window[0][24]))/0.0004
-        #if reward > 1.5:
-        #    reward = 1.5
-        #if reward <-1.5:
-        #    reward = -1.5
-        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-        #return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 9:
-        # RETURN DE MACD ADELANTADO 2 ticks (TODO: Probar otros valores para etrategia de prueba)
-        # tiene max balance 800-16k en 1y pero error=0.278 con indicator_period=77 sin short-long term data
-        reward = ( window[2][5])/0.004
-        if reward > 1.5:
-            reward = 1.5
-        if reward <-1.5:
-            reward = -1.5
-        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-    if action == 10:
-        # EMA(10)delayed 5 - EMA(20) : positive = buy else sell
-        if (window[5][10] - window[0][24]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-
-    # case 11: SL buy, if dir = buy, reward es el dd de buy 
-    if action == 11:
-        # RETURN DE MACD ADELANTADO 12 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[13][5] - window[12][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-
-    # case 12: dInv, if dir = buy, reward es el index del max menos el de open.
-    if action == 12:
-        # RETURN DE MACD ADELANTADO 14 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[15][5] - window[14][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-
-    if action == 13:
-        # RETURN DE MACD ADELANTADO 16 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[17][5] - window[16][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    
-    if action == 14:
-        # RETURN DE MACD ADELANTADO 18 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[19][5] - window[18][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    
-    if action == 15:
-        # RETURN DE MACD ADELANTADO 6 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[7][5] - window[6][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    
-    if action == 16:
-        # RETURN DE MACD ADELANTADO 7 ticks (TODO: Probar otros valores para etrategia de prueba)
-        if (window[8][5] - window[7][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 17:
-        # RETURN DE MACD ADELANTADO 8 ticks (TODO: Probar otros valores para etrategia de prueba)
-        # este tiene la menor relación balance(4219)/error(0.152)  
-        if (window[9][5] - window[8][5]) > 0:
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 18:
-        # RETURN DE MACD ADELANTADO 9 ticks (TODO: Probar otros valores para etrategia de prueba)
-        # tiene max balance 800-16k en 1y pero error=0.278 con indicator_period=77 sin short-long term data
-        if (window[10][5] - window[9][5]) > 0:
+    if action == 3:
+        # classification: variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
+        reward = ((window[5][(symbol*num_features)+10] - window[0][(symbol*num_features)+24]))
+        if (reward>0):
             rew = 1
         else:
             rew = 0
@@ -399,7 +212,12 @@ if __name__ == '__main__':
     min_dInv = 0
     max_dInv = window_size
     # Number of training signals
-    num_signals = 19
+    num_symbols = 5
+    num_signals = num_symbols*4
+    
+    features_per_symbol = 29
+    features_global = 3 
+    
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
     # returned values (vf-vi)/vi
@@ -461,8 +279,9 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
-        for j in range (0,num_signals):
-            res.append(get_reward(j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv)) 
+        for symbol in range(0, num_symbols):
+            for j in range (0,num_signals):
+                res.append(get_reward(num_symbols, num_signals, features_per_symbol, features_global, symbol, j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv));
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # window_column_t = transpose(window[:, 0])
@@ -501,25 +320,11 @@ if __name__ == '__main__':
     for i in range(0, num_columns):
         for j in range(0, window_size):
             headers = concatenate((headers,["Fr_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
-    headers = concatenate((headers,["TPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["SLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
-    headers = concatenate((headers,["TPsell_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["SLsell_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["dInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))         
-    headers = concatenate((headers,["rEMA1h"]))        
-    headers = concatenate((headers,["RSI1h"]))        
-    headers = concatenate((headers,["rnMACD1h"]))        
-    headers = concatenate((headers,["nMACD1h"]))        
-    headers = concatenate((headers,["cTPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["cSLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["cdInvbuy_"+str(min_dInv)+"_"+str(max_dInv)]))         
-    headers = concatenate((headers,["cTPsell_"+str(min_TP)+"_"+str(max_TP)]))        
-    headers = concatenate((headers,["cSLsell_"+str(min_SL)+"_"+str(max_SL)]))        
-    headers = concatenate((headers,["cdInvsell_"+str(min_dInv)+"_"+str(max_dInv)]))  
-    headers = concatenate((headers,["cEMA10d"]))  
-    headers = concatenate((headers,["cRSI1d"]))  
-    headers = concatenate((headers,["cEMAdiff10d"]))  
+    for i in range(0, num_symbols):
+        headers = concatenate((headers,["S"+str(i)+"TPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
+        headers = concatenate((headers,["S"+str(i)+"SLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
+        headers = concatenate((headers,["S"+str(i)+"EMA10(-5)20"]))        
+        headers = concatenate((headers,["S"+str(i)+"cEMA10(-5)20"]))        
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
     #pt = preprocessing.StandardScaler()
