@@ -301,13 +301,11 @@ if __name__ == '__main__':
             #
             tick_data_r = window_column_t.copy()
         
-        print('len(tick_data_r) = ', len(tick_data_r))
+        print('i = ', i)
                 # concatenate expanded tick data per feature with reward 
         for j in range (0,num_signals):
-            try:
-                tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
-            except :
-                print ("len(tick_data_r)=",len(tick_data_r)," len(res)=", len(res), " j=",j)
+            tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
+            
             
             
         output.append(tick_data_r)
