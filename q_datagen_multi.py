@@ -185,11 +185,11 @@ def get_reward(num_symbols, num_signals, features_per_symbol, features_global, s
             return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
     if action == 2:
         # regression: (EMA(10)delayed 5 - EMA(20)) : positive = buy
-        reward = ((window[5][(symbol*num_features)+10] - window[0][(symbol*num_features)+24]))
+        reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 3:
         # classification: variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
-        reward = ((window[5][(symbol*num_features)+10] - window[0][(symbol*num_features)+24]))
+        reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         if (reward>0):
             rew = 1
         else:
