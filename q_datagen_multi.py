@@ -301,7 +301,7 @@ if __name__ == '__main__':
             #
             tick_data_r = window_column_t.copy()
         
-        print('i = ', i)
+        #print('i = ', i)
                 # concatenate expanded tick data per feature with reward 
         for j in range (0,num_signals):
             tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
