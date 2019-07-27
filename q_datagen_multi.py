@@ -308,7 +308,7 @@ if __name__ == '__main__':
                 tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
             except :
                 print ("tick_data_r=",tick_data_r," res=", res)
-            raise
+            
             
         output.append(tick_data_r)
          
