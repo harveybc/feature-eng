@@ -280,7 +280,7 @@ if __name__ == '__main__':
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
         for symbol in range(0, num_symbols):
-            for j in range (0,num_signals):
+            for j in range (0,num_signals/num_symbols):
                 res.append(get_reward(num_symbols, num_signals, features_per_symbol, features_global, symbol, j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv));
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
