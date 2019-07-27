@@ -306,7 +306,7 @@ if __name__ == '__main__':
         for j in range (0,num_signals):
             try:
                 tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
-            except TypeError:
+            except :
                 print ("tick_data_r=",tick_data_r," res=", res)
             raise
             
