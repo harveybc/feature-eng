@@ -62,7 +62,7 @@ def f_regression(X,Y):
    return sklearn.feature_selection.mutual_info_regression(X,Y,discrete_features=False) #center=True (the default) would not work ("ValueError: center=True only allowed for dense data") but should presumably work in general
 
 # search_order function: search for the optimal search and buy order in the given time window,
-def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
+def search_order(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
     max = -9999999
     min = 9999999
     max_i = -1
@@ -77,9 +77,9 @@ def search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_d
     # direction es 1: buy, -1:sell, 0:nop
     direction=0
     # En cada tick verificar si la mejor orden es buy o sell comparando el reward (profit-dd) en buy y sell y verificando que el dd sea menor a max_SL
-    open_buy = window[0][0]
+    open_buy = window[0][(symbol*features_per_symbol)+0]
     open_buy_index = 0
-    open_sell = window[0][1]
+    open_sell = window[0][(symbol*features_per_symbol)+1]
     open_sell_index = 0
     # search for max/min and drawdown for open buy and sell    
     for index, obs in enumerate(window):
@@ -161,7 +161,7 @@ def get_reward(num_symbols, num_signals, features_per_symbol, features_global, s
     if action < 2:
         # search for the best buy order on the current window
         while (reward_buy <= reward_sell):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(um_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
             if reward_buy > reward_sell:
                 last_dd = dd_buy 
                 i_dd = dd_max_i
