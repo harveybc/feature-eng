@@ -304,7 +304,12 @@ if __name__ == '__main__':
         print('len(tick_data_r) = ', len(tick_data_r))
                 # concatenate expanded tick data per feature with reward 
         for j in range (0,num_signals):
-            tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
+            try:
+                tick_data_r = concatenate ((tick_data_r, [res[j]['reward']])) 
+            except TypeError:
+                print ("tick_data_r=",tick_data_r," res=", res)
+            raise
+            
         output.append(tick_data_r)
          
         # TODO: ADICIONAR HEADER DE CSV CON NOMBRES DE CADA COLUMNA
