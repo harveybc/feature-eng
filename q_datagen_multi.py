@@ -20,6 +20,9 @@
 #  y se asume que se el dataset de entrada tiene valores no-retornados, incluyendo
 #  las dimensiones por candlestick para input selection.
 #
+#  NOTE: The tested dataset used 5 symbols, with consecutive features for each symbol, in the following order: h,l,c,v,indicators
+#   
+#
 # Continuous actions
 #  action = 0: TP_buy   action = 3: TP_sell     
 #  action = 1: SL_buy   action = 4: SL_sell
