@@ -188,12 +188,20 @@ def get_reward(num_symbols, num_signals, features_per_symbol, features_global, s
         reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
     if action == 3:
-        # classification: variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
+        # classification: buy signal variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
         reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         if (reward>0):
             rew = 1
         else:
             rew = 0
+        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
+    if action == 4:
+        # classification: inverse of action 3, sell signal, variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
+        reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
+        if (reward>0):
+            rew = 0
+        else:
+            rew = 1
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
 
 # main function
@@ -213,7 +221,7 @@ if __name__ == '__main__':
     max_dInv = window_size
     # Number of training signals
     num_symbols = 5
-    num_signals = num_symbols*4
+    num_signals = num_symbols*5
     
     features_per_symbol = 29
     features_global = 3 
@@ -279,9 +287,17 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
+        # For each symbol, calculate the 3 regression signals
         for symbol in range(0, num_symbols):
-            for j in range (0,num_signals//num_symbols):
+            # until the 3rd prediction groups the otuputs for regression
+            for j in range (0,(num_signals//num_symbols)-2):
                 res.append(get_reward(num_symbols, num_signals, features_per_symbol, features_global, symbol, j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv));
+        # For each symbol, calculate the 2 classification signals
+        for symbol in range(0, num_symbols):
+            # until the 3rd prediction groups the otuputs for regression
+            for j in range ((num_signals//num_symbols)-2,(num_signals//num_symbols)):
+                res.append(get_reward(num_symbols, num_signals, features_per_symbol, features_global, symbol, j, window_future, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv));
+            
         for it,v in enumerate(tick_data):
             # expande usando los window tick anteriores (traspuesta de la columna del feature en la matriz window)
             # window_column_t = transpose(window[:, 0])
