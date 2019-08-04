@@ -183,11 +183,35 @@ def get_reward(num_symbols, num_signals, features_per_symbol, features_global, s
         elif action == 1:
             reward = dd_buy
             return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-    if action == 2:
+    if (action >= 2) and (action<4):
+        # search for the best sell order on the current window
+        while (reward_sell <= reward_buy):
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            if reward_sell> reward_buy :
+                last_dd = dd_sell 
+                i_dd = dd_min_i
+            else: 
+                last_dd = dd_buy
+                i_dd = dd_max_i
+            if i_dd <= min_dInv:
+                break
+        # Buy continuous actions (0:TP, 1:SL, 2:dInv proportional to max vol), else search the next best buy order before the dd 
+        if reward_buy < reward_sell:
+            direction = -1        
+        # case 2: TP buy 
+        if action == 2:
+            # TODO: Prueba comentando condiciones límite para profit_buy
+            reward = profit_sell
+            return {'reward': reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+        # case 3: SL sell
+        elif action == 3:
+            reward = dd_sell
+            return {'reward': reward , 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
+    if action == 4:
         # regression: (EMA(10)delayed 5 - EMA(20)) : positive = buy
         reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-    if action == 3:
+    if action == 5:
         # classification: buy signal variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
         reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         if (reward>0):
@@ -195,7 +219,7 @@ def get_reward(num_symbols, num_signals, features_per_symbol, features_global, s
         else:
             rew = 0
         return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 4:
+    if action == 6:
         # classification: inverse of action 3, sell signal, variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
         reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
         if (reward>0):
@@ -221,7 +245,7 @@ if __name__ == '__main__':
     max_dInv = window_size
     # Number of training signals
     num_symbols = 5
-    num_signals = num_symbols*5
+    num_signals = num_symbols*7
     
     features_per_symbol = 29
     features_global = 3 
@@ -287,7 +311,7 @@ if __name__ == '__main__':
         # calcula reward para el estado/accion
         #res = getReward(int(sys.argv[1]), window, nop_delay)
         res = []
-        # For each symbol, calculate the 3 regression signals
+        # For each symbol, calculate the 5 regression signals
         for symbol in range(0, num_symbols):
             # until the 3rd prediction groups the otuputs for regression
             for j in range (0,(num_signals//num_symbols)-2):
@@ -342,9 +366,14 @@ if __name__ == '__main__':
             headers = concatenate((headers,["Fr_"+str(i)+"_"+str(j)+"_"+str(min[i])+"_"+str(max[i])]))
     for i in range(0, num_symbols):
         headers = concatenate((headers,["S"+str(i)+"TPbuy_"+str(min_TP)+"_"+str(max_TP)]))        
-        headers = concatenate((headers,["S"+str(i)+"SLbuy_"+str(min_SL)+"_"+str(max_SL)]))        
+        headers = concatenate((headers,["S"+str(i)+"SLbuy_"+str(min_SL)+"_"+str(max_SL)]))
+        headers = concatenate((headers,["S"+str(i)+"TPsell_"+str(min_TP)+"_"+str(max_TP)]))        
+        headers = concatenate((headers,["S"+str(i)+"SLsell_"+str(min_SL)+"_"+str(max_SL)]))  
         headers = concatenate((headers,["S"+str(i)+"EMA10(-5)20"]))        
-        headers = concatenate((headers,["S"+str(i)+"cEMA10(-5)20"]))        
+    for i in range(0, num_symbols):
+        headers = concatenate((headers,["S"+str(i)+"cEMA10(-5)20_buy"]))        
+        headers = concatenate((headers,["S"+str(i)+"cEMA10(-5)20_sell"]))        
+        
     # Applies YeoJohnson transform with standarization (zero mean/unit variance normalization) to each column of output (including actions?)
     pt = preprocessing.PowerTransformer()
     #pt = preprocessing.StandardScaler()
