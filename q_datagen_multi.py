@@ -186,7 +186,7 @@ def get_reward(num_symbols, num_signals, features_per_symbol, features_global, s
     if (action >= 2) and (action<4):
         # search for the best sell order on the current window
         while (reward_sell <= reward_buy):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
+            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
             if reward_sell> reward_buy :
                 last_dd = dd_sell 
                 i_dd = dd_min_i
