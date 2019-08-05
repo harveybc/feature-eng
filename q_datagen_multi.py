@@ -3,9 +3,11 @@
 # q_datagen -> <Windowed Datasets whith reward> -> q_pretrainer -> <Pre-Trained model> -> q_agent -> <Performance> -> q_mlo -> <Optimal Net per Action>
 # usage: python3 q_datagen_multi <csv_dataset> <output> <window_size> <min_TP> <max_TP> <min_SL> <max_SL> 
 
-# version "multi" uses regression for 5 symbols: sl, profit, ema_10(-5)20, and classification for: ema_10(-5)20
-# to be used in q-pretrainer-multi for feature extraction for a neuroevolution-based agent 
-# to be used both in simulation and live testing. 
+# version "multi" uses regression for 5 symbols: tp_buy, sl_buy, tp_sell, sl_sell, ema_10(-5)20, and classification for: ema_10(-5)20 for buy  and sell 
+# generates a training dataset for controlling the fx-environment, with the features:hlc.                                                                 
+# It also generates a training/validation dataset for each symbol with each indicators and the moving average of the indicator for the denoising autoencoder.
+# 
+#
 
 #  Creates a dataset with observations and the reward for an action (first command line parameter)
 #  assumes an order can be open in each tick and calculates the StopLoss, TakeProfit and Volume parameters of an 
