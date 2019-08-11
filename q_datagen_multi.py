@@ -1,46 +1,20 @@
 # -*- coding: utf-8 
-## @package q_datagen
-# q_datagen -> <Windowed Datasets whith reward> -> q_pretrainer -> <Pre-Trained model> -> q_agent -> <Performance> -> q_mlo -> <Optimal Net per Action>
-# usage: python3 q_datagen_multi <csv_dataset> <output> <window_size> <min_TP> <max_TP> <min_SL> <max_SL> 
+## @package q_datagen_multi
+# q_datagen_multi -> <MSSA of Windowed Timeseries + FeatureExtractor_symbol> -> q_pretrainer_neat -> <Pre-Trained ANN model> 
+# -> q_agent(FeatureExtractor+ANN_model) -> <Performance> -> q_mlo -> <Optimal FeatureExtractor> <=> AgentAction= [<dir>,<symbol>,<TP>,<SL>]
+#
+#  Version "multi" controls the fx-environment, with observations containing: hlc, <MSSA of all features>.
+#
+#  Creates a dataset with MSSA of the timeseries loaded from a CSV file,
+#  the dataset contains the transformation of each of the given rows.
 
-# version "multi" uses regression for 5 symbols: tp_buy, sl_buy, tp_sell, sl_sell, ema_10(-5)20, and classification for: ema_10(-5)20 for buy  and sell 
-# generates a training dataset for controlling the fx-environment, with the features:hlc.                                                                 
-# It also generates a training/validation dataset for each symbol with each indicators and the moving average of the indicator for the denoising autoencoder.
-# 
-#
+#  Also exports the feature extractor (transform to be applied to data)
 
-#  Creates a dataset with observations and the reward for an action (first command line parameter)
-#  assumes an order can be open in each tick and calculates the StopLoss, TakeProfit and Volume parameters of an 
-#  optimal order (TPr, SLr, Vol) with the minimum and maximum of these parameters (max_TP, max_SL, max_Vol) given via 
-#  command-line and method parameters. Also transforming the action values so the 
-#  training signals are continuous around 0 (for testing if this transform improves q-pretrainer performance). 
-#  applies Box-Cox transform for gaussian aproximation and standarization into all signals.
+#  Applies and exports Box-Cox transform for gaussian aproximation and standarization into all signals.
 #
-#  Also calculate the same for the returned values of the features and generate 
-#  independent classification signals for: direction(0,1) ,  
-#  TP>max_TP/2, SL>max_SL/2, volume>max_volume/2, ema adelantado (#TODO: Buscar columna de EMA en mql script)
-#  y se asume que se el dataset de entrada tiene valores no-retornados, incluyendo
-#  las dimensiones por candlestick para input selection.
+#  NOTE: The tested input dataset used 5 symbols, with consecutive features for each symbol, in the following order: h,l,c,v,indicators
 #
-#  NOTE: The tested dataset used 5 symbols, with consecutive features for each symbol, in the following order: h,l,c,v,indicators
-#   
-#
-# Continuous actions
-#  action = 0: TP_buy   action = 3: TP_sell     
-#  action = 1: SL_buy   action = 4: SL_sell
-#  action = 2: EMA(10-5,20) action = 5: dInv_sell
-#
-# Discrete actions
-#  action = 6: TP_buy   action = 9: TP_sell     
-#  action = 7: SL_buy   action = 10: SL_sell
-#  action = 8: dInv_buy action = 11: dInv_sell
-#  action = 12: direction
-#
-# Differentiable continuous actions
-#  action = 13: forward EMA return 
-#
-# For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
-# v4 has  discrete and continuous training signals and both classification and regression signals
+# INSTALLATION NOTE: For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
 
 import numpy as np
 from numpy import genfromtxt
