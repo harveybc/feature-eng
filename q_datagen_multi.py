@@ -18,19 +18,14 @@
 
 import numpy as np
 from numpy import genfromtxt
-from numpy import shape
 from numpy import concatenate
-from numpy import transpose
 from numpy import concatenate
 from collections import deque
 import sys
-from itertools import islice 
 import csv 
 from sklearn import preprocessing
-from sklearn.feature_selection import SelectKBest
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import SelectPercentile, f_classif, mutual_info_classif
-from sklearn import svm
 from joblib import dump, load
 
 def f_regression(X,Y):
