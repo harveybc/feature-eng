@@ -19,243 +19,42 @@
 import numpy as np
 from numpy import genfromtxt
 from numpy import concatenate
-from numpy import concatenate
 from collections import deque
 import sys
 import csv 
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
-from sklearn.feature_selection import SelectPercentile, f_classif, mutual_info_classif
 from joblib import dump, load
 from pymssa import MSSA
-
-def f_regression(X,Y):
-   import sklearn
-   return sklearn.feature_selection.mutual_info_regression(X,Y,discrete_features=False) #center=True (the default) would not work ("ValueError: center=True only allowed for dense data") but should presumably work in general
-
-# search_order function: search for the optimal search and buy order in the given time window,
-def search_order(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
-    max = -9999999
-    min = 9999999
-    max_i = -1
-    min_i = -1
-    dd_max = 999999
-    dd_min = -9999999
-    dd_max_i = -1
-    dd_min_i = -1
-    open_index = 0
-    # busca max y min
-    start_tick = 0
-    # direction es 1: buy, -1:sell, 0:nop
-    direction=0
-    # En cada tick verificar si la mejor orden es buy o sell comparando el reward (profit-dd) en buy y sell y verificando que el dd sea menor a max_SL
-    open_buy = window[0][(symbol*features_per_symbol)+0]
-    open_buy_index = 0
-    open_sell = window[0][(symbol*features_per_symbol)+1]
-    open_sell_index = 0
-    # search for max/min and drawdown for open buy and sell    
-    for index, obs in enumerate(window):
-        if index <= max_dInv:
-            # compara con el low de cada obs (worst case), index 1
-            if (max < obs[1]): 
-                max = obs[1]
-                max_i = index
-            # compara con el high de cada obs (worst case), index 0
-            if min > obs[0]: 
-                min = obs[0]
-                min_i = index  
-    # busca dd (max antes de min o vice versa)
-    for index, obs in enumerate(window):
-        # busca min antes de max compara con el low de cada obs (worst case), index 1
-        if (dd_max > obs[1]) and (index <= max_i): 
-            dd_max = obs[1]
-            dd_max_i = index
-        # compara con el high de cada obs (worst case), index 0
-        if (dd_min < obs[0]) and (index <= min_i): 
-            dd_min = obs[0]
-            dd_min_i = index
-
-    # print("s=",stateaction, "oi=",open_index, " max=",max," max_i=",max_i," dd_max=",dd_max, " dd_max_i=", dd_max_i)
-    # print("s=",stateaction, "oi=",open_index, " min=",min," min_i=",min_i," dd_min=",dd_min, " dd_min_i=", dd_min_i)
-    pip_cost = 0.00001
-
-    # profit_buy = (max-open)/ pip_cost
-    profit_buy  = (max-open_buy)/pip_cost
-    # dd_buy = (open-min) / pip_cost
-    dd_buy = (open_buy-dd_max) / pip_cost
-    # reward_buy = profit - dd
-    reward_buy = profit_buy / (dd_buy + 1)
-    # profit_sell = (open-min)/ pip_cost
-    profit_sell  = (open_sell-min)/pip_cost
-    # dd_sell = (max-open) / pip_cost
-    dd_sell = (dd_min-open_sell) / pip_cost
-    # reward_sell = profit - dd
-    reward_sell = profit_sell / (dd_sell + 1)
-    return open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell 
-
-# returns a value between -1,1 using an increment via parameters
-def discretize_reward(reward, increment, max_r, min_r):
-    # calculate the number of increments, ie: (1 - -1)/0.1 = 20
-    num_i = (max_r - min_r) / increment
-    ret = (min_r + max_r)/2
-    print ("num_i = ", num_i)
-    for i in range(0,int(num_i+1)):
-        # start the first range in min_r - increment/2
-        r_min = min_r - (increment/2) + (float(i) * increment)
-        r_max = min_r - (increment/2) + ((float(i)+1.0) * increment) 
-        # verify if the reward is in the range range_min to range_max = range
-        if (reward >= r_min) and (reward < r_max):
-            # if it is in range, return the range_min+ increment/2
-            ret = (r_min + (increment/2))         
-        # return limit values if reward is beyond limits
-        if (reward >= max_r):
-            ret = max_r
-        if (reward <= min_r):
-            ret = min_r     
-    return ret
-        
-# getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
-# @param: stateaction = state action code (0..3) open order, (4..7) close existing
-# @param: window = High, Low, Close, nextOpen timeseries
-def get_reward(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
-    # if the draw down of the highest between buy and sell profits, is more than max_SL, 
-    # search for the best order before the dd
-    last_dd = max_SL
-    i_dd = max_dInv
-    max_r = 1.0
-    min_r = -1.0
-    reward_buy  = 0.0
-    reward_sell = 0.0
-    increment = 0.1
-    direction = 0
-    
-    # the first 3 actions for buy:  0:TP, 1:SL and 2:dInv
-    if action < 2:
-        # search for the best buy order on the current window
-        while (reward_buy <= reward_sell):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
-            if reward_buy > reward_sell:
-                last_dd = dd_buy 
-                i_dd = dd_max_i
-            else:
-                last_dd = dd_sell
-                i_dd = dd_min_i
-            if i_dd <= min_dInv:
-                break
-        # Buy continuous actions (0:TP, 1:SL, 2:dInv proportional to max vol), else search the next best buy order before the dd 
-        if reward_buy > reward_sell:
-            direction = 1
-        # case 0: TP buy, reward es el profit de buy
-        # en clasification, para tp y sl ya dos niveles:0=bajo y 1=alto
-        if action == 0:
-            # TODO: Prueba comentando condiciones límite para profit_buy
-            reward = profit_buy
-            return {'reward': reward, 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-        # case 1: SL buy, if dir = buy, reward es el dd de buy 
-        elif action == 1:
-            reward = dd_buy
-            return {'reward': reward , 'profit':profit_buy, 'dd':dd_buy ,'min':min ,'max':max, 'direction':direction}
-    if (action >= 2) and (action<4):
-        # search for the best sell order on the current window
-        while (reward_sell <= reward_buy):
-            open_sell_index, open_buy_index, max, min, max_i, min_i, profit_buy, dd_buy, dd_max_i, reward_buy, profit_sell, dd_sell, dd_min_i, reward_sell = search_order(num_symbols, num_signals, features_per_symbol, features_global, symbol, action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, i_dd)
-            if reward_sell> reward_buy :
-                last_dd = dd_sell 
-                i_dd = dd_min_i
-            else: 
-                last_dd = dd_buy
-                i_dd = dd_max_i
-            if i_dd <= min_dInv:
-                break
-        # Buy continuous actions (0:TP, 1:SL, 2:dInv proportional to max vol), else search the next best buy order before the dd 
-        if reward_buy < reward_sell:
-            direction = -1        
-        # case 2: TP buy 
-        if action == 2:
-            # TODO: Prueba comentando condiciones límite para profit_buy
-            reward = profit_sell
-            return {'reward': reward, 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-        # case 3: SL sell
-        elif action == 3:
-            reward = dd_sell
-            return {'reward': reward , 'profit':profit_sell, 'dd':dd_sell ,'min':min ,'max':max, 'direction':direction}
-    if action == 4:
-        # regression: (EMA(10)delayed 5 - EMA(20)) : positive = buy
-        reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
-        return {'reward': reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
-    if action == 5:
-        # classification: buy signal variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
-        reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
-        if (reward>0):
-            rew = 1
-        else:
-            rew = 0
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
-    if action == 6:
-        # classification: inverse of action 3, sell signal, variation of (EMA(10)delayed 5 - EMA(20)) : positive = buy
-        reward = ((window[5][(symbol*features_per_symbol)+10] - window[0][(symbol*features_per_symbol)+24]))
-        if (reward>0):
-            rew = 0
-        else:
-            rew = 1
-        return {'reward': rew, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':rew}
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
 if __name__ == '__main__':
-    # initializations
+    
+    # command line arguments
+    
+    # argument 1 = input dataset in csv format, contains num_obs observations(rows) of  the input features (columns)
     csv_f =  sys.argv[1]
+    # argument 2 = output component dataset in csv format, contains (num_obs-window_size) rows with the first n_components per feature(columns)
     out_f = sys.argv[2]
-    window_size = int(sys.argv[3])
-    min_TP = int(sys.argv[4])
-    max_TP = int(sys.argv[5])
-    min_SL = int(sys.argv[6])
-    max_SL = int(sys.argv[7])
-    # feature selection threshold, con 0.2 daba ave5 = 0.31
-    selection_score = float(sys.argv[8])
-    min_dInv = 0
-    max_dInv = window_size
+    # argument 3 = output trimmed dataset in csv format, contains the hlc columns of the original input dataset without the first window of observations for 1-to 1 relation with output(for use in agent)
+    out_f = sys.argv[3]
+    # argument 4 = window_size used for calculating the components for each observation (row) of the input dataset
+    window_size = int(sys.argv[4])
+    # argument 5 = n_components the number of components exported in the output component dataset
+    n_components = int(sys.argv[5])
+    
+    # inicializations
+       
     # Number of training signals
     num_symbols = 5
-    num_signals = num_symbols*7
-    
+    # number of features per symbol
     features_per_symbol = 29
-    features_global = 3 
-    
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data = genfromtxt(csv_f, delimiter=',')
-    # returned values (vf-vi)/vi
-    my_data_r = genfromtxt(csv_f, delimiter=',')
     # get the number of observations
     num_ticks = len(my_data)
     num_columns = len(my_data[0])
-    # initialize maximum and minimum
-    max = num_columns * [-999999.0]
-    min = num_columns * [999999.0]
-    promedio = num_columns * [0.0]
-    #TODO: VERIFICAR QUE SE LEAN window_size+1 datos y que se genere datos iguales a las observaciones del agente DCN
-    # calcula el return usando el valor anterior de cada feature y max,min para headers de output 
-    for i in range(1, num_ticks):        
-        for j in range(0, num_columns):
-            # asigna valor en matrix para valores retornados
-            if my_data[i-1,j] != 0:
-                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
-            else:
-                my_data_r[i,j] = (my_data[i,j] - my_data[i-1,j]) 
-    # so far my_data_r has data from 1 tonum_ticks, 0 does not have a return
-    # concatenate the data and the returned values
-    my_data = concatenate((my_data[1:num_ticks,:], my_data_r[1:num_ticks,:]), axis=1)
-    # so fara my_data has valid records from 1 to num_ticks for both original and returned values
-    # calcula  max,min para headers de output 
-    for i in range(0, num_ticks-1):        
-        for j in range(0, num_columns):
-            # actualiza max y min
-            if my_data[i, j] > max[j]:
-                max[j] = my_data[i, j]
-            if my_data[i, j] < min[j]:
-                min[j] = my_data[i, j]
-                # incrementa acumulador
-                promedio[j] = promedio[j] + my_data[i, j]   
     # window = deque(my_data[0:window_size-1, :], window_size)
     window = deque(my_data[0:window_size-1, :], window_size)
     window_future = deque(my_data[window_size:(2*window_size)-1, :], window_size)
