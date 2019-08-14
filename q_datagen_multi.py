@@ -27,6 +27,7 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 from sklearn.feature_selection import SelectPercentile, f_classif, mutual_info_classif
 from joblib import dump, load
+from pymssa import MSSA
 
 def f_regression(X,Y):
    import sklearn
