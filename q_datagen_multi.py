@@ -39,10 +39,12 @@ if __name__ == '__main__':
     out_f = sys.argv[2]
     # argument 3 = output trimmed dataset in csv format, contains the hlc columns of the original input dataset without the first window of observations for 1-to 1 relation with output(for use in agent)
     out_f = sys.argv[3]
-    # argument 4 = window_size used for calculating the components for each observation (row) of the input dataset
-    window_size = int(sys.argv[4])
-    # argument 5 = n_components the number of components exported in the output component dataset
-    n_components = int(sys.argv[5])
+    # argument 4 = prefix for the standarization data files 
+    out_f = sys.argv[4]
+    # argument 5 = window_size used for calculating the components for each observation (row) of the input dataset
+    window_size = int(sys.argv[5])
+    # argument 6 = n_components the number of components exported in the output component dataset
+    n_components = int(sys.argv[6])
     
     # inicializations
        
@@ -55,6 +57,29 @@ if __name__ == '__main__':
     # get the number of observations
     num_ticks = len(my_data)
     num_columns = len(my_data[0])
+    # standarize the data and export normalization data using StandardScaler
+    # Applies standarization (zero mean/unit variance normalization) to each column of output
+    pt = preprocessing.StandardScaler()
+    #pt = preprocessing.StandardScaler()
+
+# TODO: hacer standard scaler del dataset hastael 45% y hacer fit de todo
+
+
+    to_t = np.array(output)
+    to_tn = to_t[: , 0: (2 * num_columns * window_size)]
+    # probando con min-max antes de prowertransform en las 3 últimas features
+    #from sklearn.preprocessing import MinMaxScaler
+    #sc = MinMaxScaler(feature_range = (0, 1))
+    #training_set_scaled = sc.fit_transform(to_tn)
+    
+    output_bt = pt.fit_transform(to_tn) 
+    #output_bt = to_tn
+    # save the preprocessing settings
+    print("saving pre-processing.PowerTransformer() settings for the generated dataset")
+    
+    dump(pt, out_f+'.powertransformer')  
+
+    
     # window = deque(my_data[0:window_size-1, :], window_size)
     window = deque(my_data[0:window_size-1, :], window_size)
     window_future = deque(my_data[window_size:(2*window_size)-1, :], window_size)
