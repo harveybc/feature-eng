@@ -68,7 +68,7 @@ if __name__ == '__main__':
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
     # perform MSSA on standarized data
-    print("Performing MSSA on filename="+ csv_f + ", n_components=" + p_n_components + ", window_size=" + p_window_size)
+    print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     mssa = MSSA(n_components=p_n_components, window_size=p_window_size)
     mssa.fit(s_data)
     # TODO: graficar componentes acumulativos desde 1 hasta n_components, comparados con el dataset estandarizado
@@ -85,7 +85,6 @@ if __name__ == '__main__':
         fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
         
     # TODO: Save the datasets and the rank matrix
-    print("Generating dataset with " + str(len(my_data[0, :])) + " features with " + str(window_size) + " past ticks per feature and ",num_signals," reward related features. Total: " + str((len(my_data[0, :]) * window_size)+num_signals) + " columns.  \n" )
     print("Finished generating extended dataset.")
     print("Done.")
     
