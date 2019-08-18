@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # command line arguments
     # argument 1 = input dataset in csv format, contains num_obs observations(rows) of  the input features (columns)
     csv_f =  sys.argv[1]
-    # argument 2 = output component dataset in csv format, contains (num_obs-window_size) rows with the first n_components per feature(columns)
+    # argument 2 = output component dataset in csv format, contains (num_obs-window_size) rows with the first n_components per feature(columns), standarized values
     c_out_f = sys.argv[2]
     # argument 3 = output trimmed dataset in csv format, contains the hlc columns of the original input dataset without the first window of observations for 1-to 1 relation with output(for use in agent)
     t_out_f = sys.argv[3]
@@ -66,7 +66,7 @@ if __name__ == '__main__':
     # standarize the whole dataset
     s_data = pre.transform(my_data) 
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
-    dump(pt, s_out_f+'.standardscaler')  
+    dump(pre, s_out_f+'.standardscaler')  
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ csv_f + ", n_components=" + p_n_components + ", window_size=" + p_window_size)
     mssa = MSSA(n_components=p_n_components, window_size=p_window_size)
