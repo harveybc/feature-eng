@@ -27,6 +27,8 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 from joblib import dump, load
 from pymssa import MSSA
+import struct
+print(struct.calcsize("P") * 8)
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
