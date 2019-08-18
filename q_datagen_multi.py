@@ -16,6 +16,7 @@
 #
 # INSTALLATION NOTE: For importing new environment in ubuntu run, export PYTHONPATH=${PYTHONPATH}:/home/[your username]/gym-forex/
 
+import pandas as pd
 import numpy as np
 from numpy import genfromtxt
 from numpy import concatenate
@@ -66,14 +67,24 @@ if __name__ == '__main__':
     s_data = pre.transform(my_data) 
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pt, s_out_f+'.standardscaler')  
-    
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ csv_f + ", n_components=" + p_n_components + ", window_size=" + p_window_size)
     mssa = MSSA(n_components=p_n_components, window_size=p_window_size)
     mssa.fit(s_data)
     # TODO: graficar componentes acumulativos desde 1 hasta n_components, comparados con el dataset estandarizado
-    
-    # save 
+    # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
+    cumulative_recon = np.zeros_like(s_data.iloc[:, 0].values)
+    for comp in range(mssa.rank_):  
+        fig, ax = plt.subplots(figsize=(18, 7))
+        current_component = mssa.components_[0, :, comp]
+        cumulative_recon = cumulative_recon + current_component
+        ax.plot(s_data.index, s_data.iloc[:, 0].values, lw=3, alpha=0.2, c='k', label=s_data.columns[0])
+        ax.plot(s_data.index, cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
+        ax.plot(s_data.index, current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
+        ax.legend()
+        fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
+        
+    # TODO: Save the datasets and the rank matrix
     print("Generating dataset with " + str(len(my_data[0, :])) + " features with " + str(window_size) + " past ticks per feature and ",num_signals," reward related features. Total: " + str((len(my_data[0, :]) * window_size)+num_signals) + " columns.  \n" )
     print("Finished generating extended dataset.")
     print("Done.")
