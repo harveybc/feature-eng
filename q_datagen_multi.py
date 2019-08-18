@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     mssa = MSSA(n_components=p_n_components, window_size=p_window_size)
-    mssa.fit(s_data.astype(np.int64))
+    mssa.fit(s_data.astype(np.float64))
     # TODO: graficar componentes acumulativos desde 1 hasta n_components, comparados con el dataset estandarizado
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
     cumulative_recon = np.zeros_like(s_data.iloc[:, 0].values)
