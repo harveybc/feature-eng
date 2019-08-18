@@ -58,7 +58,7 @@ if __name__ == '__main__':
     my_data = genfromtxt(csv_f, delimiter=',')
     # get the number of observations
     num_ticks = len(my_data)
-    num_columns = len(my_data[0])
+    num_columns =  len(my_data[0])
     
     # standarize the data and export normalization data using StandardScaler and joblib.dump
     pre = preprocessing.StandardScaler()
