@@ -65,15 +65,17 @@ if __name__ == '__main__':
     # gets the standarization statistics from 75% of input dataset
     ts_data = my_data[ 0: (num_ticks*3)//4 , :]
     pre.fit(ts_data) 
+    
     # standarize the whole dataset
     s_data = pre.transform(my_data) 
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
+    
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-    mssa = MSSA(n_components=p_n_components, window_size=p_window_size)
+    mssa = MSSA(n_components='svht', window_size=p_window_size)
     mssa.fit(s_data.astype(np.float32))
-    # TODO: graficar componentes acumulativos desde 1 hasta n_components, comparados con el dataset estandarizado
+    
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
     cumulative_recon = np.zeros_like(s_data[:, 0])
     for comp in range(mssa.rank_):  
@@ -85,8 +87,11 @@ if __name__ == '__main__':
         ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
         ax.legend()
         fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
-        
+       
     # TODO: Save the datasets and the rank matrix
+    print("Saving components for ", str())
+    # save the components,
+    
     print("Finished generating extended dataset.")
     print("Done.")
      
