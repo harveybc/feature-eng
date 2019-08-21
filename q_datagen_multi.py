@@ -73,7 +73,7 @@ if __name__ == '__main__':
     
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-    mssa = MSSA(n_components='svht', window_size=p_window_size)
+    mssa = MSSA(n_components='parallel_analysis', pa_percentile_threshold=95, window_size=p_window_size, verbose=True)
     mssa.fit(s_data.astype(np.float32))
     
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
