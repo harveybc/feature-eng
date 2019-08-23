@@ -4,7 +4,7 @@
 # -> q_agent(FeatureExtractor+ANN_model) -> <Performance> -> q_mlo -> <Optimal FeatureExtractor> <=> AgentAction= [<dir>,<symbol>,<TP>,<SL>]
 #
 #  Version "multi" controls the fx-environment, with observations containing: hlc, <MSSA of all features>.
-#
+#  Version 2 generate MSSA for 2*window_size past ticks
 #  Creates a dataset with MSSA of the timeseries loaded from a CSV file,
 #  the dataset contains the transformation of each of the given rows.
 
@@ -72,25 +72,18 @@ if __name__ == '__main__':
     dump(pre, s_out_f+'.standardscaler')  
     
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
+    # perform MSSA on standarized data
+    for i in range(0,num_ticks-(2*window_size)):
+        print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
+        mssa = MSSA(n_components='parallel_analysis', pa_percentile_threshold=95, window_size=p_window_size, verbose=True)
+        s_data_w = s_data[i:i+2*window_size,:]
+        mssa.fit(s_data_w.astype(np.float32))
+    
     # TODO: Guardar último tick de componente (actual=probar) en output_buffer
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
-    # perform MSSA on standarized data
-    print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-    mssa = MSSA(n_components='parallel_analysis', pa_percentile_threshold=95, window_size=p_window_size, verbose=True)
-    mssa.fit(s_data.astype(np.float32))
     
-    # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
-    cumulative_recon = np.zeros_like(s_data[:, 0])
-    for comp in range(mssa.rank_):  
-        fig, ax = plt.subplots(figsize=(18, 7))
-        current_component = mssa.components_[10, :, comp]
-        cumulative_recon = cumulative_recon + current_component
-        ax.plot(s_data[:, 10], lw=3, alpha=0.2, c='k', label='original')
-        ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
-        ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
-        ax.legend()
-        fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
+
        
     # TODO: Save the datasets and the rank matrix
     print("Saving components for ", str())
