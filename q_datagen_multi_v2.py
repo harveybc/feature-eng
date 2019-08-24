@@ -78,12 +78,12 @@ if __name__ == '__main__':
         # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
         if i==0:
             mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
-            s_data_w = s_data[i:i+2*window_size,:]
+            s_data_w = s_data[i:i+2*p_window_size,:]
             mssa.fit(s_data_w.astype(np.float32))
             print("Selected Rank = ",str(mssa.rank_))
         else:
             mssa = MSSA(n_components=mssa.rank_, window_size=p_window_size, verbose=True)
-            s_data_w = s_data[i:i+2*window_size,:]
+            s_data_w = s_data[i:i+2*p_window_size,:]
             mssa.fit(s_data_w.astype(np.float32))
         
         
