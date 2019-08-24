@@ -81,8 +81,9 @@ if __name__ == '__main__':
             s_data_w = s_data[i:i+2*p_window_size,:]
             mssa.fit(s_data_w.astype(np.float32))
             print("Selected Rank = ",str(mssa.rank_))
+            rank = int(mssa.rank_)
         else:
-            mssa = MSSA(n_components=mssa.rank_, window_size=p_window_size, verbose=True)
+            mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             s_data_w = s_data[i:i+2*p_window_size,:]
             mssa.fit(s_data_w.astype(np.float32))
         
