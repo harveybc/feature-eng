@@ -70,24 +70,36 @@ if __name__ == '__main__':
     s_data = pre.transform(my_data) 
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
-    
+    output  = []
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
+    print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     for i in range(0,num_ticks-(2*window_size)):
-        print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-        mssa = MSSA(n_components='parallel_analysis', pa_percentile_threshold=95, window_size=p_window_size, verbose=True)
+        # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
+        if i==0:
+            mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
+            print("Selected Rank = ",str(mssa.rank_))
+        else:
+            mssa = MSSA(n_components=mssa.rank_, window_size=p_window_size, verbose=True)
         s_data_w = s_data[i:i+2*window_size,:]
         mssa.fit(s_data_w.astype(np.float32))
-    
+        output.append(mssa.components_[:, mssa.N_, :])
+        # show progress
+        if i % 100 == 0.0:
+            progress = i*100/mssa.N_
+            sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, mssa.N_, progress) )
+            sys.stdout.flush()
     # TODO: Guardar último tick de componente (actual=probar) en output_buffer
+    print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
+    # save the components,
+        
+    
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
     
 
        
     # TODO: Save the datasets and the rank matrix
-    print("Saving components for ", str())
-    # save the components,
     
     print("Finished generating extended dataset.")
     print("Done.")
