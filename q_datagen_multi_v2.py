@@ -74,7 +74,7 @@ if __name__ == '__main__':
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-    for i in range(0,num_ticks-(2*window_size)):
+    for i in range(0,num_ticks-(2*p_window_size)):
         # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
         if i==0:
             mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
