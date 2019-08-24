@@ -87,7 +87,7 @@ if __name__ == '__main__':
             mssa.fit(s_data_w.astype(np.float32))
         
         
-        output.append(mssa.components_[:, mssa.N_, :])
+        output.append(mssa.components_[:, mssa.N_-1, :])
         # show progress
         if i % 100 == 0.0:
             progress = i*100/mssa.N_
