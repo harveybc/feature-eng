@@ -74,21 +74,27 @@ if __name__ == '__main__':
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-    for i in range(0,num_ticks-(2*p_window_size)):
+    segments = (num_ticks//(2*p_window_size))
+    for i in range(0, segments):
+        # verify if i+(2*p_window_size) is the last observation
+        first = i * (2 * p_window_size)
+        if (i != segments-1):
+            last = (i+1) * (2 * p_window_size)
+        else:
+            last = num_ticks-1
+        # slice the data in 2*p_window_size ticks segments
+        s_data_w = s_data[first : last,:]       
         # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
-        if i==0:
+        if i==0: 
             mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
-            s_data_w = s_data[i:i+(2*p_window_size),:]
             mssa.fit(s_data_w)
             print("Selected Rank = ",str(mssa.rank_))
             rank = int(mssa.rank_)
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
-            s_data_w = s_data[i:i+(2*p_window_size),:]
             mssa.fit(s_data_w)
         
-        
-        output.append(mssa.components_[:, mssa.N_-1, :])
+        output.append(mssa.components_)
         # show progress
         if i % 100 == 0.0:
             progress = i*100/mssa.N_
@@ -97,7 +103,8 @@ if __name__ == '__main__':
     # TODO: Guardar último tick de componente (actual=probar) en output_buffer
     print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
     # save the components,
-        
+    np_output = np.asarray(output)
+    np.save(c_out_f,np_output)
     
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
