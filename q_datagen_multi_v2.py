@@ -96,7 +96,7 @@ if __name__ == '__main__':
         
         output.append(mssa.components_)
         # show progress
-        if i % 2 == 0.0:
+        if i % 1 == 0.0:
             progress = i*100/segments
             sys.stdout.write("Segment: %d/%d Progress: %d%%   \r" % (i, segments, progress) )
             sys.stdout.flush()
