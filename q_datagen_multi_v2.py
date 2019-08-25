@@ -97,8 +97,8 @@ if __name__ == '__main__':
         output.append(mssa.components_)
         # show progress
         if i % 2 == 0.0:
-            progress = i*100/mssa.N_
-            sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, mssa.N_, progress) )
+            progress = i*100/segments
+            sys.stdout.write("Segment: %d/%d Progress: %d%%   \r" % (i, segments, progress) )
             sys.stdout.flush()
     # TODO: Guardar último tick de componente (actual=probar) en output_buffer
     print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
