@@ -96,7 +96,7 @@ if __name__ == '__main__':
         
         output.append(mssa.components_)
         # show progress
-        if i % 100 == 0.0:
+        if i % 2 == 0.0:
             progress = i*100/mssa.N_
             sys.stdout.write("Tick: %d/%d Progress: %d%%   \r" % (i, mssa.N_, progress) )
             sys.stdout.flush()
