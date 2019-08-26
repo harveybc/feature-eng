@@ -27,8 +27,11 @@ from sklearn import preprocessing
 import matplotlib.pyplot as plt
 from joblib import dump, load
 from pymssa import MSSA
+import seaborn as sns
 import struct
 print(struct.calcsize("P") * 8)
+
+
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
@@ -70,12 +73,12 @@ if __name__ == '__main__':
     s_data = pre.transform(my_data) 
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
-    output  = []
+    output  = np.array([])
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     segments = (num_ticks//(2*p_window_size))
-    for i in range(0, segments):
+    for i in range(0, 1):
         # verify if i+(2*p_window_size) is the last observation
         first = i * (2 * p_window_size)
         if (i != segments-1):
@@ -94,7 +97,7 @@ if __name__ == '__main__':
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
         
-        output.append(mssa.components_)
+        np.append(output, mssa.components_)
         # show progress
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
@@ -103,9 +106,16 @@ if __name__ == '__main__':
     # save the components,
     #TODO:ERROR:  ValueError: could not broadcast input array from shape (145,240,13) into shape (145)
     
-    np_output = np.asarray(output)
-    np.save(c_out_f,np_output)
+    np.save(c_out_f, output)
     # TODO: Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+    total_comps = mssa.components_[0, :, :]
+    print(total_comps.shape)
+    total_wcorr = mssa.w_correlation(total_comps)
+    total_wcorr_abs = np.abs(total_wcorr)
+    fig, ax = plt.subplots(figsize=(12,9))
+    sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
+    ax.set_title('{} component w-correlations'.format(wine_tr.columns[0]))
+    Text(0.5,1,'Total component w-correlations')
     # TODO: Estandarizar output, guardar archivo de estandarización.
         
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
