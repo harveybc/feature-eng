@@ -102,7 +102,7 @@ if __name__ == '__main__':
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
     # TODO: Guardar último tick de componente (actual=probar) en output_buffer
-    print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
+    #print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
     # save the components,
     #TODO:ERROR:  ValueError: could not broadcast input array from shape (145,240,13) into shape (145)
     
