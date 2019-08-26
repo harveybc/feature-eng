@@ -101,9 +101,13 @@ if __name__ == '__main__':
     # TODO: Guardar último tick de componente (actual=probar) en output_buffer
     print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
     # save the components,
+    #TODO:ERROR:  ValueError: could not broadcast input array from shape (145,240,13) into shape (145)
+    
     np_output = np.asarray(output)
     np.save(c_out_f,np_output)
-    
+    # TODO: Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+    # TODO: Estandarizar output, guardar archivo de estandarización.
+        
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
     
