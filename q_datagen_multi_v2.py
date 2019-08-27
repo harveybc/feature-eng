@@ -136,7 +136,7 @@ if __name__ == '__main__':
     ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
     fig, ax = plt.subplots(figsize=(12,9))
     sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
-    ax.set_title('{} grouped component w-correlations'.format(wine_tr.columns[0]))
+    ax.set_title('grouped component w-correlations')
     fig.savefig('correlation_matrix_new.png', dpi=200)
     
     # TODO: Estandarizar output, guardar archivo de estandarización.
