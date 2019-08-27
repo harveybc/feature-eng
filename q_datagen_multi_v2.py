@@ -108,14 +108,13 @@ if __name__ == '__main__':
     
     np.save(c_out_f, output)
     # TODO: Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
-    total_comps = mssa.components_[0, :, :]
+    total_comps = mssa.components_[5, :, :]
     print(total_comps.shape)
     total_wcorr = mssa.w_correlation(total_comps)
     total_wcorr_abs = np.abs(total_wcorr)
     fig, ax = plt.subplots(figsize=(12,9))
     sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
     ax.set_title('Component w-correlations')
-    ax.legend()
     #plt.show()
     # Save the correlation matrix
     fig.savefig('correlation_matrix.png', dpi=200)
