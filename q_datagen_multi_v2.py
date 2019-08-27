@@ -119,26 +119,26 @@ if __name__ == '__main__':
         ax.set_title('Component w-correlations')
         # Save the correlation matrix
         fig.savefig('correlation_matrix_'+str(i)+'.png', dpi=200)
-    # Set the groups based on the correlation matrix
-    ts0_groups = [
-        [1,2],
-        [3,6],
-        [4,5],
-        [7],
-        [8],
-        [9,10],
-        [11,12]
-    ]
-    mssa.set_ts_component_groups(0, ts0_groups)
-    ts0_grouped = mssa.grouped_components_[0]
+        # Set the groups based on the correlation matrix
+        ts0_groups = [
+            [1,2],
+            [3,6],
+            [4,5],
+            [7],
+            [8],
+            [9,10],
+            [11,12]
+        ]
+        mssa.set_ts_component_groups(i, ts0_groups)
+        ts0_grouped = mssa.grouped_components_[i]
+        # save grouped component correlation matrix
+        ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
+        fig, ax = plt.subplots(figsize=(12,9))
+        sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
+        ax.set_title('grouped component w-correlations')
+        fig.savefig('correlation_matrix_new.png', dpi=200)
     print("Grouped components shape: ",ts0_grouped.shape)
-    # save grouped component correlation matrix
-    ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
-    fig, ax = plt.subplots(figsize=(12,9))
-    sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
-    ax.set_title('grouped component w-correlations')
-    fig.savefig('correlation_matrix_new.png', dpi=200)
-    
+        
     # TODO: Estandarizar output, guardar archivo de estandarización.
         
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
