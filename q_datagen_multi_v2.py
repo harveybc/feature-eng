@@ -109,7 +109,7 @@ if __name__ == '__main__':
     np.save(c_out_f, output)
     # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
     print("Grouping correlated components (manually set list)")
-    total_comps = mssa.components_[5, :, :]
+    total_comps = mssa.components_[0, :, :]
     print(total_comps.shape)
     total_wcorr = mssa.w_correlation(total_comps)
     total_wcorr_abs = np.abs(total_wcorr)
