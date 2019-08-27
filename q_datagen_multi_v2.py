@@ -109,15 +109,16 @@ if __name__ == '__main__':
     np.save(c_out_f, output)
     # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
     print("Grouping correlated components (manually set list)")
-    total_comps = mssa.components_[0, :, :]
-    print(total_comps.shape)
-    total_wcorr = mssa.w_correlation(total_comps)
-    total_wcorr_abs = np.abs(total_wcorr)
-    fig, ax = plt.subplots(figsize=(12,9))
-    sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
-    ax.set_title('Component w-correlations')
-    # Save the correlation matrix
-    fig.savefig('correlation_matrix_original.png', dpi=200)
+    for i in range(0, rank):
+        total_comps = mssa.components_[i, :, :]
+        print(total_comps.shape)
+        total_wcorr = mssa.w_correlation(total_comps)
+        total_wcorr_abs = np.abs(total_wcorr)
+        fig, ax = plt.subplots(figsize=(12,9))
+        sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
+        ax.set_title('Component w-correlations')
+        # Save the correlation matrix
+        fig.savefig('correlation_matrix_'+str(i)+'.png', dpi=200)
     # Set the groups based on the correlation matrix
     ts0_groups = [
         [1,2],
@@ -126,8 +127,7 @@ if __name__ == '__main__':
         [7],
         [8],
         [9,10],
-        [11],
-        [12]
+        [11,12]
     ]
     mssa.set_ts_component_groups(0, ts0_groups)
     ts0_grouped = mssa.grouped_components_[0]
