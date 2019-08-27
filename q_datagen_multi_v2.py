@@ -136,7 +136,7 @@ if __name__ == '__main__':
         fig, ax = plt.subplots(figsize=(12,9))
         sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
         ax.set_title('grouped component w-correlations')
-        fig.savefig('correlation_matrix_new.png', dpi=200)
+        fig.savefig('correlation_matrix_new_'+str(i)+'.png', dpi=200)
     print("Grouped components shape: ",ts0_grouped.shape)
         
     # TODO: Estandarizar output, guardar archivo de estandarización.
