@@ -111,7 +111,6 @@ if __name__ == '__main__':
     print("Grouping correlated components (manually set list)")
     for i in range(0, rank):
         total_comps = mssa.components_[i, :, :]
-        print(total_comps.shape)
         total_wcorr = mssa.w_correlation(total_comps)
         total_wcorr_abs = np.abs(total_wcorr)
         fig, ax = plt.subplots(figsize=(12,9))
@@ -137,6 +136,7 @@ if __name__ == '__main__':
         sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
         ax.set_title('grouped component w-correlations')
         fig.savefig('correlation_matrix_new_'+str(i)+'.png', dpi=200)
+    print("Original components shape: ",total_comps.shape)
     print("Grouped components shape: ",ts0_grouped.shape)
         
     # TODO: Estandarizar output, guardar archivo de estandarización.
