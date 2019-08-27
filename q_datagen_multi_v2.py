@@ -116,7 +116,11 @@ if __name__ == '__main__':
     sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
     ax.set_title('Component w-correlations')
     ax.legend()
-    plt.show()
+    #plt.show()
+    # Save the correlation matrix
+    fig.savefig('correlation_matrix.png', dpi=200)
+    # Set the groups based on the correlation matrix
+    
     # TODO: Estandarizar output, guardar archivo de estandarización.
         
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
