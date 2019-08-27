@@ -114,7 +114,7 @@ if __name__ == '__main__':
     total_wcorr_abs = np.abs(total_wcorr)
     fig, ax = plt.subplots(figsize=(12,9))
     sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
-    ax.set_title('{} component w-correlations'.format(wine_tr.columns[0]))
+    ax.set_title('Component w-correlations')
     Text(0.5,1,'Total component w-correlations')
     # TODO: Estandarizar output, guardar archivo de estandarización.
         
