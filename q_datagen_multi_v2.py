@@ -107,7 +107,8 @@ if __name__ == '__main__':
     #TODO:ERROR:  ValueError: could not broadcast input array from shape (145,240,13) into shape (145)
     
     np.save(c_out_f, output)
-    # TODO: Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+    # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+    print("Grouping correlated components (manually set list)")
     total_comps = mssa.components_[5, :, :]
     print(total_comps.shape)
     total_wcorr = mssa.w_correlation(total_comps)
@@ -115,10 +116,28 @@ if __name__ == '__main__':
     fig, ax = plt.subplots(figsize=(12,9))
     sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
     ax.set_title('Component w-correlations')
-    #plt.show()
     # Save the correlation matrix
-    fig.savefig('correlation_matrix.png', dpi=200)
+    fig.savefig('correlation_matrix_original.png', dpi=200)
     # Set the groups based on the correlation matrix
+    ts0_groups = [
+        [1,2],
+        [3,6],
+        [4,5],
+        [7],
+        [8],
+        [9,10],
+        [11],
+        [12]
+    ]
+    mssa.set_ts_component_groups(0, ts0_groups)
+    ts0_grouped = mssa.grouped_components_[0]
+    print("Grouped components shape: ",ts0_grouped.shape)
+    # save grouped component correlation matrix
+    ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
+    fig, ax = plt.subplots(figsize=(12,9))
+    sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
+    ax.set_title('{} grouped component w-correlations'.format(wine_tr.columns[0]))
+    fig.savefig('correlation_matrix_new.png', dpi=200)
     
     # TODO: Estandarizar output, guardar archivo de estandarización.
         
