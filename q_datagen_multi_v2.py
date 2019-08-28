@@ -96,18 +96,13 @@ if __name__ == '__main__':
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
-        
-        np.append(output, mssa.components_)
+        # concatenate otput array with the new components
+        np.concatenate((output, mssa.components_), axis = 1)
         # show progress
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
-    # TODO: Guardar último tick de componente (actual=probar) en output_buffer
-    #print("Saving matrix of size = (", str(len(output)),", ",str(len(output[0])), ", ", str(len(output[0][0])), ")")
-    # save the components,
-    #TODO:ERROR:  ValueError: could not broadcast input array from shape (145,240,13) into shape (145)
-    
-    np.save(c_out_f, output)
-    # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+
+   # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
     print("Grouping correlated components (manually set list)")
     for i in range(0, rank):
         total_comps = mssa.components_[i, :, :]
@@ -140,6 +135,8 @@ if __name__ == '__main__':
     print("Grouped components shape: ",ts0_grouped.shape)
         
     # TODO: Estandarizar output, guardar archivo de estandarización.
+    # TODO ERROR GUARDANDO
+    np.save(c_out_f, output)
         
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
