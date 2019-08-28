@@ -137,8 +137,24 @@ if __name__ == '__main__':
         fig.savefig('correlation_matrix_new_'+str(i)+'.png', dpi=200)
     print("Original components shape: ",total_comps.shape)
     print("Grouped components shape: ",ts0_grouped.shape)
-        
+    # genera gráficas para cada componente con valores agrupados
+    # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
+    cumulative_recon = np.zeros_like(s_data[:, 0])
+    for comp in range(len(mssa.grouped_components_[0][0])):  
+        fig, ax = plt.subplots(figsize=(18, 7))
+        current_component = mssa.grouped_components_[0, :, comp]
+        cumulative_recon = cumulative_recon + current_component
+        ax.plot(s_data[:, 10], lw=3, alpha=0.2, c='k', label='original')
+        ax.plot(cumulative_recon, lw1=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
+        ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
+        ax.legend()
+        fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
     # TODO: Estandarizar output, guardar archivo de estandarización.
+    # genera tabla para estandarizar
+    # estandariza y guarda datos de estandarización
+    # genera output de observaciones estandarizadas en formato csv
+    # genera hlc+EMA(10-5,20) en formato csv para usar en qagent-test y en gym-forex separado de observaciones
+    
     # TODO ERROR GUARDANDO
     np.save(c_out_f, output)
         
