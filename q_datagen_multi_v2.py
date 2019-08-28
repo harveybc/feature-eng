@@ -29,6 +29,7 @@ from joblib import dump, load
 from pymssa import MSSA
 import seaborn as sns
 import struct
+import copy
 print(struct.calcsize("P") * 8)
 
 
@@ -97,7 +98,10 @@ if __name__ == '__main__':
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
         # concatenate otput array with the new components
-        np.concatenate((output, mssa.components_), axis = 1)
+        if i == 0:
+            output = copy.deepcopy(mssa.components_)
+        else:
+            np.concatenate((output, mssa.components_), axis = 1)
         # show progress
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
