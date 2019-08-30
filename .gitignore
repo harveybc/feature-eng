@@ -104,3 +104,4 @@ venv.bak/
 .mypy_cache/
 Finish It! Workbook.docx
 ~$nish It! Workbook.docx
+nbproject/private/private.xml
