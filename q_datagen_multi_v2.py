@@ -140,9 +140,14 @@ if __name__ == '__main__':
     # genera gráficas para cada componente con valores agrupados
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
     cumulative_recon = np.zeros_like(s_data[:, 0])
+    
+    # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
+    print("len(mssa.grouped_components_) = ", str(len(mssa.grouped_components_)))
+    print("mssa.grouped_components_ = ", str(mssa.grouped_components_))
+    
     for comp in range(len(mssa.grouped_components_[0][0])):  
         fig, ax = plt.subplots(figsize=(18, 7))
-        current_component = mssa.grouped_components_.iloc[0, :, comp]
+        current_component = mssa.grouped_components_[0, :, comp]
         cumulative_recon = cumulative_recon + current_component
         ax.plot(s_data[:, 10], lw=3, alpha=0.2, c='k', label='original')
         ax.plot(cumulative_recon, lw1=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
