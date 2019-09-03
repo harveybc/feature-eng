@@ -118,14 +118,28 @@ if __name__ == '__main__':
         # Save the correlation matrix
         fig.savefig('correlation_matrix_'+str(i)+'.png', dpi=200)
         # Set the groups based on the correlation matrix
+        #ts0_groups = [
+        #    [0]
+        #    [1,2],
+        #    [3,6],
+        #    [4,5],
+        #    [7],
+        #    [8],
+        #    [9,10],
+        #    [11,12]
+        #]
         ts0_groups = [
-            [1,2],
-            [3,6],
+            [0],
+            [1],
+            [2],
+            [3],
             [4,5],
+            [6],
             [7],
             [8],
             [9,10],
-            [11,12]
+            [11],
+            [12]
         ]
         mssa.set_ts_component_groups(i, ts0_groups)
         ts0_grouped = mssa.grouped_components_[i]
