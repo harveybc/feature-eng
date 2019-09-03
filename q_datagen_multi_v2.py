@@ -147,11 +147,9 @@ if __name__ == '__main__':
     
     for comp in range(len(mssa.grouped_components_[0][0])):  
         fig, ax = plt.subplots(figsize=(18, 7))
-        # TODO: ERROR no se puede hacer slice porque no es matrix sino dict que contiene array 2D
         current_component = mssa.grouped_components_[0][:, comp]
-        
-        
-        cumulative_recon = cumulative_recon + current_component
+        # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO, reemplazar por current_component
+        cumulative_recon = cumulative_recon + current_component[0:(2*p_window_size)]
         ax.plot(s_data[:, 10], lw=3, alpha=0.2, c='k', label='original')
         ax.plot(cumulative_recon, lw1=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
         ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
