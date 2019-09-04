@@ -133,7 +133,7 @@ if __name__ == '__main__':
         if i == 0:
             grouped_output = copy.deepcopy(mssa.grouped_components_)
         else:
-            np.concatenate((grouped_output, mssa.grouped_components_[j]), axis = 1)
+            np.concatenate((grouped_output, mssa.grouped_components_), axis = 1)
 
         # show progress
         progress = i*100/segments
