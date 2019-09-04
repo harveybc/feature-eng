@@ -95,7 +95,8 @@ if __name__ == '__main__':
             mssa.fit(s_data_w)
             print("Selected Rank = ",str(mssa.rank_))
             rank = int(mssa.rank_)
-            grouped_output = np.empty([num_columns, num_ticks,rank])
+            ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
+            grouped_output = np.empty([num_columns, (2*p_window_size),len(ts0_groups)])
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
@@ -109,17 +110,7 @@ if __name__ == '__main__':
         print("Grouping correlated components (manually set list)")
         for j in range(0, num_columns):
             # draw correlation matrix for the first segment
-            if i == 0:
-                #total_comps = mssa.components_[j, :, :]
-                #total_wcorr = mssa.w_correlation(total_comps)
-                #total_wcorr_abs = np.abs(total_wcorr)
-                #fig, ax = plt.subplots(figsize=(12,9))
-                #sns.heatmap(np.abs(total_wcorr_abs), cmap='coolwarm', ax=ax)
-                #ax.set_title('Component w-correlations')
-                # Save the correlation matrix
-                #fig.savefig('correlation_matrix_'+str(j)+'.png', dpi=200)
-                # Set the groups based on the correlation matrix 
-                ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
+            
             mssa.set_ts_component_groups(j, ts0_groups)
             ts0_grouped = mssa.grouped_components_[j]
             # concatenate otput array with the new components
