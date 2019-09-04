@@ -133,6 +133,9 @@ if __name__ == '__main__':
         if i == 0:
             grouped_output = copy.deepcopy(mssa.grouped_components_)
         else:
+            print("grouped_output shape: ",grouped_output.shape)
+            print("mssa.grouped_components_ shape: ",mssa.grouped_components_.shape)
+            
             np.concatenate((grouped_output, mssa.grouped_components_), axis = 1)
 
         # show progress
