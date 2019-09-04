@@ -75,7 +75,7 @@ if __name__ == '__main__':
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
     output  = np.array([])
-    grouped_output = np.array([])
+    
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
@@ -95,6 +95,7 @@ if __name__ == '__main__':
             mssa.fit(s_data_w)
             print("Selected Rank = ",str(mssa.rank_))
             rank = int(mssa.rank_)
+            grouped_output = np.empty([num_columns, num_ticks,rank])
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
