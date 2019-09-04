@@ -102,7 +102,7 @@ if __name__ == '__main__':
             output = copy.deepcopy(mssa.components_)
         else:
             np.concatenate((output, mssa.components_), axis = 1)
-            
+        grouped_output = np.zeros(num_columns)    
         #TODO: concatenate grouped output 
         print("Grouping correlated components (manually set list)")
         for j in range(0, num_columns):
