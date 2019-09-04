@@ -120,7 +120,11 @@ if __name__ == '__main__':
                 ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
             mssa.set_ts_component_groups(j, ts0_groups)
             ts0_grouped = mssa.grouped_components_[j]
-
+            # concatenate otput array with the new components
+            if i == 0:
+                grouped_output[j] = copy.deepcopy(mssa.grouped_components_[j])
+            else:
+                np.concatenate((grouped_output[j], mssa.grouped_components_[j]), axis = 0)
             # save the correlation matrix only for the first segment
             #if i == 0:
                 # save grouped component correlation matrix
@@ -129,14 +133,7 @@ if __name__ == '__main__':
                 #sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
                 #ax.set_title('grouped component w-correlations')
                 #fig.savefig('correlation_matrix_new_'+str(j)+'.png', dpi=200)
-        # concatenate otput array with the new components
-        if i == 0:
-            grouped_output = copy.deepcopy(mssa.grouped_components_)
-        else:
-            print("grouped_output shape: ",grouped_output.shape)
-            print("mssa.grouped_components_[0] shape: ",mssa.grouped_components_[0].shape)
-            
-            np.concatenate((grouped_output, mssa.grouped_components_), axis = 1)
+        
 
         # show progress
         progress = i*100/segments
