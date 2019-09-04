@@ -75,6 +75,7 @@ if __name__ == '__main__':
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
     output  = np.array([])
+    grouped_output = np.array([])
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
@@ -102,7 +103,7 @@ if __name__ == '__main__':
             output = copy.deepcopy(mssa.components_)
         else:
             np.concatenate((output, mssa.components_), axis = 1)
-        grouped_output = np.zeros(num_columns)    
+            
         #TODO: concatenate grouped output 
         print("Grouping correlated components (manually set list)")
         for j in range(0, num_columns):
