@@ -117,7 +117,7 @@ if __name__ == '__main__':
             ts0_grouped = mssa.grouped_components_[j]
             # concatenate otput array with the new components
             if i == 0:
-                grouped_output[j] = copy.deepcopy(mssa.grouped_components_[j])
+                grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
             else:
                 np.concatenate((grouped_output[j], mssa.grouped_components_[j]), axis = 0)
             # save the correlation matrix only for the first segment
