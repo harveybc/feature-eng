@@ -91,13 +91,11 @@ if __name__ == '__main__':
         # slice the data in 2*p_window_size ticks segments
         s_data_w = s_data[first : last,:]       
         # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
-        if i==0: 
+        if i == 0: 
             mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
             print("Selected Rank = ",str(mssa.rank_))
             rank = int(mssa.rank_)
-            
-            
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
@@ -119,7 +117,7 @@ if __name__ == '__main__':
             if i == 0:
                 grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
             else:
-                np.concatenate((grouped_output[j], mssa.grouped_components_[j]), axis = 0)
+                np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
             # save the correlation matrix only for the first segment
             #if i == 0:
                 # save grouped component correlation matrix
