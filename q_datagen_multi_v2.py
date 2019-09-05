@@ -81,7 +81,7 @@ if __name__ == '__main__':
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     segments = (num_ticks//(2*p_window_size))
     #TODO CAMBIAR A SEGMENTS EN LUGAR DE 2
-    for i in range(0, 2):
+    for i in range(0, segments):
         # verify if i+(2*p_window_size) is the last observation
         first = i * (2 * p_window_size)
         if (i != segments-1):
@@ -140,7 +140,7 @@ if __name__ == '__main__':
     # genera gráficas para cada componente con valores agrupados
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
     # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
-    cumulative_recon = np.zeros_like(s_data[0:2*2*p_window_size, 0])
+    cumulative_recon = np.zeros_like(s_data[:, 0])
     
     # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
     #print("len(mssa.grouped_components_) = ", str(len(mssa.grouped_components_)))
@@ -148,11 +148,11 @@ if __name__ == '__main__':
     for comp in range(len(grouped_output[0][0])):  
         fig, ax = plt.subplots(figsize=(18, 7))
         current_component = grouped_output[0][:, comp]
-        print("len(grouped_output) = ", len(grouped_output))
-        print("grouped_output[0].shape = ", grouped_output[0].shape)
+        #print("len(grouped_output) = ", len(grouped_output))
+        #print("grouped_output[0].shape = ", grouped_output[0].shape)
         
         cumulative_recon = cumulative_recon + current_component
-        ax.plot(s_data[0:2*2*p_window_size, 0], lw=3, alpha=0.2, c='k', label='original')
+        ax.plot(s_data[¨:, 0], lw=3, alpha=0.2, c='k', label='original')
         ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
         ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
         ax.legend()
