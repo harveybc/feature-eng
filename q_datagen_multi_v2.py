@@ -152,7 +152,7 @@ if __name__ == '__main__':
         #print("grouped_output[0].shape = ", grouped_output[0].shape)
         
         cumulative_recon = cumulative_recon + current_component
-        ax.plot(s_data[¨:, 0], lw=3, alpha=0.2, c='k', label='original')
+        ax.plot(s_data[:, 0], lw=3, alpha=0.2, c='k', label='original')
         ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
         ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
         ax.legend()
