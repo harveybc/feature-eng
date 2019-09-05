@@ -75,12 +75,13 @@ if __name__ == '__main__':
     print("Saving pre-processing.StandardScaler() settings for the generated dataset")
     dump(pre, s_out_f+'.standardscaler')  
     output  = np.array([])
-    
+    grouped_output = []
     # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     segments = (num_ticks//(2*p_window_size))
-    for i in range(0, segments):
+    #TODO CAMBIAR A SEGMENTS EN LUGAR DE 2
+    for i in range(0, 2):
         # verify if i+(2*p_window_size) is the last observation
         first = i * (2 * p_window_size)
         if (i != segments-1):
@@ -95,8 +96,8 @@ if __name__ == '__main__':
             mssa.fit(s_data_w)
             print("Selected Rank = ",str(mssa.rank_))
             rank = int(mssa.rank_)
-            ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
-            grouped_output = np.empty([num_columns, (2*p_window_size),len(ts0_groups)])
+            
+            
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
@@ -108,9 +109,10 @@ if __name__ == '__main__':
             
         #TODO: concatenate grouped output 
         print("Grouping correlated components (manually set list)")
+        # use the same groups for all the features
+        ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
         for j in range(0, num_columns):
             # draw correlation matrix for the first segment
-            
             mssa.set_ts_component_groups(j, ts0_groups)
             ts0_grouped = mssa.grouped_components_[j]
             # concatenate otput array with the new components
@@ -138,7 +140,7 @@ if __name__ == '__main__':
     # genera gráficas para cada componente con valores agrupados
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
     # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
-    cumulative_recon = np.zeros_like(s_data[:, 0])
+    cumulative_recon = np.zeros_like(s_data[0:2*2*p_window_size, 0])
     
     # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
     #print("len(mssa.grouped_components_) = ", str(len(mssa.grouped_components_)))
@@ -146,9 +148,11 @@ if __name__ == '__main__':
     for comp in range(len(grouped_output[0][0])):  
         fig, ax = plt.subplots(figsize=(18, 7))
         current_component = grouped_output[0,:, comp]
+        print("len(grouped_output) = ", len(grouped_output))
+        print("grouped_output[0].shape = ", grouped_output[0].shape)
         
         cumulative_recon = cumulative_recon + current_component
-        ax.plot(s_data[:, 0], lw=3, alpha=0.2, c='k', label='original')
+        ax.plot(s_data[0:2*2*p_window_size, 0], lw=3, alpha=0.2, c='k', label='original')
         ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
         ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
         ax.legend()
