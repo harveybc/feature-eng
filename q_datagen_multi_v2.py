@@ -117,7 +117,9 @@ if __name__ == '__main__':
             if i == 0:
                 grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
             else:
+                print("PRE  grouped_output[",j,"].shape = ",grouped_output[j].shape)
                 np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
+                print("POST grouped_output[",j,"].shape = ",grouped_output[j].shape)
             # save the correlation matrix only for the first segment
             #if i == 0:
                 # save grouped component correlation matrix
