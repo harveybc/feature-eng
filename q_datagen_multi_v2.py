@@ -87,7 +87,7 @@ if __name__ == '__main__':
         if (i != segments-1):
             last = (i+1) * (2 * p_window_size)
         else:
-            last = num_ticks-1
+            last = num_ticks
         # slice the data in 2*p_window_size ticks segments
         s_data_w = s_data[first : last,:]       
         # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
