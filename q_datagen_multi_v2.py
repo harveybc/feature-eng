@@ -136,7 +136,7 @@ if __name__ == '__main__':
 
    # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
     print("Original components shape: ",output.shape)
-    print("Grouped components shape: ",grouped_output.shape)
+    print("Grouped components[0] shape: ",grouped_output[0].shape)
     # genera gráficas para cada componente con valores agrupados
     # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
     # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
