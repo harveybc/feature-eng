@@ -147,7 +147,7 @@ if __name__ == '__main__':
     #print("mssa.grouped_components_ = ", str(mssa.grouped_components_))
     for comp in range(len(grouped_output[0][0])):  
         fig, ax = plt.subplots(figsize=(18, 7))
-        current_component = grouped_output[0,:, comp]
+        current_component = grouped_output[0][:, comp]
         print("len(grouped_output) = ", len(grouped_output))
         print("grouped_output[0].shape = ", grouped_output[0].shape)
         
