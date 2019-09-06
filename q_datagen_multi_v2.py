@@ -158,13 +158,29 @@ if __name__ == '__main__':
         ax.legend()
         fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
     # TODO: Estandarizar output, guardar archivo de estandarización.
-    # genera tabla para estandarizar
-    # estandariza y guarda datos de estandarización
+    ns_output = []
+    # genera tabla para estandarizar, convierte de P,N,component a N,P*component
+    for n in range(0, num_ticks):
+        row = []
+        for p in range(0, num_columns):
+            for c in range (0, rank):
+                row.append(grouped_output[p][n][c])
+        ns_output.append(row)
+        
+    # estandariza y guarda datos de estandarización haciendo fit con 3/4 del dataset
+    pt = preprocessing.StandardScaler()
+    to_t = np.array(ns_output)
+    to_tn = to_t[0:(3*num_ticks)/4 , :]
+    pt.fit(to_tn) 
+    s_output = pt.transform(to_t) 
+    print("saving pre-processing.StandardScaler() settings for the generated dataset")
+    dump(pt, s_out_f + '.standardscaler')  
+    
     # genera output de observaciones estandarizadas en formato csv
+    
     # genera hlc+EMA(10-5,20) en formato csv para usar en qagent-test y en gym-forex separado de observaciones
     
-    # TODO ERROR GUARDANDO
-    np.save(c_out_f, grouped_output)
+    np.save(c_out_f, s_output)
         
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
@@ -173,7 +189,13 @@ if __name__ == '__main__':
        
     # TODO: Save the datasets and the rank matrix
     
-    print("Finished generating extended dataset.")
+    print("Finished generating extended dataset in numpy format.")
+    with open(t_out_f , 'w', newline='') as myfile:
+        wr = csv.writer(myfile)
+        #wr.writerow(headers_b)
+        wr.writerows(s_output)
+    print("Finished generating extended dataset in csv format.")
+    
     print("Done.")
      
     
