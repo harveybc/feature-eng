@@ -160,6 +160,8 @@ if __name__ == '__main__':
     # TODO: Estandarizar output, guardar archivo de estandarización.
     ns_output = []
     # genera tabla para estandarizar, convierte de P,N,component a N,P*component
+    print("len(grouped_output) = ", len(grouped_output))
+    print("grouped_output[0].shape = ", grouped_output[0].shape)
     for n in range(0, num_ticks):
         row = []
         for p in range(0, num_columns):
