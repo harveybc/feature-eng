@@ -165,7 +165,7 @@ if __name__ == '__main__':
     for n in range(0, num_ticks):
         row = []
         for p in range(0, num_columns):
-            for c in range (0, rank):
+            for c in range (0, len(ts0_groups)):
                 row.append(grouped_output[p][n][c])
         ns_output.append(row)
         
