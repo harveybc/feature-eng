@@ -168,7 +168,7 @@ if __name__ == '__main__':
             for c in range (0, len(ts0_groups)):
                 row.append(grouped_output[p][n][c])
         ns_output.append(row)
-        
+    print("Standarizing dataset.")
     # estandariza y guarda datos de estandarización haciendo fit con 3/4 del dataset
     pt = preprocessing.StandardScaler()
     to_t = np.array(ns_output)
