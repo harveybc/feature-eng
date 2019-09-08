@@ -172,7 +172,7 @@ if __name__ == '__main__':
     # estandariza y guarda datos de estandarización haciendo fit con 3/4 del dataset
     pt = preprocessing.StandardScaler()
     to_t = np.array(ns_output)
-    to_tn = to_t[0:(3*num_ticks)/4 , :]
+    to_tn = to_t[0:(3*num_ticks)//4 , :]
     pt.fit(to_tn) 
     s_output = pt.transform(to_t) 
     print("saving pre-processing.StandardScaler() settings for the generated dataset")
