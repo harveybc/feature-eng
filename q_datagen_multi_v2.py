@@ -179,25 +179,20 @@ if __name__ == '__main__':
     dump(pt, s_out_f + '.standardscaler')  
     
     # genera output de observaciones estandarizadas en formato csv
-    
-    # genera hlc+EMA(10-5,20) en formato csv para usar en qagent-test y en gym-forex separado de observaciones
-    
     np.save(c_out_f, s_output)
+    # TODO: necesario? o usar el mismo input? o hacer nuevo script q_datagen_signal
+    # genera hlc+EMA(10-5,20) en formato csv para usar en qagent-test y en gym-forex separado de observaciones 
+    #np.save(c_out_f, s_output)
         
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
-    
-
-       
-    # TODO: Save the datasets and the rank matrix
-    
+    # Save the datasets and the rank matrix
     print("Finished generating extended dataset in numpy format.")
     with open(t_out_f , 'w', newline='') as myfile:
         wr = csv.writer(myfile)
         #wr.writerow(headers_b)
         wr.writerows(s_output)
     print("Finished generating extended dataset in csv format.")
-    
     print("Done.")
      
     
