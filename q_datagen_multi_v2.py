@@ -183,7 +183,7 @@ if __name__ == '__main__':
     # TODO: necesario? o usar el mismo input? o hacer nuevo script q_datagen_signal
     # genera hlc+EMA(10-5,20) en formato csv para usar en qagent-test y en gym-forex separado de observaciones 
     #np.save(c_out_f, s_output)
-        
+    
     # TODO: Optional:  Guardar prediction de próximos n_pred ticks por component guardados como nuevas columnas de output_buffer
     
     # Save the datasets and the rank matrix
