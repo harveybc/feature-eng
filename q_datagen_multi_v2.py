@@ -40,7 +40,7 @@ if __name__ == '__main__':
     
     # command line arguments
     # argument 1 = input dataset in csv format, contains num_obs observations(rows) of  the input features (columns)
-    csv_f =  sys.argv[1]
+    csv_f =  sys.argv[1] 
     # argument 2 = output component dataset in csv format, contains (num_obs-window_size) rows with the first n_components per feature(columns), standarized values
     c_out_f = sys.argv[2]
     # argument 3 = output trimmed dataset in csv format, contains the hlc columns of the original input dataset without the first window of observations for 1-to 1 relation with output(for use in agent)
@@ -59,9 +59,18 @@ if __name__ == '__main__':
     features_per_symbol = 29
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
-    my_data = genfromtxt(csv_f, delimiter=',')
+    my_data_t = genfromtxt(csv_f, delimiter=',')
+    
     # get the number of observations
-    num_ticks = len(my_data)
+    num_ticks = len(my_data_t)
+    
+    # get the number of columns including timesignals (Day of Month, Day of Week, Hour)
+    num_columns_t =  len(my_data_t[0])
+    
+    # no lee columnas de timesignals
+    my_data = my_data_t[ : , 0:(num_columns_t-num_timesignals) ]
+    
+    # lee número de columnas sin timesignals (Day of Month, Day of Week, Hour)
     num_columns =  len(my_data[0])
     
     # standarize the data and export normalization data using StandardScaler and joblib.dump
@@ -76,11 +85,11 @@ if __name__ == '__main__':
     dump(pre, s_out_f+'.standardscaler')  
     output  = np.array([])
     grouped_output = []
-    # TODO: Realizar un MSSA por tick con sub_data = data[i:i+2*window_size,:] 
+  
     # perform MSSA on standarized data
     print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
     segments = (num_ticks//(2*p_window_size))
-    #TODO CAMBIAR A SEGMENTS EN LUGAR DE 2
+    
     for i in range(0, segments):
         # verify if i+(2*p_window_size) is the last observation
         first = i * (2 * p_window_size)
@@ -168,8 +177,8 @@ if __name__ == '__main__':
             for c in range (0, len(ts0_groups)):
                 row.append(grouped_output[p][n][c])
         ns_output.append(row)
-    print("Standarizing dataset.")
-    # estandariza y guarda datos de estandarización haciendo fit con 3/4 del dataset
+    print("Standarizing output dataset.")
+    # estandariza output y guarda datos de estandarización haciendo fit con 3/4 del dataset
     pt = preprocessing.StandardScaler()
     to_t = np.array(ns_output)
     to_tn = to_t[0:(3*num_ticks)//4 , :]
