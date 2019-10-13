@@ -57,6 +57,9 @@ if __name__ == '__main__':
     num_symbols = 5
     # number of features per symbol
     features_per_symbol = 29
+    # number of time signals
+    num_timesignals = 3
+    
     
     # load csv file, The file must contain 16 cols: the 0 = HighBid, 1 = Low, 2 = Close, 3 = NextOpen, 4 = v, 5 = MoY, 6 = DoM, 7 = DoW, 8 = HoD, 9 = MoH, ..<6 indicators>
     my_data_t = genfromtxt(csv_f, delimiter=',')
