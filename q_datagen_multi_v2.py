@@ -57,7 +57,7 @@ if __name__ == '__main__':
     num_symbols = 5
     # number of features per symbol
     features_per_symbol = 29
-    # number of time signals
+    # number of time signals (DayOfMonth, DayOfWeek, Hour)
     num_timesignals = 3
     
     
