@@ -61,7 +61,7 @@ pytz==2018.5
 pyxdg==0.25
 PyYAML==3.13
 reportlab==3.4.0
-requests==2.19.1
+requests==2.20.0
 requests-unixsocket==0.1.5
 scikit-learn==0.20.2
 scipy==1.2.0
