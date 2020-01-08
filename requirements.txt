@@ -58,7 +58,7 @@ python-apt==1.6.0
 python-dateutil==2.7.5
 python-debian==0.1.32
 pytz==2018.5
-pyxdg==0.25
+pyxdg==0.26
 PyYAML==3.13
 reportlab==3.4.0
 requests==2.19.1
