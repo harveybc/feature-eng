@@ -1,6 +1,6 @@
 # -*- coding: utf-8 
-## @package q_datagen_multi
-# q_datagen_multi -> <MSSA of Windowed Timeseries + FeatureExtractor_symbol> -> q_pretrainer_neat -> <Pre-Trained ANN model> 
+## @package q_datagen_multi_test
+# q_datagen_multi_test -> <4 testing signals per symbol: ema10-5,20 delta, delta10, delta20> -> q_pretrainer_neat -> <Pre-Trained ANN model> 
 # -> q_agent(FeatureExtractor+ANN_model) -> <Performance> -> q_mlo -> <Optimal FeatureExtractor> <=> AgentAction= [<dir>,<symbol>,<TP>,<SL>]
 #
 #  Version "multi" controls the fx-environment, with observations containing: hlc, <MSSA of all features>.
@@ -32,30 +32,7 @@ import struct
 import copy
 print(struct.calcsize("P") * 8)
 
-# getReward function: calculate the reward for the selected state/action in the given time window(matrix of observations) 
-# @param: stateaction = state action code (0..3) open order, (4..7) close existing
-# @param: window = High, Low, Close, nextOpen timeseries
-def get_reward(action, window, min_TP, max_TP, min_SL, max_SL, min_dInv, max_dInv):
-    # if the draw down of the highest between buy and sell profits, is more than max_SL, 
-    # search for the best order before the dd
-    last_dd = max_SL
-    i_dd = max_dInv
-    max_r = 1.0
-    min_r = -1.0
-    reward_buy  = 0.0
-    reward_sell = 0.0
-    increment = 0.1
-    direction = 0
-    
-    # Continuous indicators =    0:EMA(10) delayed 5 - EMA(20),
-    if action == 0:
-        # EMA(10) delayed 5 - EMA(20) : positive = buy
-        reward = (window[5][0] - window[0][1])/0.006
-        #if reward > 1.5:
-        #    reward = 1.5
-        #if reward <-1.5:
-        #    reward = -1.5
-        return {'reward':reward, 'profit':0, 'dd':0 ,'min':0 ,'max':0, 'direction':0}
+
 
 # main function
 # parameters: state/action code: 0..3 for open, 4..7 for close 
@@ -74,11 +51,6 @@ if __name__ == '__main__':
     p_window_size = int(sys.argv[5])
     # argument 6 = n_components the number of components exported in the output component dataset
     p_n_components = int(sys.argv[6])
-    # argument 7 = generate training signal (default:false) 
-    p_training_signal = int(sys.argv[7])
-    # argument 8 = calculate correlation between sum conponent 0..n  and  training signal (default: false)
-    p_correlations = int(sys.argv[8])
-    
     
     # inicializations
     # Number of training signals
@@ -130,13 +102,11 @@ if __name__ == '__main__':
         # slice the data in 2*p_window_size ticks segments
         s_data_w = s_data[first : last,:]       
         # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
-        
         if i == 0: 
             mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
             print("Selected Rank = ",str(mssa.rank_))
-            #rank = int(mssa.rank_)
-            rank = int(p_n_components)
+            rank = int(mssa.rank_)
         else:
             mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
             mssa.fit(s_data_w)
