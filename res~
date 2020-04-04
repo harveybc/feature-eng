@@ -1,3 +1,0 @@
-git pull
-python3 q_datagen.py 2 test.CSV out.CSV
-
