@@ -2,10 +2,10 @@
 
 A simple data pre-processor that performs sliding window on a timeseries dataset. Usable both from command line and from class methods.
 
-[![Build Status](https://travis-ci.org/harveybc/preprocessor.svg?branch=master)](https://travis-ci.org/harveybc/preprocessor)
-[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-preprocessor.readthedocs.io/en/latest/)
-[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/preprocessor?branch=master)](https://bettercodehub.com/)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/preprocessor/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/harveybc/feature_engineering.svg?branch=master)](https://travis-ci.org/harveybc/feature_engineering)
+[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_engineering.readthedocs.io/en/latest/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_engineering?branch=master)](https://bettercodehub.com/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature_engineering/blob/master/LICENSE)
 
 ## Description
 
@@ -14,17 +14,17 @@ of the input dataset.
 
 Usable both from command line and from class methods.
 
-The sliding_window is implemented in the SlidingWindow class, it has methods for loading a dataset, performing sliding window via the windowize ()  method for producing an output dataset, please see [test_sliding_window](https://github.com/harveybc/preprocessor/blob/master/tests/sliding_window/test_sliding_window.py). 
+The sliding_window is implemented in the SlidingWindow class, it has methods for loading a dataset, performing sliding window via the windowize ()  method for producing an output dataset, please see [test_sliding_window](https://github.com/harveybc/feature_engineering/blob/master/tests/sliding_window/test_sliding_window.py). 
 
 ## Installation
 
-The module is installed with the preprocessor package, the instructions are described in the following section.
+The module is installed with the feature_engineering package, the instructions are described in the following section.
 
 ### Steps
 1. Clone the GithHub repo:   
-> git clone https://github.com/harveybc/preprocessor
+> git clone https://github.com/harveybc/feature_engineering
 2. Change to the repo folder:
-> cd preprocessor
+> cd feature_engineering
 3. Install requirements.
 > pip install -r requirements.txt
 4. Install python package (also installs the console command data-trimmer)
@@ -50,7 +50,7 @@ The following examples show both the class method and command line uses.
 
 ### Usage via Class Methods
 ```python
-from preprocessor.sliding_window.sliding_window import SlidingWindow
+from feature_engineering.sliding_window.sliding_window import SlidingWindow
 # configure parameters (same vaiable names as command-line parameters)
 class Conf:
     def __init__(self):

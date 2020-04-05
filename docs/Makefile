@@ -8,7 +8,7 @@ PAPER         =
 BUILDDIR      = ./
 AUTODOCDIR    = api
 AUTODOCBUILD  = sphinx-apidoc
-PROJECT       = preprocessor
+PROJECT       = feature_engineering
 MODULEDIR     = ../src/data_trimmer
 
 # User-friendly check for sphinx-build

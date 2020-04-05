@@ -7,7 +7,7 @@ import sys
 import os
 from filecmp import cmp
 
-from preprocessor.data_trimmer.data_trimmer import DataTrimmer
+from feature_engineering.data_trimmer.data_trimmer import DataTrimmer
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"

@@ -1,12 +1,12 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
-source = preprocessor
+source = feature_engineering
 # omit = bad_file.py
 
 [paths]
 source =
-    preprocessor/
+    feature_engineering/
     */site-packages/
 
 [report]

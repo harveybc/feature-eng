@@ -13,8 +13,8 @@ from pkg_resources import VersionConflict, require
 from setuptools import setup
 from setuptools import find_packages
 
-# sys.path.append('preprocessor\\')
-from preprocessor.data_trimmer.data_trimmer import DataTrimmer
+# sys.path.append('feature_engineering\\')
+from feature_engineering.data_trimmer.data_trimmer import DataTrimmer
 
 try:
     require("setuptools>=38.3")

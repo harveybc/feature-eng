@@ -15,7 +15,7 @@ import argparse
 import sys
 import logging
 import numpy as np
-from preprocessor.preprocessor import Preprocessor
+from feature_engineering.feature_engineering import Preprocessor
 from itertools import zip_longest 
 
 # from data_trimmer import __version__
@@ -28,7 +28,7 @@ _logger = logging.getLogger(__name__)
 
 
 class DataTrimmer(Preprocessor):
-    """ The Data Trimmer preprocessor class """
+    """ The Data Trimmer feature_engineering class """
 
     def __init__(self, conf):
         """ Constructor using same parameters as base class """
@@ -82,7 +82,7 @@ class DataTrimmer(Preprocessor):
             self.auto_trim = True
 
     def core(self):
-        """ Core preprocessor task after starting the instance with the main method.
+        """ Core feature_engineering task after starting the instance with the main method.
             Decide from the arguments, what trimming method to call.
 
         Args:
@@ -188,7 +188,7 @@ class DataTrimmer(Preprocessor):
         
         
     def store(self):
-        """ Save preprocessed data and the configuration of the preprocessor. """
+        """ Save preprocessed data and the configuration of the feature_engineering. """
         print("self.output_ds.shape = ", self.output_ds.shape)
         config_rows = list(zip_longest(self.r_rows, self.r_cols, fillvalue=-1))
         _logger.debug("output_file = "+ self.output_file)

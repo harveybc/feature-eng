@@ -7,7 +7,7 @@ import logging
 import numpy as np
 import csv
 
-# from preprocessor import __version__
+# from feature_engineering import __version__
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -56,7 +56,7 @@ class PreprocessorBase:
         )
 
     def load_ds(self):
-        """ Save preprocessed data and the configuration of the preprocessor. """
+        """ Save preprocessed data and the configuration of the feature_engineering. """
         # Load input dataset
         self.input_ds = np.genfromtxt(self.input_file, delimiter=",")
         # load input config dataset if the parameter is available

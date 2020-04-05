@@ -39,7 +39,7 @@ except ImportError:
     from sphinx import apidoc
 
 output_dir = os.path.join(__location__, "api")
-module_dir = os.path.join(__location__, "../preprocessor")
+module_dir = os.path.join(__location__, "../feature_engineering")
 try:
     shutil.rmtree(output_dir)
 except FileNotFoundError:
@@ -94,7 +94,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"preprocessor"
+project = u"feature_engineering"
 copyright = u"2020, Harvey Bastidas"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -246,7 +246,7 @@ latex_documents = [
     (
         "index",
         "user_guide.tex",
-        u"preprocessor Documentation",
+        u"feature_engineering Documentation",
         u"Harvey Bastidas",
         "manual",
     )

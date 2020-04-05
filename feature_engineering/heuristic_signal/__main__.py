@@ -1,5 +1,5 @@
 import sys
-import preprocessor.standardizer.standardizer as dt
+import feature_engineering.data_trimmer.data_trimmer as dt
 
 
 def main(args=None):

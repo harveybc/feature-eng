@@ -6,9 +6,9 @@ import sys
 import logging
 import numpy as np
 import csv
-from preprocessor.preprocessor_base import PreprocessorBase
+from feature_engineering.feature_engineering_base import PreprocessorBase
 
-# from preprocessor import __version__
+# from feature_engineering import __version__
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -30,7 +30,7 @@ class Preprocessor(PreprocessorBase):
         self.parse_args(args)
         # Start logging: TODO: Use args.loglevel en lugar de logging.DEBUG
         self.setup_logging(logging.DEBUG)
-        _logger.info("Starting preprocessor...")
+        _logger.info("Starting feature_engineering...")
         # Load input dataset
         if self.input_ds == None:
             self.load_ds()
@@ -43,7 +43,7 @@ class Preprocessor(PreprocessorBase):
         _logger.info("Script end.")
 
     def parse_cmd(self, parser):
-        parser.add_argument("--version", action="version", version="preprocessor")
+        parser.add_argument("--version", action="version", version="feature_engineering")
         parser.add_argument("--input_file", help="Input CSV filename ")
         parser.add_argument("--output_file", help="Output CSV filename")
         parser.add_argument("--input_config_file", help="Input configuration  filename")
@@ -53,12 +53,12 @@ class Preprocessor(PreprocessorBase):
         return parser
     
     def store(self):
-        """ Save preprocessed data and the configuration of the preprocessor. """
+        """ Save preprocessed data and the configuration of the feature_engineering. """
         pass
 
     def core(self):
-        """ Core preprocessor task after starting the instance with the main method.
-            To be overriden by child classes depending on their preprocessor task.
+        """ Core feature_engineering task after starting the instance with the main method.
+            To be overriden by child classes depending on their feature_engineering task.
         """
         pass
 
