@@ -1,15 +1,15 @@
-# Preprocessor
+# Feature Engineering
 
-A simple data pre-processor. Usable both from command line and from class methods. __Work In Progress__.
+Transform raw data to generate new data that better represent features so they improve the performance of a predictive model. Usable both from command line and from class methods. __Work In Progress, NOT USABLE YET__.
 
-[![Build Status](https://travis-ci.org/harveybc/feature_engineering.svg?branch=master)](https://travis-ci.org/harveybc/feature_engineering)
-[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_engineering.readthedocs.io/en/latest/)
-[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_engineering?branch=master)](https://bettercodehub.com/)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature_engineering/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/harveybc/feature-engineering.svg?branch=master)](https://travis-ci.org/harveybc/feature-engineering)
+[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature-engineering.readthedocs.io/en/latest/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature-engineering?branch=master)](https://bettercodehub.com/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature-engineering/blob/master/LICENSE)
 
 ## Description
 
-Implements modular components for dataset preprocessing: a data-trimmer, a standardizer, multi-feature Singular Spectrum Analysis (SSA) decomposer, a feature selector, and feature extractors such as:  Deep Convolutional Networks (DCN), Long-Short Term Memories(LSTM) and Autoencoder-based feature extractors.
+Implements modular components for dataset preprocessing: a data-trimmer, a standardizer, a feature selector and a sliding window data generator.
 
 ## Installation
 
@@ -17,9 +17,9 @@ The installation is made by clonning the github repo and manually installing it,
 
 ### Steps
 1. Clone the GithHub repo:   
-> git clone https://github.com/harveybc/feature_engineering
+> git clone https://github.com/harveybc/feature-engineering
 2. Change to the repo folder:
-> cd feature_engineering
+> cd feature-engineering
 3. Install requirements.
 > pip install -r requirements.txt
 4. Install python package (also installs the console command data-trimmer)
@@ -31,9 +31,9 @@ The installation is made by clonning the github repo and manually installing it,
 
 ## Modules
 
-All the CLI commands and the class modules are installed with the feature_engineering package, the following sections describe each module briefly and link to each module's basic documentation. 
+All the CLI commands and the class modules are installed with the feature-engineering package, the following sections describe each module briefly and link to each module's basic documentation. 
 
-Detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 6 of the installation process, it contains documentation of the classes and methods of all modules in the feature_engineering package. 
+Detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 6 of the installation process, it contains documentation of the classes and methods of all modules in the feature-engineering package. 
 
 ## Data-Trimmer
 
@@ -43,15 +43,29 @@ See [Data-Trimmer Readme](../master/README_data_trimmer.md) for detailed descrip
 
 ## Standarizer
 
-Work In Progress. 
+Standardizes a dataset and exports the standarization configuration for use on other datasets. Usable both from command line and from class methods.
+
+See [Standardizer Readme](../master/README_standardizer.md) for detailed description and usage instructions.
+
+## Sliding Window
+
+Performs the sliding window technique. Usable both from command line and from class methods.
+
+See [Sliding Window Readme](../master/README_sliding_window.md) for detailed description and usage instructions.
+
+## Feature Selector
+
+Performs the feature selection based on a classification or regression training signal and a threeshold. Usable both from command line and from class methods.
+
+See [Feature Selector Readme](../master/README_feature_selector.md) for detailed description and usage instructions.
 
 ## Examples of usage
 
-The following examples show both the class method and command line uses for the data-trimmer feature_engineering module, please see the documentation for examples of other modules.
+The following examples show both the class method and command line uses for the data-trimmer feature-engineering module, please see the documentation for examples of other modules.
 
 ### Example: Usage via Class Methods (DataTrimmer)
 ```python
-from feature_engineering.data_trimmer.data_trimmer import DataTrimmer
+from feature-engineering.data_trimmer.data_trimmer import DataTrimmer
 # configure parameters (same vaiable names as command-line parameters)
 class Conf:
     def __init__(self):

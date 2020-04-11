@@ -2,36 +2,22 @@
 
 A simple data pre-processor that trims the constant valued columns.  Also removes rows from the start and the end of a dataset with features with consecutive zeroes. Usable both from command line and from class methods.
 
-[![Build Status](https://travis-ci.org/harveybc/feature_engineering.svg?branch=master)](https://travis-ci.org/harveybc/feature_engineering)
-[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_engineering.readthedocs.io/en/latest/)
-[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_engineering?branch=master)](https://bettercodehub.com/)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature_engineering/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/harveybc/preprocessor.svg?branch=master)](https://travis-ci.org/harveybc/preprocessor)
+[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-preprocessor.readthedocs.io/en/latest/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/preprocessor?branch=master)](https://bettercodehub.com/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/preprocessor/blob/master/LICENSE)
 
 ## Description
 
 Trims the constant valued columns. Also removes rows from the start and the end of a dataset with features with consecutive zeroes. 
 
-The data-trimmer is implemented in the DataTrimmer class, it has methods for loading a dataset trimming it an producing an  output, please see [test_data_trimmer](https://github.com/harveybc/feature_engineering/blob/master/tests/data_trimmer/test_data_trimmer.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
+The data-trimmer is implemented in the DataTrimmer class, it has methods for loading a dataset trimming it an producing an  output, please see [test_data_trimmer](https://github.com/harveybc/preprocessor/blob/master/tests/data_trimmer/test_data_trimmer.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
 
-It also saves a configuration file, that is a CSV files with removed files and columns for applying similar  trimming to another dataset. Usable both from command line and from class methods (see [tests folder](https://github.com/harveybc/feature_engineering/tree/master/tests)).
+It also saves a configuration file, that is a CSV files with removed files and columns for applying similar  trimming to another dataset. Usable both from command line and from class methods (see [tests folder](https://github.com/harveybc/preprocessor/tree/master/tests)).
 
 ## Installation
 
-The module is installed with the feature_engineering package, the instructions are described in the following section.
-
-### Steps
-1. Clone the GithHub repo:   
-> git clone https://github.com/harveybc/feature_engineering
-2. Change to the repo folder:
-> cd feature_engineering
-3. Install requirements.
-> pip install -r requirements.txt
-4. Install python package (also installs the console command data-trimmer)
-> python setup.py install
-5. (Optional) Perform tests
-> python setup.py install
-6. (Optional) Generate Sphinx Documentation
-> python setup.py docs
+The module is installed with the preprocessor package, the instructions are described in the [preprocessor README](../master/README.md).
 
 ### Command-Line Execution
 
@@ -54,7 +40,7 @@ The following examples show both the class method and command line uses.
 
 ### Usage via Class Methods
 ```python
-from feature_engineering.data_trimmer.data_trimmer import DataTrimmer
+from preprocessor.data_trimmer.data_trimmer import DataTrimmer
 # configure parameters (same vaiable names as command-line parameters)
 class Conf:
     def __init__(self):
