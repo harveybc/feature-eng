@@ -1,6 +1,6 @@
 # Feature Engineering
 
-Transform raw data to generate new data that better represent features so they improve the performance of a predictive model. Usable both from command line and from class methods. __Work In Progress, NOT USABLE YET__.
+Transform raw data to generate new data that better represent features so they improve the performance of a predictive model. __Work In Progress, NOT USABLE YET__.
 
 [![Build Status](https://travis-ci.org/harveybc/feature-engineering.svg?branch=master)](https://travis-ci.org/harveybc/feature-engineering)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature-engineering.readthedocs.io/en/latest/)
@@ -9,7 +9,9 @@ Transform raw data to generate new data that better represent features so they i
 
 ## Description
 
-Implements modular components for dataset preprocessing: a data-trimmer, a standardizer, a feature selector and a sliding window data generator.
+Implements modular components for featuer engineering: a heuristic training signal generator, a MSSA decomposer and a MSSA predictor. 
+
+All modules are usable both from command line and from class methods.
 
 ## Installation
 
@@ -31,57 +33,51 @@ The installation is made by clonning the github repo and manually installing it,
 
 ## Modules
 
-All the CLI commands and the class modules are installed with the feature-engineering package, the following sections describe each module briefly and link to each module's basic documentation. 
+All the class modules and their CLI commands are installed with the feature-engineering package, the following sections describe each module briefly and link to each module's basic documentation. 
 
-Detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 6 of the installation process, it contains documentation of the classes and methods of all modules in the feature-engineering package. 
+Additional detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 6 of the installation process, it contains documentation of the classes and methods of all modules in the feature-engineering package. 
 
-## Data-Trimmer
+## Heuristic Training Signal Generator
 
-A simple data pre-processor that trims the constant valued columns.  Also removes rows from the start and the end of a dataset with features with consecutive zeroes. Usable both from command line and from class methods.
+Generates an ideal training signal for trading using EMA_fast forwarded a number of ticks minus current EMA_slow as buy signal.
 
-See [Data-Trimmer Readme](../master/README_data_trimmer.md) for detailed description and usage instructions.
+See [heuristic_ts Readme](../master/README_heuristic_ts.md) for detailed description and usage instructions.
 
-## Standarizer
+## Multivariate Singular Spectrum Analysis (MSSA) Decomposer. 
 
-Standardizes a dataset and exports the standarization configuration for use on other datasets. Usable both from command line and from class methods.
+Performs MSSA decomposition, save the output dataset containing a configurable number of components per feature or the sum of a configurable number of components.
 
-See [Standardizer Readme](../master/README_standardizer.md) for detailed description and usage instructions.
+See [MSSA Decomposer Readme](../master/README_mssa_decomposer.md) for detailed description and usage instructions.
 
-## Sliding Window
+## MSSA Predictor
 
-Performs the sliding window technique. Usable both from command line and from class methods.
+Performs MSSA prediction for a configurable number of forward ticks, save the .output dataset containing the prediction for a configurable number of channels or its sum.
 
-See [Sliding Window Readme](../master/README_sliding_window.md) for detailed description and usage instructions.
-
-## Feature Selector
-
-Performs the feature selection based on a classification or regression training signal and a threeshold. Usable both from command line and from class methods.
-
-See [Feature Selector Readme](../master/README_feature_selector.md) for detailed description and usage instructions.
+See [MSSA Predictor Readme](../master/README_mssa_predictor.md) for detailed description and usage instructions.
 
 ## Examples of usage
 
-The following examples show both the class method and command line uses for the data-trimmer feature-engineering module, please see the documentation for examples of other modules.
+The following examples show both the class method and command line uses for one module, for examples of other modules, please see the specific module´s documentation.
 
-### Example: Usage via Class Methods (DataTrimmer)
+### Example: Usage via Class Methods (HeuristicTS)
 ```python
-from feature-engineering.data_trimmer.data_trimmer import DataTrimmer
-# configure parameters (same vaiable names as command-line parameters)
+from feature-engineering.heuristic_ts.heuristic_ts import HeuristicTS
+# configure parameters (same variable names as command-line parameters)
 class Conf:
     def __init__(self):
         self.input_file = "tests/data/test_input.csv"
 conf = Conf()
-# instance trimmer class and loads dataset
-dt = DataTrimmer(conf)
-# do the trimming
-rows_t, cols_t = dt.trim_auto()
-# save output to output file
+# instance class and loads dataset
+dt = HeuristicTS(conf)
+# execute the module´s core method
+dt.core()
+# save output to output file (defaults to input file with .output extension)
 dt.store()
 ```
 
 ### Example: Usage via CLI (DataTrimmer)
 
-> data-trimmer --input_file "tests/data/test_input.csv"
+> heuristic_ts --input_file "tests/data/test_input.csv"
 
 
 
