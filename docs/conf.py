@@ -22,7 +22,7 @@ __location__ = os.path.join(
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.join(__location__, "../src"))
+sys.path.insert(0, os.path.join(__location__, "../.."))
 
 # -- Run sphinx-apidoc ------------------------------------------------------
 # This hack is necessary since RTD does not issue `sphinx-apidoc` before running
@@ -39,7 +39,7 @@ except ImportError:
     from sphinx import apidoc
 
 output_dir = os.path.join(__location__, "api")
-module_dir = os.path.join(__location__, "../feature_engineering")
+module_dir = os.path.join(__location__, "../preprocessor")
 try:
     shutil.rmtree(output_dir)
 except FileNotFoundError:
@@ -94,7 +94,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"feature_engineering"
+project = u"preprocessor"
 copyright = u"2020, Harvey Bastidas"
 
 # The version info for the project you're documenting, acts as replacement for
@@ -161,7 +161,7 @@ html_theme_options = {"sidebar_width": "300px", "page_width": "1200px"}
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
 try:
-    from data_trimmer import __version__ as version
+    from preprocessor import __version__ as version
 except ImportError:
     pass
 else:
@@ -226,7 +226,7 @@ html_static_path = ["_static"]
 # html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "data_trimmer-doc"
+htmlhelp_basename = "preprocessor-doc"
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -246,7 +246,7 @@ latex_documents = [
     (
         "index",
         "user_guide.tex",
-        u"feature_engineering Documentation",
+        u"preprocessor Documentation",
         u"Harvey Bastidas",
         "manual",
     )

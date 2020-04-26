@@ -8,8 +8,8 @@ PAPER         =
 BUILDDIR      = ./
 AUTODOCDIR    = api
 AUTODOCBUILD  = sphinx-apidoc
-PROJECT       = feature_engineering
-MODULEDIR     = ../src/data_trimmer
+PROJECT       = preprocessor
+MODULEDIR     = ../preprocessor
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $?), 1)

@@ -9,6 +9,21 @@ This File contains the DataTrimmer class. To run this script uncomment or add th
 Then run `python setup.py install` which will install the command `data-trimmer`
 inside your current environment.
 
+Non-Related Personal Note:
+
+This module is dedicated to my little kitty Palomita, today 2020/04/26 may her soul rest in peace.
+
+The whole Singularity project was inspired in your eyes, what they made me feel, made me think that 
+there is much more in life than we can understand. The peace of mind i used to feel when i saw your eyes changed me forever. 
+
+Pequeña Palomita linda, mi amor, my soul is binded to yours since we shared our lives, i loved you so much since you 
+were a baby until you were old, i gave you millions of kisses and you rubbed your ears on me countles times, 
+i enjoyed it every time, and your memories have influenced and will influence every step i made for good.
+
+I miss you so much! Thanks for everything! You teached me a lot on how to love.
+
+You were my company, my inspiration and my rock in a lonely world that does not believe in me or what i do.
+
 """
 
 import argparse
