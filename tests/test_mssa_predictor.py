@@ -7,7 +7,7 @@ import os
 import filecmp
 import numpy as np
 
-from feature_engineering.sliding_window.sliding_window import SlidingWindow
+from feature_eng.sliding_window.sliding_window import SlidingWindow
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -23,7 +23,7 @@ class Conf:
         self.output_file = fname
         """ Output dataset filename """
         self.window_size = 21
-        """ Output configuration of the feature_engineering """
+        """ Output configuration of the feature_eng """
 
 class TestSlidingWindow:
     """ Component Tests  """

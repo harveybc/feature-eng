@@ -1,5 +1,5 @@
 import sys
-import feature_engineering.heuristic_ts.heuristic_ts as dt
+import feature_eng.heuristic_ts.heuristic_ts as dt
 
 
 def main(args=None):

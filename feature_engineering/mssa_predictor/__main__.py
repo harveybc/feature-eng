@@ -1,5 +1,5 @@
 import sys
-import feature_engineering.sliding_window.sliding_window as dt
+import feature_eng.sliding_window.sliding_window as dt
 
 
 def main(args=None):

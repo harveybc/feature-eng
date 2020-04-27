@@ -7,7 +7,7 @@ import sys
 import os
 from filecmp import cmp
 
-from feature_engineering.heuristic_ts.heuristic_ts import HeuristicTS
+from feature_eng.heuristic_ts.heuristic_ts import HeuristicTS
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"

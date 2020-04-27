@@ -30,7 +30,7 @@ import argparse
 import sys
 import logging
 import numpy as np
-from feature_engineering.feature_engineering import FeatureEng
+from feature_eng.feature_eng import FeatureEng
 from itertools import zip_longest 
 
 # from heuristic_ts import __version__
@@ -43,7 +43,7 @@ _logger = logging.getLogger(__name__)
 
 
 class HeuristicTS(FeatureEng):
-    """ The Data Trimmer feature_engineering class """
+    """ The Data Trimmer feature_eng class """
 
     def __init__(self, conf):
         """ Constructor using same parameters as base class """
@@ -97,7 +97,7 @@ class HeuristicTS(FeatureEng):
             self.auto_trim = True
 
     def core(self):
-        """ Core feature_engineering task after starting the instance with the main method.
+        """ Core feature_eng task after starting the instance with the main method.
             Decide from the arguments, what trimming method to call.
 
         Args:
@@ -119,7 +119,7 @@ class HeuristicTS(FeatureEng):
 
 
     def store(self):
-        """ Save preprocessed data and the configuration of the feature_engineering. """
+        """ Save preprocessed data and the configuration of the feature_eng. """
         print("self.output_ds.shape = ", self.output_ds.shape)
         _logger.debug("output_file = "+ self.output_file)
         np.savetxt(self.output_file, self.output_ds, delimiter=",")

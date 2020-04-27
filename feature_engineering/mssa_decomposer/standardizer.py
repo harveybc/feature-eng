@@ -16,7 +16,7 @@ import sys
 import logging
 import numpy as np
 from sklearn import preprocessing
-from feature_engineering.feature_engineering import FeatureEng
+from feature_eng.feature_eng import FeatureEng
 from itertools import zip_longest 
 from joblib import dump, load
 
@@ -28,7 +28,7 @@ _logger = logging.getLogger(__name__)
 
 
 class Standardizer(FeatureEng):
-    """ The Standardizer feature_engineering class """
+    """ The Standardizer feature_eng class """
 
     def __init__(self, conf):
         """ Constructor using same parameters as base class """
@@ -60,7 +60,7 @@ class Standardizer(FeatureEng):
             self.no_config = False
 
     def core(self):
-        """ Core feature_engineering task after starting the instance with the main method.
+        """ Core feature_eng task after starting the instance with the main method.
             Decide from the arguments, what trimming method to call.
 
         Args:
@@ -88,7 +88,7 @@ class Standardizer(FeatureEng):
         self.output_ds = pt.transform(self.input_ds)
         
     def store(self):
-        """ Save preprocessed data and the configuration of the feature_engineering. """
+        """ Save preprocessed data and the configuration of the feature_eng. """
         _logger.debug("output_file = "+ self.output_file)
         np.savetxt(self.output_file, self.output_ds, delimiter=",", fmt='%1.6f')
 

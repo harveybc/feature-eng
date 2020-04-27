@@ -8,7 +8,7 @@ import os
 import filecmp
 import numpy as np
 
-from feature_engineering.standardizer.standardizer import Standardizer
+from feature_eng.standardizer.standardizer import Standardizer
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -26,7 +26,7 @@ class Conf:
         """ Output dataset filename """
         fname = os.path.join(os.path.dirname(__file__), "data/out_config.csv")
         self.output_config_file = fname
-        """ Output configuration of the feature_engineering """
+        """ Output configuration of the feature_eng """
 
 class TestStandardizer:
     """ Component Tests  """
