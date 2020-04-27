@@ -4,7 +4,7 @@ This File contains the DataTrimmer class. To run this script uncomment or add th
 [options.entry_points] section in setup.cfg:
 
     console_scripts =
-        data-trimmer = data_trimmer.__main__:main
+        data-trimmer = heuristic_ts.__main__:main
 
 Then run `python setup.py install` which will install the command `data-trimmer`
 inside your current environment.
@@ -33,7 +33,7 @@ import numpy as np
 from feature_engineering.feature_engineering import Preprocessor
 from itertools import zip_longest 
 
-# from data_trimmer import __version__
+# from heuristic_ts import __version__
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -216,8 +216,8 @@ class DataTrimmer(Preprocessor):
 
 def run(args):
     """ Entry point for console_scripts """
-    data_trimmer = DataTrimmer(None)
-    data_trimmer.main(args)
+    heuristic_ts = DataTrimmer(None)
+    heuristic_ts.main(args)
 
 
 if __name__ == "__main__":

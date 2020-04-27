@@ -1,5 +1,5 @@
 import sys
-import feature_engineering.data_trimmer.data_trimmer as dt
+import feature_engineering.heuristic_ts.heuristic_ts as dt
 
 
 def main(args=None):

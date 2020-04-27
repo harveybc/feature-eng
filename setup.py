@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Setup file for data_trimmer.
+    Setup file for heuristic_ts.
     Use setup.cfg to configure your project.
 
     This file was generated with PyScaffold 3.2.3.
@@ -14,7 +14,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 # sys.path.append('feature_engineering\\')
-from feature_engineering.data_trimmer.data_trimmer import DataTrimmer
+from feature_engineering.heuristic_ts.heuristic_ts import DataTrimmer
 
 try:
     require("setuptools>=38.3")
