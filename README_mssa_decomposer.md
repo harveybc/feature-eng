@@ -11,7 +11,7 @@ A simple data pre-processor that trims the constant valued columns.  Also remove
 
 Trims the constant valued columns. Also removes rows from the start and the end of a dataset with features with consecutive zeroes. 
 
-The data-trimmer is implemented in the DataTrimmer class, it has methods for loading a dataset trimming it an producing an  output, please see [test_heuristic_ts](https://github.com/harveybc/preprocessor/blob/master/tests/heuristic_ts/test_heuristic_ts.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
+The data-trimmer is implemented in the HeuristicTS class, it has methods for loading a dataset trimming it an producing an  output, please see [test_heuristic_ts](https://github.com/harveybc/preprocessor/blob/master/tests/heuristic_ts/test_heuristic_ts.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
 
 It also saves a configuration file, that is a CSV files with removed files and columns for applying similar  trimming to another dataset. Usable both from command line and from class methods (see [tests folder](https://github.com/harveybc/preprocessor/tree/master/tests)).
 
@@ -40,14 +40,14 @@ The following examples show both the class method and command line uses.
 
 ### Usage via Class Methods
 ```python
-from preprocessor.heuristic_ts.heuristic_ts import DataTrimmer
+from preprocessor.heuristic_ts.heuristic_ts import HeuristicTS
 # configure parameters (same vaiable names as command-line parameters)
 class Conf:
     def __init__(self):
         self.input_file = "tests/data/test_input.csv"
 conf = Conf()
 # instance trimmer class and loads dataset
-dt = DataTrimmer(conf)
+dt = HeuristicTS(conf)
 # do the trimming
 rows_t, cols_t = dt.trim_auto()
 # save output to output file

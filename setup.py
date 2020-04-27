@@ -14,7 +14,7 @@ from setuptools import setup
 from setuptools import find_packages
 
 # sys.path.append('feature_engineering\\')
-from feature_engineering.heuristic_ts.heuristic_ts import DataTrimmer
+from feature_engineering.heuristic_ts.heuristic_ts import HeuristicTS
 
 try:
     require("setuptools>=38.3")

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" This File contains the Preprocessor class, it is the base class for DataTrimmer, FeatureSelector, Standardizer, MSSADecomposer. """
+""" This File contains the Preprocessor class, it is the base class for HeuristicTS, FeatureSelector, Standardizer, MSSADecomposer. """
 
 import argparse
 import sys

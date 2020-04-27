@@ -75,7 +75,7 @@ dt.core()
 dt.store()
 ```
 
-### Example: Usage via CLI (DataTrimmer)
+### Example: Usage via CLI (HeuristicTS)
 
 > heuristic_ts --input_file "tests/data/test_input.csv"
 
