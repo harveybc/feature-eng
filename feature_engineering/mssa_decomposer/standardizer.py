@@ -16,7 +16,7 @@ import sys
 import logging
 import numpy as np
 from sklearn import preprocessing
-from feature_engineering.feature_engineering import Preprocessor
+from feature_engineering.feature_engineering import FeatureEng
 from itertools import zip_longest 
 from joblib import dump, load
 
@@ -27,7 +27,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-class Standardizer(Preprocessor):
+class Standardizer(FeatureEng):
     """ The Standardizer feature_engineering class """
 
     def __init__(self, conf):

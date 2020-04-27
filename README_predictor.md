@@ -1,23 +1,23 @@
-# Preprocessor: Data-Trimmer
+# FeatureEng: Data-Trimmer
 
 A simple data pre-processor that trims the constant valued columns.  Also removes rows from the start and the end of a dataset with features with consecutive zeroes. Usable both from command line and from class methods.
 
-[![Build Status](https://travis-ci.org/harveybc/preprocessor.svg?branch=master)](https://travis-ci.org/harveybc/preprocessor)
-[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-preprocessor.readthedocs.io/en/latest/)
-[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/preprocessor?branch=master)](https://bettercodehub.com/)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/preprocessor/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/harveybc/feature_eng.svg?branch=master)](https://travis-ci.org/harveybc/feature_eng)
+[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_eng.readthedocs.io/en/latest/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_eng?branch=master)](https://bettercodehub.com/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature_eng/blob/master/LICENSE)
 
 ## Description
 
 Trims the constant valued columns. Also removes rows from the start and the end of a dataset with features with consecutive zeroes. 
 
-The data-trimmer is implemented in the HeuristicTS class, it has methods for loading a dataset trimming it an producing an  output, please see [test_heuristic_ts](https://github.com/harveybc/preprocessor/blob/master/tests/heuristic_ts/test_heuristic_ts.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
+The data-trimmer is implemented in the HeuristicTS class, it has methods for loading a dataset trimming it an producing an  output, please see [test_heuristic_ts](https://github.com/harveybc/feature_eng/blob/master/tests/heuristic_ts/test_heuristic_ts.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
 
-It also saves a configuration file, that is a CSV files with removed files and columns for applying similar  trimming to another dataset. Usable both from command line and from class methods (see [tests folder](https://github.com/harveybc/preprocessor/tree/master/tests)).
+It also saves a configuration file, that is a CSV files with removed files and columns for applying similar  trimming to another dataset. Usable both from command line and from class methods (see [tests folder](https://github.com/harveybc/feature_eng/tree/master/tests)).
 
 ## Installation
 
-The module is installed with the preprocessor package, the instructions are described in the [preprocessor README](../master/README.md).
+The module is installed with the feature_eng package, the instructions are described in the [feature_eng README](../master/README.md).
 
 ### Command-Line Execution
 
@@ -40,7 +40,7 @@ The following examples show both the class method and command line uses.
 
 ### Usage via Class Methods
 ```python
-from preprocessor.heuristic_ts.heuristic_ts import HeuristicTS
+from feature_eng.heuristic_ts.heuristic_ts import HeuristicTS
 # configure parameters (same vaiable names as command-line parameters)
 class Conf:
     def __init__(self):

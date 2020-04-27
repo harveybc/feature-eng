@@ -2,10 +2,10 @@
 
 Generates an ideal training signal for trading based on a feature forwarded a configurable number of ticks.
 
-[![Build Status](https://travis-ci.org/harveybc/preprocessor.svg?branch=master)](https://travis-ci.org/harveybc/preprocessor)
-[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-preprocessor.readthedocs.io/en/latest/)
-[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/preprocessor?branch=master)](https://bettercodehub.com/)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/preprocessor/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/harveybc/feature_eng.svg?branch=master)](https://travis-ci.org/harveybc/feature_eng)
+[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_eng.readthedocs.io/en/latest/)
+[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_eng?branch=master)](https://bettercodehub.com/)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature_eng/blob/master/LICENSE)
 
 ## Description
 
@@ -13,7 +13,7 @@ Generates a training signal using Exponentioal Moving Average (EMA) fast, forwar
 
 ## Installation
 
-The module is installed with the preprocessor package, the instructions are described in the [preprocessor README](../master/README.md).
+The module is installed with the feature_eng package, the instructions are described in the [feature_eng README](../master/README.md).
 
 ### Command-Line Execution
 
@@ -34,7 +34,7 @@ The following examples show both the class method and command line uses.
 
 ### Usage via Class Methods
 ```python
-from preprocessor.heuristic_ts.heuristic_ts import HeurusticTS
+from feature_eng.heuristic_ts.heuristic_ts import HeurusticTS
 # configure parameters (same variable names as command-line parameters)
 class Conf:
     def __init__(self):
