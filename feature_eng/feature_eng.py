@@ -17,8 +17,34 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-class FeatureEng(FeatureEngBase):
-    """ Base class for HeuristicTS, FeatureSelector, Standardizer, SlidingWindow. """
+class FeatureEng():
+    """ Base class. """
+
+    def __init__(self, conf):
+        """ Constructor """
+        # if conf =  None, loads the configuration from the command line arguments
+        if conf != None:
+            self.input_file = conf.input_file
+            """ Path of the input dataset """
+            self.output_file = conf.output_file
+            """ Path of the output dataset """
+            if hasattr(conf, "input_config_file"):
+                self.input_config_file = conf.input_config_file
+            else:
+                self.input_config_file = None
+            """ Path of the input configuration """
+            if hasattr(conf, "output_config_file"):
+                self.output_config_file = conf.output_config_file
+            else:
+                self.output_config_file = None
+            """ Path of the output configuration """
+            # Load input dataset
+            self.load_ds()
+        else :
+            self.input_ds = None
+        self.r_rows = []
+        self.r_cols = []
+        self.config_ds = None
 
     def main(self, args):
         """ Starts an instance. Main entry point allowing external calls.
@@ -78,6 +104,28 @@ class FeatureEng(FeatureEngBase):
         else:
             print("Error: No input file parameter provided. Use option -h to show help.")
             sys.exit()
+
+    def setup_logging(self, loglevel):
+        """Setup basic logging.
+
+        Args:
+        loglevel (int): minimum loglevel for emitting messages
+        """
+        logformat = "[%(asctime)s] %(levelname)s:%(name)s:%(message)s"
+        logging.basicConfig(
+            level=loglevel,
+            stream=sys.stdout,
+            format=logformat,
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+
+    def load_ds(self):
+        """ Save preprocessed data and the configuration of the feature_eng. """
+        # Load input dataset
+        self.input_ds = np.genfromtxt(self.input_file, delimiter=",")
+        # load input config dataset if the parameter is available
+        # Initialize input number of rows and columns
+        self.rows_d, self.cols_d = self.input_ds.shape
 
     def store(self):
         """ Save preprocessed data and the configuration of the feature_eng. """
