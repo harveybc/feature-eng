@@ -61,7 +61,7 @@ class TestHeuristicTS:
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the new == old - trimmed
-        assert (cols_o == 1) and (rows_o = rows_t - self.forward_ticks)
+        assert ((cols_o == 1) and (rows_o = rows_t - self.forward_ticks))
 
     def test_C05T02_cmdline_training_signal(self):
         """ same as C03T02, but via command-line """
