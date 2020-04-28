@@ -6,7 +6,7 @@ import sys
 import logging
 import numpy as np
 import csv
-from feature_eng.feature_eng_base import FeatureEngBase
+from feature_eng_base import FeatureEngBase
 
 # from feature_eng import __version__
 
