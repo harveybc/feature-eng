@@ -107,15 +107,12 @@ class HeuristicTS(FeatureEng):
         
     
     def training_signal(self):
-        """ Trims all the constant columns and trims all rows with consecutive zeroes from start and end of the input dataset
-
-        Returns:
-        rows_t, cols_t (int,int): number of rows and columns trimmed
+        """ Performs the substraction of the ema_fast forwarded forward_ticks
+            minus the ema_slow.
         """
-        
-        # TODO:  CORE 
-
-        return rows_t, cols_t
+        self.output_ds = np.empty(shape=(0,1))
+        for i in range(self.rows_d - self.forward_ticks): 
+            np.append(self.output_ds, [self.input_ds[i+self.forward_ticks]-self.input_ds[i]])
 
 
     def store(self):
