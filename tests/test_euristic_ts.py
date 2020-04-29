@@ -60,8 +60,8 @@ class TestHeuristicTS:
         self.dt.store()
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
-        # assert if the new == old - trimmed
-        assert (cols_o == 1) and (rows_o == rows_t - self.forward_ticks)
+        # assertion
+        assert (cols_o == 1) and (rows_o == self.dt.rows_d - self.forward_ticks)
 
     def test_C05T02_cmdline_training_signal(self):
         """ same as C03T02, but via command-line """
@@ -75,5 +75,5 @@ class TestHeuristicTS:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
-        assert (cols_o == 1) and (rows_o == rows_t - self.dt.forward_ticks)
+        assert (cols_o == 1) and (rows_o == self.dt.rows_d - self.dt.forward_ticks)
         
