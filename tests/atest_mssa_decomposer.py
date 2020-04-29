@@ -42,7 +42,7 @@ class TestStandardizer:
             print("No test output file found.")
             pass
 
-    def atest_C02T01_standardize(self):
+    def test_C02T01_standardize(self):
         """ Standardizes all the columns and assert if the average is near zero """        
         self.dt.standardize()
         # save output to file
@@ -50,7 +50,7 @@ class TestStandardizer:
         mean_all = np.mean(self.dt.output_ds, dtype=np.float64)
         assert (mean_all>-10) and (mean_all<10)
 
-    def atest_C02T02_cmdline_standarize(self):
+    def test_C02T02_cmdline_standarize(self):
         """ Standardizes all the columns using command line arguments """
         os.system(
             "standardizer --input_file "
@@ -63,7 +63,7 @@ class TestStandardizer:
         mean_all = np.mean(o_array[:,0], dtype=np.float64)
         assert (mean_all>-10) and (mean_all<10)
 
-    def atest_C02T03_config_save_load(self):
+    def test_C02T03_config_save_load(self):
         """ Save a configuration file and uses it to standardize a dataset. Assert that output_config can be loaded and the output_config(loaded) == output_config(saved)"""
         os.system(
             "standardizer --input_file "

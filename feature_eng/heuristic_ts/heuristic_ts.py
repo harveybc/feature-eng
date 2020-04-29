@@ -62,39 +62,37 @@ class HeuristicTS(FeatureEng):
             description="Dataset Trimmer: trims constant columns and consecutive zero rows from the end and the start of a dataset."
         )
         parser.add_argument(
-            "--from_start",
-            help="number of rows to remove from start (ignored if auto_trim)",
+            "--ema_fast",
+            help="column index on the input dataset for ema fast",
             type=int,
             default=0
         )
-        parser.add_argument("--from_end",
-            help="number of rows to remove from end (ignored if auto_trim)",
+        parser.add_argument("--ema_slow",
+            help="column index on the input dataset for ema slow",
             type=int,
             default=0
         )
-        parser.add_argument("--remove_columns", 
-            help="removes constant columns", 
-            action="store_true",
-            default=False
-        )
-        parser.add_argument("--no_auto_trim",
-            help="trims the constant columns and trims all rows with consecutive zeroes from start and end",
-            action="store_true",
-            default=False
+        parser.add_argument("--forward_ticks",
+            help="number of ticks in the future for ema_fast",
+            type=int,
+            default=0
         )
         parser = self.parse_cmd(parser)
         pargs = parser.parse_args(args)
         self.assign_arguments(pargs)
-        if hasattr(pargs, "from_start"):
-            self.from_start = pargs.from_start
-        if hasattr(pargs, "from_end"):
-            self.from_end = pargs.from_end
-        if hasattr(pargs, "remove_columns"):
-            self.remove_columns = pargs.remove_columns
-        if hasattr(pargs, "no_auto_trim"):
-            self.auto_trim = not(pargs.no_auto_trim)
+        if hasattr(pargs, "ema_fast"):
+            self.ema_fast = pargs.ema_fast
         else:
-            self.auto_trim = True
+            self.ema_fast = 0
+        if hasattr(pargs, "ema_slow"):
+            self.ema_slow = pargs.ema_slow
+        else:
+            self.ema_slow = 1
+        if hasattr(pargs, "forward_ticks"):
+            self.forward_ticks = pargs.forward_ticks
+        else:
+            self.forward_ticks = 10
+            
 
     def core(self):
         """ Core feature_eng task after starting the instance with the main method.
@@ -103,19 +101,17 @@ class HeuristicTS(FeatureEng):
         Args:
         args (obj): command line parameters as objects
         """
+
         self.training_signal()
         
     
     def training_signal(self):
-        """ Trims all the constant columns and trims all rows with consecutive zeroes from start and end of the input dataset
-
-        Returns:
-        rows_t, cols_t (int,int): number of rows and columns trimmed
+        """ Performs the substraction of the ema_fast forwarded forward_ticks
+            minus the ema_slow.
         """
-        
-        # TODO:  CORE 
-
-        return rows_t, cols_t
+        self.output_ds = np.empty(shape=(self.rows_d-self.forward_ticks, 1))
+        for i in range(self.rows_d - self.forward_ticks): 
+            self.output_ds[i] = self.input_ds[i+self.forward_ticks, self.ema_fast]-self.input_ds[i, self.ema_slow]
 
 
     def store(self):

@@ -39,7 +39,7 @@ class TestSlidingWindow:
             print("No test output file found.")
             pass
 
-    def atest_C03T01_window(self):
+    def test_C03T01_window(self):
         """ Perform sliding_window and assert if the output_columns == input_columns * (window_size-1) """        
         self.dt.window()
         # save output to file
@@ -47,7 +47,7 @@ class TestSlidingWindow:
         #TODO: PROCESS BEFORE ASSERT
         assert output_columns == (input_columns * (self.conf.window_size-1))
 
-    def atest_C03T02_cmdline_window(self):
+    def test_C03T02_cmdline_window(self):
         """ Perform the same C03T01_window assertion but using command line arguments """
         os.system(
             "sliding_window --input_file "
