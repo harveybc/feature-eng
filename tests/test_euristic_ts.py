@@ -70,7 +70,7 @@ class TestHeuristicTS:
             + " --output_file "
             + self.conf.output_file
             + " --forward_ticks "
-            + self.dt.forward_ticks
+            + str(self.dt.forward_ticks)
         )
         # get the size of the original dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
