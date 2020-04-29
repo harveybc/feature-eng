@@ -61,7 +61,7 @@ class TestHeuristicTS:
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
-        assert (cols_o == 1) and (rows_o == self.dt.rows_d - self.forward_ticks)
+        assert (cols_o == 1) and (rows_o == self.dt.rows_d - self.dt.forward_ticks)
 
     def test_C05T02_cmdline_training_signal(self):
         """ same as C03T02, but via command-line """
@@ -69,6 +69,8 @@ class TestHeuristicTS:
             + self.conf.input_file
             + " --output_file "
             + self.conf.output_file
+            + " --forward_ticks "
+            + self.dt.forward_ticks
         )
         # get the size of the original dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
