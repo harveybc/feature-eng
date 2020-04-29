@@ -34,6 +34,8 @@ class TestHeuristicTS:
         """ Data trimmer object """
         self.rows_d, self.cols_d = self.get_size_csv(self.conf.input_file)
         """ Get the number of rows and columns of the test dataset """
+        self.dt.ema_fast = 0
+        self.dt.ema_slow = 1
         self.dt.forward_ticks = 5
         try:
             os.remove(self.conf.output_file)
