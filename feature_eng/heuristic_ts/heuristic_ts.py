@@ -62,25 +62,20 @@ class HeuristicTS(FeatureEng):
             description="Dataset Trimmer: trims constant columns and consecutive zero rows from the end and the start of a dataset."
         )
         parser.add_argument(
-            "--from_start",
-            help="number of rows to remove from start (ignored if auto_trim)",
+            "--ema_fast",
+            help="column index on the input dataset for ema fast",
             type=int,
             default=0
         )
-        parser.add_argument("--from_end",
-            help="number of rows to remove from end (ignored if auto_trim)",
+        parser.add_argument("--ema_slow",
+            help="column index on the input dataset for ema slow",
             type=int,
             default=0
         )
-        parser.add_argument("--remove_columns", 
-            help="removes constant columns", 
-            action="store_true",
-            default=False
-        )
-        parser.add_argument("--no_auto_trim",
-            help="trims the constant columns and trims all rows with consecutive zeroes from start and end",
-            action="store_true",
-            default=False
+        parser.add_argument("--forward_ticks",
+            help="number of ticks in the future for ema_fast",
+            type=int,
+            default=0
         )
         parser = self.parse_cmd(parser)
         pargs = parser.parse_args(args)
