@@ -114,9 +114,9 @@ class HeuristicTS(FeatureEng):
         """ Performs the substraction of the ema_fast forwarded forward_ticks
             minus the ema_slow.
         """
-        self.output_ds = np.empty(shape=(0,1))
+        self.output_ds = np.empty(shape=(self.rows_d-self.forward_ticks, 1))
         for i in range(self.rows_d - self.forward_ticks): 
-            np.append(self.output_ds, [[self.input_ds[i+self.forward_ticks]-self.input_ds[i]]])
+            self.output_ds[i] = self.input_ds[i+self.forward_ticks]-self.input_ds[i]
 
 
     def store(self):
