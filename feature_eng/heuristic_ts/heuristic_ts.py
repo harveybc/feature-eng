@@ -116,7 +116,7 @@ class HeuristicTS(FeatureEng):
         """
         self.output_ds = np.empty(shape=(self.rows_d-self.forward_ticks, 1))
         for i in range(self.rows_d - self.forward_ticks): 
-            self.output_ds[i] = self.input_ds[i+self.forward_ticks]-self.input_ds[i]
+            self.output_ds[i] = self.input_ds[i+self.forward_ticks, self.ema_fast]-self.input_ds[i, self.ema_slow]
 
 
     def store(self):
