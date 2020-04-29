@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-This File contains the Standardizer class. To run this script uncomment or add the following lines in the
+This File contains the MSSADecomposer class. To run this script uncomment or add the following lines in the
 [options.entry_points] section in setup.cfg:
 
     console_scripts =
-        standardizer = standardizer.__main__:main
+        mssa_decomposer = mssa_decomposer.__main__:main
 
-Then run `python setup.py install` which will install the command `standardizer`
+Then run `python setup.py install` which will install the command `mssa_decomposer`
 inside your current environment.
 
 """
@@ -27,8 +27,8 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-class Standardizer(FeatureEng):
-    """ The Standardizer feature_eng class """
+class MSSADecomposer(FeatureEng):
+    """ The MSSADecomposer feature_eng class """
 
     def __init__(self, conf):
         """ Constructor using same parameters as base class """
@@ -44,7 +44,7 @@ class Standardizer(FeatureEng):
             :obj:`argparse.Namespace`: command line parameters namespace
         """
         parser = argparse.ArgumentParser(
-            description="Dataset Standardizer: standarizes a dataset."
+            description="Dataset MSSADecomposer: standarizes a dataset."
         )
         parser.add_argument("--no_config",
             help="Do not generate an output configuration file.",
@@ -94,8 +94,8 @@ class Standardizer(FeatureEng):
 
 def run(args):
     """ Entry point for console_scripts """
-    standardizer = Standardizer(None)
-    standardizer.main(args)
+    mssa_decomposer = MSSADecomposer(None)
+    mssa_decomposer.main(args)
 
 
 if __name__ == "__main__":
