@@ -55,7 +55,7 @@ class TestHeuristicTS:
 
     def test_C05T01_training_signal(self):
         """ Asses that output file has 1 column and num_ticks - forward_ticks """
-        rows_t, cols_t = self.dt.core()
+        self.dt.core()
         # save output to file
         self.dt.store()
         # get the number of rows and cols from out_file
