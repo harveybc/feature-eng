@@ -106,6 +106,7 @@ class HeuristicTS(FeatureEng):
         Args:
         args (obj): command line parameters as objects
         """
+
         self.training_signal()
         
     
@@ -115,7 +116,7 @@ class HeuristicTS(FeatureEng):
         """
         self.output_ds = np.empty(shape=(0,1))
         for i in range(self.rows_d - self.forward_ticks): 
-            np.append(self.output_ds, [self.input_ds[i+self.forward_ticks]-self.input_ds[i]])
+            np.append(self.output_ds, [[self.input_ds[i+self.forward_ticks]-self.input_ds[i]]])
 
 
     def store(self):
