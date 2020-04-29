@@ -65,7 +65,7 @@ class TestHeuristicTS:
 
     def test_C05T02_cmdline_training_signal(self):
         """ same as C03T02, but via command-line """
-        os.system("euristic_ts --input_file "
+        os.system("heuristic_ts --input_file "
             + self.conf.input_file
             + " --output_file "
             + self.conf.output_file
