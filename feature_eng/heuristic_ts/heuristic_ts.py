@@ -85,16 +85,19 @@ class HeuristicTS(FeatureEng):
         parser = self.parse_cmd(parser)
         pargs = parser.parse_args(args)
         self.assign_arguments(pargs)
-        if hasattr(pargs, "from_start"):
-            self.from_start = pargs.from_start
-        if hasattr(pargs, "from_end"):
-            self.from_end = pargs.from_end
-        if hasattr(pargs, "remove_columns"):
-            self.remove_columns = pargs.remove_columns
-        if hasattr(pargs, "no_auto_trim"):
-            self.auto_trim = not(pargs.no_auto_trim)
+        if hasattr(pargs, "ema_fast"):
+            self.ema_fast = pargs.ema_fast
         else:
-            self.auto_trim = True
+            self.ema_fast = 0
+        if hasattr(pargs, "ema_slow"):
+            self.ema_slow = pargs.ema_slow
+        else:
+            self.ema_slow = 1
+        if hasattr(pargs, "forward_ticks"):
+            self.forward_ticks = pargs.forward_ticks
+        else:
+            self.forward_ticks = 10
+            
 
     def core(self):
         """ Core feature_eng task after starting the instance with the main method.

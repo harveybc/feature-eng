@@ -27,7 +27,6 @@ The heuristic_ts also is implemented as a console command:
 * __--ema_fast <val>__:(Optional) column index of the EMA fast in the input dataset. Defaults to 0.
 * __--ema_slow <val>__: (Optional) column index of the EMA slow in the input dataset. Defaults to 1.
 * __--forward_ticks <val>__: (Optional) Number of forward ticks for EMA fast.
-* __--group_similar__: (Optional) Group by summing the similar channels.
 
 ## Examples of usage
 The following examples show both the class method and command line uses.
