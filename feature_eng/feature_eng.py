@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-""" This File contains the FeatureEng class, it is the base class for HeuristicTS, FeatureSelector, Standardizer and SlidingWindow classes. """
+""" This File contains the FeatureEng class, has methods for listing and loading plugins and execute their entry point. """
 
 import argparse
 import sys
@@ -25,7 +25,10 @@ class FeatureEng():
         if conf != None:
             self.input_file = conf.input_file
             """ Path of the input dataset """
-            self.output_file = conf.output_file
+             if hasattr(conf, "output_file"):
+                self.output_file = conf.output_file
+            else:
+                self.output_file = self.input_file + ".output"
             """ Path of the output dataset """
             if hasattr(conf, "input_config_file"):
                 self.input_config_file = conf.input_config_file
@@ -37,6 +40,16 @@ class FeatureEng():
             else:
                 self.output_config_file = None
             """ Path of the output configuration """
+             if hasattr(conf, "plugin"):
+                self.plugin = conf.plugin
+            else:
+                self.plugin = None
+            """ Plugin to load """
+             if hasattr(conf, "list_plugins"):
+                self.list_plugins = conf.list_plugins
+            else:
+                self.list_plugins = False
+            """ If true, lists all installed external and internal plugins. """
             # Load input dataset
             self.load_ds()
         else :
