@@ -43,14 +43,12 @@ feature_eng is implemented as a console command:
 
 ### Command-Line Parameters
 
-* __--input_file <filename>__: The only mandatory parameter, is the filename for the input dataset to be trimmed.
+* __--list_plugins__: Shows a list of available plugins.
+* __--plugin <plugin_name>__: Loads a plugin to process an input dataset.
+* __--input_file <filename>__: The only mandatory parameter, is the filename for the input dataset to be processed with a plugin.
 * __--output_file <filename>__: (Optional) Filename for the output dataset. Defaults to the input dataset with the .output extension.
-* __--output_config_file <filename>__: (Optional) Filename for the output configuration containing rows trimmed in columns 0 and columns trimmed in column 1. Defaults to the input dataset with the .config extension.
-* __--input_config_file <filename>__: (Optional) Imports an existing configuration and trims a dataset with it.
-* __--from_start <val>__:(Optional) number of rows to remove from the start of the input dataset.
-* __--from_end <val>__: (Optional) number of rows to remove from the end of the input dataset.
-* __--remove_columns__: (Optional) Removes all constant columns.
-* __--no_auto_trim__: (Optional) Do not perform auto-trimming, useful if using the remove_columns, from_start or from_end options.
+* __--input_config_file <filename>__: (Optional) Imports an existing configuration file and processes a dataset with it.
+* __--output_config_file <filename>__: (Optional) Filename for the output configuration containing rows trimmed in columns 0 and columns trimmed in column 1. Defaults 
 
 ## Examples of usage
 
@@ -134,6 +132,13 @@ Check that <PLUGIN_NAME> appears in the list of installed plugins.
 ### Internal Plugin Creation
 
 The following procedure allows to contribute to the feature_eng repository by creating a new plugin to be included in the pre-installed plugins.
-Comming soon.
+1. Fork the feature_eng repository via the github homepage 
+2. Clone your fork using github Desktop or via command line into a local directory
+3. Create a new branch called with the name of the new plugin using github Desktop and select it
+4. Cd to the feature_eng fork directory
+5. Create the new module inside the plugins directory, following the structure of the existing plugins
+7. Make a commit and push to save your changes to github
+8. Make a Pull Request to the master branch of my feature_eng repo so i can review the changes and merge them with my existing code.
 
+More detailed collaboration instructions soon.
 
