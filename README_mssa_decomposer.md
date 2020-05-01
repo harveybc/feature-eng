@@ -1,6 +1,6 @@
-# FeatureEng: Data-Trimmer
+# FeatureEng: MSSA-Decomposer
 
-A simple data pre-processor that trims the constant valued columns.  Also removes rows from the start and the end of a dataset with features with consecutive zeroes. Usable both from command line and from class methods.
+Performs Multivariate Singular Spectrum Analysis (MSSA) decomposition of an input dataset.
 
 [![Build Status](https://travis-ci.org/harveybc/feature_eng.svg?branch=master)](https://travis-ci.org/harveybc/feature_eng)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_eng.readthedocs.io/en/latest/)
@@ -9,9 +9,10 @@ A simple data pre-processor that trims the constant valued columns.  Also remove
 
 ## Description
 
-Trims the constant valued columns. Also removes rows from the start and the end of a dataset with features with consecutive zeroes. 
+Performs MSSA decomposition of an input dataset, uses a configurable number of output channels and optionally 
+grouping similar components.
 
-The data-trimmer is implemented in the HeuristicTS class, it has methods for loading a dataset trimming it an producing an  output, please see [test_heuristic_ts](https://github.com/harveybc/feature_eng/blob/master/tests/heuristic_ts/test_heuristic_ts.py), tests 1 to 3. It can also be used via command line, by default it performs auto-trimming, but it can be configured manually by using the --no_auto_trim option.
+The mssa_decomposer is implemented in the MSSADecomposer class, it has methods for loading a dataset processing it an producing an output, please see [test_mssa_decomposer](https://github.com/harveybc/feature_eng/blob/master/tests/mssa_decomposer/test_mssa_decomposer.py)
 
 It also saves a configuration file, that is a CSV files with removed files and columns for applying similar  trimming to another dataset. Usable both from command line and from class methods (see [tests folder](https://github.com/harveybc/feature_eng/tree/master/tests)).
 
@@ -21,8 +22,8 @@ The module is installed with the feature_eng package, the instructions are descr
 
 ### Command-Line Execution
 
-The data-trimmer also is implemented as a console command:
-> data-trimmer -- input_file <input_dataset> <optional_parameters>
+The mssa_decomposer also is implemented as a console command:
+> mssa_decomposer -- input_file <input_dataset> <optional_parameters>
 
 ### Command-Line Parameters
 
@@ -40,14 +41,14 @@ The following examples show both the class method and command line uses.
 
 ### Usage via Class Methods
 ```python
-from feature_eng.heuristic_ts.heuristic_ts import HeuristicTS
+from feature_eng.mssa_decomposer.mssa_decomposer import MSSADecomposer
 # configure parameters (same vaiable names as command-line parameters)
 class Conf:
     def __init__(self):
         self.input_file = "tests/data/test_input.csv"
 conf = Conf()
 # instance trimmer class and loads dataset
-dt = HeuristicTS(conf)
+dt = MSSADecomposer(conf)
 # do the trimming
 rows_t, cols_t = dt.trim_auto()
 # save output to output file
@@ -56,7 +57,7 @@ dt.store()
 
 ### Usage via CLI
 
-> data-trimmer --input_file "tests/data/test_input.csv"
+> mssa_decomposer --input_file "tests/data/test_input.csv"
 
 
 
