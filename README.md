@@ -116,7 +116,7 @@ To create a plugin, there are two ways, the first one allows to install the plug
 
 The following procedure allows to create a plugin as a python package with setuptools, install it, verify that is installed and use the plugin.
 
-1. Create a new package with the same directory structure of the [standardize plugin example](../master/examples/standardizer/)
+1. Create a new package with the same directory structure of the [standardizer plugin example](../master/examples/standardizer/)
 2. Edit the setup.py or setup.cfg and add your package name as a feature_eng plugin (with a correspondent plugin name) in the entry_points section as follows:
 > setup(
 >     ...
