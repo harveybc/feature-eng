@@ -33,7 +33,7 @@ Also, the installation can be made by clonning the github repo and manually inst
 5. Add the repo folder to the environment variable PYTHONPATH
 6. (Optional) Perform tests
 > python setup.py test
-6. (Optional) Generate Sphinx Documentation
+7. (Optional) Generate Sphinx Documentation
 > python setup.py docs
 
 ### Command-Line Execution
@@ -87,7 +87,7 @@ dt.store()
 
 All the plugin modules and their CLI commands are installed with the feature-eng package, the following sections describe each module briefly and link to each module's basic documentation. 
 
-Additional detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 6 of the installation process, it contains documentation of the classes and methods of all modules in the feature-eng package. 
+Additional detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 7 of the installation process, it contains documentation of the classes and methods of all modules in the feature-eng package. 
 
 ## Heuristic Training Signal Generator
 
