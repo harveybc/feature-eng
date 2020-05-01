@@ -48,11 +48,11 @@ feature_eng is implemented as a console command:
 * __--input_file <filename>__: The only mandatory parameter, is the filename for the input dataset to be processed with a plugin.
 * __--output_file <filename>__: (Optional) Filename for the output dataset. Defaults to the input dataset with the .output extension.
 * __--input_config_file <filename>__: (Optional) Imports an existing configuration file and processes a dataset with it.
-* __--output_config_file <filename>__: (Optional) Filename for the output configuration containing rows trimmed in columns 0 and columns trimmed in column 1. Defaults 
+* __--output_config_file <filename>__: (Optional) Filename for the output configuration that can be used to process other datasets.
 
 ## Examples of usage
 
-The following examples show both the class method and command line uses for one module, for examples of other modules, please see the specific module´s documentation.
+The following examples show both the class method and command line uses for one module, for examples of other plugins, please see the specific module´s documentation.
 
 ### Example: Usage via CLI to list installed plugins
 
@@ -106,11 +106,11 @@ Performs MSSA prediction for a configurable number of forward ticks, save the .o
 See [MSSA Predictor Readme](../master/README_mssa_predictor.md) for detailed description and usage instructions.
 
 
-## Plugin Creation
+## Plugin Creation and Installation
 
 To create a plugin, there are two ways, the first one allows to install the plugin from an external python package using setuptools and is useful for testing your plugins, the second way is to add a new pre-installed plugin to the feature-eng package by making a pull request to my repo so i can review it and merge it. Both methods are described in the following sections.
 
-### External Plugin Creation
+### External Plugins
 
 The following procedure allows to create a plugin as a python package with setuptools, install it, verify that is installed and use the plugin.
 
@@ -129,14 +129,15 @@ Check that <PLUGIN_NAME> appears in the list of installed plugins.
 5. Use your newly installed plugin
 > feature_eng --plugin <PLUGIN_NAME> --plugin_option1 --plugin_option2 ...
 
-### Internal Plugin Creation
+### Internal Plugins 
 
 The following procedure allows to contribute to the feature_eng repository by creating a new plugin to be included in the pre-installed plugins.
 1. Fork the feature_eng repository via the github homepage 
 2. Clone your fork using github Desktop or via command line into a local directory
 3. Create a new branch called with the name of the new plugin using github Desktop and select it
 4. Cd to the feature_eng fork directory
-5. Create the new module inside the plugins directory, following the structure of the existing plugins
+5. Create the new module implementation inside the plugins directory, following the structure of the existing plugins
+6. Create the new module tests inside the tests directory, following the structure of the existing tests
 7. Make a commit and push to save your changes to github
 8. Make a Pull Request to the master branch of my feature_eng repo so i can review the changes and merge them with my existing code.
 
