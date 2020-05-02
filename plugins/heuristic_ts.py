@@ -42,7 +42,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-class FeatureEngPlugin(FeatureEng): 
+class HeuristicTS(FeatureEng): 
     """ The Data Trimmer feature_eng class """
 
     def __init__(self, conf):
