@@ -61,7 +61,7 @@ class TestFeatureEng:
         self.dt.find_plugins()
         # assertion
         assert (len(self.dt.discovered_plugins) > 0)
-s
+
     def test_C01T02_plugin_load(self):
         """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
         # Load dataset
