@@ -11,7 +11,6 @@ __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
-
 class Conf:
     """ This method initialize the configuration variables for a plugin """
     def __init__(self):
