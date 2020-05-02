@@ -46,6 +46,9 @@ class FeatureEng():
             if hasattr(conf, "plugin"):
                 self.plugin = conf.plugin
                 # Load plugin
+                _logger.debug("Finding Plugins.")
+                self.find_plugins()
+                # Load plugin
                 _logger.debug("Loading plugin.")
                 self.load_plugin()
                 self.fep = self.plugin_entry_point.FeatureEngPlugin(conf)
@@ -58,6 +61,9 @@ class FeatureEng():
                 self.list_plugins = True
                 _logger.debug("Listing plugins.")
                 self.find_plugins()
+                _logger.debug("Priniting plugins.")
+                self.print_plugins()
+                
             else:
                 self.list_plugins = False
             """ If true, lists all installed external and internal plugins. """
@@ -125,7 +131,7 @@ class FeatureEng():
         if self.plugin != None:    
             # Load plugin
             _logger.debug("Finding Plugins.")
-            self.load_plugin()
+            self.find_plugins()
             # Load plugin
             _logger.debug("Loading plugin.")
             self.load_plugin()
