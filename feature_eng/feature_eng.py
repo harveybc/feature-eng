@@ -43,7 +43,7 @@ class FeatureEng():
             else:
                 self.output_config_file = None
             """ Path of the output configuration """
-             if hasattr(conf, "plugin"):
+            if hasattr(conf, "plugin"):
                 self.plugin = conf.plugin
                 # Load plugin
                 _logger.debug("Loading plugin.")
