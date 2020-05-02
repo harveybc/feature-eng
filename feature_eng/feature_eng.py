@@ -124,6 +124,9 @@ class FeatureEng():
         self.parse_args(args)
         if self.plugin != None:    
             # Load plugin
+            _logger.debug("Finding Plugins.")
+            self.load_plugin()
+            # Load plugin
             _logger.debug("Loading plugin.")
             self.load_plugin()
             # Instantiate plugin class
@@ -180,6 +183,8 @@ class FeatureEng():
             for entry_point
             in pkg_resources.iter_entry_points('feature_eng.plugins')
         }
+
+    def print_plugins(self):
         for key, value in self.discovered_plugins:
             print(key+"\n")
 
