@@ -28,7 +28,7 @@ class FeatureEng():
         if conf != None:
             self.input_file = conf.input_file
             """ Path of the input dataset """
-             if hasattr(conf, "output_file"):
+            if hasattr(conf, "output_file"):
                 self.output_file = conf.output_file
             else:
                 self.output_file = self.input_file + ".output"
