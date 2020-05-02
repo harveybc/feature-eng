@@ -28,7 +28,6 @@ class Conf:
         self.ema_slow = 1
         self.forward_ticks = 5    
 
-
 class TestFeatureEng:
     """ Component Tests  """
 
