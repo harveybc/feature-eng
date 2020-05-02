@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
-
 import pytest
 import csv
 import sys
 import os
 from filecmp import cmp
-
 from feature_eng.feature_eng import FeatureEng
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
- 
+
 
 class Conf:
+    """ This method initialize the configuration variables for a plugin """
     def __init__(self):
         """ Component Tests Constructor """
         fname = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
@@ -23,6 +22,11 @@ class Conf:
         fname = os.path.join(os.path.dirname(__file__), "data/test_output.csv")
         self.output_file = fname
         """ Output dataset filename """
+        self.list_plugins = False
+        self.plugin = "heuristic_ts"
+        self.ema_fast = 0
+        self.ema_slow = 1
+        self.forward_ticks = 5    
 
 class TestFeatureEng:
     """ Component Tests  """
@@ -34,12 +38,6 @@ class TestFeatureEng:
         """ Data trimmer object """
         self.rows_d, self.cols_d = self.get_size_csv(self.conf.input_file)
         """ Get the number of rows and columns of the test dataset """
-        self.dt.list_plugins = False
-        self.dt.plugin = "heuristic_ts"
-        self.dt.ema_fast = 0
-        self.dt.ema_slow = 1
-        self.dt.forward_ticks = 5
-        
         try:
             os.remove(self.conf.output_file)
         except:
@@ -60,16 +58,18 @@ class TestFeatureEng:
 
     def test_C01T01_list_plugins(self):
         """ Asses that plugin list has more than zero installed plugins """
-        self.dt.list_plugins = True
-        self.dt.core()
+        self.dt.find_plugins()
         # assertion
-        assert (len(self.dt.plugin_list) > 0)
-
+        assert (len(self.dt.discovered_plugins) > 0)
+s
     def test_C01T02_plugin_load(self):
         """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
-        self.dt.core()
+        # Load dataset
+        self.fep.load_ds()
+        # Perform Core Task
+        self.fep.core()
         # save output to file
-        self.dt.store()
+        self.fep.store()
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
