@@ -54,7 +54,7 @@ class FeatureEng():
             else:
                 self.plugin = None
             """ Plugin to load """
-             if hasattr(conf, "list_plugins"):
+            if hasattr(conf, "list_plugins"):
                 self.list_plugins = True
                 _logger.debug("Listing plugins.")
                 self.find_plugins()
