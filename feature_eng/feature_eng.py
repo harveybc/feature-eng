@@ -83,8 +83,7 @@ class FeatureEng():
     def assign_arguments(self,pargs):
         self.list_plugins =  False
         if hasattr(pargs, "plugin"):
-           self.plugin = pargs.plugin
-
+            self.plugin = pargs.plugin
             if hasattr(pargs, "input_file"):
                 if pargs.input_file != None: 
                     self.input_file = pargs.input_file
