@@ -51,7 +51,7 @@ class FeatureEng():
                 # Load plugin
                 _logger.debug("Loading plugin.")
                 self.load_plugin()
-                self.fep = self.plugin_entry_point.FeatureEngPlugin(conf)
+                self.fep = self.plugin_entry_point:FeatureEngPlugin(conf)
                 # Load input dataset
                 _logger.debug("Loading input file.")
             else:
