@@ -49,43 +49,49 @@ class HeuristicTS(FeatureEng):
 
     def __init__(self, conf):
         """ Constructor using same parameters as base class """
-        self.input_file = conf.input_file
-        """ Path of the input dataset """
-        if hasattr(conf, "output_file"):
-            self.output_file = conf.output_file
+        if conf != None:
+            self.input_file = conf.input_file
+            """ Path of the input dataset """
+            if hasattr(conf, "output_file"):
+                self.output_file = conf.output_file
+            else:
+                self.output_file = self.input_file + ".output"
+            """ Path of the output dataset """
+            if hasattr(conf, "input_config_file"):
+                self.input_config_file = conf.input_config_file
+            else:
+                self.input_config_file = None
+            """ Path of the input configuration """
+            if hasattr(conf, "output_config_file"):
+                self.output_config_file = conf.output_config_file
+            else:
+                self.output_config_file = None
+            if hasattr(conf, "ema_fast"):
+                self.ema_fast = conf.ema_fast
+            else:
+                self.ema_fast = 0
+            if hasattr(conf, "ema_slow"):
+                self.ema_slow = conf.ema_slow
+            else:
+                self.ema_slow = 1
+            if hasattr(conf, "forward_ticks"):
+                self.forward_ticks = conf.forward_ticks
+            else:
+                self.forward_ticks = 10
+            if hasattr(conf, "plugin"):
+                self.plugin = conf.plugin
+            else:
+                self.plugin = None
+            if hasattr(conf, "list_plugins"):
+                    self.list_plugins = True
+            else:
+                self.list_plugins = False
         else:
-            self.output_file = self.input_file + ".output"
-        """ Path of the output dataset """
-        if hasattr(conf, "input_config_file"):
-            self.input_config_file = conf.input_config_file
-        else:
-            self.input_config_file = None
-        """ Path of the input configuration """
-        if hasattr(conf, "output_config_file"):
-            self.output_config_file = conf.output_config_file
-        else:
-            self.output_config_file = None
-        if hasattr(conf, "ema_fast"):
-            self.ema_fast = conf.ema_fast
-        else:
-            self.ema_fast = 0
-        if hasattr(conf, "ema_slow"):
-            self.ema_slow = conf.ema_slow
-        else:
-            self.ema_slow = 1
-        if hasattr(conf, "forward_ticks"):
-            self.forward_ticks = conf.forward_ticks
-        else:
-            self.forward_ticks = 10
-        if hasattr(conf, "plugin"):
-            self.plugin = conf.plugin
-        else:
-            self.plugin = None
-        if hasattr(conf, "list_plugins"):
-                self.list_plugins = True
-        else:
-            self.list_plugins = False
-            
+            self.input_ds = None
+        self.r_rows = []
+        self.r_cols = []
+        self.config_ds = None
+
         
     def parse_args(self, args):
         """ Parse command line parameters
