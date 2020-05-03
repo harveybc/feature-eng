@@ -48,9 +48,11 @@ class HeuristicTS(FeatureEng):
     """ The Data Trimmer feature_eng class """
 
     def __init__(self, conf):
-    #    """ Constructor using same parameters as base class """
-        #super().__init__(conf)
-        pass
+        """ Constructor using same parameters as base class """
+        self.input_file = super().input_file
+        self.output_file = super().output_file
+        self.input_config_file = super().input_file
+        self.output_config_file = super().output_file
 
     def parse_args(self, args):
         """ Parse command line parameters
