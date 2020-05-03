@@ -192,7 +192,7 @@ class FeatureEng():
         }
 
     def print_plugins(self):
-        for key, value in self.discovered_plugins:
+        for key in self.discovered_plugins:
             print(key+"\n")
 
     def store(self):
