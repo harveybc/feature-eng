@@ -137,9 +137,10 @@ class FeatureEng():
             _logger.debug("Loading plugin.")
             self.load_plugin()
             # Instantiate plugin class
-            self.fep = self.plugin_entry_point.FeatureEngPlugin()
+            self.fep = self.plugin_entry_point(conf)
+            self.fep.parse_args(args)
             # Load input dataset
-            if self.input_ds == None:
+            if self.fep.input_ds == None:
                 _logger.debug("Loading input file.")
                 #self.load_ds()
                 self.fep.load_ds()
