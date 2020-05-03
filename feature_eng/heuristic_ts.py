@@ -32,7 +32,7 @@ import argparse
 import sys
 import logging
 import numpy as np
-#from feature_eng.feature_eng import FeatureEng
+from feature_eng.feature_eng import FeatureEng
 from itertools import zip_longest 
 
 # from heuristic_ts import __version__
@@ -44,7 +44,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-class HeuristicTS(): 
+class HeuristicTS(FeatureEng): 
     """ The Data Trimmer feature_eng class """
 
     def __init__(self, conf):
