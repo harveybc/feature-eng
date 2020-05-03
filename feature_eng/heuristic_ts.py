@@ -77,7 +77,15 @@ class HeuristicTS(FeatureEng):
             self.forward_ticks = conf.forward_ticks
         else:
             self.forward_ticks = 10
-
+        if hasattr(conf, "plugin"):
+            self.plugin = conf.plugin
+        else:
+            self.plugin = None
+        if hasattr(conf, "list_plugins"):
+                self.list_plugins = True
+        else:
+            self.list_plugins = False
+            
         
     def parse_args(self, args):
         """ Parse command line parameters
