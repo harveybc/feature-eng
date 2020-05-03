@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-This File contains the HeuristicTS class. To run this script uncomment or add the following lines in the
+This File contains the HeuristicTS class plugin. To run this script uncomment or add the following lines in the
 [options.entry_points] section in setup.cfg:
 
+#  TODO: MODIFICAR PARA USO COMO PLUGIN
+
     console_scripts =
-        data-trimmer = heuristic_ts.__main__:main
+        heu = heuristic_ts.__main__:main
 
 Then run `python setup.py install` which will install the command `data-trimmer`
 inside your current environment.
@@ -30,7 +32,7 @@ import argparse
 import sys
 import logging
 import numpy as np
-from feature_eng.feature_eng import FeatureEng
+#from feature_eng.feature_eng import FeatureEng
 from itertools import zip_longest 
 
 # from heuristic_ts import __version__
@@ -42,7 +44,7 @@ __license__ = "mit"
 _logger = logging.getLogger(__name__)
 
 
-class HeuristicTS(FeatureEng): 
+class HeuristicTS(): 
     """ The Data Trimmer feature_eng class """
 
     def __init__(self, conf):
