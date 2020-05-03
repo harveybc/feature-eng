@@ -65,6 +65,19 @@ class HeuristicTS(FeatureEng):
             self.output_config_file = conf.output_config_file
         else:
             self.output_config_file = None
+        if hasattr(conf, "ema_fast"):
+            self.ema_fast = conf.ema_fast
+        else:
+            self.ema_fast = 0
+        if hasattr(conf, "ema_slow"):
+            self.ema_slow = conf.ema_slow
+        else:
+            self.ema_slow = 1
+        if hasattr(conf, "forward_ticks"):
+            self.forward_ticks = conf.forward_ticks
+        else:
+            self.forward_ticks = 10
+
         
     def parse_args(self, args):
         """ Parse command line parameters
