@@ -81,7 +81,7 @@ class TestFeatureEng:
             + " --output_file "
             + self.conf.output_file
             + " --forward_ticks "
-            + str(self.dt.forward_ticks)
+            + str(self.dt.fep.forward_ticks)
         )
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
