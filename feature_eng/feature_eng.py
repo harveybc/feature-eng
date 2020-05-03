@@ -219,7 +219,7 @@ class FeatureEng():
             description="FeatureEng: Feature engineering operations."
         )
         parser = self.parse_cmd(parser)
-        pargs = parser.parse_known_args(args)
+        pargs, unknown = parser.parse_known_args(args)
         self.assign_arguments(pargs)
         
 def run(args):
