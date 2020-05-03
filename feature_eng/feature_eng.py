@@ -214,8 +214,13 @@ class FeatureEng():
         Returns:
         :obj:`argparse.Namespace`: command line parameters namespace
         """
-        pass
-
+        parser = argparse.ArgumentParser(
+            description="FeatureEng: Feature engineering operations."
+        )
+        parser = self.parse_cmd(parser)
+        pargs = parser.parse_args(args)
+        self.assign_arguments(pargs)
+        
 def run(args):
     """ Entry point for console_scripts """
     feature_eng = FeatureEng(None)
