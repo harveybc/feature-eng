@@ -47,9 +47,9 @@ _logger = logging.getLogger(__name__)
 class HeuristicTS(FeatureEng): 
     """ The Data Trimmer feature_eng class """
 
-    def __init__(self, conf):
-        """ Constructor using same parameters as base class """
-        super().__init__(conf)
+    #def __init__(self, conf):
+    #    """ Constructor using same parameters as base class """
+        #super().__init__(conf)
 
     def parse_args(self, args):
         """ Parse command line parameters
