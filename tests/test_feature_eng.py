@@ -72,7 +72,7 @@ class TestFeatureEng:
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
-        assert (cols_o == 1) and (rows_o == self.dt.rows_d - self.dt.forward_ticks)
+        assert (cols_o == 1) and (rows_o == self.dt.fep.rows_d - self.dt.fep.forward_ticks)
 
     def test_C01T03_cmdline_plugin_load(self):
         """ same as C01T02, but via command-line """
