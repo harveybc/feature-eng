@@ -84,7 +84,9 @@ class TestFeatureEng:
             + str(self.dt.fep.forward_ticks)
         )
         # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
-        assert (cols_o == 1) and (rows_o == self.dt.fep.rows_d - self.dt.fep.forward_ticks)
+        assert (cols_o == 1) and (rows_o == rows_d - self.dt.fep.forward_ticks)
         
