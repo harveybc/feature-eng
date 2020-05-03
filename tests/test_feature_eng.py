@@ -86,5 +86,5 @@ class TestFeatureEng:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
-        assert (cols_o == 1) and (rows_o == self.dt.rows_d - self.dt.forward_ticks)
+        assert (cols_o == 1) and (rows_o == self.dt.fep.rows_d - self.dt.fep.forward_ticks)
         
