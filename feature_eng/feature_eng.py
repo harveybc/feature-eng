@@ -27,25 +27,18 @@ class FeatureEng():
         self.setup_logging(logging.DEBUG)
         _logger.info("Starting feature_eng...")
         if conf != None:
-            self.input_file = conf.input_file
-            """ Path of the input dataset """
-            if hasattr(conf, "output_file"):
-                self.output_file = conf.output_file
+            if hasattr(conf, "input_plugin"):
+                self.input_plugin = conf.input_plugin
             else:
-                self.output_file = self.input_file + ".output"
-            """ Path of the output dataset """
-            if hasattr(conf, "input_config_file"):
-                self.input_config_file = conf.input_config_file
+                self.input_plugin = "csv_input"
+            """ Name of the input plugin """
+            if hasattr(conf, "output_plugin"):
+                self.output_plugin = conf.output_plugin
             else:
-                self.input_config_file = None
-            """ Path of the input configuration """
-            if hasattr(conf, "output_config_file"):
-                self.output_config_file = conf.output_config_file
-            else:
-                self.output_config_file = None
-            """ Path of the output configuration """
-            if hasattr(conf, "plugin"):
-                self.plugin = conf.plugin
+                self.output_plugin = "csv_output"
+            """ Name of the output plugin """
+            if hasattr(conf, "core_plugin"):
+                self.core_plugin = conf.core_plugin
                 # Load plugin
                 _logger.debug("Finding Plugins.")
                 self.find_plugins()
@@ -56,7 +49,7 @@ class FeatureEng():
                 # Load input dataset
                 _logger.debug("Loading input file.")
             else:
-                self.plugin = None
+                self.core_plugin = None
             """ Plugin to load """
             if hasattr(conf, "list_plugins"):
                 self.list_plugins = True
@@ -64,11 +57,9 @@ class FeatureEng():
                 self.find_plugins()
                 _logger.debug("Priniting plugins.")
                 self.print_plugins()
-                
             else:
                 self.list_plugins = False
             """ If true, lists all installed external and internal plugins. """
-
         else :
             self.input_ds = None
         self.r_rows = []
