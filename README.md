@@ -9,9 +9,18 @@ Plug-in based feature engineering operations, transform raw data to generate new
 
 ## Description
 
-Implements modular components for feature engineering, it can be expanded by installing plugins, it includes some plugins: a heuristic training signal generator, a MSSA decomposer and a MSSA predictor. 
+Implements modular components for feature engineering, it can be expanded by installing plugins, there are three types of plugins:
+* Input plugins: load the data to be processed
+* Operations plugins: perform feature engineering operations on loaded data 
+* Output plugins: save the results of the feature engineering operations
 
-All modules are usable both from command line and from class methods library.
+It includes some pre-installed plugins:
+* Heuristic training signal generator
+* MSSA decomposer
+* MSSA predictor
+* CSV file input and output plugins
+
+Usable both from command line and from class methods library.
 
 ## Installation
 
@@ -44,11 +53,9 @@ feature_eng is implemented as a console command:
 ### Command-Line Parameters
 
 * __--list_plugins__: Shows a list of available plugins.
-* __--plugin <plugin_name>__: Loads a plugin to process an input dataset.
-* __--input_file <filename>__: The only mandatory parameter, is the filename for the input dataset to be processed with a plugin.
-* __--output_file <filename>__: (Optional) Filename for the output dataset. Defaults to the input dataset with the .output extension.
-* __--input_config_file <filename>__: (Optional) Imports an existing configuration file and processes a dataset with it.
-* __--output_config_file <filename>__: (Optional) Filename for the output configuration that can be used to process other datasets.
+* __--core_plugin <ops_plugin_name>__: Feature engineering core operations plugin to process an input dataset.
+* __--input_plugin <input_lugin_name>__: Input dataset importing plugin. Defaults to csv_input.
+* __--output_plugin <output_plugin_name>__: Output dataset exporting plugin. Defaults to csv_output.
 
 ## Examples of usage
 
@@ -127,7 +134,7 @@ The following procedure allows to create a plugin as a python package with setup
 > feature_eng --list_plugins
 Check that <PLUGIN_NAME> appears in the list of installed plugins.
 5. Use your newly installed plugin
-> feature_eng --plugin <PLUGIN_NAME> --plugin_option1 --plugin_option2 ...
+> feature_eng --core_plugin <PLUGIN_NAME> --plugin_option1 --plugin_option2 ...
 
 ### Internal Plugins 
 

@@ -33,7 +33,7 @@ class TestFeatureEng:
     def setup_method(self, test_method):
         """ Component Tests Constructor """
         self.conf = Conf()
-        self.dt = FeatureEng(self.conf)
+        self.fe = FeatureEng(self.conf)
         """ Data trimmer object """
         self.rows_d, self.cols_d = self.get_size_csv(self.conf.input_file)
         """ Get the number of rows and columns of the test dataset """
@@ -57,18 +57,18 @@ class TestFeatureEng:
 
     def test_C01T01_list_plugins(self):
         """ Asses that plugin list has more than zero installed plugins """
-        self.dt.find_plugins()
+        self.fe.find_plugins()
         # assertion
         assert (len(self.dt.discovered_plugins) > 0)
 
     def test_C01T02_plugin_load(self):
         """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
-        # Load dataset
-        self.dt.fep.load_ds()
-        # Perform Core Task
-        self.dt.fep.core()
-        # save output to file
-        self.dt.fep.store()
+        # Load a dataset from the input plugin entry point
+        input_ds = self.fe.ep_input.load_ds()
+        # Perform core operations from the core plugins on the input dataset
+        output_ds = self.fe.ep_core.core(input_ds)
+        # Save output to file
+        self.fe.ep_output.store_ds()
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
@@ -76,17 +76,17 @@ class TestFeatureEng:
 
     def test_C01T03_cmdline_plugin_load(self):
         """ same as C01T02, but via command-line """
-        os.system("feature_eng --plugin heuristic_ts --input_file "
+        os.system("feature_eng --core_plugin heuristic_ts --input_file "
             + self.conf.input_file
             + " --output_file "
             + self.conf.output_file
             + " --forward_ticks "
-            + str(self.dt.fep.forward_ticks)
+            + str(self.dt.ep_core.forward_ticks)
         )
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
-        assert (cols_o == 1) and (rows_o == rows_d - self.dt.fep.forward_ticks)
+        assert (cols_o == 1) and (rows_o == rows_d - self.dt.ep_core.forward_ticks)
         
