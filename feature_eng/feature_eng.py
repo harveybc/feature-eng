@@ -24,9 +24,9 @@ class FeatureEng():
     def __init__(self, conf):
         """ Constructor """
         # if conf =  None, loads the configuration from the command line arguments
-        self.setup_logging(logging.DEBUG)
-        _logger.info("Starting feature_eng...")
         if conf != None:
+            self.setup_logging(logging.DEBUG)
+            _logger.info("Starting feature_eng via class constructor...")
             if hasattr(conf, "input_plugin"):
                 self.input_plugin = conf.input_plugin
             else:
@@ -38,19 +38,9 @@ class FeatureEng():
                 self.output_plugin = "csv_output"
             """ Name of the output plugin """
             if hasattr(conf, "core_plugin"):
-                self.core_plugin = conf.core_plugin
-                # Load plugin
-                _logger.debug("Finding Plugins.")
-                self.find_plugins()
-                # Load plugin
-                _logger.debug("Loading plugin.")
-                self.load_plugin()
-                self.fep = self.plugin_entry_point(conf)
-                # Load input dataset
-                _logger.debug("Loading input file.")
+                self.core(conf)
             else:
                 self.core_plugin = None
-            """ Plugin to load """
             if hasattr(conf, "list_plugins"):
                 self.list_plugins = True
                 _logger.debug("Listing plugins.")
@@ -119,32 +109,15 @@ class FeatureEng():
         Args:
         args ([str]): command line parameter list
         """
-        self.parse_args(args)
+        self.setup_logging(logging.DEBUG)
+        conf = self.parse_args(args)
         if self.plugin != None:    
-            # Load plugin
-            _logger.debug("Finding Plugins.")
-            self.find_plugins()
-            # Load plugin
-            _logger.debug("Loading plugin.")
-            self.load_plugin()
-            # Instantiate plugin class
-            self.fep = self.plugin_entry_point(None)
-            self.fep.parse_args(args)
-            # Load input dataset
-            if self.fep.input_ds == None:
-                _logger.debug("Loading input file.")
-                #self.load_ds()
-                self.fep.load_ds()
-            # Start core function
-            #self.core()
-            self.fep.core()
-            # Start logger
-            _logger.debug("Saving results.")
-            # Save results and output configuration
-            self.fep.store()
+            self.core(conf)
         else:
             if self.list_plugins == True:
                 self.find_plugins()
+            else: 
+                _logger.debug("Error: No core plugi provided. for help, use feature_eng --help")
         _logger.info("Script end.")
 
     def setup_logging(self, loglevel):
@@ -191,12 +164,26 @@ class FeatureEng():
         """ Save preprocessed data and the configuration of the feature_eng. """
         pass
 
-    def core(self):
+    def core(self,conf):
         """ Core feature_eng task after starting the instance with the main method.
             To be overriden by child classes depending on their feature_eng task.
         """
-        pass
-
+        self.core_plugin = conf.core_plugin
+        """ Core plugin to load """
+        _logger.debug("Finding Plugins.")
+        self.find_plugins()
+        _logger.debug("Loading plugins.")
+        self.load_plugins()
+        _logger.debug("Initializing plugins.")
+        self.init_plugins(conf)
+        _logger.debug("Loading input dataset from the input plugin.")
+        self.input_ds = self.ep_input.load_ds() 
+        _logger.debug("Performing core operations from the  core plugin.")
+        self.output_ds = self.ep_core.core(self.input_ds) 
+        _logger.debug("Storing results using the output plugin.")
+        self.ep_output.store(self.output_ds) 
+        _logger.info("feature_eng finished.")
+            
     def parse_args(self, args):
         """Parse command line parameters, to be overriden by child classes depending on their command line parameters if they are console scripts.
 
