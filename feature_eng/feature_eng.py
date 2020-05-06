@@ -38,8 +38,9 @@ class FeatureEng(FeatureEngBase):
                 _logger.debug("Printing plugins.")
                 self.print_plugins()
             # execute core operations
-            else hasattr(self, "core_plugin"):
-                self.core()
+            else 
+                if hasattr(self, "core_plugin"):
+                    self.core()
             
     def main(self, args):
         """ Starts an instance. Main entry point allowing external calls.
