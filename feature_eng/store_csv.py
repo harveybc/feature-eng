@@ -3,7 +3,7 @@
 This File contains the StoreCSV class plugin. 
 """
 
-from numpy import genfromtxt
+from numpy import savetxt
 from sys import exit
 
 __author__ = "Harvey Bastidas"
@@ -20,7 +20,7 @@ class StoreCSV():
     
     def store_csv(self, output_ds):
         """ Save preprocessed data """
-        np.savetxt(self.output_file, output_ds, delimiter=",")
+        savetxt(self.output_file, output_ds, delimiter=",")
         
     def assign_arguments(self,conf):
         """ Assign configuration values to class attributes""" 

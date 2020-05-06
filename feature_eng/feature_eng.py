@@ -50,7 +50,7 @@ class FeatureEng(FeatureEngBase):
         self.setup_logging(logging.DEBUG)
         self.parse_args(args)
         if self.core_plugin != None:    
-            self.core(conf)
+            self.core(self.unknown)
         else:
             if self.list_plugins == True:
                 _logger.debug("Listing plugins.")
