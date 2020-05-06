@@ -38,7 +38,7 @@ class FeatureEng(FeatureEngBase):
                 _logger.debug("Printing plugins.")
                 self.print_plugins()
             # execute core operations
-            elif hasattr(self, "core_plugin"):
+            else hasattr(self, "core_plugin"):
                 self.core()
             
     def main(self, args):
