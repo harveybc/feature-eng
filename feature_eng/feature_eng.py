@@ -89,17 +89,17 @@ class FeatureEng(FeatureEngBase):
         self.discovered_input_plugins = {
             entry_point.name: entry_point.load()
             for entry_point
-            in pkg_resources.iter_entry_points('feature_eng.plugins.input')
+            in pkg_resources.iter_entry_points('feature_eng.plugins_input')
         }
         self.discovered_output_plugins = {
             entry_point.name: entry_point.load()
             for entry_point
-            in pkg_resources.iter_entry_points('feature_eng.plugins.output')
+            in pkg_resources.iter_entry_points('feature_eng.plugins_output')
         }
         self.discovered_core_plugins = {
             entry_point.name: entry_point.load()
             for entry_point
-            in pkg_resources.iter_entry_points('feature_eng.plugins.core')
+            in pkg_resources.iter_entry_points('feature_eng.plugins_core')
         }
 
     def print_plugins(self):
