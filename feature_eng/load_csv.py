@@ -71,41 +71,4 @@ class LoadCSV(FeatureEngBase):
             self.forward_ticks = pargs.forward_ticks
         else:
             self.forward_ticks = 10
-            
-
-    def core(self):
-        """ Core feature_eng task after starting the instance with the main method.
-            Decide from the arguments, what trimming method to call.
-
-        Args:
-        args (obj): command line parameters as objects
-        """
-
-        self.training_signal()
-        
-    
-    def training_signal(self):
-        """ Performs the substraction of the ema_fast forwarded forward_ticks
-            minus the ema_slow.
-        """
-        self.output_ds = np.empty(shape=(self.rows_d-self.forward_ticks, 1))
-        for i in range(self.rows_d - self.forward_ticks): 
-            self.output_ds[i] = self.input_ds[i+self.forward_ticks, self.ema_fast]-self.input_ds[i, self.ema_slow]
-
-
-    def store(self):
-        """ Save preprocessed data and the configuration of the feature_eng. """
-        print("self.output_ds.shape = ", self.output_ds.shape)
-        _logger.debug("output_file = "+ self.output_file)
-        np.savetxt(self.output_file, self.output_ds, delimiter=",")
-      
-
-def run(args):
-    """ Entry point for console_scripts """
-    heuristic_ts = HeuristicTS(None)
-    heuristic_ts.main(args)
-
-
-if __name__ == "__main__":
-    run(sys.argv)
-
+ 
