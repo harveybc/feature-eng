@@ -28,7 +28,7 @@ class LoadCSV():
         """ Assign configuration values to class attributes""" 
         if hasattr(conf, "input_file"):
             self.input_file = conf.input_file
-       else:
+        else:
             print("Error: No input_file parameter provided for load_csv plugin.")
             exit()
             
