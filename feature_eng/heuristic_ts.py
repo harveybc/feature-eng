@@ -10,7 +10,7 @@ __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
-class StoreCSV(): 
+class HeuristicTS(): 
     """ Output plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
 
     def __init__(self, conf):
