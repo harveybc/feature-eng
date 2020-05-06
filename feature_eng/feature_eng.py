@@ -29,6 +29,7 @@ class FeatureEng(FeatureEngBase):
             self.setup_logging(logging.DEBUG)
             _logger.info("Starting feature_eng via class constructor...")
             # assign arguments to class attributes
+            self.conf =  conf
             self.assign_arguments(conf)
             # execute core operations
             if hasattr(self, "core_plugin"):
@@ -58,26 +59,26 @@ class FeatureEng(FeatureEngBase):
                 _logger.debug("Printing plugins.")
                 self.print_plugins()
             else: 
-                _logger.debug("Error: No core plugi provided. for help, use feature_eng --help")
+                _logger.debug("Error: No core plugin provided. for help, use feature_eng --help")
         _logger.info("Script end.")
 
-    def load_plugins(self, conf):
+    def load_plugins(self):
         """ Loads plugin entry points into class attributes"""
         if self.input_plugin in self.discovered_input_plugins:
             self.ep_i = self.discovered_input_plugins[self.input_plugin]
-            self.ep_input = self.ep_i(conf)
+            self.ep_input = self.ep_i(self.conf)
         else:
             print("Error: Input Plugin "+ self.input_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
         if self.output_plugin in self.discovered_output_plugins:
             self.ep_o = self.discovered_output_plugins[self.output_plugin]
-            self.ep_output = self.ep_o(conf)
+            self.ep_output = self.ep_o(self.conf)
         else:
             print("Error: Output Plugin "+ self.output_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
         if self.core_plugin in self.discovered_core_plugins:
             self.ep_c = self.discovered_core_plugins[self.core_plugin]
-            self.ep_core = self.ep_c(conf)
+            self.ep_core = self.ep_c(self.conf)
         else:
             print("Error: Core Plugin "+ self.core_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
