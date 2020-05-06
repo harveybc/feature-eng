@@ -22,7 +22,7 @@ class Conf:
         self.output_file = fname
         """ Output dataset filename """
         self.list_plugins = False
-        self.plugin = "heuristic_ts"
+        self.core_plugin = "heuristic_ts"
         self.ema_fast = 0
         self.ema_slow = 1
         self.forward_ticks = 5    
@@ -34,7 +34,7 @@ class TestFeatureEng:
         """ Component Tests Constructor """
         self.conf = Conf()
         self.fe = FeatureEng(self.conf)
-        """ Data trimmer object """
+        """ FeatureEng instance """
         self.rows_d, self.cols_d = self.get_size_csv(self.conf.input_file)
         """ Get the number of rows and columns of the test dataset """
         try:
@@ -63,6 +63,8 @@ class TestFeatureEng:
 
     def test_C01T02_plugin_load(self):
         """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
+        # Find Plugins
+        self.fe.find_plugins()
         # Load a dataset from the input plugin entry point
         input_ds = self.fe.ep_input.load_ds()
         # Perform core operations from the core plugins on the input dataset
