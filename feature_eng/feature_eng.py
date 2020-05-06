@@ -32,7 +32,7 @@ class FeatureEng(FeatureEngBase):
             self.assign_arguments(conf)
             # execute core operations
             if hasattr(self, "core_plugin"):
-                self.core(conf)
+                self.core()
             # list available plugins
             elif hasattr(self, "list_plugins"):
                 _logger.debug("Listing plugins.")
