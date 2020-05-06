@@ -113,8 +113,6 @@ class FeatureEng(FeatureEngBase):
 
     def core(self):
         """ Core feature_eng operations. """
-        self.core_plugin = self.conf.core_plugin
-        """ Core plugin to load """
         _logger.debug("Finding Plugins.")
         self.find_plugins()
         _logger.debug("Loading plugins.")
