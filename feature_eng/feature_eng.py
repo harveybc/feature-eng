@@ -78,6 +78,7 @@ class FeatureEng(FeatureEngBase):
             else:
                 # if using command line (conf == None), uses unknown parameters from arparser as params for plugins
                 _logger.debug("initializing input plugin via command line parameters.")
+                print("self.conf", self.conf)
                 print("self.unknown", self.unknown)
                 self.ep_input = self.ep_i(self.unknown)
                 
