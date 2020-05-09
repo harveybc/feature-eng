@@ -3,6 +3,7 @@
 This File contains the StoreCSV class plugin. 
 """
 
+from feature_eng.plugin_base import PluginBase
 from numpy import savetxt
 from sys import exit
 
@@ -10,26 +11,22 @@ __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
-class StoreCSV(): 
+class StoreCSV(PluginBase): 
     """ Output plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
 
     def __init__(self, conf):
         """ Constructor using same parameters as base class """
-        if conf != None:
-            self.assign_arguments(conf)
-    
+        super().__init__(conf)
+        # Insert your plugin initialization code here.
+        pass
+
+    def parse_cmd(self, parser):
+        """ Adds command-line arguments to be parsed, overrides base class """
+        parser.add_argument("--output_file", help="Output file to store the processed data.", default="")
+        return parser
+
     def store_data(self, output_ds):
         """ Save preprocessed data """
-        savetxt(self.output_file, output_ds, delimiter=",")
-        
-    def assign_arguments(self,conf):
-        """ Assign configuration values to class attributes""" 
-        if hasattr(conf, "input_file"):
-            self.input_file = conf.input_file
-        if hasattr(conf, "output_file"):
-            self.output_file = conf.output_file
-        else:
-            print("Warning: No output_file parameter provided for store_csv plugin. Using default input_file with .output extension.")
-            self.output_file = conf.input_file + ".output"
+        savetxt(self.conf.output_file, output_ds, delimiter=",")
             
     

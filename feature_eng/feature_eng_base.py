@@ -77,7 +77,7 @@ class FeatureEngBase():
         )
     
     def parse_args(self, args):
-        """Parse command line parameters, to be overriden by child classes depending on their command line parameters if they are console scripts.
+        """Parse command line parameters.
 
         Args:
         args ([str]): command line parameters as list of strings
