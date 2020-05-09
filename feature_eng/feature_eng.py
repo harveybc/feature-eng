@@ -72,12 +72,14 @@ class FeatureEng(FeatureEngBase):
         if self.input_plugin in self.discovered_input_plugins:
             self.ep_i = self.discovered_input_plugins[self.input_plugin]
             if self.command_line == False:
-                self.ep_input = self.ep_i(self.conf)
                 _logger.debug("initializing input plugin via constructor.")
+                self.ep_input = self.ep_i(self.conf)
+                
             else:
                 # if using command line (conf == None), uses unknown parameters from arparser as params for plugins
-                self.ep_input = self.ep_i(self.unknown)
                 _logger.debug("initializing input plugin via command line parameters.")
+                self.ep_input = self.ep_i(self.unknown)
+                
         else:
             print("Error: Input Plugin "+ self.input_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
