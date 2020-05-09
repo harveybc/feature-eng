@@ -51,7 +51,7 @@ class FeatureEngBase():
                 self.output_plugin = conf.output_plugin
             else:
                 self.output_plugin = "csv_output"
-        else 
+        else:
             if hasattr(conf, "list_plugins"):
                 if conf.list_plugins == True:
                     self.list_plugins = True
