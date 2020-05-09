@@ -33,8 +33,8 @@ class FeatureEngBase():
         parser.add_argument("--version", action="version", version="feature_eng")
         parser.add_argument("--list_plugins", help="lists all installed external and internal plugins")
         parser.add_argument("--core_plugin", help="Plugin to load ")
-        parser.add_argument("--input_plugin", help="Input CSV filename ")
-        parser.add_argument("--output_plugin", help="Output CSV filename")
+        parser.add_argument("--input_plugin", help="Input plugin to load ")
+        parser.add_argument("--output_plugin", help="Output plugin to load")
         parser.add_argument("-v","--verbose",dest="loglevel",help="set loglevel to INFO",action="store_const",const=logging.INFO)
         parser.add_argument("-vv","--very_verbose",dest="loglevel",help="set loglevel to DEBUG",action="store_const",const=logging.DEBUG)
         return parser
@@ -45,8 +45,10 @@ class FeatureEngBase():
             self.core_plugin = conf.core_plugin
             if hasattr(conf, "input_plugin"):
                 self.input_plugin = conf.input_plugin
+                _logger.debug("self.input_plugin assigned by parameter.")
             else:
                 self.input_plugin = "load_csv"
+                 _logger.debug("self.input_plugin assigned by default.")
             if hasattr(conf, "output_plugin"):
                 self.output_plugin = conf.output_plugin
             else:
