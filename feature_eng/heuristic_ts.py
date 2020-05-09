@@ -28,7 +28,7 @@ class HeuristicTS():
         self.output_ds = np.empty(shape=(self.rows_d-self.forward_ticks, 1))
         # calculate the output
         for i in range(self.rows_d - self.forward_ticks): 
-            self.output_ds[i] = self.input_ds[i+self.forward_ticks, self.ema_fast]-self.input_ds[i, self.ema_slow]
+            self.output_ds[i] = input_ds[i+self.forward_ticks, self.ema_fast]-input_ds[i, self.ema_slow]
         return self.output_ds
 
     def assign_arguments(self,conf):
