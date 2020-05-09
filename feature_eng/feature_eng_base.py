@@ -46,11 +46,11 @@ class FeatureEngBase():
             if hasattr(conf, "input_plugin"):
                 self.input_plugin = conf.input_plugin
             else:
-                self.input_plugin = "csv_input"
+                self.input_plugin = "load_csv"
             if hasattr(conf, "output_plugin"):
                 self.output_plugin = conf.output_plugin
             else:
-                self.output_plugin = "csv_output"
+                self.output_plugin = "store_csv"
         else:
             if hasattr(conf, "list_plugins"):
                 if conf.list_plugins == True:
