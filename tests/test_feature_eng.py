@@ -67,7 +67,7 @@ class TestFeatureEng:
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
-        assert (cols_o == 1) and (rows_o == self.dt.fep.rows_d - self.dt.fep.forward_ticks)
+        assert (cols_o == 1) and (rows_o == self.fe.fep.rows_d - self.fe.fep.forward_ticks)
 
     def test_C01T03_cmdline_plugin_load(self):
         """ same as C01T02, but via command-line """
@@ -76,12 +76,12 @@ class TestFeatureEng:
             + " --output_file "
             + self.conf.output_file
             + " --forward_ticks "
-            + str(self.dt.ep_core.forward_ticks)
+            + str(self.fe.ep_core.forward_ticks)
         )
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
-        assert (cols_o == 1) and (rows_o == rows_d - self.dt.ep_core.forward_ticks)
+        assert (cols_o == 1) and (rows_o == rows_d - self.fe.ep_core.forward_ticks)
         
