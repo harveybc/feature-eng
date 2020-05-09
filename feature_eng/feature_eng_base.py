@@ -31,16 +31,17 @@ class FeatureEngBase():
     def parse_cmd(self, parser):
         """ Adds command-line arguments to parse """
         parser.add_argument("--version", action="version", version="feature_eng")
-        parser.add_argument("--list_plugins", help="lists all installed external and internal plugins")
-        parser.add_argument("--core_plugin", help="Plugin to load ")
-        parser.add_argument("--input_plugin", help="Input plugin to load ")
-        parser.add_argument("--output_plugin", help="Output plugin to load")
+        parser.add_argument("--list_plugins", help="lists all installed external and internal plugins", default=False)
+        parser.add_argument("--core_plugin", help="Plugin to load ", default="heuristic_ts")
+        parser.add_argument("--input_plugin", help="Input plugin to load ", default="load_csv")
+        parser.add_argument("--output_plugin", help="Output plugin to load", default="store_csv")
         parser.add_argument("-v","--verbose",dest="loglevel",help="set loglevel to INFO",action="store_const",const=logging.INFO)
         parser.add_argument("-vv","--very_verbose",dest="loglevel",help="set loglevel to DEBUG",action="store_const",const=logging.DEBUG)
         return parser
     
     def assign_arguments(self,conf):
         """ Assign configuration values to class attributes""" 
+        # TODO: QUITAR HASATTR Y VALORES POR DEFECTO YA QUE SE HACEN DESDE PARSE_CMD
         if hasattr(conf, "core_plugin"):
             self.core_plugin = conf.core_plugin
             if hasattr(conf, "input_plugin"):
