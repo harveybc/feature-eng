@@ -26,6 +26,7 @@ class FeatureEng(FeatureEngBase):
         """ Constructor """
         # if conf =  None, loads the configuration from the command line arguments
         if conf != None:
+            self.command_line =  False
             self.setup_logging(logging.DEBUG)
             _logger.info("Starting feature_eng via class constructor...")
             # assign arguments to class attributes
@@ -43,6 +44,7 @@ class FeatureEng(FeatureEngBase):
                     self.core()
         else:
             self.conf = None
+            self.command_line = True
 
     def main(self, args):
         """ Starts an instance. Main entry point allowing external calls.
@@ -69,7 +71,7 @@ class FeatureEng(FeatureEngBase):
         """ Loads plugin entry points into class attributes"""
         if self.input_plugin in self.discovered_input_plugins:
             self.ep_i = self.discovered_input_plugins[self.input_plugin]
-            if self.conf != None:
+            if self.command_line == False:
                 self.ep_input = self.ep_i(self.conf)
             else:
                 # if using command line (conf == None), uses unknown parameters from arparser as params for plugins
@@ -79,7 +81,7 @@ class FeatureEng(FeatureEngBase):
             sys.exit()
         if self.output_plugin in self.discovered_output_plugins:
             self.ep_o = self.discovered_output_plugins[self.output_plugin]
-            if self.conf != None:
+            if self.command_line == False:
                 self.ep_output = self.ep_o(self.conf)
             else:
                 self.ep_output = self.ep_o(self.unknown)
@@ -88,7 +90,7 @@ class FeatureEng(FeatureEngBase):
             sys.exit()
         if self.core_plugin in self.discovered_core_plugins:
             self.ep_c = self.discovered_core_plugins[self.core_plugin]
-            if self.conf != None:
+            if self.command_line == False:
                 self.ep_core = self.ep_c(self.conf)
             else:
                 self.ep_core = self.ep_c(self.unknown)
