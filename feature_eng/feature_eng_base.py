@@ -51,11 +51,13 @@ class FeatureEngBase():
                 self.output_plugin = conf.output_plugin
             else:
                 self.output_plugin = "csv_output"
-        elif hasattr(conf, "list_plugins"):
-            self.list_plugins = conf.list_plugins
-        else:
-            print("Error: No valid parameters provided. Use option -h to show help.")
-            sys.exit()
+        else 
+            if hasattr(conf, "list_plugins"):
+                if conf.list_plugins == True:
+                    self.list_plugins = True
+                else:
+                    print("Error: No valid parameters provided. Use option -h to show help.")
+                    sys.exit()
         
     def setup_logging(self, loglevel):
         """Setup basic logging.

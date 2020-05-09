@@ -22,7 +22,7 @@ class Conf:
         self.output_file = fname
         """ Output dataset filename """
         self.list_plugins = False
-        self.plugin = "heuristic_ts"
+        self.core_plugin = "heuristic_ts"
         self.ema_fast = 0
         self.ema_slow = 1
         self.forward_ticks = 5    
