@@ -41,7 +41,9 @@ class FeatureEng(FeatureEngBase):
             else: 
                 if hasattr(self, "core_plugin"):
                     self.core()
-            
+        else:
+            self.conf = None
+
     def main(self, args):
         """ Starts an instance. Main entry point allowing external calls.
             Starts logging, parse command line arguments and start core.
@@ -52,7 +54,7 @@ class FeatureEng(FeatureEngBase):
         self.setup_logging(logging.DEBUG)
         self.parse_args(args)
         if self.core_plugin != None:    
-            self.core(self.unknown)
+            self.core()
         else:
             if self.list_plugins == True:
                 _logger.debug("Listing plugins.")
@@ -67,19 +69,29 @@ class FeatureEng(FeatureEngBase):
         """ Loads plugin entry points into class attributes"""
         if self.input_plugin in self.discovered_input_plugins:
             self.ep_i = self.discovered_input_plugins[self.input_plugin]
-            self.ep_input = self.ep_i(self.conf)
+            if self.conf != None:
+                self.ep_input = self.ep_i(self.conf)
+            else:
+                # if using command line (conf == None), uses unknown parameters from arparser as params for plugins
+                self.ep_input = self.ep_i(self.unknown)
         else:
             print("Error: Input Plugin "+ self.input_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
         if self.output_plugin in self.discovered_output_plugins:
             self.ep_o = self.discovered_output_plugins[self.output_plugin]
-            self.ep_output = self.ep_o(self.conf)
+            if self.conf != None:
+                self.ep_output = self.ep_o(self.conf)
+            else:
+                self.ep_output = self.ep_o(self.unknown)
         else:
             print("Error: Output Plugin "+ self.output_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
         if self.core_plugin in self.discovered_core_plugins:
             self.ep_c = self.discovered_core_plugins[self.core_plugin]
-            self.ep_core = self.ep_c(self.conf)
+            if self.conf != None:
+                self.ep_core = self.ep_c(self.conf)
+            else:
+                self.ep_core = self.ep_c(self.unknown)
         else:
             print("Error: Core Plugin "+ self.core_plugin +" not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
