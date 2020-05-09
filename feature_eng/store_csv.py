@@ -18,7 +18,7 @@ class StoreCSV():
         if conf != None:
             self.assign_arguments(conf)
     
-    def store_csv(self, output_ds):
+    def store_data(self, output_ds):
         """ Save preprocessed data """
         savetxt(self.output_file, output_ds, delimiter=",")
         
