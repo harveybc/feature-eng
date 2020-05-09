@@ -48,7 +48,7 @@ class FeatureEngBase():
                 _logger.debug("self.input_plugin assigned by parameter.")
             else:
                 self.input_plugin = "load_csv"
-                 _logger.debug("self.input_plugin assigned by default.")
+                _logger.debug("self.input_plugin assigned by default.")
             if hasattr(conf, "output_plugin"):
                 self.output_plugin = conf.output_plugin
             else:
