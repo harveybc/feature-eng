@@ -22,9 +22,9 @@ class HeuristicTS(PluginBase):
 
     def parse_cmd(self, parser):
         """ Adds command-line arguments to be parsed, overrides base class """
-        parser.add_argument("--forward_ticks", help="Number of forwrard ticks in the future for ema_fast", default=10)
-        parser.add_argument("--ema_fast", help="Column index for ema fast", default=0)
-        parser.add_argument("--ema_slow", help="Column index for ema slow", default=1)
+        parser.add_argument("--forward_ticks", help="Number of forwrard ticks in the future for ema_fast", default=10, type=int)
+        parser.add_argument("--ema_fast", help="Column index for ema fast", default=0, type=int)
+        parser.add_argument("--ema_slow", help="Column index for ema slow", default=1, type=int)
         return parser
 
     def core(self, input_ds):
