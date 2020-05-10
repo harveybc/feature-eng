@@ -9,7 +9,6 @@ import csv
 import pkg_resources
 from feature_eng.feature_eng_base import FeatureEngBase
 
-
 # from feature_eng import __version__
 
 __author__ = "Harvey Bastidas"
