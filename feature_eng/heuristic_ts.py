@@ -34,8 +34,8 @@ class HeuristicTS(PluginBase):
         # get the size of the input dataset
         self.rows_d, self.cols_d = input_ds.shape
         # create an empty array with the estimated output shape
-        self.output_ds = np.empty(shape=(self.rows_d-self.forward_ticks, 1))
+        self.output_ds = np.empty(shape=(self.rows_d-self.conf.forward_ticks, 1))
         # calculate the output
-        for i in range(self.rows_d - self.forward_ticks): 
-            self.output_ds[i] = input_ds[i+self.forward_ticks, self.ema_fast]-input_ds[i, self.ema_slow]
+        for i in range(self.rows_d - self.conf.forward_ticks): 
+            self.output_ds[i] = input_ds[i+self.conf.forward_ticks, self.conf.ema_fast]-input_ds[i, self.conf.ema_slow]
         return self.output_ds
