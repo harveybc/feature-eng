@@ -21,7 +21,7 @@ class PluginBase():
                 description="PluginBase: Base class for FeatureEng plugins."
             )
             parser = self.parse_cmd(parser)
-            self.conf, self.unknown = parser.parse_known_args(args)
+            self.conf, self.unknown = parser.parse_known_args(conf.args)
         
     def parse_cmd(self, parser):
         """ Adds command-line arguments to parse, to be overriden by plugin-specific arguments """

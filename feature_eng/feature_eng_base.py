@@ -8,7 +8,6 @@ import numpy as np
 import csv
 import pkg_resources
 
-
 # from feature_eng import __version__
 
 __author__ = "Harvey Bastidas"
@@ -17,17 +16,9 @@ __license__ = "mit"
 
 _logger = logging.getLogger(__name__)
 
-
 class FeatureEngBase():
     """ Base class For FeatureEng and its plugins. """
-
-    def __init__(self, conf):
-        """ Constructor """
-        # if conf =  None, loads the configuration from the command line arguments
-        if conf != None:
-            # assign arguments to class attributes
-            self.assign_arguments(conf)  
-            
+        
     def parse_cmd(self, parser):
         """ Adds command-line arguments to parse """
         parser.add_argument("--version", action="version", version="feature_eng")
@@ -38,33 +29,9 @@ class FeatureEngBase():
         parser.add_argument("-v","--verbose",dest="loglevel",help="set loglevel to INFO",action="store_const",const=logging.INFO)
         parser.add_argument("-vv","--very_verbose",dest="loglevel",help="set loglevel to DEBUG",action="store_const",const=logging.DEBUG)
         return parser
-    
-    def assign_arguments(self,conf):
-        """ Assign configuration values to class attributes""" 
-        # TODO: QUITAR HASATTR Y VALORES POR DEFECTO YA QUE SE HACEN DESDE PARSE_CMD
-        if hasattr(conf, "core_plugin"):
-            self.core_plugin = conf.core_plugin
-            if hasattr(conf, "input_plugin"):
-                self.input_plugin = conf.input_plugin
-                _logger.debug("self.input_plugin assigned by parameter.")
-            else:
-                self.input_plugin = "load_csv"
-                _logger.debug("self.input_plugin assigned by default.")
-            if hasattr(conf, "output_plugin"):
-                self.output_plugin = conf.output_plugin
-            else:
-                self.output_plugin = "store_csv"
-        else:
-            if hasattr(conf, "list_plugins"):
-                if conf.list_plugins == True:
-                    self.list_plugins = True
-                else:
-                    print("Error: No valid parameters provided. Use option -h to show help.")
-                    sys.exit()
-        
+
     def setup_logging(self, loglevel):
         """Setup basic logging.
-
         Args:
         loglevel (int): minimum loglevel for emitting messages
         """
@@ -90,7 +57,6 @@ class FeatureEngBase():
         )
         parser = self.parse_cmd(parser)
         self.conf, self.unknown = parser.parse_known_args(args)
-        self.assign_arguments(self.conf)
+        # assign as arguments, the unknown arguments from the parser
+        self.conf.args = self.unknown
         
-
-
