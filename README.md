@@ -71,21 +71,21 @@ The following examples show both the class method and command line uses for one 
 
 ### Example: Usage via Class Methods (HeuristicTS plugin)
 
-TODO: PLUGIN LIST & IMPORT
+The following example show how to configure and execute the core plugin.
 
 ```python
-from feature-eng.heuristic_ts.heuristic_ts import HeuristicTS
+from feature_eng.feature_eng import FeatureEng
 # configure parameters (same variable names as command-line parameters)
 class Conf:
     def __init__(self):
+        self.core_plugin = "heuristic_ts"
         self.input_file = "tests/data/test_input.csv"
+# initialize instance of the Conf configuration class
 conf = Conf()
-# instance class and loads dataset
-dt = HeuristicTS(conf)
-# execute the module´s core method
-dt.core()
-# save output to output file (defaults to input file with .output extension)
-dt.store()
+# initialize and execute the core plugin, loading the dataset with the default feature_eng 
+# input plugin (load_csv), and saving the results using the default output plugin (store_csv). 
+fe = FeatureEng(conf)
+```re()
 ```
 
 ## Pre-Installed Plugins

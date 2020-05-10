@@ -28,12 +28,11 @@ The heuristic_ts core can be executed by loading the plugin from a class method 
 * __--ema_slow <val>__: (Optional) column index of the EMA slow in the input dataset. Defaults to 1.
 * __--forward_ticks <val>__: (Optional) Number of forward ticks for EMA fast defaults 10.
 
-## Examples of usage
-The following examples show both the class method and command line uses.
+## Example of usage
 
-### Usage via Class Methods
+The following example show how to configure and execute the core plugin.
+
 ```python
-from feature_eng.heuristic_ts.heuristic_ts import HeurusticTS
 from feature_eng.feature_eng import FeatureEng
 # configure parameters (same variable names as command-line parameters)
 class Conf:
