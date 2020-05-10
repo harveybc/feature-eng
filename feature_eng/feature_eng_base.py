@@ -35,15 +35,15 @@ class FeatureEngBase():
                     self.print_plugins()
                 # execute core operations
                 else: 
+                    # sets default values for plugins
+                    if not hasattr(conf, "input_plugin"): 
+                        self.conf.input_plugin = "load_csv"    
+                    if not hasattr(conf, "output_plugin"): 
+                        self.conf.output_plugin = "store_csv"
+                    if not hasattr(conf, "core_plugin"): 
+                        self.conf.core_plugin = "heuristic_ts"
                     self.core()
-            # sets default values for plugins
-            if not hasattr(conf, "input_plugin"): 
-                self.conf.input_plugin = "load_csv"    
-            if not hasattr(conf, "output_plugin"): 
-                self.conf.output_plugin = "store_csv"
-            if not hasattr(conf, "core_plugin"): 
-                self.conf.core_plugin = "heuristic_ts"
-
+            
     def parse_cmd(self, parser):
         """ Adds command-line arguments to parse """
         parser.add_argument("--version", action="version", version="feature_eng")
