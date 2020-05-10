@@ -3,6 +3,7 @@
 This File contains the StoreCSV class plugin. 
 """
 
+from feature_eng.plugin_base import PluginBase
 import numpy as np
 from sys import exit
 
@@ -10,13 +11,21 @@ __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
-class HeuristicTS(): 
+class HeuristicTS(PluginBase): 
     """ Output plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
 
     def __init__(self, conf):
-        """ Constructor using same parameters as base class """
-        if conf != None:
-            self.assign_arguments(conf)
+        """ Initializes PluginBase. Do NOT delete the following line whether you have initialization code or not. """
+        super().__init__(conf)
+        # Insert your plugin initialization code here.
+        pass
+
+    def parse_cmd(self, parser):
+        """ Adds command-line arguments to be parsed, overrides base class """
+        parser.add_argument("--forward_ticks", help="Number of forwrard ticks in the future for ema_fast", default=10)
+        parser.add_argument("--ema_fast", help="Column index for ema fast", default=0)
+        parser.add_argument("--ema_slow", help="Column index for ema slow", default=1)
+        return parser
 
     def core(self, input_ds):
         """ Performs the substraction of the ema_fast forwarded forward_ticks
@@ -30,20 +39,3 @@ class HeuristicTS():
         for i in range(self.rows_d - self.forward_ticks): 
             self.output_ds[i] = input_ds[i+self.forward_ticks, self.ema_fast]-input_ds[i, self.ema_slow]
         return self.output_ds
-
-    def assign_arguments(self,conf):
-        """ Assign configuration values to class attributes""" 
-        if hasattr(conf, "forward_ticks"):
-            self.forward_ticks = conf.forward_ticks
-        else:
-            self.forward_ticks = 10
-        if hasattr(conf, "ema_fast"):
-            self.ema_fast = conf.ema_fast
-        else:
-            self.ema_fast = 0
-        if hasattr(conf, "ema_slow"):
-            self.ema_slow = conf.ema_slow
-        else:
-            self.ema_slow = 1
-            
-    
