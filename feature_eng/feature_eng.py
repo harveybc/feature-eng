@@ -23,23 +23,11 @@ class FeatureEng(FeatureEngBase):
     """ Base class. """
 
     def __init__(self, conf):
-        """ Constructor """
-        self.conf = conf
-        if conf != None:
-            if not hasattr(conf, "args"):
-                self.args = None
-                self.setup_logging(logging.DEBUG)
-                _logger.info("Starting feature_eng via class constructor...")
-                # list available plugins
-                if self.conf.list_plugins == True:
-                    _logger.debug("Listing plugins.")
-                    self.find_plugins()
-                    _logger.debug("Printing plugins.")
-                    self.print_plugins()
-                # execute core operations
-                else: 
-                    self.core()
-                
+        """ Initializes PluginBase. Do NOT delete the following line whether you have initialization code or not. """
+        super().__init__(conf)
+        # Insert your plugin initialization code here.
+        pass
+
     def main(self, args):
         """ Starts an instance. Main entry point allowing external calls.
             Starts logging, parse command line arguments and start core.
