@@ -22,7 +22,9 @@ class PluginBase():
             )
             parser = self.parse_cmd(parser)
             self.conf, self.unknown = parser.parse_known_args(conf.args)
-        
+        else:
+            self.conf = conf
+
     def parse_cmd(self, parser):
         """ Adds command-line arguments to parse, to be overriden by plugin-specific arguments """
         pass
