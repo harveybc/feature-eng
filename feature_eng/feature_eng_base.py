@@ -43,7 +43,7 @@ class FeatureEngBase():
                     if not hasattr(conf, "core_plugin"): 
                         self.conf.core_plugin = "heuristic_ts"
                     self.core()
-            
+
     def parse_cmd(self, parser):
         """ Adds command-line arguments to parse """
         parser.add_argument("--version", action="version", version="feature_eng")
@@ -54,7 +54,21 @@ class FeatureEngBase():
         parser.add_argument("-v","--verbose",dest="loglevel",help="set loglevel to INFO",action="store_const",const=logging.INFO)
         parser.add_argument("-vv","--very_verbose",dest="loglevel",help="set loglevel to DEBUG",action="store_const",const=logging.DEBUG)
         return parser
-
+    
+    def core(self):
+        """ Core feature_eng operations. """
+        _logger.debug("Finding Plugins.")
+        self.find_plugins()
+        _logger.debug("Loading plugins.")
+        self.load_plugins()
+        _logger.debug("Loading input dataset from the input plugin.")
+        self.input_ds = self.ep_input.load_data() 
+        _logger.debug("Performing core operations from the  core plugin.")
+        self.output_ds = self.ep_core.core(self.input_ds) 
+        _logger.debug("Storing results using the output plugin.")
+        self.ep_output.store_data(self.output_ds) 
+        _logger.info("feature_eng finished.")
+    
     def setup_logging(self, loglevel):
         """Setup basic logging.
         Args:
@@ -84,4 +98,6 @@ class FeatureEngBase():
         self.conf, self.unknown = parser.parse_known_args(args)
         # assign as arguments, the unknown arguments from the parser
         self.conf.args = self.unknown
+
+
         

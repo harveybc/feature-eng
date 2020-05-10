@@ -22,13 +22,11 @@ class FeatureEng(FeatureEngBase):
     """ Base class. """
 
     def __init__(self, conf):
-        """ Initializes PluginBase. Do NOT delete the following line whether you have initialization code or not. """
+        """ Initializes FeatureEngBase.  """
         super().__init__(conf)
-        # Insert your plugin initialization code here.
-        pass
-
+        
     def main(self, args):
-        """ Starts an instance. Main entry point allowing external calls.
+        """ Starts an instance via command line parameters, uses the FeatureEngBase.core() method.
             Starts logging, parse command line arguments and start core.
 
         Args:
@@ -40,13 +38,31 @@ class FeatureEng(FeatureEngBase):
             self.core()
         else:
             if self.conf.list_plugins == True:
-                _logger.debug("Listing plugins.")
+                _logger.debug("Finding plugins.")
                 self.find_plugins()
                 _logger.debug("Printing plugins.")
                 self.print_plugins()
             else: 
                 _logger.debug("Error: No core plugin provided. for help, use feature_eng --help")
         _logger.info("Script end.")
+
+    def find_plugins(self):
+        """" Populate the discovered plugin lists """
+        self.discovered_input_plugins = {
+            entry_point.name: entry_point.load()
+            for entry_point
+            in pkg_resources.iter_entry_points('feature_eng.plugins_input')
+        }
+        self.discovered_output_plugins = {
+            entry_point.name: entry_point.load()
+            for entry_point
+            in pkg_resources.iter_entry_points('feature_eng.plugins_output')
+        }
+        self.discovered_core_plugins = {
+            entry_point.name: entry_point.load()
+            for entry_point
+            in pkg_resources.iter_entry_points('feature_eng.plugins_core')
+        }
 
     def load_plugins(self):
         """ Loads plugin entry points into class attributes"""
@@ -75,24 +91,6 @@ class FeatureEng(FeatureEngBase):
             print("Error: Core Plugin not found. Use option --list_plugins to show the list of available plugins.")
             sys.exit()
     
-    def find_plugins(self):
-        """" Populate the discovered plugin lists """
-        self.discovered_input_plugins = {
-            entry_point.name: entry_point.load()
-            for entry_point
-            in pkg_resources.iter_entry_points('feature_eng.plugins_input')
-        }
-        self.discovered_output_plugins = {
-            entry_point.name: entry_point.load()
-            for entry_point
-            in pkg_resources.iter_entry_points('feature_eng.plugins_output')
-        }
-        self.discovered_core_plugins = {
-            entry_point.name: entry_point.load()
-            for entry_point
-            in pkg_resources.iter_entry_points('feature_eng.plugins_core')
-        }
-
     def print_plugins(self):
         print("Discovered input plugins:")
         for key in self.discovered_input_plugins:
@@ -103,26 +101,11 @@ class FeatureEng(FeatureEngBase):
         print("Discovered core plugins:")
         for key in self.discovered_core_plugins:
             print(key+"\n")
-
-    def core(self):
-        """ Core feature_eng operations. """
-        _logger.debug("Finding Plugins.")
-        self.find_plugins()
-        _logger.debug("Loading plugins.")
-        self.load_plugins()
-        _logger.debug("Loading input dataset from the input plugin.")
-        self.input_ds = self.ep_input.load_data() 
-        _logger.debug("Performing core operations from the  core plugin.")
-        self.output_ds = self.ep_core.core(self.input_ds) 
-        _logger.debug("Storing results using the output plugin.")
-        self.ep_output.store_data(self.output_ds) 
-        _logger.info("feature_eng finished.")
         
 def run(args):
     """ Entry point for console_scripts """
     feature_eng = FeatureEng(None)
     feature_eng.main(args)
-
 
 if __name__ == "__main__":
     run(sys.argv)

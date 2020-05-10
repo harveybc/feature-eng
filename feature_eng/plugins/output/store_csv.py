@@ -22,7 +22,7 @@ class StoreCSV(PluginBase):
 
     def parse_cmd(self, parser):
         """ Adds command-line arguments to be parsed, overrides base class """
-        parser.add_argument("--output_file", help="Output file to store the processed data.", default="")
+        parser.add_argument("--output_file", help="Output file to store the processed data.", default="_output.csv")
         return parser
 
     def store_data(self, output_ds):

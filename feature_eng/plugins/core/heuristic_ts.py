@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This File contains the StoreCSV class plugin. 
+This File contains the HeuristicTS class plugin. 
 """
 
 from feature_eng.plugin_base import PluginBase
@@ -12,7 +12,7 @@ __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
 class HeuristicTS(PluginBase): 
-    """ Output plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
+    """ Core plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
 
     def __init__(self, conf):
         """ Initializes PluginBase. Do NOT delete the following line whether you have initialization code or not. """
