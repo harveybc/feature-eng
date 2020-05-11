@@ -24,7 +24,7 @@ class Conf:
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "mssa_decomposer"
-        self.num_components = 0
+        self.num_components = 5
         self.group_similar = True
 
 class TestMSSADecomposer:
@@ -54,27 +54,26 @@ class TestMSSADecomposer:
         return (len(rows), len(rows[0]))
 
 
-    def test_C02T01_core(self):
-        """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
+    def test_C03T01_core(self):
+        """ Loads plugin from FeatureEng using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
         self.fe = FeatureEng(self.conf)
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
-        assert (cols_o == 1) and (rows_o == self.fe.ep_core.rows_d - self.fe.ep_core.conf.forward_ticks)
+        assert (cols_o == self.fe.ep_core.cols_d * self.conf.num_components)
 
-    def test_C02T02_cmdline(self):
-        """ same as C01T02, but via command-line """
-        os.system("feature_eng --core_plugin heuristic_ts --input_file "
+    def test_C03T02_cmdline(self):
+        """ same as C03T02, but via command-line """
+        os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
             + " --output_file "
             + self.conf.output_file
-            + " --forward_ticks "
-            + str(self.conf.forward_ticks)
+            + " --num_components "
+            + str(self.conf.num_components)
         )
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
-        assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)
-        
+        assert (cols_o == self.cols_d * self.conf.num_components)
