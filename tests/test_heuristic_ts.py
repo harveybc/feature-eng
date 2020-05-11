@@ -53,7 +53,7 @@ class TestHeuristicTS:
         """
         rows = list(csv.reader(open(csv_file)))
         return (len(rows), len(rows[0]))
-+
+
 
     def test_C02T01_core(self):
         """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
