@@ -13,6 +13,7 @@ __license__ = "mit"
 
 class Conf:
     """ This method initialize the configuration variables for a plugin """
+   
     def __init__(self):
         """ Component Tests Constructor """
         fname = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
@@ -64,8 +65,6 @@ class TestFeatureEng:
     def test_C01T02_plugin_load(self):
         """ Loads HeuristicTS using parameters from setup_method() and Asses that output file has 1 column and num_ticks - forward_ticks """
         self.fe = FeatureEng(self.conf)
-        # perform core operations
-        self.fe.core()
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
