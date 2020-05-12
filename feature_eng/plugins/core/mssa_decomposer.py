@@ -29,8 +29,7 @@ class MSSADecomposer(PluginBase):
         return parser
 
     def core(self, input_ds):
-        """ Performs the substraction of the ema_fast forwarded forward_ticks
-            minus the ema_slow.
+        """ Performs mssa_decomposition.
         """
         # get the size of the input dataset
         self.rows_d, self.cols_d = input_ds.shape
