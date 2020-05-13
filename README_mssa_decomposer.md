@@ -27,6 +27,8 @@ The plugin's core method can be executed by loading the plugin by instantiating 
 * __--output_file <filename>__: (Optional) Filename for the output dataset for the default feature_eng output plugin (store_csv). Defaults to output.csv
 * __--num_components <val>__:(Optional) Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).
 * __--group_similar <val>__: (Optional) If False, do not group similar components by adding them. Defaults to True.
+* __--window_size <val>__: (Optional) If False, do not group similar components by adding them. Defaults to True.
+
 
 ## Examples of usage
 

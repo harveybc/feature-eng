@@ -23,9 +23,9 @@ class MSSADecomposer(PluginBase):
 
     def parse_cmd(self, parser):
         """ Adds command-line arguments to be parsed, overrides base class """
-        parser.add_argument("--forward_ticks", help="Number of forwrard ticks in the future for ema_fast", default=10, type=int)
-        parser.add_argument("--ema_fast", help="Column index for ema fast", default=0, type=int)
-        parser.add_argument("--ema_slow", help="Column index for ema slow", default=1, type=int)
+        parser.add_argument("--num_components", help="Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).", default=0, type=int)
+        parser.add_argument("--group_similar", help="If False, do not group similar components by adding them. Defaults to True.", default=True, type=bool)
+        parser.add_Argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
         return parser
 
     def core(self, input_ds):
@@ -35,42 +35,38 @@ class MSSADecomposer(PluginBase):
         self.rows_d, self.cols_d = input_ds.shape
         # create an empty array with the estimated output shape
         self.output_ds = np.empty(shape=(self.rows_d-self.conf.forward_ticks, 1))
-        # calculate the output
-        for i in range(self.rows_d - self.conf.forward_ticks): 
-            self.output_ds[i] = input_ds[i+self.conf.forward_ticks, self.conf.ema_fast]-input_ds[i, self.conf.ema_slow]
-        return self.output_ds
-
-
-
-        # performs MSSA on data
-        print("Performing MSSA on filename="+ str(csv_f) + ", n_components=" + str(p_n_components) + ", window_size=" + str(p_window_size))
-        segments = (num_ticks//(2*p_window_size))
-        
+        # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
+        segments = (self.rows_d // (2*self.conf.window_size))
         for i in range(0, segments):
-            # verify if i+(2*p_window_size) is the last observation
-            first = i * (2 * p_window_size)
+            # verify if i+(2*self.conf.window_size) is the last observation
+            first = i * (2 * self.conf.window_size)
             if (i != segments-1):
-                last = (i+1) * (2 * p_window_size)
+                last = (i+1) * (2 * self.conf.window_size)
             else:
-                last = num_ticks
-            # slice the data in 2*p_window_size ticks segments
-            s_data_w = s_data[first : last,:]       
+                last = self.rows_d
+            # slice the input_ds dataset in 2*self.conf.window_size ticks segments
+            s_data_w = input_ds[first : last,:]       
             # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
-            
             if i == 0: 
-                mssa = MSSA(n_components='svht', window_size=p_window_size, verbose=True)
-                mssa.fit(s_data_w)
-                print("Selected Rank = ",str(mssa.rank_))
-                #rank = int(mssa.rank_)
-                rank = int(p_n_components)
+                # uses SVHT for selecting number of components if required from the conf parameters
+                if self.conf.num_components == 0:
+                    mssa = MSSA(n_components='svht', window_size=self.conf.window_size, verbose=True)
+                    mssa.fit(s_data_w)
+                    print("Automatically Selected Rank (number of components)= ",str(mssa.rank_))
+                    rank = int(mssa.rank_)
+                else:
+                    rank = self.conf.num_components
+                    mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
+                    mssa.fit(s_data_w)
             else:
-                mssa = MSSA(n_components=rank, window_size=p_window_size, verbose=True)
+                mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
                 mssa.fit(s_data_w)
+
             # concatenate otput array with the new components
             if i == 0:
-                output = copy.deepcopy(mssa.components_)
+                output_ds = copy.deepcopy(mssa.components_)
             else:
-                np.concatenate((output, mssa.components_), axis = 1)
+                np.concatenate((output_ds, mssa.components_), axis = 1)
                 
             #TODO: concatenate grouped output 
             print("Grouping correlated components (manually set list)") 
@@ -124,3 +120,6 @@ class MSSADecomposer(PluginBase):
             ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
             ax.legend()
             fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
+
+
+        return self.output_ds
