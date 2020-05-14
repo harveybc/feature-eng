@@ -26,6 +26,7 @@ class Conf:
         self.core_plugin = "mssa_decomposer"
         self.num_components = 5
         self.group_similar = True
+        self.window_size = 30
 
 class TestMSSADecomposer:
     """ Component Tests  """
