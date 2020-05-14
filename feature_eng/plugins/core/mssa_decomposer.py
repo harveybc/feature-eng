@@ -7,6 +7,7 @@ from feature_eng.plugin_base import PluginBase
 import numpy as np
 from sys import exit
 from pymssa import MSSA
+import copy
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -72,7 +73,7 @@ class MSSADecomposer(PluginBase):
             print("Grouping correlated components (manually set list)") 
             # use the same groups for all the features
             ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
-            for j in range(0, num_columns):
+            for j in range(0, self.cols_d):
                 # draw correlation matrix for the first segment
                 mssa.set_ts_component_groups(j, ts0_groups)
                 ts0_grouped = mssa.grouped_components_[j]
