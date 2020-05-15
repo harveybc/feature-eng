@@ -29,7 +29,7 @@ The plugin's core method can be executed by loading the plugin by instantiating 
 * __--window_size <val>__: (Optional) Size of the window used for analysis.
 * __--group_file <filename>__: (Optional) Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.
 * __--plot_correlations <filename_prefix>__: (Optional) Exports plots of the w-correlation matrix for grouped components for each feature. Defaults to None.
-* __--plot_channels <filename_prefix>__:(Optional) Exports plots of each grouped channel superposed to the input dataset. Defaults to None.
+* __--plot_channels <filename_prefix>__: (Optional) Exports plots of each grouped channel superposed to the input dataset. Defaults to None.
 
 
 ## Examples of usage
