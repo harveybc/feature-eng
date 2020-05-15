@@ -72,6 +72,9 @@ class MSSADecomposer(PluginBase):
             #TODO: concatenate grouped output 
             print("Grouping correlated components (manually set list)") 
             # use the same groups for all the features
+            # load the groups from a json file
+            
+
             ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
             for j in range(0, self.cols_d):
                 # draw correlation matrix for the first segment
@@ -97,8 +100,8 @@ class MSSADecomposer(PluginBase):
             # show progress
             progress = i*100/segments
             print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
-            
-    # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+
+        # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
         print("Original components shape: ",output.shape)
         print("Output components[0] shape: ",grouped_output[0].shape)
         # genera gráficas para cada componente con valores agrupados
