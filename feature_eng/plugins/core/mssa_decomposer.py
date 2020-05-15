@@ -8,6 +8,7 @@ import numpy as np
 from sys import exit
 from pymssa import MSSA
 import copy
+import json
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -25,8 +26,14 @@ class MSSADecomposer(PluginBase):
     def parse_cmd(self, parser):
         """ Adds command-line arguments to be parsed, overrides base class """
         parser.add_argument("--num_components", help="Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).", default=0, type=int)
-        parser.add_argument("--group_similar", help="If False, do not group similar components by adding them. Defaults to True.", default=True, type=bool)
-        parser.add_Argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
+        parser.add_argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
+        parser.add_argument("--group_file", help="Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.", default=None, type=str)
+        parser.add_argument("--plot_correlations", help="Exports a plot of the w-correlation matrix for grouped components. Defaults to None.", default=None, type=str)
+        parser.add_argument("--plot_channels", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=30, type=str)
+
+
+* __--plot_channels <filename_prefix>__:(Optional) Exports plots of each grouped channel superposed to the input dataset. Defaults to None.
+
         return parser
 
     def core(self, input_ds):
@@ -74,27 +81,35 @@ class MSSADecomposer(PluginBase):
             # use the same groups for all the features
             # load the groups from a json file
             
+            if self.conf.group_file != None:
+                # TODO: QUITAR GUARDADO DE JSON DE EJEMPLO
+                ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
+                with open(self.conf.group_file, 'w') as f:
+                    json.dump(ts0_groups, f)
+                with open('data.txt') as json_file:
+                    ts0_groups = json.load(json_file)
 
-            ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
-            for j in range(0, self.cols_d):
-                # draw correlation matrix for the first segment
-                mssa.set_ts_component_groups(j, ts0_groups)
-                ts0_grouped = mssa.grouped_components_[j]
-                # concatenate otput array with the new components
-                if i == 0:
-                    grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
-                else:
-                    #print("PRE  grouped_output[",j,"].shape = ",grouped_output[j].shape)
-                    grouped_output[j] = np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
-                    #print("POST grouped_output[",j,"].shape = ",grouped_output[j].shape)
-                # save the correlation matrix only for the first segment
-                #if i == 0:
-                    # save grouped component correlation matrix
-                    #ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
-                    #fig, ax = plt.subplots(figsize=(12,9))
-                    #sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
-                    #ax.set_title('grouped component w-correlations')
-                    #fig.savefig('correlation_matrix_new_'+str(j)+'.png', dpi=200)
+
+
+                for j in range(0, self.cols_d):
+                    # draw correlation matrix for the first segment
+                    mssa.set_ts_component_groups(j, ts0_groups)
+                    ts0_grouped = mssa.grouped_components_[j]
+                    # concatenate otput array with the new components
+                    if i == 0:
+                        grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
+                    else:
+                        #print("PRE  grouped_output[",j,"].shape = ",grouped_output[j].shape)
+                        grouped_output[j] = np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
+                        #print("POST grouped_output[",j,"].shape = ",grouped_output[j].shape)
+                    # save the correlation matrix only for the first segment
+                    #if i == 0:
+                        # save grouped component correlation matrix
+                        #ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
+                        #fig, ax = plt.subplots(figsize=(12,9))
+                        #sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
+                        #ax.set_title('grouped component w-correlations')
+                        #fig.savefig('correlation_matrix_new_'+str(j)+'.png', dpi=200)
             
 
             # show progress

@@ -26,10 +26,9 @@ The plugin's core method can be executed by loading the plugin by instantiating 
 * __--input_file <filename>__: The only mandatory parameter, is the filename for the input dataset for the default feature_eng input plugin (load_csv).
 * __--output_file <filename>__: (Optional) Filename for the output dataset for the default feature_eng output plugin (store_csv). Defaults to output.csv
 * __--num_components <val>__:(Optional) Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).
-* __--group_file <filename>__: (Optional) Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.
 * __--window_size <val>__: (Optional) Size of the window used for analysis.
-* __--num_components <val>__: (Optional) Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).
-* __--plot_correlations <filename>__: (Optional) Exports a plot of the w-correlation matrix for grouped components. Defaults to None.
+* __--group_file <filename>__: (Optional) Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.
+* __--plot_correlations <filename_prefix>__: (Optional) Exports plots of the w-correlation matrix for grouped components for each feature. Defaults to None.
 * __--plot_channels <filename_prefix>__:(Optional) Exports plots of each grouped channel superposed to the input dataset. Defaults to None.
 
 
