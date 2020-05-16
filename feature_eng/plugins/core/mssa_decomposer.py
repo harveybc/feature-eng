@@ -86,11 +86,8 @@ class MSSADecomposer(PluginBase):
                 ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
                 with open(self.conf.group_file, 'w') as f:
                     json.dump(ts0_groups, f)
-                with open('data.txt') as json_file:
+                with open(self.conf.group_file) as json_file:
                     ts0_groups = json.load(json_file)
-
-
-
                 for j in range(0, self.cols_d):
                     # draw correlation matrix for the first segment
                     mssa.set_ts_component_groups(j, ts0_groups)
@@ -99,22 +96,18 @@ class MSSADecomposer(PluginBase):
                     if i == 0:
                         grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
                     else:
-                        #print("PRE  grouped_output[",j,"].shape = ",grouped_output[j].shape)
                         grouped_output[j] = np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
-                        #print("POST grouped_output[",j,"].shape = ",grouped_output[j].shape)
                     # save the correlation matrix only for the first segment
-                    #if i == 0:
+                    if (i == 0) and (self.conf.plot_correlations != None):
                         # save grouped component correlation matrix
-                        #ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
-                        #fig, ax = plt.subplots(figsize=(12,9))
-                        #sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
-                        #ax.set_title('grouped component w-correlations')
-                        #fig.savefig('correlation_matrix_new_'+str(j)+'.png', dpi=200)
-            
-
-            # show progress
-            progress = i*100/segments
-            print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
+                        ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
+                        fig, ax = plt.subplots(figsize=(12,9))
+                        sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
+                        ax.set_title('grouped component w-correlations')
+                        fig.savefig(self.conf.plot_correlations + str(j) + 'grouped.png', dpi=200)
+        # show progress
+        progress = i*100/segments
+        print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
 
         # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
         print("Original components shape: ",output.shape)
