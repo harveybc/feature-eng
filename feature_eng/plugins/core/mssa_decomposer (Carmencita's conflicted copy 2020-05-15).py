@@ -9,8 +9,6 @@ from sys import exit
 from pymssa import MSSA
 import copy
 import json
-import seaborn as sns
-
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -30,12 +28,13 @@ class MSSADecomposer(PluginBase):
         parser.add_argument("--num_components", help="Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).", default=0, type=int)
         parser.add_argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
         parser.add_argument("--group_file", help="Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.", default=None, type=str)
-        parser.add_argument("--w_prefix", help="Exports a plot of the w-correlation matrix for grouped components. Defaults to None.", default=None, type=str)
-        parser.add_argument("--plot_prefix", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=30, type=str)
+        parser.add_argument("--plot_correlations", help="Exports a plot of the w-correlation matrix for grouped components. Defaults to None.", default=None, type=str)
+        parser.add_argument("--plot_channels", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=30, type=str)
         return parser
 
     def core(self, input_ds):
-        """ Performs mssa_decomposition. """
+        """ Performs mssa_decomposition.
+        """
         # get the size of the input dataset
         self.rows_d, self.cols_d = input_ds.shape
         # create an empty array with the estimated output shape
@@ -77,7 +76,7 @@ class MSSADecomposer(PluginBase):
             print("Grouping correlated components (manually set list)") 
             # use the same groups for all the features
             # load the groups from a json file
-            grouped_output = []
+            
             if self.conf.group_file != None:
                 # TODO: QUITAR GUARDADO DE JSON DE EJEMPLO
                 ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
