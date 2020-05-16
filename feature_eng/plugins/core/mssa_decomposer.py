@@ -102,33 +102,28 @@ class MSSADecomposer(PluginBase):
                         sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
                         ax.set_title('grouped component w-correlations')
                         fig.savefig(self.conf.plot_correlations + str(j) + 'grouped.png', dpi=200)
+                self.output_ds = grouped_output
+            else:
+                grouped_output = self.output_ds
         # show progress
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
-
-        # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
-        print("Original components shape: ",output.shape)
-        print("Output components[0] shape: ",grouped_output[0].shape)
-        # genera gráficas para cada componente con valores agrupados
-        # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
-        # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
-        cumulative_recon = np.zeros_like(s_data[:, 0])
-        
-        # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
-        #print("len(mssa.grouped_components_) = ", str(len(mssa.grouped_components_)))
-        #print("mssa.grouped_components_ = ", str(mssa.grouped_components_))
-        for comp in range(len(grouped_output[0][0])):
-            fig, ax = plt.subplots(figsize=(18, 7))
-            current_component = grouped_output[0][:, comp]
-            #print("len(grouped_output) = ", len(grouped_output))
-            #print("grouped_output[0].shape = ", grouped_output[0].shape)
-            
-            cumulative_recon = cumulative_recon + current_component
-            ax.plot(s_data[:, 0], lw=3, alpha=0.2, c='k', label='original')
-            ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
-            ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
-            ax.legend()
-            fig.savefig('mssa_' + str(comp) + '.png', dpi=600)
+        if self.conf.plot_prefix != None:
+            # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
+            # genera gráficas para cada componente con valores agrupados
+            # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
+            # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
+            cumulative_recon = np.zeros_like(s_data[:, 0])
+            # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
+            for comp in range(len(grouped_output[0][0])):
+                fig, ax = plt.subplots(figsize=(18, 7))
+                current_component = grouped_output[0][:, comp]
+                cumulative_recon = cumulative_recon + current_component
+                ax.plot(s_data[:, 0], lw=3, alpha=0.2, c='k', label='original')
+                ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
+                ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
+                ax.legend()
+                fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
 
 
         return self.output_ds
