@@ -29,7 +29,7 @@ class MSSADecomposer(PluginBase):
         """ Adds command-line arguments to be parsed, overrides base class """
         parser.add_argument("--num_components", help="Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).", default=0, type=int)
         parser.add_argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
-        parser.add_argument("--group_file", help="Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.", default=None, type=str)
+        parser.add_argument("--group_file", help="Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.", default="test", type=str)
         parser.add_argument("--w_prefix", help="Exports a plot of the w-correlation matrix for grouped components. Defaults to None.", default=None, type=str)
         parser.add_argument("--plot_prefix", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=30, type=str)
         return parser
