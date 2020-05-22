@@ -73,12 +73,13 @@ class MSSADecomposer(PluginBase):
             else:
                 np.concatenate((output_ds, mssa.components_), axis = 1)
                 
-            #TODO: concatenate grouped output 
-            print("Grouping correlated components (manually set list)") 
+            
             # use the same groups for all the features
             # load the groups from a json file
             grouped_output = []
             if self.conf.group_file != None:
+                #TODO: concatenate grouped output 
+                print("Grouping correlated components (manually set list)") 
                 # TODO: QUITAR GUARDADO DE JSON DE EJEMPLO
                 ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
                 with open(self.conf.group_file, 'w') as f:
