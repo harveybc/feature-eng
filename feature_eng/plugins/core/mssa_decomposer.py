@@ -70,10 +70,8 @@ class MSSADecomposer(PluginBase):
             # concatenate otput array with the new components
             if i == 0:
                 output_ds = copy.deepcopy(mssa.components_)
-                print("output_ds.shape = ", output_ds.shape)
             else:
                 np.concatenate((output_ds, mssa.components_), axis = 1)
-                
             
             # use the same groups for all the features
             # load the groups from a json file
@@ -127,5 +125,5 @@ class MSSADecomposer(PluginBase):
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
 
-
+        print("output_ds.shape = ", output_ds.shape)
         return self.output_ds
