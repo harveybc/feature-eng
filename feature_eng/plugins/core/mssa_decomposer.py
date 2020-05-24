@@ -72,6 +72,8 @@ class MSSADecomposer(PluginBase):
                 output_ds = copy.deepcopy(mssa.components_)
                 print("output_ds.shape = ", output_ds.shape)
             else:
+                print("output_ds.shape = ", output_ds.shape)
+                print("mssa.components_ = ", mssa.components_.shape)
                 np.concatenate((output_ds, mssa.components_), axis = 1)
                 print("new output_ds.shape = ", output_ds.shape)
             # use the same groups for all the features
