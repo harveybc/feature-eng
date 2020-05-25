@@ -69,13 +69,13 @@ class MSSADecomposer(PluginBase):
 
             # concatenate otput array with the new components
             if i == 0:
-                output_ds = copy.deepcopy(mssa.components_)
-                print("output_ds.shape = ", output_ds.shape)
+                self.output_ds = copy.deepcopy(mssa.components_)
+                print("output_ds.shape = ", self.output_ds.shape)
             else:
-                print("output_ds.shape = ", output_ds.shape)
+                print("output_ds.shape = ", self.output_ds.shape)
                 print("mssa.components_ = ", mssa.components_.shape)
-                output_ds = np.concatenate((output_ds, mssa.components_), axis = 1)
-                print("new output_ds.shape = ", output_ds.shape)
+                self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
+                print("new output_ds.shape = ", self.output_ds.shape)
             # use the same groups for all the features
             # load the groups from a json file
             grouped_output = []
@@ -127,7 +127,7 @@ class MSSADecomposer(PluginBase):
                 ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
-        print("pre output_ds.shape = ", output_ds.shape)
+        print("pre self.output_ds.shape = ", self.output_ds.shape)
 
         # transforms the dimensions from (features, ticks, channels) to (ticks, feats*channels)
         ns_output = []
@@ -135,11 +135,11 @@ class MSSADecomposer(PluginBase):
             row = []
             for p in range(0, input_ds.shape[0]):
                 # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
-                for c in range (0,  output_ds.shape[2]):
+                for c in range (0,  self.output_ds.shape[2]):
                     #row.append(self.output_ds[p,n,c])
                     row.append(self.output_ds[p,n,c])
             ns_output.append(row)
         # convert to np array
         self.output_ds = np.array(ns_output)
-        print("new output_ds.shape = ", output_ds.shape)
+        print("new self.output_ds.shape = ", self.output_ds.shape)
         return self.output_ds
