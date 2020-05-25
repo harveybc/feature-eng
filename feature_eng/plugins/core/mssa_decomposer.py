@@ -98,13 +98,13 @@ class MSSADecomposer(PluginBase):
                     else:
                         grouped_output[j] = np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
                     # save the correlation matrix only for the first segment
-                    if (i == 0) and (self.conf.plot_correlations != None):
+                    if (i == 0) and (self.conf.w_prefix != None):
                         # save grouped component correlation matrix
                         ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
                         fig, ax = plt.subplots(figsize=(12,9))
                         sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
                         ax.set_title('grouped component w-correlations')
-                        fig.savefig(self.conf.plot_correlations + str(j) + 'grouped.png', dpi=200)
+                        fig.savefig(self.conf.w_prefix + str(j) + 'grouped.png', dpi=200)
                 self.output_ds = grouped_output
             else:
                 grouped_output = self.output_ds
