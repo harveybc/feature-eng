@@ -131,11 +131,11 @@ class MSSADecomposer(PluginBase):
 
         # transforms the dimensions from (features, ticks, channels) to (ticks, feats*channels)
         ns_output = []
-        for n in range(0, input_ds.shape[1]):
+        for n in range(self.output_ds.shape[1]):
             row = []
-            for p in range(0, input_ds.shape[0]):
+            for p in range(self.output_ds.shape[0]):
                 # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
-                for c in range (0,  self.output_ds.shape[2]):
+                for c in range (self.output_ds.shape[2]):
                     #row.append(self.output_ds[p,n,c])
                     row.append(self.output_ds[p,n,c])
             ns_output.append(row)
