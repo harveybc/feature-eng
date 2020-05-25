@@ -127,10 +127,17 @@ class MSSADecomposer(PluginBase):
                 ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
+        print("pre output_ds.shape = ", output_ds.shape)
 
-        print("output_ds.shape = ", output_ds.shape)
-        
-        # transform the dimensions from (feats, ticks, channels) to (feats*channels, ticks)
-        
-        print("new output_ds.shape = ", output_ds.shape)
+        # transforms the dimensions from (features, ticks, channels) to (ticks, feats*channels)
+        ns_output = []
+        for n in range(0, num_ticks):
+            row = []
+            for p in range(0, num_columns):
+                for c in range (0, len(ts0_groups)):
+                    row.append(grouped_output[p][n][c])
+            ns_output.append(row)
+
+        self.output_ds = ns_output
+        print("new output_ds rows = ", len(self.output_ds), ",  cols = ", len(self.output_ds[0]))
         return self.output_ds
