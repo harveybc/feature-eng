@@ -129,4 +129,8 @@ class MSSADecomposer(PluginBase):
                 fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
 
         print("output_ds.shape = ", output_ds.shape)
+        
+        # transform the dimensions from (feats, ticks, channels) to (feats*channels, ticks)
+        
+        print("new output_ds.shape = ", output_ds.shape)
         return self.output_ds
