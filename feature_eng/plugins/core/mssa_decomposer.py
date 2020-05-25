@@ -136,8 +136,8 @@ class MSSADecomposer(PluginBase):
             for p in range(0, input_ds.shape[0]):
                 # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
                 for c in range (0, rank):
-                    #row.append(self.output_ds[p][n][c])
-                    row.append(self.output_ds[0][0][0])
+                    #row.append(self.output_ds[p,n,c])
+                    row.append(self.output_ds[p,n,c])
             ns_output.append(row)
         # convert to np array
         self.output_ds = np.array(ns_output)
