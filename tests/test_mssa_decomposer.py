@@ -24,7 +24,7 @@ class Conf:
         self.core_plugin = "mssa_decomposer"
         self.num_components = 5
         self.window_size = 30
-        self.group_file = os.path.join(os.path.dirname(__file__), "groups.json")
+        self.group_file = None
         self.plot_prefix = None
         self.w_prefix = None
 
@@ -71,6 +71,24 @@ class TestMSSADecomposer:
             + self.conf.output_file
             + " --num_components "
             + str(self.conf.num_components)
+        )
+        # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        # get the size of the output dataset
+        rows_o, cols_o = self.get_size_csv(self.conf.output_file)
+        # assert if the number of rows an colums is less than the input dataset and > 0
+        assert (cols_o == self.cols_d * self.conf.num_components)
+
+    def atest_C03T03_group_cmdline(self):
+        """ same as C03T03, but via command-line """
+        os.system("feature_eng --core_plugin mssa_decomposer --input_file "
+            + self.conf.input_file
+            + " --output_file "
+            + self.conf.output_file
+            + " --num_components "
+            + str(self.conf.num_components)
+            + " --group_file "
+            + os.path.join(os.path.dirname(__file__), "groups.json")
         )
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
