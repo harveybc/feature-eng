@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This File contains the MSSADecomposer class plugin. 
+This File contains the MSSADecomposer class plugin.
 """
 
 from feature_eng.plugin_base import PluginBase
@@ -16,7 +16,7 @@ __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
-class MSSADecomposer(PluginBase): 
+class MSSADecomposer(PluginBase):
     """ Core plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
 
     def __init__(self, conf):
@@ -50,9 +50,9 @@ class MSSADecomposer(PluginBase):
             else:
                 last = self.rows_d
             # slice the input_ds dataset in 2*self.conf.window_size ticks segments
-            s_data_w = input_ds[first : last,:]       
+            s_data_w = input_ds[first : last,:]
             # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
-            if i == 0: 
+            if i == 0:
                 # uses SVHT for selecting number of components if required from the conf parameters
                 if self.conf.num_components == 0:
                     mssa = MSSA(n_components='svht', window_size=self.conf.window_size, verbose=True)
@@ -80,8 +80,8 @@ class MSSADecomposer(PluginBase):
             # load the groups from a json file
             grouped_output = []
             if self.conf.group_file != None:
-                #TODO: concatenate grouped output 
-                print("Grouping correlated components (manually set list)") 
+                #TODO: concatenate grouped output
+                print("Grouping correlated components (manually set list)")
                 # TODO: QUITAR GUARDADO DE JSON DE EJEMPLO
                 ts0_groups = [[0],[1],[2],[3],[4,5],[6],[7],[8],[9,10],[11],[12]]
                 with open(self.conf.group_file, 'w') as f:
@@ -114,7 +114,7 @@ class MSSADecomposer(PluginBase):
         if self.conf.plot_prefix != None:
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
             # genera gráficas para cada componente con valores agrupados
-            # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column 
+            # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column
             # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
             cumulative_recon = np.zeros_like(s_data[:, 0])
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
@@ -136,7 +136,8 @@ class MSSADecomposer(PluginBase):
             for p in range(0, input_ds.shape[0]):
                 # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
                 for c in range (0, rank):
-                    row.append(self.output_ds[p][n][c])
+                    #row.append(self.output_ds[p][n][c])
+                    row.append(self.output_ds[0][0][0])
             ns_output.append(row)
         # convert to np array
         self.output_ds = np.array(ns_output)
