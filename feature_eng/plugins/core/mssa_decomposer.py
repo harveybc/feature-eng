@@ -135,7 +135,7 @@ class MSSADecomposer(PluginBase):
             row = []
             for p in range(0, input_ds.shape[0]):
                 # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
-                for c in range (0, rank):
+                for c in range (0,  output_ds.shape[2]):
                     #row.append(self.output_ds[p,n,c])
                     row.append(self.output_ds[p,n,c])
             ns_output.append(row)
