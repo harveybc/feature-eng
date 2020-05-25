@@ -69,6 +69,7 @@ class MSSADecomposer(PluginBase):
 
             # concatenate otput array with the new components
             if i == 0:
+                print("mssa.components_.shape = ", mssa.components_.shape)
                 self.output_ds = copy.deepcopy(mssa.components_)
             else:
                 self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
