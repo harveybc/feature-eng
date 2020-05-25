@@ -63,7 +63,7 @@ class TestMSSADecomposer:
         # assertion
         assert (cols_o == self.fe.ep_core.cols_d * self.conf.num_components)
 
-    def atest_C03T02_cmdline(self):
+    def test_C03T02_cmdline(self):
         """ same as C03T02, but via command-line """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
