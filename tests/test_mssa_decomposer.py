@@ -16,17 +16,15 @@ class Conf:
     
     def __init__(self):
         """ Component Tests Constructor """
-        fname = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
-        self.input_file = fname
+        self.input_file = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
         """ Test dataset filename """
-        fname = os.path.join(os.path.dirname(__file__), "data/test_output.csv")
-        self.output_file = fname
+        self.output_file = os.path.join(os.path.dirname(__file__), "data/test_output.csv")
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "mssa_decomposer"
         self.num_components = 5
         self.window_size = 30
-        self.group_file = None
+        self.group_file = os.path.join(os.path.dirname(__file__), "groups.json")
         self.plot_prefix = None
         self.w_prefix = None
 
