@@ -79,7 +79,7 @@ class TestMSSADecomposer:
         # assert if the number of rows an colums is less than the input dataset and > 0
         assert (cols_o == self.cols_d * self.conf.num_components)
 
-    def atest_C03T03_group_cmdline(self):
+    def test_C03T03_group_file(self):
         """ same as C03T03, but via command-line """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
