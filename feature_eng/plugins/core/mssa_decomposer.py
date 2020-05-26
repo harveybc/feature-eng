@@ -42,6 +42,7 @@ class MSSADecomposer(PluginBase):
         self.output_ds = np.empty(shape=(self.rows_d-self.conf.window_size, 1))
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
         segments = (self.rows_d // (2*self.conf.window_size))
+        grouped_output = []
         for i in range(0, segments):
             # verify if i+(2*self.conf.window_size) is the last observation
             first = i * (2 * self.conf.window_size)
@@ -76,7 +77,6 @@ class MSSADecomposer(PluginBase):
                     self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
            
             # load the groups from a json file, use the same groups for all the features
-            grouped_output = []
             if self.conf.group_file != None:
                 #TODO: concatenate grouped output  NO DEBERIA ENTRAR AQUI SIN EL PARAM
                 print("Grouping correlated components (manually set list)")
