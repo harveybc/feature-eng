@@ -22,7 +22,7 @@ class Conf:
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "mssa_decomposer"
-        self.num_components = 7
+        self.num_components = 8
         self.window_size = 30
         self.group_file = None
         self.plot_prefix = None
