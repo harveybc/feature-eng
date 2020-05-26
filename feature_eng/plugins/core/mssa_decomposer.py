@@ -89,9 +89,6 @@ class MSSADecomposer(PluginBase):
                     if i == 0:
                         grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
                     else:
-                        print("len(grouped_output) = ", str(len(grouped_output)))
-                        print("len(mssa.grouped_components_) = ", str(len(mssa.grouped_components_)))
-                        
                         grouped_output[j] = np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
                     # save the correlation matrix only for the first segment
                     if (i == 0) and (self.conf.w_prefix != None):
