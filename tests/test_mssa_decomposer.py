@@ -106,7 +106,7 @@ class TestMSSADecomposer:
             + " --num_components "
             + str(self.conf.num_components)
             + " --w_prefix "
-            + os.path.join(os.path.dirname(__file__), "data/w_")
+            + os.path.join(os.path.dirname(__file__), "data/plots/w_")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
@@ -125,7 +125,7 @@ class TestMSSADecomposer:
             + " --num_components "
             + str(self.conf.num_components)
             + " --w_prefix "
-            + os.path.join(os.path.dirname(__file__), "data/w_")
+            + os.path.join(os.path.dirname(__file__), "data/plots/w_")
             + " --group_file "
             + os.path.join(os.path.dirname(__file__), "data/groups.json")
         ) 
@@ -146,7 +146,7 @@ class TestMSSADecomposer:
             + " --num_components "
             + str(self.conf.num_components)
             + " --plot_prefix "
-            + os.path.join(os.path.dirname(__file__), "data/plot_")
+            + os.path.join(os.path.dirname(__file__), "data/plot/")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
@@ -164,9 +164,9 @@ class TestMSSADecomposer:
             + self.conf.output_file
             + " --num_components 0"
             + " --plot_prefix "
-            + os.path.join(os.path.dirname(__file__), "data/svht_plot_")
+            + os.path.join(os.path.dirname(__file__), "data/plot/svht_")
             + " --w_prefix "
-            + os.path.join(os.path.dirname(__file__), "data/svht_w_")
+            + os.path.join(os.path.dirname(__file__), "data/lot/svht_w_")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
