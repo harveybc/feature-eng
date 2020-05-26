@@ -127,13 +127,13 @@ class MSSADecomposer(PluginBase):
             # genera gráficas para cada componente con valores agrupados
             # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column
             # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
-            cumulative_recon = np.zeros_like(s_data[:, 0])
+            cumulative_recon = np.zeros_like(input_ds[:, 0])
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
             for comp in range(len(grouped_output[0][0])):
                 fig, ax = plt.subplots(figsize=(18, 7))
                 current_component = grouped_output[0][:, comp]
                 cumulative_recon = cumulative_recon + current_component
-                ax.plot(s_data[:, 0], lw=3, alpha=0.2, c='k', label='original')
+                ax.plot(input_ds[:, 0], lw=3, alpha=0.2, c='k', label='original')
                 ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
                 ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
                 ax.legend()
