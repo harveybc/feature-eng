@@ -88,7 +88,7 @@ class TestMSSADecomposer:
             + " --num_components "
             + str(self.conf.num_components)
             + " --group_file "
-            + os.path.join(os.path.dirname(__file__), "groups.json")
+            + os.path.join(os.path.dirname(__file__), "data/groups.json")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
