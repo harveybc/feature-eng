@@ -117,7 +117,7 @@ class TestMSSADecomposer:
         assert (cols_o == self.cols_d * self.conf.num_components)
     
     def test_C03T05_w_prefix_group_file(self):
-        """ assert if there are 3 groups per feature in the output dataset """
+        """ assert if there are 4 groups per feature in the output dataset """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
             + " --output_file "
@@ -135,10 +135,10 @@ class TestMSSADecomposer:
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF PLOT FILE EXISTS
-        assert (cols_o == self.cols_d * 3)
+        assert (cols_o == self.cols_d * 4)
 
     def test_C03T06_plot_prefix(self):
-        """ assert if there are 3 groups per feature in the output dataset """
+        """  """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
             + " --output_file "
@@ -174,4 +174,4 @@ class TestMSSADecomposer:
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF PLOT FILE EXISTS
-        assert (cols_o == self.cols_d * self.conf.num_components)
+        assert (cols_o > self.cols_d)
