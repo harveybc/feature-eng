@@ -72,12 +72,10 @@ class MSSADecomposer(PluginBase):
                 if self.conf.group_file == None:
                     self.output_ds = np.array(mssa.components_)
             else:
-                print("mssa.components_.shape = ", mssa.components_.shape)
-                print("self.output_ds.shape = ", self.output_ds.shape)
-                self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
-                print("post self.output_ds.shape = ", self.output_ds.shape)
-            # use the same groups for all the features
-            # load the groups from a json file
+                if self.conf.group_file == None:
+                    self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
+           
+            # load the groups from a json file, use the same groups for all the features
             grouped_output = []
             if self.conf.group_file != None:
                 #TODO: concatenate grouped output  NO DEBERIA ENTRAR AQUI SIN EL PARAM
