@@ -157,7 +157,7 @@ class TestMSSADecomposer:
         assert (cols_o == self.cols_d * self.conf.num_components)
     
     def test_C03T07_svht_plot_w_prefix(self):
-        """ assert if there are 3 groups per feature in the output dataset """
+        """  """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
             + " --output_file "
@@ -167,6 +167,28 @@ class TestMSSADecomposer:
             + os.path.join(os.path.dirname(__file__), "plots/svht_")
             + " --w_prefix "
             + os.path.join(os.path.dirname(__file__), "plots/svht_w_")
+        ) 
+        # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        # get the size of the output dataset
+        rows_o, cols_o = self.get_size_csv(self.conf.output_file)
+        # assert if there are 3 groups per feature in the output dataset
+        #TODO: ASSERT IF PLOT FILE EXISTS
+        assert (cols_o > self.cols_d)
+
+    def test_C03T08_svht_plot_w_prefix_group(self):
+        """ assert if there are 4 groups per feature in the output dataset """
+        os.system("feature_eng --core_plugin mssa_decomposer --input_file "
+            + self.conf.input_file
+            + " --output_file "
+            + self.conf.output_file
+            + " --num_components 0"
+            + " --plot_prefix "
+            + os.path.join(os.path.dirname(__file__), "plots/svht_gr_")
+            + " --w_prefix "
+            + os.path.join(os.path.dirname(__file__), "plots/svht_w_gr_")
+            + " --group_file "
+            + os.path.join(os.path.dirname(__file__), "data/groups.json")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
