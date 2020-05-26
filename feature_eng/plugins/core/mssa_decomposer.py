@@ -42,7 +42,7 @@ class MSSADecomposer(PluginBase):
         except:
             (self.rows_d,) = input_ds.shape
             self.cols_d = 1
-            input_ds.reshape(self.rows_d,self.cols_d)
+            input_ds = input_ds.reshape(self.rows_d,self.cols_d)
         # create an empty array with the estimated output shape
 
         self.output_ds = np.empty(shape=(self.rows_d-self.conf.window_size, 1))
