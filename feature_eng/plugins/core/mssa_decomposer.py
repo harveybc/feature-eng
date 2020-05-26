@@ -97,18 +97,19 @@ class MSSADecomposer(PluginBase):
                         fig, ax = plt.subplots(figsize=(12,9))
                         sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
                         ax.set_title('grouped component w-correlations')
-                        fig.savefig(self.conf.w_prefix + str(j) + 'grouped.png', dpi=200)
+                        fig.savefig(self.conf.w_prefix + str(j) + '_grouped.png', dpi=200)
                 self.output_ds = np.array(grouped_output)
             else:
                 # save the correlation matrix only for the first segment
-                if (i == 0) and (self.conf.w_prefix != None):
-                    total_comps = mssa.components_[0, :, :]
-                    # save grouped component correlation matrix
-                    ts0_wcor = mssa.w_correlation(total_comps)
-                    fig, ax = plt.subplots(figsize=(12,9))
-                    sns.heatmap(np.abs(ts0_wcor), cmap='coolwarm', ax=ax)
-                    ax.set_title('component w-correlations')
-                    fig.savefig(self.conf.w_prefix + str(j) + '.png', dpi=200)
+                for j in range(0, self.cols_d):
+                    if (i == 0) and (self.conf.w_prefix != None):
+                        total_comps = mssa.components_[j, :, :]
+                        # save grouped component correlation matrix
+                        ts0_wcor = mssa.w_correlation(total_comps)
+                        fig, ax = plt.subplots(figsize=(12,9))
+                        sns.heatmap(np.abs(ts0_wcor), cmap='coolwarm', ax=ax)
+                        ax.set_title('component w-correlations')
+                        fig.savefig(self.conf.w_prefix + str(j) + '.png', dpi=200)
                 grouped_output = self.output_ds.tolist()
         # show progress
         # save the correlation matrix only for the first segment
@@ -118,7 +119,7 @@ class MSSADecomposer(PluginBase):
             fig, ax = plt.subplots(figsize=(12,9))
             sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
             ax.set_title('grouped component w-correlations')
-            fig.savefig(self.conf.w_prefix + str(j) + 'grouped.png', dpi=200)
+            fig.savefig(self.conf.w_prefix + str(j) + '.png', dpi=200)
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
         if self.conf.plot_prefix != None:
