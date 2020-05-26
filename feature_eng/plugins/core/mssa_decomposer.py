@@ -36,8 +36,12 @@ class MSSADecomposer(PluginBase):
 
     def core(self, input_ds):
         """ Performs mssa_decomposition. """
-        # get the size of the input dataset
-        self.rows_d, self.cols_d = input_ds.shape
+        # get the size of the input dataset, try if there are more than one column, else, assign number of columns as 1
+        try:
+            self.rows_d, self.cols_d = input_ds.shape
+        except:
+            self.rows_d = input_ds.shape
+            self.cols_d = 1
         # create an empty array with the estimated output shape
         self.output_ds = np.empty(shape=(self.rows_d-self.conf.window_size, 1))
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
