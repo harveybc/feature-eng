@@ -10,7 +10,7 @@ from pymssa import MSSA
 import copy
 import json
 import seaborn as sns
-
+import matplotlib.pyplot as plt
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -105,9 +105,9 @@ class MSSADecomposer(PluginBase):
                         sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
                         ax.set_title('grouped component w-correlations')
                         fig.savefig(self.conf.w_prefix + str(j) + 'grouped.png', dpi=200)
-                self.output_ds = grouped_output
+                self.output_ds = np.array(grouped_output)
             else:
-                grouped_output = self.output_ds
+                grouped_output = self.output_ds.tolist()
         # show progress
         progress = i*100/segments
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
