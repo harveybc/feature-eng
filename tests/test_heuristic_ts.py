@@ -19,7 +19,7 @@ class Conf:
         fname = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
         self.input_file = fname
         """ Test dataset filename """
-        fname = os.path.join(os.path.dirname(__file__), "data/test_output.csv")
+        fname = os.path.join(os.path.dirname(__file__), "data/test_c02_output.csv")
         self.output_file = fname
         """ Output dataset filename """
         self.list_plugins = False

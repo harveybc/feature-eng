@@ -16,9 +16,9 @@ class Conf:
     
     def __init__(self):
         """ Component Tests Constructor """
-        self.input_file = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
+        self.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_output.csv")
         """ Test dataset filename """
-        self.output_file = os.path.join(os.path.dirname(__file__), "data/test_output.csv")
+        self.output_file = os.path.join(os.path.dirname(__file__), "data/test_c03_output.csv")
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "mssa_decomposer"
