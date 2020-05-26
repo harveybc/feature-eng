@@ -81,7 +81,7 @@ class MSSADecomposer(PluginBase):
                 print("Grouping correlated components (manually set list)")
                 with open(self.conf.group_file) as json_file:
                     ts0_groups = json.load(json_file)
-                for j in range(0, self.cols_d)):
+                for j in range(0, self.cols_d):
                     # draw correlation matrix for the first segment
                     mssa.set_ts_component_groups(j, ts0_groups)
                     ts0_grouped = mssa.grouped_components_[j]
