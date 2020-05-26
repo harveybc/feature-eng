@@ -156,7 +156,7 @@ class TestMSSADecomposer:
         #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o == self.cols_d * self.conf.num_components)
     
-    def test_C03T07_svht_plot_prefix(self):
+    def test_C03T07_svht_plot_w_prefix(self):
         """ assert if there are 3 groups per feature in the output dataset """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + self.conf.input_file
@@ -165,6 +165,8 @@ class TestMSSADecomposer:
             + " --num_components 0"
             + " --plot_prefix "
             + os.path.join(os.path.dirname(__file__), "data/plot_")
+            + " --w_prefix "
+            + os.path.join(os.path.dirname(__file__), "data/w_")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
