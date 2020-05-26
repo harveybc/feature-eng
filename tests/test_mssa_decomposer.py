@@ -113,7 +113,7 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        assert (cols_o == self.cols_d * self.conf.num_component)
+        assert (cols_o == self.cols_d * self.conf.num_components)
     
     def test_C03T05_w_prefix_group_file(self):
         """ assert if there are 3 groups per feature in the output dataset """
@@ -133,4 +133,4 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        assert (cols_o == self.cols_d * self.conf.num_components)
+        assert (cols_o == self.cols_d * 3)
