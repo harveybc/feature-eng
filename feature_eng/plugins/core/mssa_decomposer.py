@@ -40,7 +40,7 @@ class MSSADecomposer(PluginBase):
         try:
             self.rows_d, self.cols_d = input_ds.shape
         except:
-            (self.rows_d) = input_ds.shape
+            (self.rows_d,) = input_ds.shape
             self.cols_d = 1
         # create an empty array with the estimated output shape
         print("self.rows_d = ", self.rows_d)
