@@ -131,7 +131,7 @@ class MSSADecomposer(PluginBase):
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
             for comp in range(len(grouped_output[0][0])):
                 fig, ax = plt.subplots(figsize=(18, 7))
-                current_component = grouped_output[0,:, comp]
+                current_component = self.output_ds[0,:, comp]
                 cumulative_recon = cumulative_recon + current_component
                 ax.plot(input_ds[:, 0], lw=3, alpha=0.2, c='k', label='original')
                 ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
