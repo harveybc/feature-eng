@@ -28,7 +28,8 @@ class MSSAPredictor(PluginBase):
     def parse_cmd(self, parser):
         """ Adds command-line arguments to be parsed, overrides base class """
         parser.add_argument("--num_components", help="Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).", default=0, type=int)
-        parser.add_argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
+        parser.add_argument("--window_size", help="Size of the data window that is half of the segments in which the dataset will be divided for analysis.", default=30, type=int)
+        parser.add_argument("--forward_ticks", help="Number of ticks in the future to predict.", default=10, type=int)
         parser.add_argument("--plot_prefix", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=None, type=str)
         parser.add_argument("--show_error", help="Calculate the Mean Squared Error (MSE) between the prediction and the input future value. Defaults to False", action="store_true", default=False, type=bool)
         return parser
@@ -42,11 +43,12 @@ class MSSAPredictor(PluginBase):
         except:
             (self.rows_d,) = input_ds.shape
             self.cols_d = 1
-            input_ds = input_ds.reshape(self.rows_d,self.cols_d)
+            input_ds = input_ds.reshape(self.rows_d, self.cols_d)
         # create an empty array with the estimated output shape
-        self.output_ds = np.empty(shape=(self.rows_d-(self.conf.window_size), 1))
+        self.output_ds = np.empty(shape=(self.rows_d-(self.conf.window_size), self.cols_d))
+
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
-        segments = (self.rows_d // (2*self.conf.window_size))
+        segments = (self.rows_d - (2*self.conf.window_size + self.))
         grouped_output = []
         for i in range(0, segments):
             # verify if i+(2*self.conf.window_size) is the last observation
