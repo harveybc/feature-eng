@@ -45,7 +45,7 @@ class MSSADecomposer(PluginBase):
             input_ds = input_ds.reshape(self.rows_d,self.cols_d)
         # create an empty array with the estimated output shape
 
-        self.output_ds = np.empty(shape=(self.rows_d-self.conf.window_size, 1))
+        self.output_ds = np.empty(shape=(self.rows_d-self.conf.window_size, self.cols_d))
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
         segments = (self.rows_d // (2*self.conf.window_size))
         grouped_output = []

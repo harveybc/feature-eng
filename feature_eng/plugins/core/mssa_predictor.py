@@ -35,7 +35,7 @@ class MSSAPredictor(PluginBase):
 
 #TODO: SLIDING WINDOW  Y PREDICCION
     def core(self, input_ds):
-        """ Performs mssa_decomposition. """
+        """ Performs sliding-window mssa_decomposition and prediction of each input feature. """
         # get the size of the input dataset, try if there are more than one column, else, assign number of columns as 1
         try:
             self.rows_d, self.cols_d = input_ds.shape
@@ -44,8 +44,7 @@ class MSSAPredictor(PluginBase):
             self.cols_d = 1
             input_ds = input_ds.reshape(self.rows_d,self.cols_d)
         # create an empty array with the estimated output shape
-
-        self.output_ds = np.empty(shape=(self.rows_d-self.conf.window_size, 1))
+        self.output_ds = np.empty(shape=(self.rows_d-(self.conf.window_size), 1))
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
         segments = (self.rows_d // (2*self.conf.window_size))
         grouped_output = []
