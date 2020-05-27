@@ -198,7 +198,7 @@ class TestMSSADecomposer:
         #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o > self.cols_d)
 
-    def test_C03T08_svht_multi(self):
+    def test_C03T09_svht_multi(self):
         """ assert if there are 4 groups per feature in the output dataset """
         os.system("feature_eng --core_plugin mssa_decomposer --input_file "
             + os.path.join(os.path.dirname(__file__), "data/test_input.csv")
