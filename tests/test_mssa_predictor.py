@@ -87,7 +87,7 @@ class TestMSSADecomposer:
             + " --num_components "
             + str(self.conf.num_components)
             + " --plot_prefix "
-            + os.path.join(os.path.dirname(__file__), "plots/")
+            + os.path.join(os.path.dirname(__file__), "plots/c04_")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
@@ -106,7 +106,7 @@ class TestMSSADecomposer:
             + self.conf.output_file
             + " --num_components 0"
             + " --plot_prefix "
-            + os.path.join(os.path.dirname(__file__), "plots/svht_")
+            + os.path.join(os.path.dirname(__file__), "plots/svht_c04_")
         ) 
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
@@ -114,7 +114,8 @@ class TestMSSADecomposer:
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF PLOT FILE EXISTS
-        assert (cols_o > self.cols_d)
+        # assertion
+        assert (cols_o == self.conf.cols_d) and (rows_o == self.conf.rows_d-(self.conf.window_size+self.conf.forward_ticks))
 
     def test_C04T05_svht_plot_prefix_show_error(self):
         """  """
@@ -124,7 +125,7 @@ class TestMSSADecomposer:
             + self.conf.output_file
             + " --num_components 0"
             + " --plot_prefix "
-            + os.path.join(os.path.dirname(__file__), "plots/svht_")
+            + os.path.join(os.path.dirname(__file__), "plots/svht_c04_")
             + " --show_error "
         ) 
         # get the size of the output dataset
@@ -132,5 +133,6 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
-        assert (cols_o > self.cols_d)
+        #TODO: ASSERT IF error is shown
+        # assertion
+        assert (cols_o == self.conf.cols_d) and (rows_o == self.conf.rows_d-(self.conf.window_size+self.conf.forward_ticks))
