@@ -18,7 +18,7 @@ class Conf:
         """ Component Tests Constructor """
         self.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_output.csv")
         """ Test dataset filename """
-        self.output_file = os.path.join(os.path.dirname(__file__), "data/test_c03_output.csv")
+        self.output_file = os.path.join(os.path.dirname(__file__), "data/test_c04_output.csv")
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "mssa_predictor"
