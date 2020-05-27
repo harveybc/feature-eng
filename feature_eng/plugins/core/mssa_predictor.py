@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This File contains the MSSADecomposer class plugin.
+This File contains the MSSAPredictor class plugin.
 """
 
 from feature_eng.plugin_base import PluginBase
@@ -16,7 +16,7 @@ __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
 __license__ = "mit"
 
-class MSSADecomposer(PluginBase):
+class MSSAPredictor(PluginBase):
     """ Core plugin for the FeatureEng class, after initialization, saves the data and after calling the store_data method """
 
     def __init__(self, conf):
@@ -29,11 +29,11 @@ class MSSADecomposer(PluginBase):
         """ Adds command-line arguments to be parsed, overrides base class """
         parser.add_argument("--num_components", help="Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).", default=0, type=int)
         parser.add_argument("--window_size", help="Size of the data windows in which the dataset will be divided for analysis.", default=30, type=int)
-        parser.add_argument("--group_file", help="Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.", default=None, type=str)
-        parser.add_argument("--w_prefix", help="Exports a plot of the w-correlation matrix for grouped components. Defaults to None.", default=None, type=str)
         parser.add_argument("--plot_prefix", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=None, type=str)
+        parser.add_argument("--show_error", help="Calculate the Mean Squared Error (MSE) between the prediction and the input future value. Defaults to False", action="store_true", default=False, type=bool)
         return parser
 
+#TODO: SLIDING WINDOW  Y PREDICCION
     def core(self, input_ds):
         """ Performs mssa_decomposition. """
         # get the size of the input dataset, try if there are more than one column, else, assign number of columns as 1
