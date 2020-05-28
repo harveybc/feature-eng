@@ -75,7 +75,7 @@ class MSSAPredictor(PluginBase):
                 mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
                 mssa.fit(s_data_w)
 
-# TODO : Con las componentes, generar la predicción y luego los plots
+# TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
 
             # concatenate otput array with the new components
             if i == 0:
