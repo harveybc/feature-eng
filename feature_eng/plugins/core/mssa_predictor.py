@@ -48,13 +48,13 @@ class MSSAPredictor(PluginBase):
         self.output_ds = np.empty(shape=(self.rows_d-(self.conf.window_size), self.cols_d))
 
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
-        segments = (self.rows_d - (2*self.conf.window_size + self.))
+        segments = (self.rows_d - (2*self.conf.window_size + self.forward_ticks))
         grouped_output = []
         for i in range(0, segments):
             # verify if i+(2*self.conf.window_size) is the last observation
-            first = i * (2 * self.conf.window_size)
+            first = i 
             if (i != segments-1):
-                last = (i+1) * (2 * self.conf.window_size)
+                last = i + (2 * self.conf.window_size)
             else:
                 last = self.rows_d
             # slice the input_ds dataset in 2*self.conf.window_size ticks segments
@@ -74,6 +74,8 @@ class MSSAPredictor(PluginBase):
             else:
                 mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
                 mssa.fit(s_data_w)
+
+# TODO : Con las componentes, generar la predicción y luego los plots
 
             # concatenate otput array with the new components
             if i == 0:
