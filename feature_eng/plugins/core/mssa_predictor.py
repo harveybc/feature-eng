@@ -34,7 +34,7 @@ class MSSAPredictor(PluginBase):
         parser.add_argument("--show_error", help="Calculate the Mean Squared Error (MSE) between the prediction and the input future value. Defaults to False", action="store_true", default=False, type=bool)
         return parser
 
-#TODO: SLIDING WINDOW  Y PREDICCION
+#TODO: SLIDING WINDOW Y PREDICCION
     def core(self, input_ds):
         """ Performs sliding-window mssa_decomposition and prediction of each input feature. """
         # get the size of the input dataset, try if there are more than one column, else, assign number of columns as 1
@@ -84,52 +84,7 @@ class MSSAPredictor(PluginBase):
             else:
                 if self.conf.group_file == None:
                     self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
-           
-            # load the groups from a json file, use the same groups for all the features
-            if self.conf.group_file != None:
-                print("Grouping correlated components (manually set list)")
-                with open(self.conf.group_file) as json_file:
-                    ts0_groups = json.load(json_file)
-                for j in range(0, self.cols_d):
-                    # draw correlation matrix for the first segment
-                    mssa.set_ts_component_groups(j, ts0_groups)
-                    ts0_grouped = mssa.grouped_components_[j]
-                    # concatenate otput array with the new components
-                    if i == 0:
-                        grouped_output.append(copy.deepcopy(mssa.grouped_components_[j]))
-                    else:
-                        grouped_output[j] = np.concatenate((grouped_output[j], copy.deepcopy(mssa.grouped_components_[j])), axis = 0)
-                    # save the correlation matrix only for the first segment
-                    if (i == 0) and (self.conf.w_prefix != None):
-                        # save grouped component correlation matrix
-                        ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
-                        fig, ax = plt.subplots(figsize=(12,9))
-                        sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
-                        ax.set_title('grouped component w-correlations')
-                        fig.savefig(self.conf.w_prefix + str(j) + '_grouped.png', dpi=200)
-                self.output_ds = np.array(grouped_output)
-            else:
-                # save the correlation matrix only for the first segment
-                for j in range(0, self.cols_d):
-                    if (i == 0) and (self.conf.w_prefix != None):
-                        total_comps = mssa.components_[j, :, :]
-                        # save grouped component correlation matrix
-                        ts0_wcor = mssa.w_correlation(total_comps)
-                        fig, ax = plt.subplots(figsize=(12,9))
-                        sns.heatmap(np.abs(ts0_wcor), cmap='coolwarm', ax=ax)
-                        ax.set_title('component w-correlations')
-                        fig.savefig(self.conf.w_prefix + str(j) + '.png', dpi=200)
-                grouped_output = self.output_ds.tolist()
-        # show progress
-        # save the correlation matrix only for the first segment
-        if (i == 0) and (self.conf.w_prefix != None):
-            # save grouped component correlation matrix
-            ts0_grouped_wcor = mssa.w_correlation(ts0_grouped)
-            fig, ax = plt.subplots(figsize=(12,9))
-            sns.heatmap(np.abs(ts0_grouped_wcor), cmap='coolwarm', ax=ax)
-            ax.set_title('grouped component w-correlations')
-            fig.savefig(self.conf.w_prefix + str(j) + '.png', dpi=200)
-        progress = i*100/segments
+            
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
         if self.conf.plot_prefix != None:
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
