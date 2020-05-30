@@ -62,7 +62,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
 
-    def test_C04T02_cmdline(self):
+    def atest_C04T02_cmdline(self):
         """ same as C04T01, but via command-line """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
@@ -78,7 +78,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
 
-    def test_C04T03_plot_prefix(self):
+    def atest_C04T03_plot_prefix(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
@@ -98,7 +98,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
     
-    def test_C04T04_svht_plot_prefix(self):
+    def atest_C04T04_svht_plot_prefix(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
@@ -117,7 +117,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
 
-    def test_C04T05_svht_plot_prefix_show_error(self):
+    def atest_C04T05_svht_plot_prefix_show_error(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
