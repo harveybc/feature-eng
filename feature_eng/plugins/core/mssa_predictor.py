@@ -59,6 +59,7 @@ class MSSAPredictor(PluginBase):
                 last = self.rows_d
             # slice the input_ds dataset in 2*self.conf.window_size ticks segments
             s_data_w = input_ds[first : last,:]
+            # center the data before fitting
             # only the first time, run svht, in following iterations, use the same n_components, without executing the svht algo
             if i == 0:
                 # uses SVHT for selecting number of components if required from the conf parameters
@@ -75,7 +76,7 @@ class MSSAPredictor(PluginBase):
                 mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
                 mssa.fit(s_data_w)
 
-# TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
+        # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
 
             # concatenate otput array with the new components
             if i == 0:
@@ -84,7 +85,9 @@ class MSSAPredictor(PluginBase):
             else:
                 if self.conf.group_file == None:
                     self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
-            
+
+    
+
         print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
         if self.conf.plot_prefix != None:
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.

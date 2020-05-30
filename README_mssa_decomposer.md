@@ -12,6 +12,10 @@ Performs Multivariate Singular Spectrum Analysis (MSSA) decomposition of an inpu
 Performs MSSA decomposition of an input dataset, uses a configurable number of output channels, optionally 
 grouping similar components.
 
+## NOTE: 
+
+It centers each feature by substracting the mean, please be careful using this data since the mean value is not stored anywhere. A better approach is to standardize the input dataset before using mssa_decomposer.
+
 ## Installation
 
 The plugin is pre-installed with the feature_eng package, the instructions are described in the [feature_eng README](../master/README.md).
