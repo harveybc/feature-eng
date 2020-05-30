@@ -96,7 +96,7 @@ class MSSAPredictor(PluginBase):
                 print("ini self.output_ds.shape = ", self.output_ds.shape)
                 
             else:
-                self.output_ds = np.concatenate((self.output_ds, fc_row), axis = 1)
+                self.output_ds = np.concatenate((self.output_ds, fc_row), axis = 0)
             # TODO: calculate error per feature
     
 
