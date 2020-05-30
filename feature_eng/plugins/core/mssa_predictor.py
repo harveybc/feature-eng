@@ -82,6 +82,7 @@ class MSSAPredictor(PluginBase):
                 mssa.fit(s_data_w)
 
             # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
+            tp = self.forward_ticks
             for ts_index in range(input_ds.shape[1]):
                 tr = np.zeros(input_ds.shape[0])
                 tr[:] = np.nan
@@ -90,11 +91,11 @@ class MSSAPredictor(PluginBase):
                 # performs the forecast
                 fc = mssa.forecast(tp, timeseries_indices=ts_index)
                 
-                ytrue = wine_te.iloc[:, ts_index].values
-                yhat = fc.ravel()[~pd.isnull(ytrue)]
-                ytrue = ytrue[~pd.isnull(ytrue)]
+                #ytrue = wine_te.iloc[:, ts_index].values
+                #yhat = fc.ravel()[~pd.isnull(ytrue)]
+                #ytrue = ytrue[~pd.isnull(ytrue)]
                 
-                r2 = r2_score(ytrue, yhat)
+                #r2 = r2_score(ytrue, yhat)
                 te[-tp:] = fc
 
                 fig, ax = plt.subplots(figsize=(18, 7))
