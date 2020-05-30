@@ -52,7 +52,7 @@ class MSSAPredictor(PluginBase):
         input_ds = input_ds - in_means
 
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
-        segments = (self.rows_d - (2*self.conf.window_size + self.forward_ticks))
+        segments = (self.rows_d - (2*self.conf.window_size + self.conf.forward_ticks))
         grouped_output = []
         for i in range(0, segments):
             print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
@@ -82,7 +82,7 @@ class MSSAPredictor(PluginBase):
                 mssa.fit(s_data_w)
 
             # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
-            fc = mssa.forecast(self.forward_ticks, timeseries_indices=None)
+            fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)
             print("fc.shape = ",fc.shape)
                     
 
