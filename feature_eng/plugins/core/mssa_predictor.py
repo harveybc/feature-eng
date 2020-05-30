@@ -90,13 +90,14 @@ class MSSAPredictor(PluginBase):
 
             # TODO: concatenate otput array with the new predictions
             if i == 0:
-                self.output_ds = np.array(mssa.components_)
+                self.output_ds = np.transpose(fc[:,4])
+                print("ini self.output_ds.shape = ", self.output_ds.shape)
             else:
-                self.output_ds = np.concatenate((self.output_ds, mssa.components_), axis = 1)
-            # calculate error per feature
+                self.output_ds = np.concatenate((self.output_ds, np.transpose(fc[:,4])), axis = 0)
+            # TODO: calculate error per feature
     
 
-        
+        print("end self.output_ds.shape = ", self.output_ds.shape)
         if self.conf.plot_prefix != None:
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
             # genera gráficas para cada componente con valores agrupados
