@@ -86,7 +86,7 @@ class MSSAPredictor(PluginBase):
             fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)        
             # extracts the required tick from prediction for each feature in fc_col
             fc_col = fc[:,self.conf.forward_ticks-1]
-            (rows_o,) = self.fc_col.shape
+            (rows_o,) = fc_col.shape
             # transpose the predictions into a row 
             fc_row = fc_col.reshape(1,rows_o)
 
