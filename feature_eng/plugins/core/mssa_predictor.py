@@ -55,7 +55,8 @@ class MSSAPredictor(PluginBase):
         segments = (self.rows_d - (2*self.conf.window_size + self.conf.forward_ticks))
         grouped_output = []
         for i in range(0, segments):
-            print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
+            #progress = i*100/segments
+            #print("Segment: ",i,"/",segments, "     Progress: ", progress," %" )
             # verify if i+(2*self.conf.window_size) is the last observation
             first = i 
             if (i != segments-1):
