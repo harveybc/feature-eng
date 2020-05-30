@@ -16,7 +16,7 @@ class Conf:
     
     def __init__(self):
         """ Component Tests Constructor """
-        self.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_output.csv")
+        self.input_file = os.path.join(os.path.dirname(__file__), "data/test_input.csv")
         """ Test dataset filename """
         self.output_file = os.path.join(os.path.dirname(__file__), "data/test_c04_output.csv")
         """ Output dataset filename """
