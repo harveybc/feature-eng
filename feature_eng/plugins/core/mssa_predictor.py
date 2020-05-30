@@ -82,31 +82,9 @@ class MSSAPredictor(PluginBase):
                 mssa.fit(s_data_w)
 
             # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
-            tp = self.forward_ticks
-            for ts_index in range(input_ds.shape[1]):
-                tr = np.zeros(input_ds.shape[0])
-                tr[:] = np.nan
-                te = np.copy(tr)
-                tr[:-tp] = mssa.components_[ts_index, :, :].sum(axis=1)
-                # performs the forecast
-                fc = mssa.forecast(tp, timeseries_indices=ts_index)
-                
-                #ytrue = wine_te.iloc[:, ts_index].values
-                #yhat = fc.ravel()[~pd.isnull(ytrue)]
-                #ytrue = ytrue[~pd.isnull(ytrue)]
-                
-                #r2 = r2_score(ytrue, yhat)
-                te[-tp:] = fc
-
-                fig, ax = plt.subplots(figsize=(18, 7))
-                ax.plot(wine_c.index, wine_c.iloc[:, ts_index].values, lw=3, alpha=0.2, c='k', label=wine_c.columns[ts_index])
-                ax.plot(wine_c.index, tr, lw=2, c='steelblue', alpha=0.75, label='Train')
-                ax.plot(wine_c.index, te, lw=2, c='darkgoldenrod', label='Forecast')
-                ax.set_title('Forecast R2: {:.3f}'.format(r2))
-                ax.legend()
-                
-                plt.show()
-
+            fc = mssa.forecast(self.forward_ticks, timeseries_indices=None)
+            print("fc.shape = ",fc.shape)
+                    
 
 
             # TODO: concatenate otput array with the new predictions
