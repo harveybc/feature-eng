@@ -70,30 +70,29 @@ class MSSAPredictor(PluginBase):
             if i == 0:
                 # uses SVHT for selecting number of components if required from the conf parameters
                 if self.conf.num_components == 0:
-                    mssa = MSSA(n_components='svht', window_size=self.conf.window_size, verbose=True)
+                    mssa = MSSA(n_components='svht', window_size=self.conf.window_size, verbose=False)
                     mssa.fit(s_data_w)
                     print("Automatically Selected Rank (number of components)= ",str(mssa.rank_))
                     rank = int(mssa.rank_)
                 else:
                     rank = self.conf.num_components
-                    mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
+                    mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=False)
                     mssa.fit(s_data_w)
             else:
-                mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
+                mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=False)
                 mssa.fit(s_data_w)
 
             # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
-            fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)
-            print("fc.shape = ",fc.shape)
-                    
+            fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)        
 
 
             # TODO: concatenate otput array with the new predictions
             if i == 0:
-                self.output_ds = np.transpose(fc[:,4])
+                self.output_ds = fc[:,4]
                 print("ini self.output_ds.shape = ", self.output_ds.shape)
+                
             else:
-                self.output_ds = np.concatenate((self.output_ds, np.transpose(fc[:,4])), axis = 0)
+                self.output_ds = np.concatenate((self.output_ds, np.transpose(fc[:,4])), axis = 1)
             # TODO: calculate error per feature
     
 
