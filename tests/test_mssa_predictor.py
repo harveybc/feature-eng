@@ -27,7 +27,7 @@ class Conf:
         self.plot_prefix = None
         self.forward_ticks = 5
 
-class TestMSSADecomposer:
+class TestMSSAPredictor:
     """ Component Tests  """
 
     def setup_method(self, test_method):
