@@ -46,6 +46,10 @@ class MSSAPredictor(PluginBase):
             input_ds = input_ds.reshape(self.rows_d, self.cols_d)
         # create an empty array with the estimated output shape
         self.output_ds = np.empty(shape=(self.rows_d-(self.conf.window_size), self.cols_d))
+        
+        # center the input_ds before fitting
+        in_means = np.nanmean(input_ds, axis=0)
+        input_ds = input_ds - in_means
 
         # calculate the output by performing MSSA on <segments> number of windows of data of size window_size
         segments = (self.rows_d - (2*self.conf.window_size + self.forward_ticks))
@@ -76,7 +80,7 @@ class MSSAPredictor(PluginBase):
                 mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=True)
                 mssa.fit(s_data_w)
 
-        # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
+            # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
 
             # concatenate otput array with the new components
             if i == 0:
