@@ -84,15 +84,19 @@ class MSSAPredictor(PluginBase):
 
             # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
             fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)        
-
+            # extracts the required tick from prediction for each feature in fc_col
+            fc_col = fc[:,self.conf.forward_ticks-1]
+            (rows_o,) = self.fc_col.shape
+            # transpose the predictions into a row 
+            fc_row = fc_col.reshape(1,rows_o)
 
             # TODO: concatenate otput array with the new predictions
             if i == 0:
-                self.output_ds = fc[:,4]
+                self.output_ds = fc_row
                 print("ini self.output_ds.shape = ", self.output_ds.shape)
                 
             else:
-                self.output_ds = np.concatenate((self.output_ds, np.transpose(fc[:,4])), axis = 1)
+                self.output_ds = np.concatenate((self.output_ds, fc_row), axis = 1)
             # TODO: calculate error per feature
     
 
