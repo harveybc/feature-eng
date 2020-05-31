@@ -89,10 +89,15 @@ class MSSAPredictor(PluginBase):
             (rows_o,) = fc_col.shape
             # transpose the predictions into a row 
             fc_row = fc_col.reshape(1,rows_o)
+            # extract the row of components for all features
+            comp_row = mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].sum(axis=1)
+            print("comp_row.shape = ", comp_row.shape)
 
             # TODO: concatenate otput array with the new predictions
             if i == 0:
                 self.output_ds = fc_row
+                denoised = np.array(mssa.components_)
+                
                 print("ini self.output_ds.shape = ", self.output_ds.shape)
                 
             else:
@@ -117,19 +122,6 @@ class MSSAPredictor(PluginBase):
                 ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
-        print("pre self.output_ds.shape = ", self.output_ds.shape)
 
-        # transforms the dimensions from (features, ticks, channels) to (ticks, feats*channels)
-        ns_output = []
-        for n in range(self.output_ds.shape[1]):
-            row = []
-            for p in range(self.output_ds.shape[0]):
-                # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
-                for c in range (self.output_ds.shape[2]):
-                    #row.append(self.output_ds[p,n,c])
-                    row.append(self.output_ds[p,n,c])
-            ns_output.append(row)
-        # convert to np array
-        self.output_ds = np.array(ns_output)
         print("new self.output_ds.shape = ", self.output_ds.shape)
         return self.output_ds
