@@ -131,5 +131,5 @@ class MSSAPredictor(PluginBase):
                 ax.plot(denoised[self.conf.forward_ticks-1:, feature], lw=3, c='darkgoldenrod', alpha=0.6, label='denoised')
                 ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1:, feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
-                fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
+                fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
         return self.output_ds
