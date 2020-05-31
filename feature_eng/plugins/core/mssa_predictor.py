@@ -90,7 +90,7 @@ class MSSAPredictor(PluginBase):
             # transpose the predictions into a row 
             fc_row = fc_col.reshape(1,rows_o)
             # extract the row of components for all features
-            comp_row = mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].sum(axis=1)
+            comp_row = mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].sum(axis=2)
             print("comp_row.shape = ", comp_row.shape)
 
             # TODO: concatenate otput array with the new predictions
