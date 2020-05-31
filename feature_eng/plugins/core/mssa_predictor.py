@@ -102,7 +102,7 @@ class MSSAPredictor(PluginBase):
                 denoised = comp_row                
             else:
                 self.output_ds = np.concatenate((self.output_ds, fc_row), axis = 0)
-                denoised = = np.concatenate((denoised, comp_row), axis = 0)
+                denoised = np.concatenate((denoised, comp_row), axis = 0)
             # TODO: calculate error per feature
         # calcluate shape of output_ds
         try:
