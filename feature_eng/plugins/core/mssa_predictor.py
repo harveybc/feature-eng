@@ -120,6 +120,7 @@ class MSSAPredictor(PluginBase):
             # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
             cumulative_recon = np.zeros_like(input_ds[:, 0])
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
+            feature = 0
             print("self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape = ", self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape)
             print("denoised[self.conf.forward_ticks-1:, feature].shape = ", denoised[self.conf.forward_ticks-1:, feature].shape)
             print("input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1:, feature] = ", input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1:, feature].shape)
