@@ -76,7 +76,7 @@ class TestMSSAPredictor:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size+self.conf.forward_ticks))
 
     def test_C04T03_plot_prefix(self):
         """  """
@@ -96,7 +96,7 @@ class TestMSSAPredictor:
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF PLOT FILE EXISTS
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size+self.conf.forward_ticks))
     
     def atest_C04T04_svht_plot_prefix(self):
         """  """
@@ -115,7 +115,7 @@ class TestMSSAPredictor:
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF PLOT FILE EXISTS
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size+self.conf.forward_ticks))
 
     def atest_C04T05_svht_plot_prefix_show_error(self):
         """  """
@@ -135,4 +135,4 @@ class TestMSSAPredictor:
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF error is shown
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size+self.conf.forward_ticks))
