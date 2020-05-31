@@ -78,7 +78,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
 
-    def atest_C04T03_plot_prefix(self):
+    def test_C04T03_plot_prefix(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
