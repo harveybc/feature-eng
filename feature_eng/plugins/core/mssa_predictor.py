@@ -89,22 +89,28 @@ class MSSAPredictor(PluginBase):
             (rows_o,) = fc_col.shape
             # transpose the predictions into a row 
             fc_row = fc_col.reshape(1,rows_o)
-            # extract the row of components for all features
-            print("mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].shape = ", mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].shape)
-            comp_row = mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].sum(axis=1)
-            print("comp_row.shape = ", comp_row.shape)
-
-            # TODO: concatenate otput array with the new predictions
+            # extract the row of components for all features into a single column
+            comp_col = mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].sum(axis=1)
+            (rows_o,) = comp_col.shape
+            # transpose the sum of channels per feature into a row
+            comp_row = comp_col.reshape(1,rows_o)
+            
+            
+            # concatenate otput array with the new predictions (5 tick fw) and the component sum (last tick in segment before prediction) in another array for plotting
             if i == 0:
                 self.output_ds = fc_row
-                denoised = np.array(mssa.components_)
-                
-                print("ini self.output_ds.shape = ", self.output_ds.shape)
-                
+                denoised = comp_row                
             else:
                 self.output_ds = np.concatenate((self.output_ds, fc_row), axis = 0)
+                denoised = = np.concatenate((denoised, comp_row), axis = 0)
             # TODO: calculate error per feature
-    
+        # calcluate shape of output_ds
+        try:
+            rows_o, cols_o = self.output_ds.shape
+        except:
+            (rows_o,) = self.output_ds.shape
+            cols_o = 1
+            self.output_ds = self.output_ds.reshape(rows_o, cols_o)
 
         print("end self.output_ds.shape = ", self.output_ds.shape)
         if self.conf.plot_prefix != None:
@@ -114,15 +120,15 @@ class MSSAPredictor(PluginBase):
             # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
             cumulative_recon = np.zeros_like(input_ds[:, 0])
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
-            for comp in range(len(grouped_output[0][0])):
+            print("self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape = ", self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape)
+            print("denoised[self.conf.forward_ticks-1:, feature].shape = ", denoised[self.conf.forward_ticks-1:, feature].shape)
+            print("input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1:, feature] = ", input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1:, feature].shape)
+
+            for feature in range(self.cols_d):
                 fig, ax = plt.subplots(figsize=(18, 7))
-                current_component = self.output_ds[0,:, comp]
-                cumulative_recon = cumulative_recon + current_component
-                ax.plot(input_ds[:, 0], lw=3, alpha=0.2, c='k', label='original')
-                ax.plot(cumulative_recon, lw=3, c='darkgoldenrod', alpha=0.6, label='cumulative'.format(comp))
-                ax.plot(current_component, lw=3, c='steelblue', alpha=0.8, label='component={}'.format(comp))
+                ax.plot(self.output_ds[:rows_o-self.conf.forward_ticks, feature], lw=3, c='steelblue', alpha=0.8, label='predicted')
+                ax.plot(denoised[self.conf.forward_ticks-1:, feature], lw=3, c='darkgoldenrod', alpha=0.6, label='denoised')
+                ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1:, feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(comp) + '.png', dpi=600)
-
-        print("new self.output_ds.shape = ", self.output_ds.shape)
         return self.output_ds
