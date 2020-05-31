@@ -90,7 +90,7 @@ class MSSAPredictor(PluginBase):
             # transpose the predictions into a row 
             fc_row = fc_col.reshape(1,rows_o)
             # extract the row of components for all features into a single column
-            comp_col = mssa.components_[:, i + (2 * self.conf.window_size) -1 , :].sum(axis=1)
+            comp_col = mssa.components_[:,(2 * self.conf.window_size) -1 , :].sum(axis=1)
             (rows_o,) = comp_col.shape
             # transpose the sum of channels per feature into a row
             comp_row = comp_col.reshape(1,rows_o)
