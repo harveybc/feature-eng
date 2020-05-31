@@ -31,7 +31,7 @@ class MSSAPredictor(PluginBase):
         parser.add_argument("--window_size", help="Size of the data window that is half of the segments in which the dataset will be divided for analysis.", default=30, type=int)
         parser.add_argument("--forward_ticks", help="Number of ticks in the future to predict.", default=10, type=int)
         parser.add_argument("--plot_prefix", help="Exports plots of each grouped channel superposed to the input dataset. Defaults to None.", default=None, type=str)
-        parser.add_argument("--show_error", help="Calculate the Mean Squared Error (MSE) between the prediction and the input future value. Defaults to False", action="store_true", default=False, type=bool)
+        parser.add_argument("--show_error", help="Calculate the Mean Squared Error (MSE) between the prediction and the input future value. Defaults to False", action="store_true", default=False)
         return parser
 
 #TODO: SLIDING WINDOW Y PREDICCION

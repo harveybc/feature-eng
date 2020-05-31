@@ -60,7 +60,7 @@ class TestMSSAPredictor:
         # get the number of rows and cols from out_file
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(self.conf.window_size+self.conf.forward_ticks))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size+self.conf.forward_ticks))
 
     def atest_C04T02_cmdline(self):
         """ same as C04T01, but via command-line """
