@@ -118,7 +118,6 @@ class MSSAPredictor(PluginBase):
             # genera gráficas para cada componente con valores agrupados
             # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column
             # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
-            cumulative_recon = np.zeros_like(input_ds[:, 0])
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
             feature = 0
             print("self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape = ", self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape)
@@ -129,7 +128,7 @@ class MSSAPredictor(PluginBase):
                 fig, ax = plt.subplots(figsize=(18, 7))
                 #ax.plot(self.output_ds[:rows_o-self.conf.forward_ticks, feature], lw=3, c='steelblue', alpha=0.8, label='predicted')
                 ax.plot(denoised[self.conf.forward_ticks:, feature], lw=3, c='darkgoldenrod', alpha=0.6, label='denoised')
-                ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks:, feature], lw=3, alpha=0.2, c='k', label='original')
+                ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : , feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
         return self.output_ds
