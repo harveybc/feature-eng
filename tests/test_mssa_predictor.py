@@ -25,7 +25,7 @@ class Conf:
         self.num_components = 8
         self.window_size = 30
         self.plot_prefix = None
-        self.forward_ticks = 1
+        self.forward_ticks = 5
 
 class TestMSSAPredictor:
     """ Component Tests  """
