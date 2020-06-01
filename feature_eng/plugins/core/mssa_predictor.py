@@ -126,7 +126,7 @@ class MSSAPredictor(PluginBase):
 
             for feature in range(self.cols_d):
                 fig, ax = plt.subplots(figsize=(18, 7))
-                #ax.plot(self.output_ds[:rows_o-self.conf.forward_ticks, feature], lw=3, c='steelblue', alpha=0.8, label='predicted')
+                ax.plot(self.output_ds[:rows_o-self.conf.forward_ticks, feature], lw=3, c='steelblue', alpha=0.8, label='predicted')
                 ax.plot(denoised[self.conf.forward_ticks:, feature], lw=3, c='darkgoldenrod', alpha=0.6, label='denoised')
                 ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : , feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
