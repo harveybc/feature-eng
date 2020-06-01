@@ -27,6 +27,7 @@ The heuristic_ts core can be executed by loading the plugin from a class method 
 * __--ema_fast <val>__:(Optional) column index of the EMA fast in the input dataset. Defaults to 0.
 * __--ema_slow <val>__: (Optional) column index of the EMA slow in the input dataset. Defaults to 1.
 * __--forward_ticks <val>__: (Optional) Number of forward ticks for EMA fast defaults 10.
+* __--current__: (Optional) Do not use future data but only past data for the training signal calculus.
 
 ## Example of usage
 
