@@ -36,6 +36,8 @@ class HeuristicTS(PluginBase):
         # create an empty array with the estimated output shape
         self.output_ds = np.empty(shape=(self.rows_d-self.conf.forward_ticks, 1))
         # calculate the output
+
+        #TODO: IMPLEMENT CURRENT
         for i in range(self.rows_d - self.conf.forward_ticks): 
             self.output_ds[i] = input_ds[i+self.conf.forward_ticks, self.conf.ema_fast]-input_ds[i, self.conf.ema_slow]
         return self.output_ds
