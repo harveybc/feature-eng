@@ -25,7 +25,7 @@ class HeuristicTS(PluginBase):
         parser.add_argument("--forward_ticks", help="Number of forwrard ticks in the future for ema_fast", default=10, type=int)
         parser.add_argument("--ema_fast", help="Column index for ema fast", default=0, type=int)
         parser.add_argument("--ema_slow", help="Column index for ema slow", default=1, type=int)
-        parser.add_argument("--current", help="Do not use future data but only past data for the training signal calculus. Defaults to False", action="store_true", default=False)
+        parser.add_argument("--use_current", help="Do not use future data but only past data for the training signal calculus. Defaults to False", action="store_true", default=False)
         return parser
 
     def core(self, input_ds):
@@ -39,7 +39,7 @@ class HeuristicTS(PluginBase):
         # calculate the output
 
         # implements current
-        if self.conf.current == False:
+        if self.conf.use_current == False:
             for i in range(self.rows_d - self.conf.forward_ticks): 
                 self.output_ds[i] = input_ds[i + self.conf.forward_ticks, self.conf.ema_fast] - input_ds[i, self.conf.ema_slow]
         else:
