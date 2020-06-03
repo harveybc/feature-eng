@@ -96,7 +96,7 @@ class TestMSSAPredictor:
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF PLOT FILE EXISTS
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
     
     def atest_C04T04_svht_plot_prefix(self):
         """  """
