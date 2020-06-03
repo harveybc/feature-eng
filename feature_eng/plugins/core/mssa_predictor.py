@@ -132,9 +132,11 @@ class MSSAPredictor(PluginBase):
                 ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
+        # calculate error
+        r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
+        self.error = r2
         # shows error
         if self.conf.show_error == True:
             for feature in range(self.cols_d):
-                r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
                 print("Feature = ", str(feature), "R2 = ", str(r2))
         return self.output_ds
