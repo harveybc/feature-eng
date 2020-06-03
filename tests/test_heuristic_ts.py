@@ -108,8 +108,8 @@ class TestHeuristicTS:
             + " --current"
         )
         # get the size of the output dataset
-        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        rows_d, cols_d = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_input_10k.csv"))
         # get the size of the output dataset
-        rows_o, cols_o = self.get_size_csv(self.conf.output_file)
+        rows_o, cols_o = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")   )
         # assert if the number of rows an colums is less than the input dataset and > 0
         assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)
