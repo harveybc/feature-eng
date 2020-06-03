@@ -11,6 +11,7 @@ import copy
 import json
 import seaborn as sns
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -112,7 +113,7 @@ class MSSAPredictor(PluginBase):
             cols_o = 1
             self.output_ds = self.output_ds.reshape(rows_o, cols_o)
 
-        print("end self.output_ds.shape = ", self.output_ds.shape)
+        # plots th original data, predicted data and denoised data.
         if self.conf.plot_prefix != None:
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
             # genera gráficas para cada componente con valores agrupados
@@ -131,4 +132,8 @@ class MSSAPredictor(PluginBase):
                 ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
+        # shows error
+        if self.conf.show_error == True:
+            r2 = r2_score(ytrue, yhat)
+            print("R2 = ", str(r2))
         return self.output_ds
