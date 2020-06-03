@@ -45,7 +45,7 @@ class MSSAPredictor(PluginBase):
             (self.rows_d,) = input_ds.shape
             self.cols_d = 1
             input_ds = input_ds.reshape(self.rows_d, self.cols_d)
-        if self.conf.window_size < self.rows_d//5
+        if self.conf.window_size < self.rows_d // 5:
             print("The window_size must be at least 1/5th of the rows of the input dataset")
             system.exit(0)
         # create an empty array with the estimated output shape
