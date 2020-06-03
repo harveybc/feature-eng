@@ -137,7 +137,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(1*(self.conf.window_size+self.conf.forward_ticks)))
 
-    def test_C04T05_svht_plot_prefix_show_error_quad_window_size(self):
+    def test_C04T06_svht_plot_prefix_show_error_quad_window_size(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
@@ -148,6 +148,29 @@ class TestMSSAPredictor:
             + os.path.join(os.path.dirname(__file__), "plots/svht_c04_quad_")
             + " --window_size "
             + str(4*self.conf.window_size)
+            + " --show_error "
+            
+        ) 
+        # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        # get the size of the output dataset
+        rows_o, cols_o = self.get_size_csv(self.conf.output_file)
+        # assert if there are 3 groups per feature in the output dataset
+        #TODO: ASSERT IF error is shown
+        # assertion
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
+
+    def test_C04T07_svht_plot_prefix_show_error_octa_window_size(self):
+        """  """
+        os.system("feature_eng --core_plugin mssa_predictor --input_file "
+            + self.conf.input_file
+            + " --output_file "
+            + self.conf.output_file
+            + " --num_components 0"
+            + " --plot_prefix "
+            + os.path.join(os.path.dirname(__file__), "plots/svht_c04_quad_")
+            + " --window_size "
+            + str(8*self.conf.window_size)
             + " --show_error "
             
         ) 
