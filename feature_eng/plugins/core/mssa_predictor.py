@@ -134,6 +134,7 @@ class MSSAPredictor(PluginBase):
                 fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
         # shows error
         if self.conf.show_error == True:
-            r2 = r2_score(ytrue, yhat)
-            print("R2 = ", str(r2))
+            for feature in range(self.cols_d):
+                r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
+                print("Feature = ", str(feature), "R2 = ", str(r2))
         return self.output_ds
