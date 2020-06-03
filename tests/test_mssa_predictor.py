@@ -22,7 +22,7 @@ class Conf:
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "mssa_predictor"
-        self.num_components = 8
+        self.num_components = 4
         self.window_size = 30
         self.plot_prefix = None
         self.forward_ticks = 5
@@ -78,7 +78,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*self.conf.window_size+self.conf.forward_ticks))
 
-    def test_C04T03_plot_prefix(self):
+    def atest_C04T03_plot_prefix(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
@@ -98,7 +98,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
     
-    def atest_C04T04_svht_plot_prefix(self):
+    def test_C04T04_svht_plot_prefix(self):
         """  """
         os.system("feature_eng --core_plugin mssa_predictor --input_file "
             + self.conf.input_file
