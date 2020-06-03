@@ -116,10 +116,21 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
 
-    def test_C04T07_svht_variable_window_size(self):
-        """ manual test for plotting a variable number """
-        self.fe = FeatureEng(self.conf)
-        # get the number of rows and cols from out_file
+    def test_C04T05_svht_variable_window_size(self):
+        """ manual test for plotting the error (r2 coeff) for a variable window_size """
+        # use the output of the test 5 of the heuristic_ts component as input since it has 10k rows = 10 times the maximum window size
+        self.conf.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")
+        # use svht for auto selecting the number of components per window_size
+        self.conf.num_components = 0
+        error_list = []
+        for window_size in range(10,1010,10):
+            # setup window_size configuration parameters
+            self.conf.window_size = window_size
+            # instance class with the new configuration 
+            self.fe = FeatureEng(self.conf)
+            # save the error for plotting
+            error_list.append(self.fe.ep_core.error)
+        
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
         # get the size of the output dataset
