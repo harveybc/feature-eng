@@ -130,6 +130,7 @@ class TestMSSAPredictor:
             self.fe = FeatureEng(self.conf)
             # save the error for plotting
             error_list.append(self.fe.ep_core.error)
+        # plots the error for each window size
         
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
