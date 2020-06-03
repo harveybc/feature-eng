@@ -102,7 +102,7 @@ class TestHeuristicTS:
         os.system("feature_eng --core_plugin heuristic_ts --input_file "
             + os.path.join(os.path.dirname(__file__), "data/test_input_10k.csv")
             + " --output_file "
-            + + os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")   
+            + os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")   
             + " --forward_ticks "
             + str(self.conf.forward_ticks)
             + " --current"
