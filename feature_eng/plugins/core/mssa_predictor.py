@@ -45,6 +45,9 @@ class MSSAPredictor(PluginBase):
             (self.rows_d,) = input_ds.shape
             self.cols_d = 1
             input_ds = input_ds.reshape(self.rows_d, self.cols_d)
+        if self.conf.window_size < self.rows_d//5
+            print("The window_size must be at least 1/5th of the rows of the input dataset")
+            system.exit(0)
         # create an empty array with the estimated output shape
         self.output_ds = np.empty(shape=(self.rows_d-(self.conf.window_size), self.cols_d))
         
@@ -132,8 +135,9 @@ class MSSAPredictor(PluginBase):
                 ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], lw=3, alpha=0.2, c='k', label='original')
                 ax.legend()
                 fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
-        # calculate error
-        r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
+        # calculate error on the last half of the input dataset
+        #r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
+        r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 + (self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[(self.rows_d//2):rows_o-self.conf.forward_ticks, feature])
         self.error = r2
         # shows error
         if self.conf.show_error == True:
