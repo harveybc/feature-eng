@@ -2,6 +2,8 @@
 
 Core plugin that generates an ideal training signal for trading based on a feature forwarded a configurable number of ticks.
 
+TODO: MULTI-SYMBOL
+
 [![Build Status](https://travis-ci.org/harveybc/feature_eng.svg?branch=master)](https://travis-ci.org/harveybc/feature_eng)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_eng.readthedocs.io/en/latest/)
 [![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_eng?branch=master)](https://bettercodehub.com/)

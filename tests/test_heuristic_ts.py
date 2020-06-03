@@ -96,3 +96,20 @@ class TestHeuristicTS:
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
         assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)
+
+    def test_C02T04_cmdline_current_10k(self):
+        """ generate 10k registers """
+        os.system("feature_eng --core_plugin heuristic_ts --input_file "
+            + os.path.join(os.path.dirname(__file__), "data/test_input_10k.csv")
+            + " --output_file "
+            + self.conf.output_file
+            + " --forward_ticks "
+            + str(self.conf.forward_ticks)
+            + " --current"
+        )
+        # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        # get the size of the output dataset
+        rows_o, cols_o = self.get_size_csv(self.conf.output_file)
+        # assert if the number of rows an colums is less than the input dataset and > 0
+        assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)
