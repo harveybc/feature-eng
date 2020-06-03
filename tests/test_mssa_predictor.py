@@ -168,7 +168,7 @@ class TestMSSAPredictor:
             + self.conf.output_file
             + " --num_components 0"
             + " --plot_prefix "
-            + os.path.join(os.path.dirname(__file__), "plots/svht_c04_quad_")
+            + os.path.join(os.path.dirname(__file__), "plots/svht_c04_octa_")
             + " --window_size "
             + str(8*self.conf.window_size)
             + " --show_error "
