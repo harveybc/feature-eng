@@ -132,7 +132,7 @@ class TestMSSAPredictor:
             error_list.append(self.fe.ep_core.error)
         # plots the error for each window size
         fig, ax = plt.subplots(figsize=(18, 7))
-        ax.plot(error, range(10,1010,10):, lw=3, c='steelblue', alpha=0.8, label='predicted')
+        ax.plot(error, range(10,1010,10), lw=3, c='steelblue', alpha=0.8, label='predicted')
         ax.legend()
         fig.savefig(self.conf.plot_prefix + 'c04t05.png', dpi=600)
         # get the size of the output dataset
