@@ -135,7 +135,7 @@ class TestMSSAPredictor:
         # assert if there are 3 groups per feature in the output dataset
         #TODO: ASSERT IF error is shown
         # assertion
-        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
+        assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(1*(self.conf.window_size+self.conf.forward_ticks)))
 
     def test_C04T05_svht_plot_prefix_show_error_quad_window_size(self):
         """  """
