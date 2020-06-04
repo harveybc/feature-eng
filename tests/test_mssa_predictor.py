@@ -131,10 +131,12 @@ class TestMSSAPredictor:
             # setup window_size configuration parameters
             self.conf.window_size = window_size
             # re-instance class with the new configuration 
-            fe = FeatureEng(self.conf)
+            conf = Conf()
+            fe = FeatureEng(conf)
             # save the error for plotting
             error_list.append(fe.ep_core.error)
             del fe
+            del conf
         # plots the error for each window size
         fig, ax = plt.subplots(figsize=(18, 7))
         ax.plot(error_list, range(10,1010,10), lw=3, c='steelblue', alpha=0.8, label='r2 score')
