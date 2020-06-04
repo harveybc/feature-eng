@@ -136,11 +136,11 @@ class TestMSSAPredictor:
             fe = FeatureEng(conf)
             # save the error for plotting
             err = fe.ep_core.error
-            if err < -2 and err >= -10
+            if err < -2 and err >= -10:
                 err = -2 + (err/10)
-            if err < -10 and err >= -100
+            elif err < -10 and err >= -100:
                 err = -2 + (err/100)
-            if err < -100
+            elif err < -100:
                 err = -2 + (err/1000)
             
             error_list.append(err)
