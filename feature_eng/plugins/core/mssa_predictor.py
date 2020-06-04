@@ -5,7 +5,7 @@ This File contains the MSSAPredictor class plugin.
 
 from feature_eng.plugin_base import PluginBase
 import numpy as np
-from sys
+import sys
 from pymssa import MSSA
 import copy
 import json
