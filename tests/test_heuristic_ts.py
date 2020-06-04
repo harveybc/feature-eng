@@ -25,9 +25,9 @@ class Conf:
         self.list_plugins = False
         self.core_plugin = "heuristic_ts"
         # in test data, column 10 is ema 10
-        self.ema_fast = 10
+        self.ema_fast = 0
         # in test data, column 24 is ema 20
-        self.ema_slow = 24
+        self.ema_slow = 1
         self.forward_ticks = 5  
         self.use_current = False  
 
