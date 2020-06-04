@@ -118,7 +118,7 @@ class TestMSSAPredictor:
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
 
-    def atest_C04T05_svht_variable_window_size(self):
+    def test_C04T05_svht_variable_window_size(self):
         """ manual test for plotting the error (r2 coeff) for a variable window_size """
         error_list = []
         for window_size in range(15,72,1):
