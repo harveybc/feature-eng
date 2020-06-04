@@ -125,7 +125,7 @@ class TestMSSAPredictor:
             # re-instance class with the new configuration 
             conf = Conf()
             # use the output of the test 5 of the heuristic_ts component as input since it has 10k rows = 10 times the maximum window size
-            conf.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")
+            conf.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output_std.csv")
             # plot prefix to generate a plot per test iteration
             conf.plot_prefix =  os.path.join(os.path.dirname(__file__), "plots/c04t05_" + str(window_size) + "_")
             # use svht for auto selecting the number of components per window_size
