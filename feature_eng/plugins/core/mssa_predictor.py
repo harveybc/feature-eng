@@ -88,6 +88,9 @@ class MSSAPredictor(PluginBase):
 
             # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
             fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)        
+            print("fc.shape = ", fc.shape)
+            print("fc.shape = ", fc.shapez)
+            
             # extracts the required tick from prediction for each feature in fc_col
             fc_col = fc[:,self.conf.forward_ticks-1]
             (rows_o,) = fc_col.shape
