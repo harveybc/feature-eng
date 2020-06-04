@@ -12,6 +12,9 @@ import json
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_error
+
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -121,8 +124,9 @@ class MSSAPredictor(PluginBase):
         #r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
         #r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 + (self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, 0], self.output_ds[(self.rows_d//2):rows_o-self.conf.forward_ticks, 0])
         r2 = r2_score(input_ds[(self.rows_d-self.conf.forward_ticks-1)-(self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, 0], self.output_ds[(rows_o-self.conf.forward_ticks)-(self.rows_d//2) :rows_o-self.conf.forward_ticks, 0])
-        self.error = r2
-        
+        mse = mean_squared_error(input_ds[(self.rows_d-self.conf.forward_ticks-1)-(self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, 0], self.output_ds[(rows_o-self.conf.forward_ticks)-(self.rows_d//2) :rows_o-self.conf.forward_ticks, 0])
+        mae = mean_absolute_error(input_ds[(self.rows_d-self.conf.forward_ticks-1)-(self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, 0], self.output_ds[(rows_o-self.conf.forward_ticks)-(self.rows_d//2) :rows_o-self.conf.forward_ticks, 0])
+        self.error = self.r2
         # plots th original data, predicted data and denoised data.
         if self.conf.plot_prefix != None:
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
@@ -131,16 +135,12 @@ class MSSAPredictor(PluginBase):
             # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
             # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
             feature = 0
-            print("self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape = ", self.output_ds[:rows_o-self.conf.forward_ticks, feature].shape)
-            print("denoised[self.conf.forward_ticks:, feature].shape = ", denoised[self.conf.forward_ticks:, feature].shape)
-            print("input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1: self.rows_d-self.conf.forward_ticks, feature] = ", input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks: self.rows_d-self.conf.forward_ticks, feature].shape)
-
             for feature in range(self.cols_d):
                 fig, ax = plt.subplots(figsize=(18, 7))
                 ax.plot(self.output_ds[:rows_o-self.conf.forward_ticks, feature], lw=3, c='steelblue', alpha=0.8, label='predicted')
                 ax.plot(denoised[self.conf.forward_ticks:, feature], lw=3, c='darkgoldenrod', alpha=0.6, label='denoised')
                 ax.plot(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], lw=3, alpha=0.2, c='k', label='original') 
-                ax.set_title('Forecast R2: {:.3f}'.format(r2))
+                ax.set_title('Forecast R2 = {:.3f}   MSE = {:.3f} MAE = {:.3f}'.format(r2,mse,mae))
                 ax.legend() 
                 fig.savefig(self.conf.plot_prefix + str(feature) + '.png', dpi=600)
 
