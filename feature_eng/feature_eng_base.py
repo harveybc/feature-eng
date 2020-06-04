@@ -22,8 +22,13 @@ class FeatureEngBase():
     def __init__(self, conf):
         """ Constructor """
         self.conf = conf
+        print("OK0")
+            
         if conf != None:
+            print("OK1")
             if not hasattr(conf, "args"):
+                print("OK2")
+            
                 self.conf.args = None
                 self.setup_logging(logging.DEBUG) 
                 _logger.info("Starting feature_eng via class constructor...")
