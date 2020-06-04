@@ -22,12 +22,12 @@ class FeatureEngBase():
     def __init__(self, conf):
         """ Constructor """
         self.conf = conf
-        print("OK0")
+ 
             
         if conf != None:
-            print("OK1")
+         
             if not hasattr(conf, "args"):
-                print("OK2")
+               
             
                 self.conf.args = None
                 self.setup_logging(logging.DEBUG) 
@@ -40,7 +40,7 @@ class FeatureEngBase():
                     self.print_plugins()
                 # execute core operations
                 else: 
-                    print("OK3")
+                    
                     # sets default values for plugins
                     if not hasattr(conf, "input_plugin"): 
                         self.conf.input_plugin = "load_csv"    

@@ -137,7 +137,7 @@ class MSSAPredictor(PluginBase):
                 fig.savefig(self.conf.plot_prefix + '_' + str(feature) + '.png', dpi=600)
         # calculate error on the last half of the input dataset
         #r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 : self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[:rows_o-self.conf.forward_ticks, feature])
-        r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 + (self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, feature], self.output_ds[(self.rows_d//2):rows_o-self.conf.forward_ticks, 0])
+        r2 = r2_score(input_ds[(2 * self.conf.window_size) + self.conf.forward_ticks-1 + (self.rows_d//2): self.rows_d-self.conf.forward_ticks-1, 0], self.output_ds[(self.rows_d//2):rows_o-self.conf.forward_ticks, 0])
         self.error = r2
         # shows error
         if self.conf.show_error == True:
