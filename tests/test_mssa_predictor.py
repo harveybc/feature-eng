@@ -27,7 +27,7 @@ class Conf:
         self.window_size = 30
         self.plot_prefix = None
         self.forward_ticks = 5
-        self.forward_ticksshow_error = True
+        self.show_error = True
 
 class TestMSSAPredictor:
     """ Component Tests  """
