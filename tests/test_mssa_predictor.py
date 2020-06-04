@@ -139,7 +139,7 @@ class TestMSSAPredictor:
             del conf
         # plots the error for each window size
         fig, ax = plt.subplots(figsize=(18, 7))
-        ax.plot(error_list, range(10,1010,10), lw=3, c='steelblue', alpha=0.8, label='r2 score')
+        ax.plot(error_list, range(10,30,10), lw=3, c='steelblue', alpha=0.8, label='r2 score')
         ax.legend()
         fig.savefig(self.conf.plot_prefix + 'c04t05_variable_window_size.png', dpi=600)
         # get the size of the output dataset
