@@ -135,7 +135,15 @@ class TestMSSAPredictor:
             # instance class
             fe = FeatureEng(conf)
             # save the error for plotting
-            error_list.append(fe.ep_core.error)
+            err = fe.ep_core.error
+            if err < -2 and err >= -10
+                err = -2 + (err/10)
+            if err < -10 and err >= -100
+                err = -2 + (err/100)
+            if err < -100
+                err = -2 + (err/1000)
+            
+            error_list.append(err)
             del fe
             del conf
         # plots the error for each window size
@@ -144,9 +152,9 @@ class TestMSSAPredictor:
         ax.legend()
         fig.savefig(os.path.join(os.path.dirname(__file__), "plots/c04t05_variable_window_size.png"), dpi=600)
         # get the size of the output dataset
-        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        rows_d, cols_d = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv"))
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
         # TODO: ASSERT RIGHT NUMBER OF ROWS AND IF PLOT EXISTS
-        assert (cols_o == self.cols_d) and (rows_o < self.rows_d)
+        assert (cols_o == cols_d) and (rows_o < rows_d)
