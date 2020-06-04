@@ -40,6 +40,7 @@ class FeatureEngBase():
                     self.print_plugins()
                 # execute core operations
                 else: 
+                    print("OK3")
                     # sets default values for plugins
                     if not hasattr(conf, "input_plugin"): 
                         self.conf.input_plugin = "load_csv"    
