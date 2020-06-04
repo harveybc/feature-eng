@@ -127,7 +127,7 @@ class TestMSSAPredictor:
         # use svht for auto selecting the number of components per window_size
         self.conf.num_components = 0
         error_list = []
-        for window_size in range(10,1010,10):
+        for window_size in range(10,30,10):
             # setup window_size configuration parameters
             self.conf.window_size = window_size
             # re-instance class with the new configuration 

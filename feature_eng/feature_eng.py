@@ -32,7 +32,7 @@ class FeatureEng(FeatureEngBase):
         Args:
         args ([str]): command line parameter list
         """
-        self.setup_logging(logging.DEBUG)
+        self.setup_logging(logging.DEBUG) 
         self.parse_args(args)
         if self.conf.core_plugin != None:    
             self.core()

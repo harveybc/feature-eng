@@ -25,7 +25,7 @@ class FeatureEngBase():
         if conf != None:
             if not hasattr(conf, "args"):
                 self.conf.args = None
-                self.setup_logging(logging.DEBUG)
+                self.setup_logging(logging.DEBUG) 
                 _logger.info("Starting feature_eng via class constructor...")
                 # list available plugins
                 if self.conf.list_plugins == True:
