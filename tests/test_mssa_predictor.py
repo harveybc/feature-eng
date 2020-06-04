@@ -131,7 +131,6 @@ class TestMSSAPredictor:
             # setup window_size configuration parameters
             self.conf.window_size = window_size
             # re-instance class with the new configuration 
-            del self.fe
             self.fe = FeatureEng(self.conf)
             # save the error for plotting
             error_list.append(self.fe.ep_core.error)
