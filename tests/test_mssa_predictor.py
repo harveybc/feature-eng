@@ -133,6 +133,7 @@ class TestMSSAPredictor:
             # setup window_size configuration parameters
             conf.window_size = window_size
             # instance class
+            conf.forward_ticks = 10
             fe = FeatureEng(conf)
             # save the error for plotting
             err = fe.ep_core.error

@@ -92,9 +92,9 @@ class MSSAPredictor(PluginBase):
             #print("fc.shape = ", fc.shapez)
             
             # extracts the required tick from prediction for each feature in fc_col
-            # TODO: VOLVER A CAMBIAR LA COLUMNA 0 POR self.conf.forward_ticks-1
+            # TODO: VOLVER A CAMBIAR LA COLUMNA 5 POR self.conf.forward_ticks-1
             # fc_col = fc[:,self.conf.forward_ticks-1]
-            fc_col = fc[:,0]
+            fc_col = fc[:,5]
             (rows_o,) = fc_col.shape
             # transpose the predictions into a row 
             fc_row = fc_col.reshape(1,rows_o)
