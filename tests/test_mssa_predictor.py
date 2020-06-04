@@ -6,6 +6,7 @@ import sys
 import os
 from filecmp import cmp
 from feature_eng.feature_eng import FeatureEng
+import matplotlib.pyplot as plt
 
 __author__ = "Harvey Bastidas"
 __copyright__ = "Harvey Bastidas"
@@ -120,6 +121,8 @@ class TestMSSAPredictor:
         """ manual test for plotting the error (r2 coeff) for a variable window_size """
         # use the output of the test 5 of the heuristic_ts component as input since it has 10k rows = 10 times the maximum window size
         self.conf.input_file = os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")
+        # plot prefix to generate a plot per test iteration
+        self.conf.plot_prefix =  os.path.join(os.path.dirname(__file__), "plots/c04t05_")
         # use svht for auto selecting the number of components per window_size
         self.conf.num_components = 0
         error_list = []
@@ -132,9 +135,9 @@ class TestMSSAPredictor:
             error_list.append(self.fe.ep_core.error)
         # plots the error for each window size
         fig, ax = plt.subplots(figsize=(18, 7))
-        ax.plot(error, range(10,1010,10), lw=3, c='steelblue', alpha=0.8, label='predicted')
+        ax.plot(error_list, range(10,1010,10), lw=3, c='steelblue', alpha=0.8, label='r2 score')
         ax.legend()
-        fig.savefig(self.conf.plot_prefix + 'c04t05.png', dpi=600)
+        fig.savefig(self.conf.plot_prefix + 'c04t05_variable_window_size.png', dpi=600)
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
         # get the size of the output dataset

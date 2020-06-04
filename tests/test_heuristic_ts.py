@@ -24,8 +24,10 @@ class Conf:
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "heuristic_ts"
-        self.ema_fast = 0
-        self.ema_slow = 1
+        # in test data, column 10 is ema 10
+        self.ema_fast = 10
+        # in test data, column 24 is ema 20
+        self.ema_slow = 24
         self.forward_ticks = 5  
         self.use_current = False  
 
@@ -105,8 +107,12 @@ class TestHeuristicTS:
             + os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")   
             + " --forward_ticks "
             + str(self.conf.forward_ticks)
+            # in test data, column 10 is ema 10
+            + " --ema_fast 10"
+            # in test data, column 24 is ema 20
+            + " --ema_slow 24"
             + " --current"
-        )
+        )        
         # get the size of the output dataset
         rows_d, cols_d = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_input_10k.csv"))
         # get the size of the output dataset
