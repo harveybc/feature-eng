@@ -133,7 +133,7 @@ class TestMSSAPredictor:
             # re-instance class with the new configuration 
             fe = FeatureEng(self.conf)
             # save the error for plotting
-            error_list.append(self.fe.ep_core.error)
+            error_list.append(fe.ep_core.error)
             del fe
         # plots the error for each window size
         fig, ax = plt.subplots(figsize=(18, 7))
