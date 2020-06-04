@@ -121,7 +121,7 @@ class TestMSSAPredictor:
     def test_C04T05_svht_variable_window_size(self):
         """ manual test for plotting the error (r2 coeff) for a variable window_size """
         error_list = []
-        for window_size in range(10,40,10):
+        for window_size in range(10,1010,10):
             # re-instance class with the new configuration 
             conf = Conf()
             # use the output of the test 5 of the heuristic_ts component as input since it has 10k rows = 10 times the maximum window size
@@ -136,19 +136,15 @@ class TestMSSAPredictor:
             fe = FeatureEng(conf)
             # save the error for plotting
             err = fe.ep_core.error
-            if err < -2 and err >= -10:
-                err = -2 + (err/10)
-            elif err < -10 and err >= -100:
-                err = -2 + (err/100)
-            elif err < -100:
-                err = -2 + (err/1000)
+            if err < -2: 
+                err = -2 + ((err+2)/1000)
             
             error_list.append(err)
             del fe
             del conf
         # plots the error for each window size
         fig, ax = plt.subplots(figsize=(18, 7))
-        ax.plot(range(10,40,10), error_list,  lw=3, c='steelblue', alpha=0.8, label='r2 score')
+        ax.plot(range(10,1010,10), error_list,  lw=3, c='steelblue', alpha=0.8, label='r2 score')
         ax.legend()
         fig.savefig(os.path.join(os.path.dirname(__file__), "plots/c04t05_variable_window_size.png"), dpi=600)
         # get the size of the output dataset
