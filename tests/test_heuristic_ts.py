@@ -24,9 +24,12 @@ class Conf:
         """ Output dataset filename """
         self.list_plugins = False
         self.core_plugin = "heuristic_ts"
+        # in test data, column 10 is ema 10
         self.ema_fast = 0
+        # in test data, column 24 is ema 20
         self.ema_slow = 1
-        self.forward_ticks = 5    
+        self.forward_ticks = 5  
+        self.use_current = False  
 
 class TestHeuristicTS:
     """ Component Tests  """
@@ -78,4 +81,41 @@ class TestHeuristicTS:
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if the number of rows an colums is less than the input dataset and > 0
         assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)
-        
+
+    def test_C02T03_cmdline_current(self):
+        """ same as C01T02, but via command-line """
+        os.system("feature_eng --core_plugin heuristic_ts --input_file "
+            + self.conf.input_file
+            + " --output_file "
+            + os.path.join(os.path.dirname(__file__), "data/test_c02_t03_output.csv")
+            + " --forward_ticks "
+            + str(self.conf.forward_ticks)
+            + " --current"
+        )
+        # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(self.conf.input_file)
+        # get the size of the output dataset
+        rows_o, cols_o = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_c02_t03_output.csv"))
+        # assert if the number of rows an colums is less than the input dataset and > 0
+        assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)
+
+    def test_C02T04_cmdline_current_10k(self):
+        """ generate 10k registers """
+        os.system("feature_eng --core_plugin heuristic_ts --input_file "
+            + os.path.join(os.path.dirname(__file__), "data/test_input_10k.csv")
+            + " --output_file "
+            + os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")   
+            + " --forward_ticks "
+            + str(self.conf.forward_ticks)
+            # in test data, column 10 is ema 10
+            + " --ema_fast 10"
+            # in test data, column 24 is ema 20
+            + " --ema_slow 24"
+            + " --current"
+        )        
+        # get the size of the output dataset
+        rows_d, cols_d = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_input_10k.csv"))
+        # get the size of the output dataset
+        rows_o, cols_o = self.get_size_csv(os.path.join(os.path.dirname(__file__), "data/test_c02_t04_output.csv")   )
+        # assert if the number of rows an colums is less than the input dataset and > 0
+        assert (cols_o == 1) and (rows_o == rows_d - self.conf.forward_ticks)

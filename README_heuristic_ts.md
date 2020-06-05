@@ -2,6 +2,8 @@
 
 Core plugin that generates an ideal training signal for trading based on a feature forwarded a configurable number of ticks.
 
+TODO: MULTI-SYMBOL
+
 [![Build Status](https://travis-ci.org/harveybc/feature_eng.svg?branch=master)](https://travis-ci.org/harveybc/feature_eng)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature_eng.readthedocs.io/en/latest/)
 [![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature_eng?branch=master)](https://bettercodehub.com/)
@@ -27,6 +29,7 @@ The heuristic_ts core can be executed by loading the plugin from a class method 
 * __--ema_fast <val>__:(Optional) column index of the EMA fast in the input dataset. Defaults to 0.
 * __--ema_slow <val>__: (Optional) column index of the EMA slow in the input dataset. Defaults to 1.
 * __--forward_ticks <val>__: (Optional) Number of forward ticks for EMA fast defaults 10.
+* __--current__: (Optional) Do not use future data but only past data for the training signal calculus.
 
 ## Example of usage
 

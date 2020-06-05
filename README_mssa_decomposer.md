@@ -12,6 +12,10 @@ Performs Multivariate Singular Spectrum Analysis (MSSA) decomposition of an inpu
 Performs MSSA decomposition of an input dataset, uses a configurable number of output channels, optionally 
 grouping similar components.
 
+## NOTE: 
+
+It centers each feature by substracting the mean, please be careful using this data since the mean value is not stored anywhere. A better approach is to standardize the input dataset before using mssa_decomposer.
+
 ## Installation
 
 The plugin is pre-installed with the feature_eng package, the instructions are described in the [feature_eng README](../master/README.md).
@@ -26,7 +30,7 @@ The plugin's core method can be executed by loading the plugin by instantiating 
 * __--input_file <filename>__: The only mandatory parameter, is the filename for the input dataset for the default feature_eng input plugin (load_csv).
 * __--output_file <filename>__: (Optional) Filename for the output dataset for the default feature_eng output plugin (store_csv). Defaults to output.csv
 * __--num_components <val>__:(Optional) Number of SSA components per input feature. Defaults to 0 = Autocalculated usign Singular Value Hard Thresholding (SVHT).
-* __--window_size <val>__: (Optional) Size of the window used for analysis. Defaults to 30.
+* __--window_size <val>__: (Optional) Size of the window used for analysis. Dividies the dataset in segments of 2*window_size ticks. Defaults to 30.
 * __--group_file <filename>__: (Optional) Filename for the JSON file containing manually set feature groups. Use --plot_correlation to export a w-correlation matrix plot. Defaults to None.
 * __--w_prefix <filename_prefix>__: (Optional) Exports plots of the w-correlation matrix for grouped components for each feature. Defaults to None.
 * __--plots_prefix <filename_prefix>__: (Optional) Exports plots of each grouped channel superposed to the input dataset. Defaults to None.

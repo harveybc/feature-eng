@@ -3,7 +3,7 @@
 import pytest
 import csv
 import sys
-import os
+import os 
 from filecmp import cmp
 from feature_eng.feature_eng import FeatureEng
 
@@ -27,6 +27,7 @@ class Conf:
         self.ema_fast = 0
         self.ema_slow = 1
         self.forward_ticks = 5    
+        self.use_current = False  
 
 class TestFeatureEng:
     """ Component Tests  """
