@@ -67,7 +67,7 @@ The following examples show both the class method and command line uses for one 
 
 ### Example: Usage via CLI to execute an installed plugin with its parameters
 
-> feature_eng --plugin heuristic_ts --input_file "tests/data/test_input.csv"
+> feature_eng --core_plugin heuristic_ts --input_file "tests/data/test_input.csv"
 
 ### Example: Usage via Class Methods (HeuristicTS plugin)
 
