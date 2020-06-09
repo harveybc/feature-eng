@@ -1,6 +1,6 @@
 # Feature Engineering 
 
-Plug-in based feature engineering operations, transform raw data to generate new data that better represent features so they improve the performance of a predictive model. __Work In Progress, NOT USABLE YET__.
+Plug-in based feature engineering operations, transform raw data to generate new data that better represent features so they improve the performance of a predictive model.
 
 [![Build Status](https://travis-ci.org/harveybc/feature-eng.svg?branch=master)](https://travis-ci.org/harveybc/feature-eng)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature-eng.readthedocs.io/en/latest/)
@@ -67,7 +67,7 @@ The following examples show both the class method and command line uses for one 
 
 ### Example: Usage via CLI to execute an installed plugin with its parameters
 
-> feature_eng --plugin heuristic_ts --input_file "tests/data/test_input.csv"
+> feature_eng --core_plugin heuristic_ts --input_file "tests/data/test_input.csv"
 
 ### Example: Usage via Class Methods (HeuristicTS plugin)
 
