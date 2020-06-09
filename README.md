@@ -14,7 +14,7 @@ Implements modular components for feature engineering, it can be expanded by ins
 * Operations plugins: perform feature engineering operations on loaded data 
 * Output plugins: save the results of the feature engineering operations
 
-It includes some pre-installed configureable plugins:
+It includes some pre-installed configurable plugins:
 * Heuristic training signal generator
 * MSSA decomposer
 * MSSA predictor
