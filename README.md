@@ -30,6 +30,8 @@ To install the package via PIP, use the following command:
 
 Also, the installation can be made by clonning the github repo and manually installing it as in the following instructions.
 
+TODO: Install kieferk/pymssa via github clone and python setup.py install
+
 ### Github Installation Steps
 1. Clone the GithHub repo:   
 > git clone https://github.com/harveybc/feature-eng
