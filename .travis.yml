@@ -25,7 +25,7 @@ before_script:
   - git clone https://github.com/harveybc/pymssa
   - cd pymssa 
   - python setup.py install
-  - cd
+  - cd ..
 script:
   - python setup.py develop
   - tox
