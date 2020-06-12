@@ -46,6 +46,12 @@ TODO: Install kieferk/pymssa via github clone and python setup.py install
 > python setup.py test
 7. (Optional) Generate Sphinx Documentation
 > python setup.py docs
+8. clone pymssa from GithHub
+> git clone https://github.com/harveybc/pymssa
+9. cd to the pymssa directory
+> cd pymssa
+10. install pymssa
+> python setup.py install
 
 ### Command-Line Execution
 

@@ -14,5 +14,6 @@
 # Example:
 numpy==1.15
 scikit-learn
+seaborn
 # scipy==1.0
 #
