@@ -136,9 +136,7 @@ class MSSADecomposer(PluginBase):
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
             # genera gráficas para cada componente con valores agrupados
             # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column
-            # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
             cumulative_recon = np.zeros_like(input_ds[:, 0])
-            # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
             for comp in range(len(grouped_output[0][0])):
                 fig, ax = plt.subplots(figsize=(18, 7))
                 current_component = self.output_ds[0,:, comp]
@@ -155,7 +153,6 @@ class MSSADecomposer(PluginBase):
         for n in range(self.output_ds.shape[1]):
             row = []
             for p in range(self.output_ds.shape[0]):
-                # TODO: CORREGIR PARA CUANDO SE USE GROUP_FILE
                 for c in range (self.output_ds.shape[2]):
                     #row.append(self.output_ds[p,n,c])
                     row.append(self.output_ds[p,n,c])
