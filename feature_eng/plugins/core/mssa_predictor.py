@@ -38,7 +38,6 @@ class MSSAPredictor(PluginBase):
         parser.add_argument("--show_error", help="Calculate the Mean Squared Error (MSE) between the prediction and the input future value. Defaults to False", action="store_true", default=False)
         return parser
 
-#TODO: SLIDING WINDOW Y PREDICCION
     def core(self, input_ds):
         """ Performs sliding-window mssa_decomposition and prediction of each input feature. """
         # get the size of the input dataset, try if there are more than one column, else, assign number of columns as 1
@@ -89,7 +88,6 @@ class MSSAPredictor(PluginBase):
                 mssa = MSSA(n_components=rank, window_size=self.conf.window_size, verbose=False)
                 mssa.fit(s_data_w)
 
-            # TODO : Con las componentes, generar la predicción y luego los plots para cada feature del input_ds
             fc = mssa.forecast(self.conf.forward_ticks, timeseries_indices=None)        
             
             # extracts the required tick from prediction for each feature in fc_col
@@ -111,7 +109,6 @@ class MSSAPredictor(PluginBase):
             else:
                 self.output_ds = np.concatenate((self.output_ds, fc_row), axis = 0)
                 denoised = np.concatenate((denoised, comp_row), axis = 0)
-            # TODO: calculate error per feature
         # calcluate shape of output_ds
         try:
             rows_o, cols_o = self.output_ds.shape
@@ -132,8 +129,6 @@ class MSSAPredictor(PluginBase):
             # Graficar matriz de correlaciones del primero y  agrupar aditivamente los mas correlated.
             # genera gráficas para cada componente con valores agrupados
             # for the 5th and the next components, save plots containing the original and cummulative timeseries for the first data column
-            # TODO: QUITAR CUANDO DE HAGA PARA TODO SEGMENTO EN EL DATASET; NO SOLO EL PRIMERO
-            # TODO : QUITAR: TEST de tamaño de grouped_components_ dictionary
             feature = 0
             for feature in range(self.cols_d):
                 fig, ax = plt.subplots(figsize=(18, 7))
