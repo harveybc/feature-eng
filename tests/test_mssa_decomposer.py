@@ -113,7 +113,6 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o == self.cols_d * self.conf.num_components)
     
     def test_C03T05_w_prefix_group_file(self):
@@ -134,7 +133,6 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o == self.cols_d * 4)
 
     def test_C03T06_plot_prefix(self):
@@ -153,7 +151,6 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o == self.cols_d * self.conf.num_components)
     
     def test_C03T07_svht_plot_w_prefix(self):
@@ -173,7 +170,6 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o > self.cols_d)
 
     def test_C03T08_svht_plot_w_prefix_group(self):
@@ -195,7 +191,6 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o > self.cols_d)
 
     def test_C03T09_svht_multi(self):
@@ -211,5 +206,4 @@ class TestMSSADecomposer:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         assert (cols_o > self.cols_d)
