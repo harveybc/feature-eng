@@ -9,7 +9,7 @@ virtualenv:
 matrix:
   fast_finish: true
   include:
-    - env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false"
+    - env: DISTRIB="conda" PYTHON_VERSION="3.6" COVERAGE="false" 
 install:
   - source tests/travis_install.sh
   - pip install numpy
