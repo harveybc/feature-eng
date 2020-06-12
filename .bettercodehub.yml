@@ -9,3 +9,4 @@ exclude:
 - .*/setup\.py
 - .*/__init__\.py
 - .*/mssa_decomposer\.py
+- .*/mssa_predictor\.py
