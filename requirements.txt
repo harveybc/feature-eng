@@ -15,6 +15,6 @@
 numpy==1.15
 scikit-learn
 seaborn
-git+https://github.com/harveybc/pymssa.git
+git+https://github.com/harveybc/pymssa
 # scipy==1.0
 #
