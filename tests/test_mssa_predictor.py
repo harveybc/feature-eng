@@ -96,7 +96,6 @@ class TestMSSAPredictor:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        #TODO: ASSERT IF PLOT FILE EXISTS
         # assertion
         assert (cols_o == self.cols_d) and (rows_o == self.rows_d-(2*(self.conf.window_size+self.conf.forward_ticks)))
     
@@ -114,7 +113,6 @@ class TestMSSAPredictor:
         rows_d, cols_d = self.get_size_csv(self.conf.input_file)
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
-        #TODO: ASSERT IF PLOT FILE EXISTS
         # assertion
         assert (cols_o == self.cols_d) and (rows_o < self.rows_d)
 
@@ -153,6 +151,5 @@ class TestMSSAPredictor:
         # get the size of the output dataset
         rows_o, cols_o = self.get_size_csv(self.conf.output_file)
         # assert if there are 3 groups per feature in the output dataset
-        # TODO: ASSERT RIGHT NUMBER OF ROWS AND IF PLOT EXISTS
         assert (cols_o == cols_d) and (rows_o < rows_d)
         

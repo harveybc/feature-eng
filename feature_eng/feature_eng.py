@@ -69,7 +69,6 @@ class FeatureEng(FeatureEngBase):
         if self.conf.input_plugin in self.discovered_input_plugins:
             self.ep_i = self.discovered_input_plugins[self.conf.input_plugin]
             if self.conf.args == None:
-                # TODO: QUITAR
                 _logger.debug("initializing input plugin via constructor.")
             else:
                 # if using command line (conf == None), uses unknown parameters from arparser as params for plugins
