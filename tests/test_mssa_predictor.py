@@ -155,3 +155,4 @@ class TestMSSAPredictor:
         # assert if there are 3 groups per feature in the output dataset
         # TODO: ASSERT RIGHT NUMBER OF ROWS AND IF PLOT EXISTS
         assert (cols_o == cols_d) and (rows_o < rows_d)
+        
