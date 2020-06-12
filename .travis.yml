@@ -5,7 +5,7 @@
 sudo: false
 language: python
 virtualenv:
-  system_site_packages: false
+  system_site_packages: true
 matrix:
   fast_finish: true
   include:
