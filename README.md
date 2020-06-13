@@ -2,7 +2,7 @@
 
 Plug-in based feature engineering operations, transform raw data to generate new data that better represent features so they improve the performance of a predictive model.
 
-[![Build Status](https://travis-ci.org/harveybc/feature-eng.svg?branch=master)](https://travis-ci.org/harveybc/feature-eng)
+[![Build Status](https://api.travis-ci.com/harveybc/feature-eng.svg?branch=master)](https://travis-ci.org/harveybc/feature-eng)
 [![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature-eng.readthedocs.io/en/latest/)
 [![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature-eng?branch=master)](https://bettercodehub.com/)
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature-eng/blob/master/LICENSE)
