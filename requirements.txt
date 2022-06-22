@@ -12,7 +12,7 @@
 # pip install -r requirements.txt
 # Remember to also add them in setup.cfg but unpinned.
 # Example:
-numpy==1.15
+numpy==1.22.0
 scikit-learn
 seaborn
 git+https://github.com/harveybc/pymssa
