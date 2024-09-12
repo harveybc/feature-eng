@@ -1,160 +1,161 @@
-# Feature Engineering 
 
-Plug-in based feature engineering operations, transform raw data to generate new data that better represent features so they improve the performance of a predictive model.
-
-[![Build Status](https://api.travis-ci.com/harveybc/feature-eng.svg?branch=master)](https://travis-ci.org/harveybc/feature-eng)
-[![Documentation Status](https://readthedocs.org/projects/docs/badge/?version=latest)](https://harveybc-feature-eng.readthedocs.io/en/latest/)
-[![BCH compliance](https://bettercodehub.com/edge/badge/harveybc/feature-eng?branch=master)](https://bettercodehub.com/)
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/harveybc/feature-eng/blob/master/LICENSE)
+# Feature Engineering System
 
 ## Description
 
-Implements modular components for feature engineering, it can be expanded by installing plugins, there are three types of plugins:
-* Input plugins: load the data to be processed
-* Operations plugins: perform feature engineering operations on loaded data 
-* Output plugins: save the results of the feature engineering operations
+The Feature Engineering System is a flexible, plugin-based tool designed for generating and selecting features from time-series data. This system allows for the integration of various feature engineering techniques via plugins, starting with the generation of technical indicators and supporting future methods such as Singular Spectrum Analysis (SSA) and Fast Fourier Transform (FFT).
 
-It includes some pre-installed configurable plugins:
-* Heuristic training signal generator
-* MSSA decomposer
-* MSSA predictor
-* CSV file input and output plugins
+### Key Features:
 
-Usable both from command line and from class methods library.
+- **Plugin-Based Architecture**: The system uses a modular plugin architecture, allowing users to add, configure, and switch between different feature generation methods. The initial implementation includes a technical indicator generator, with support for additional plugins like SSA, FFT, and others in the future.
+- **Configurable Parameters**: The system allows for dynamic configuration of input parameters such as input/output file paths, method-specific parameters, and other options via a command-line interface (CLI).
+- **Correlation and Distribution Analysis**: Users can automatically compute and visualize Pearson and Spearman correlation matrices to identify relationships between features. The system also supports the visualization of feature distributions to help in manual feature selection.
+- **Manual Feature Selection**: Users can manually select which features (e.g., technical indicators, SSA components) to include in the final output dataset, based on the results of the correlation and distribution analysis.
 
-## Installation
+This tool is designed for data scientists, quantitative analysts, and machine learning practitioners working with time-series data in applications like financial modeling, trading strategies, and predictive analytics.
 
-To install the package via PIP, use the following command:
+## Installation Instructions
 
-> pip install -i https://test.pypi.org/simple/ feature-eng
+To install and set up the feature-engineering application, follow these steps:
 
-Also, the installation can be made by clonning the github repo and manually installing it as in the following instructions.
+1. **Clone the Repository**:
+    ```bash
+    git clone https://github.com/harveybc/feature-engineering.git
+    cd feature-engineering
+    ```
 
-TODO: Install kieferk/pymssa via github clone and python setup.py install
+2. **Create and Activate a Virtual Environment**:
 
-### Github Installation Steps
-1. Clone the GithHub repo:   
-> git clone https://github.com/harveybc/feature-eng
-2. Change to the repo folder:
-> cd feature-eng
-3. Install requirements.
-> pip install -r requirements.txt
-4. Install python package (also installs the console command data-trimmer)
-> python setup.py install
-5. Add the repo folder to the environment variable PYTHONPATH
-6. (Optional) Perform tests
-> python setup.py test
-7. (Optional) Generate Sphinx Documentation
-> python setup.py docs
-8. clone pymssa from GithHub
-> git clone https://github.com/harveybc/pymssa
-9. cd to the pymssa directory
-> cd pymssa
-10. install pymssa
-> python setup.py install
+    - **Using `conda`**:
+        ```bash
+        conda create --name feature-engineering-env python=3.9
+        conda activate feature-engineering-env
+        ```
 
-### Command-Line Execution
+3. **Install Dependencies**:
+    ```bash
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    ```
 
-feature_eng is implemented as a console command:
-> feature_eng --help
+4. **Build the Package**:
+    ```bash
+    python -m build
+    ```
 
-### Command-Line Parameters
+5. **Install the Package**:
+    ```bash
+    pip install .
+    ```
 
-* __--list_plugins__: Shows a list of available plugins.
-* __--core_plugin <ops_plugin_name>__: Feature engineering core operations plugin to process an input dataset.
-* __--input_plugin <input_lugin_name>__: Input dataset importing plugin. Defaults to csv_input.
-* __--output_plugin <output_plugin_name>__: Output dataset exporting plugin. Defaults to csv_output.
+6. **(Optional) Run the feature-engineering CLI**:
+    - On Windows, verify installation:
+        ```bash
+        feature-engineering.bat --help
+        ```
+    - On Linux:
+        ```bash
+        sh feature-engineering.sh --help
+        ```
 
-## Examples of usage
+7. **(Optional) Run Tests**:
+    - On Windows:
+        ```bash
+        set_env.bat
+        pytest
+        ```
+    - On Linux:
+        ```bash
+        sh ./set_env.sh
+        pytest
+        ```
 
-The following examples show both the class method and command line uses for one module, for examples of other plugins, please see the specific module´s documentation.
+## Usage
 
-### Example: Usage via CLI to list installed plugins
+The application provides a command-line interface to control its behavior and manage feature generation through plugins.
 
-> feature_eng --list_plugins
+### Command Line Arguments
 
-### Example: Usage via CLI to execute an installed plugin with its parameters
+#### Required Arguments
 
-> feature_eng --core_plugin heuristic_ts --input_file "tests/data/test_input.csv"
+- `input_file` (str): Path to the input CSV file.
 
-### Example: Usage via Class Methods (HeuristicTS plugin)
+#### Optional Arguments
 
-The following example show how to configure and execute the core plugin.
+- `output_file` (str, optional): Path to the output CSV file. If not specified, the system will not generate an output file.
+- `plugin` (str, default='technical_indicator'): Name of the plugin to use for feature generation. The default plugin generates technical indicators, but additional plugins such as SSA and FFT can be used.
+- `correlation_analysis` (flag): Compute and display Pearson and Spearman correlation matrices.
+- `distribution_plot` (flag): Plot the distributions of the generated features.
+- `quiet_mode` (flag): Suppress output messages to reduce verbosity.
+- `save_log` (str): Path to save the current debug log.
+- `username` (str): Username for the remote API endpoint.
+- `password` (str): Password for the remote API endpoint.
+- `remote_save_config` (str): URL of a remote API endpoint for saving the configuration in JSON format.
+- `remote_load_config` (str): URL of a remote JSON configuration file to download and execute.
+- `remote_log` (str): URL of a remote API endpoint for saving debug variables in JSON format.
+- `load_config` (str): Path to load a configuration file.
+- `save_config` (str): Path to save the current configuration.
 
-```python
-from feature_eng.feature_eng import FeatureEng
-# configure parameters (same variable names as command-line parameters)
-class Conf:
-    def __init__(self):
-        self.core_plugin = "heuristic_ts"
-        self.input_file = "tests/data/test_input.csv"
-# initialize instance of the Conf configuration class
-conf = Conf()
-# initialize and execute the core plugin, loading the dataset with the default feature_eng 
-# input plugin (load_csv), and saving the results using the default output plugin (store_csv). 
-fe = FeatureEng(conf)
-```re()
+### Examples of Use
+
+#### Generate Technical Indicators
+
+To generate technical indicators using the default plugin:
+
+```bash
+feature-engineering.bat --input_file data/eurusd.csv --output_file results/indicators.csv --plugin technical_indicator
 ```
 
-## Pre-Installed Plugins
+#### Perform Singular Spectrum Analysis
 
-All the plugin modules and their CLI commands are installed with the feature-eng package, the following sections describe each module briefly and link to each module's basic documentation. 
+To perform SSA feature extraction:
 
-Additional detailed Sphinix documentation for all modules can be generated in HTML format with the optional step 7 of the installation process, it contains documentation of the classes and methods of all modules in the feature-eng package. 
+```bash
+feature-engineering.bat --input_file data/eurusd.csv --output_file results/ssa_features.csv --plugin ssa
+```
 
-## Heuristic Training Signal Generator
+#### Run Correlation Analysis
 
-Generates an ideal training signal for trading using EMA_fast forwarded a number of ticks minus current EMA_slow as buy signal.
+To compute and display correlation matrices for the generated features:
 
-See [heuristic_ts Readme](../master/README_heuristic_ts.md) for detailed description and usage instructions.
+```bash
+feature-engineering.bat --input_file data/eurusd.csv --correlation_analysis
+```
 
-## Multivariate Singular Spectrum Analysis (MSSA) Decomposer. 
+## Project Directory Structure
 
-Performs MSSA decomposition, save the output dataset containing a configurable number of components per feature or the sum of a configurable number of components.
+```md
+feature-engineering/
+│
+├── app/                           # Main application package
+│   ├── cli.py                     # Handles command-line argument parsing
+│   ├── config.py                  # Stores default configuration values
+│   ├── config_merger.py           # Merges configuration from various sources
+│   ├── plugin_loader.py           # Dynamically loads feature engineering plugins
+│   ├── data_handler.py            # Handles data loading and saving
+│   ├── data_processor.py          # Processes input data and runs the feature extraction pipeline
+│   ├── main.py                    # Main entry point for the application
+│   └── plugins/                   # Plugin directory
+│       ├── technical_indicator.py # Plugin for generating technical indicators
+│       ├── ssa.py                 # Plugin for Singular Spectrum Analysis (future)
+│       └── fft.py                 # Plugin for Fast Fourier Transform (future)
+│
+├── tests/                         # Test modules for the application
+│   ├── system                     # System tests
+│   └── unit                       # Unit tests
+│
+├── README.md                      # Project documentation
+├── requirements.txt               # Python package dependencies
+├── setup.py                       # Script for packaging and installing the project
+├── set_env.bat                    # Batch script for environment setup
+├── set_env.sh                     # Shell script for environment setup
+└── .gitignore                     # Specifies untracked files to ignore
+```
 
-See [MSSA Decomposer Readme](../master/README_mssa_decomposer.md) for detailed description and usage instructions.
+## Contributing
 
-## MSSA Predictor
+Contributions to the project are welcome! Please refer to the `CONTRIBUTING.md` file for guidelines on how to contribute.
 
-Performs MSSA prediction for a configurable number of forward ticks, save the .output dataset containing the prediction for a configurable number of channels or its sum.
+## License
 
-See [MSSA Predictor Readme](../master/README_mssa_predictor.md) for detailed description and usage instructions.
-
-
-## Plugin Creation and Installation
-
-To create a plugin, there are two ways, the first one allows to install the plugin from an external python package using setuptools and is useful for testing your plugins, the second way is to add a new pre-installed plugin to the feature-eng package by making a pull request to my repo so i can review it and merge it. Both methods are described in the following sections.
-
-### External Plugins
-
-The following procedure allows to create a plugin as a python package with setuptools, install it, verify that is installed and use the plugin.
-
-1. Create a new package with the same directory structure of the [standardizer plugin example](../master/examples/standardizer/)
-2. Edit the setup.py or setup.cfg and add your package name as a feature_eng plugin (with a correspondent plugin name) in the entry_points section as follows:
-> setup(
->     ...
->     entry_points={'feature_eng.plugins': '<PLUGIN_NAME> = <YOUR_PACKAGE_NAME>'},
->     ...
-> )
-3. Install your package as usual
-> python setup.py install
-4. Verify that your plugin was registered
-> feature_eng --list_plugins
-Check that <PLUGIN_NAME> appears in the list of installed plugins.
-5. Use your newly installed plugin
-> feature_eng --core_plugin <PLUGIN_NAME> --plugin_option1 --plugin_option2 ...
-
-### Internal Plugins 
-
-The following procedure allows to contribute to the feature_eng repository by creating a new plugin to be included in the pre-installed plugins.
-1. Fork the feature_eng repository via the github homepage 
-2. Clone your fork using github Desktop or via command line into a local directory
-3. Create a new branch called with the name of the new plugin using github Desktop and select it
-4. Cd to the feature_eng fork directory
-5. Create the new module implementation inside the plugins directory, following the structure of the existing plugins
-6. Create the new module tests inside the tests directory, following the structure of the existing tests
-7. Make a commit and push to save your changes to github
-8. Make a Pull Request to the master branch of my feature_eng repo so i can review the changes and merge them with my existing code.
-
-More detailed collaboration instructions soon.
-
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
