@@ -12,9 +12,11 @@ def process_data(data, plugin, config):
     # Keep the date column separate
     date_column = data.index
     
-    # Process only the non-date columns
-    numeric_data = data.iloc[:, 0:]  # Consider everything except 'date'
-    
+    # Process only the non-date columns (assuming OHLC data starts from column 1)
+    numeric_data = data.iloc[:, 1:]
+
+    print(f"Numeric columns before processing: {numeric_data.columns}")  # Debugging line
+
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
     

@@ -9,9 +9,11 @@ def load_csv(file_path):
         # Read CSV with headers and date parsing for the first column
         data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
         
-        # Correctly rename columns: 'date', 'c1', 'c2', ...
+        # Correctly set column names including 'date'
         data.columns = ['date'] + [f'c{i}' for i in range(1, len(data.columns))]
         data.set_index('date', inplace=True)
+
+        print(f"Loaded data columns: {data.columns}")  # Debugging line
         
         # Convert all non-date columns to numeric, coercing errors to NaN
         for col in data.columns:
@@ -25,7 +27,6 @@ def load_csv(file_path):
         raise
 
     return data
-
 
 
 
