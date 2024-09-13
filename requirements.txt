@@ -7,3 +7,5 @@ build
 pytest
 pdoc3
 matplotlib
+Pillow
+kiwisolver

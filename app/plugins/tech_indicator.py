@@ -29,25 +29,42 @@ class Plugin:
     def get_debug_info(self):
         return {var: self.params.get(var, None) for var in self.plugin_debug_vars}
 
+
+
     def adjust_ohlc(self, data):
         """
-        Adjusts the input data based on the specified OHLC order.
+        Adjust the OHLC columns based on the ohlc_order parameter.
         """
-        # Ensure proper renaming according to the `ohlc_order` parameter        
+        print("Renaming columns to match OHLC order...")
+
+        # Define the renaming map for OHLC columns based on the OHLC order
         if self.params['ohlc_order'] == 'ohlc':
-            data_renamed = data.rename(columns={ 
-                'c1': 'Open', 'c2': 'High', 'c3': 'Low', 'c4': 'Close' 
-            })
+            ordered_columns = ['Open', 'High', 'Low', 'Close']
+        elif self.params['ohlc_order'] == 'olhc':
+            ordered_columns = ['Open', 'Low', 'High', 'Close']
         else:
-            data_renamed = data.rename(columns={ 
-                'c1': 'Open', 'c2': 'Low', 'c3': 'High', 'c4': 'Close' 
-            })
+            raise ValueError("Invalid OHLC order specified")
 
-        print(f"Renamed columns: {data_renamed.columns}")  # Debugging line
+        # Rename the OHLC columns
+        rename_map = {
+            'c1': ordered_columns[0],
+            'c2': ordered_columns[1],
+            'c3': ordered_columns[2],
+            'c4': ordered_columns[3]
+        }
 
-        # Ensure renamed columns are correctly accessed
-        ordered_columns = ['Open', 'High', 'Low', 'Close']
+        # Debugging: Print rename map
+        print(f"Renaming columns: {rename_map}")
+
+        # Apply the renaming and ensure the dataset contains the expected columns
+        data_renamed = data.rename(columns=rename_map)
+
+        # Debugging: Check renamed columns
+        print(f"Renamed columns: {data_renamed.columns}")
+
+        # Return the renamed data in the expected order
         return data_renamed[ordered_columns]
+
 
 
 
