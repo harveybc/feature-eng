@@ -55,6 +55,7 @@ class Plugin:
 
 
 
+
     def process(self, data):
         """
         Process the input data by calculating the specified technical indicators using default parameters.
@@ -86,10 +87,7 @@ class Plugin:
             
             elif indicator == 'macd':
                 macd = ta.macd(data['Close'])  # Using default fast, slow, and signal periods (12, 26, 9)
-                if 'MACD_12_26_9' in macd.columns:
-                    technical_indicators['MACD'] = macd['MACD_12_26_9']
-                if 'MACDs_12_26_9' in macd.columns:
-                    technical_indicators['MACD_signal'] = macd['MACDs_12_26_9']
+                technical_indicators.update(macd)
                 print(f"MACD columns returned: {macd.columns}")
             
             elif indicator == 'ema':
@@ -99,17 +97,13 @@ class Plugin:
                     print(f"EMA calculated with shape: {ema.shape}")
             
             elif indicator == 'stoch':
-                stoch = ta.stoch(data['High'], data['Low'], data['Close'])  # Using default %K and %D values (14, 3)
-                if 'STOCHk_14_3_3' in stoch.columns:
-                    technical_indicators['StochK'] = stoch['STOCHk_14_3_3']
-                if 'STOCHd_14_3_3' in stoch.columns:
-                    technical_indicators['StochD'] = stoch['STOCHd_14_3_3']
+                stoch = ta.stoch(data['High'], data['Low'], data['Close'])  # Default %K and %D values (14, 3)
+                technical_indicators.update(stoch)
                 print(f"Stochastic columns returned: {stoch.columns}")
             
             elif indicator == 'adx':
                 adx = ta.adx(data['High'], data['Low'], data['Close'])  # Using default length of 14
-                if 'ADX_14' in adx.columns:
-                    technical_indicators['ADX'] = adx['ADX_14']
+                technical_indicators.update(adx)
                 print(f"ADX columns returned: {adx.columns}")
             
             elif indicator == 'atr':
@@ -126,10 +120,8 @@ class Plugin:
             
             elif indicator == 'bbands':
                 bbands = ta.bbands(data['Close'])  # Using default length of 20
-                if 'BBU_20_2.0' in bbands.columns and 'BBL_20_2.0' in bbands.columns:
-                    technical_indicators['BB_Upper'] = bbands['BBU_20_2.0']
-                    technical_indicators['BB_Lower'] = bbands['BBL_20_2.0']
-                    print(f"BB_Upper and BB_Lower calculated.")
+                technical_indicators.update(bbands)
+                print(f"Bollinger Bands columns returned: {bbands.columns}")
             
             elif indicator == 'williams':
                 williams = ta.willr(data['High'], data['Low'], data['Close'])  # Using default length of 14
@@ -151,13 +143,12 @@ class Plugin:
             
             elif indicator == 'ichimoku':
                 ichimoku = ta.ichimoku(data['High'], data['Low'], data['Close'])  # Using default Ichimoku parameters
-                if ichimoku is not None and len(ichimoku) > 1:
-                    technical_indicators['Ichimoku_Tenkan'] = ichimoku[0]  # Tenkan-sen (Conversion line)
-                    technical_indicators['Ichimoku_Kijun'] = ichimoku[1]  # Kijun-sen (Base line)
-                    technical_indicators['Ichimoku_SenkouA'] = ichimoku[2]  # Senkou span A
-                    technical_indicators['Ichimoku_SenkouB'] = ichimoku[3]  # Senkou span B
-                    technical_indicators['Ichimoku_Chikou'] = ichimoku[4]  # Chikou span
-                    print(f"Ichimoku calculated with shape: {ichimoku[0].shape}, {ichimoku[1].shape}, {ichimoku[2].shape}, {ichimoku[3].shape}, {ichimoku[4].shape}")
+                
+                if ichimoku is not None:
+                    # Dynamically assign returned columns
+                    for idx, col in enumerate(ichimoku):
+                        technical_indicators[f'Ichimoku_{idx}'] = col
+                    print(f"Ichimoku columns returned with shape: {[col.shape for col in ichimoku]}")
         
         # Create a DataFrame from the calculated technical indicators
         indicator_df = pd.DataFrame(technical_indicators)
