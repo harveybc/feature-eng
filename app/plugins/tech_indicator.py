@@ -31,34 +31,26 @@ class Plugin:
 
     def adjust_ohlc(self, data):
         """
-        Adjusts the input data based on the specified OHLC order by renaming the columns accordingly.
-
-        Parameters:
-        data (pd.DataFrame): Input time-series data (excluding the date column).
-
-        Returns:
-        pd.DataFrame: Reordered DataFrame with renamed columns (Open, High, Low, Close).
+        Adjusts the input data based on the specified OHLC order.
         """
         ohlc_order = self.params['ohlc_order']
+
+        # Adjust according to the real column names from the file
         columns_map = {
-            'o': 'Open',
-            'h': 'High',
-            'l': 'Low',
-            'c': 'Close'
+            'o': 'BO',   # Open
+            'h': 'BH',   # High
+            'l': 'BL',   # Low
+            'c': 'BC'    # Close
         }
 
-        if len(ohlc_order) != 4 or not set(ohlc_order).issubset(set(columns_map.keys())):
-            raise ValueError("Invalid 'ohlc_order' format. It must be a string with the exact four characters: 'o', 'h', 'l', 'c'.")
-
-        # Map the current columns (e.g., c1, c2, c3, c4) to the corresponding OHLC names
-        current_columns = data.columns[:4]  # Assuming the first 4 columns represent OHLC values (without the date)
         ordered_columns = [columns_map[col] for col in ohlc_order]
-        column_mapping = {current_columns[i]: ordered_columns[i] for i in range(4)}
+        
+        # Debugging the OHLC column names before and after renaming
+        print(f"Original columns before renaming: {data.columns}")
+        print(f"Renaming columns to match OHLC order: {ordered_columns}")
 
-        print(f"Renaming columns to match OHLC order: {column_mapping}")
-        data = data.rename(columns=column_mapping)
+        return data[ordered_columns]
 
-        return data
 
 
     def process(self, data):

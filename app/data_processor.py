@@ -9,22 +9,28 @@ def process_data(data, plugin, config):
     """
     print("Processing data using plugin...")
 
-    # Keep the date column separate
-    date_column = data.iloc[:, 0]
-    
+    # Keep the date column separate for debugging purposes
+    date_column = data.index
+    print(f"Date column extracted: {date_column[:5]}")
+
     # Process only the non-date columns (assuming OHLC data starts from column 1)
-    numeric_data = data.iloc[:, 1:]
-    
+    numeric_data = data.iloc[:, 0:]
+    print(f"Numeric columns before processing: {numeric_data.columns}")
+    print(f"First 5 rows of numeric data before conversion:\n{numeric_data.head()}")
+
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
-    
+    print(f"Numeric data after ensuring conversion:\n{numeric_data.head()}")
+
     # Use the plugin to process the numeric data (e.g., feature extraction)
     processed_data = plugin.process(numeric_data)
     
-    # Debugging message to confirm the shape of the processed data
+    # Debugging message to confirm the shape and structure of the processed data
     print(f"Processed data shape: {processed_data.shape}")
-    
+    print(f"First 5 rows of processed data:\n{processed_data.head()}")
+
     return processed_data
+
 
 
 def run_feature_engineering_pipeline(config, plugin):
