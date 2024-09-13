@@ -33,13 +33,12 @@ class Plugin:
         """
         Adjusts the input data based on the specified OHLC order.
         """
-        # Ensure proper renaming according to the `ohlc_order` param
+        # Ensure proper renaming according to the `ohlc_order` parameter        
         if self.params['ohlc_order'] == 'ohlc':
             data_renamed = data.rename(columns={ 
                 'c1': 'Open', 'c2': 'High', 'c3': 'Low', 'c4': 'Close' 
             })
         else:
-            # Handle the inverse order, if needed
             data_renamed = data.rename(columns={ 
                 'c1': 'Open', 'c2': 'Low', 'c3': 'High', 'c4': 'Close' 
             })
@@ -49,6 +48,7 @@ class Plugin:
         # Ensure renamed columns are correctly accessed
         ordered_columns = ['Open', 'High', 'Low', 'Close']
         return data_renamed[ordered_columns]
+
 
 
 

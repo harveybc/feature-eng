@@ -9,13 +9,13 @@ def process_data(data, plugin, config):
     """
     print("Processing data using plugin...")
 
-    # Keep the date column separate
-    date_column = data.index
-    
-    # Process only the non-date columns (assuming OHLC data starts from column 1)
-    numeric_data = data.iloc[:, 1:]
+    # Separate the date column properly (if present) and work only with numeric data
+    date_column = data.index  # Date is set as index earlier
 
+    # Extract numeric columns starting from 'c1' and exclude the date column
+    numeric_data = data.iloc[:, :]  # Work with all non-date columns
     print(f"Numeric columns before processing: {numeric_data.columns}")  # Debugging line
+
 
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
