@@ -57,7 +57,7 @@ class Plugin:
 
     def process(self, data):
         """
-        Process the input data by calculating the specified technical indicators using their default parameters.
+        Process the input data by calculating the specified technical indicators using default parameters.
         
         Parameters:
         data (pd.DataFrame): Input time-series data with renamed 'Open', 'High', 'Low', 'Close', etc.
@@ -85,7 +85,7 @@ class Plugin:
                     print(f"RSI calculated with shape: {rsi.shape}")
             
             elif indicator == 'macd':
-                macd = ta.macd(data['Close'])  # Using default fast, slow, and signal periods
+                macd = ta.macd(data['Close'])  # Using default fast, slow, and signal periods (12, 26, 9)
                 if 'MACD_12_26_9' in macd.columns:
                     technical_indicators['MACD'] = macd['MACD_12_26_9']
                 if 'MACDs_12_26_9' in macd.columns:
@@ -99,7 +99,7 @@ class Plugin:
                     print(f"EMA calculated with shape: {ema.shape}")
             
             elif indicator == 'stoch':
-                stoch = ta.stoch(data['High'], data['Low'], data['Close'])  # Default %K and %D values
+                stoch = ta.stoch(data['High'], data['Low'], data['Close'])  # Using default %K and %D values (14, 3)
                 if 'STOCHk_14_3_3' in stoch.columns:
                     technical_indicators['StochK'] = stoch['STOCHk_14_3_3']
                 if 'STOCHd_14_3_3' in stoch.columns:
@@ -113,48 +113,51 @@ class Plugin:
                 print(f"ADX columns returned: {adx.columns}")
             
             elif indicator == 'atr':
-                atr = ta.atr(data['High'], data['Low'], data['Close'])  # Default length of 14
+                atr = ta.atr(data['High'], data['Low'], data['Close'])  # Using default length of 14
                 if atr is not None:
                     technical_indicators['ATR'] = atr
                     print(f"ATR calculated with shape: {atr.shape}")
             
             elif indicator == 'cci':
-                cci = ta.cci(data['High'], data['Low'], data['Close'])  # Default length of 20
+                cci = ta.cci(data['High'], data['Low'], data['Close'])  # Using default length of 20
                 if cci is not None:
                     technical_indicators['CCI'] = cci
                     print(f"CCI calculated with shape: {cci.shape}")
             
             elif indicator == 'bbands':
-                bbands = ta.bbands(data['Close'])  # Default length of 20
+                bbands = ta.bbands(data['Close'])  # Using default length of 20
                 if 'BBU_20_2.0' in bbands.columns and 'BBL_20_2.0' in bbands.columns:
                     technical_indicators['BB_Upper'] = bbands['BBU_20_2.0']
                     technical_indicators['BB_Lower'] = bbands['BBL_20_2.0']
                     print(f"BB_Upper and BB_Lower calculated.")
             
             elif indicator == 'williams':
-                williams = ta.willr(data['High'], data['Low'], data['Close'])  # Default length of 14
+                williams = ta.willr(data['High'], data['Low'], data['Close'])  # Using default length of 14
                 if williams is not None:
                     technical_indicators['WilliamsR'] = williams
                     print(f"WilliamsR calculated with shape: {williams.shape}")
             
             elif indicator == 'momentum':
-                momentum = ta.mom(data['Close'])  # Default length of 10
+                momentum = ta.mom(data['Close'])  # Using default length of 10
                 if momentum is not None:
                     technical_indicators['Momentum'] = momentum
                     print(f"Momentum calculated with shape: {momentum.shape}")
             
             elif indicator == 'roc':
-                roc = ta.roc(data['Close'])  # Default length of 10
+                roc = ta.roc(data['Close'])  # Using default length of 10
                 if roc is not None:
                     technical_indicators['ROC'] = roc
                     print(f"ROC calculated with shape: {roc.shape}")
             
             elif indicator == 'ichimoku':
-                ichimoku = ta.ichimoku(data['High'], data['Low'], data['Close'])  # Default parameters for Ichimoku Cloud
+                ichimoku = ta.ichimoku(data['High'], data['Low'], data['Close'])  # Using default Ichimoku parameters
                 if ichimoku is not None and len(ichimoku) > 1:
-                    technical_indicators['IchimokuA'] = ichimoku[0]  # Conversion line (Tenkan-sen)
-                    technical_indicators['IchimokuB'] = ichimoku[1]  # Base line (Kijun-sen)
-                    print(f"Ichimoku calculated with shape: {ichimoku[0].shape}, {ichimoku[1].shape}")
+                    technical_indicators['Ichimoku_Tenkan'] = ichimoku[0]  # Tenkan-sen (Conversion line)
+                    technical_indicators['Ichimoku_Kijun'] = ichimoku[1]  # Kijun-sen (Base line)
+                    technical_indicators['Ichimoku_SenkouA'] = ichimoku[2]  # Senkou span A
+                    technical_indicators['Ichimoku_SenkouB'] = ichimoku[3]  # Senkou span B
+                    technical_indicators['Ichimoku_Chikou'] = ichimoku[4]  # Chikou span
+                    print(f"Ichimoku calculated with shape: {ichimoku[0].shape}, {ichimoku[1].shape}, {ichimoku[2].shape}, {ichimoku[3].shape}, {ichimoku[4].shape}")
         
         # Create a DataFrame from the calculated technical indicators
         indicator_df = pd.DataFrame(technical_indicators)
