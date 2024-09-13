@@ -8,7 +8,7 @@ setup(
         'console_scripts': [
             'feature-eng=app.main:main'
         ],
-        'predictor.plugins': [
+        'feature-eng.plugins': [
             'default=app.plugins.technical_indicator:Plugin',
             'ssa=app.plugins.ssa:Plugin',
             'fft=app.plugins.fft:Plugin'
