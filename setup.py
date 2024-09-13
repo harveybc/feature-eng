@@ -6,9 +6,9 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'feature-eng=app.main:main'
+            'feature_eng=app.main:main'
         ],
-        'feature-eng.plugins': [
+        'feature_eng.plugins': [
             'default=app.plugins.technical_indicator:Plugin',
             'ssa=app.plugins.ssa:Plugin',
             'fft=app.plugins.fft:Plugin'
