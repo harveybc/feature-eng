@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='feature-engineering',
+    name='feature-eng',
     version='0.1.0',
     packages=find_packages(),
     entry_points={
