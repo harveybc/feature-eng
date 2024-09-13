@@ -11,7 +11,7 @@ setup(
         'feature_eng.plugins': [
             'default=app.plugins.tech_indicator:Plugin',
             'tech_indicator=app.plugins.tech_indicator:Plugin',
-            'technical_indicator=app.plugins.technical_indicator:Plugin',
+            'technical_indicator=app.plugins.tech_indicator:Plugin',
             'ssa=app.plugins.ssa:Plugin',
             'fft=app.plugins.fft:Plugin'
         ]
