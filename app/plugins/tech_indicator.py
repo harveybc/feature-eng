@@ -86,16 +86,15 @@ class Plugin:
             
             elif indicator == 'macd':
                 macd = ta.macd(data['Close'], fast=self.params['short_term_period'], slow=self.params['mid_term_period'])
+                print(f"MACD columns returned: {macd.columns}")  # Add this to inspect the actual column names
                 
-                # Check for MACD column names dynamically
-                print(f"MACD columns returned: {macd.columns}")
+                # Dynamically use the returned column names
                 if 'MACD_12_26_9' in macd.columns:
                     technical_indicators['MACD'] = macd['MACD_12_26_9']
                     technical_indicators['MACD_signal'] = macd['MACDs_12_26_9']
                 else:
-                    # Use available columns
-                    technical_indicators['MACD'] = macd.iloc[:, 0]
-                    technical_indicators['MACD_signal'] = macd.iloc[:, 1]
+                    technical_indicators['MACD'] = macd.iloc[:, 0]  # Fallback to first MACD column
+                    technical_indicators['MACD_signal'] = macd.iloc[:, 1]  # Fallback to signal column
             
             elif indicator == 'ema':
                 technical_indicators['EMA'] = ta.ema(data['Close'], length=self.params['mid_term_period'])
@@ -107,7 +106,13 @@ class Plugin:
             
             elif indicator == 'adx':
                 adx = ta.adx(data['High'], data['Low'], data['Close'], length=self.params['mid_term_period'])
-                technical_indicators['ADX'] = adx['ADX_14']
+                print(f"ADX columns returned: {adx.columns}")  # Print the actual ADX column names
+                
+                # Dynamically handle the returned ADX column names
+                if 'ADX_14' in adx.columns:
+                    technical_indicators['ADX'] = adx['ADX_14']
+                else:
+                    technical_indicators['ADX'] = adx.iloc[:, 0]  # Fallback to first column
             
             elif indicator == 'atr':
                 technical_indicators['ATR'] = ta.atr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -142,6 +147,7 @@ class Plugin:
         print(f"Calculated technical indicators: {self.params['output_columns']}")
 
         return indicator_df
+
 
 
     def add_debug_info(self, debug_info):
