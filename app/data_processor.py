@@ -35,7 +35,7 @@ def run_feature_engineering_pipeline(config, plugin):
 
     # Load the data
     print(f"Loading data from {config['input_file']}...")
-    data = load_csv(config['input_file'], headers=config['headers'])
+    data = load_csv(config['input_file'])
     print(f"Data loaded with shape: {data.shape}")
 
     # Process the data
