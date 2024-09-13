@@ -89,8 +89,8 @@ class Plugin:
                 print(f"MACD columns returned: {macd.columns}")  # Add this to inspect the actual column names
                 
                 # Store each MACD component as a separate column
-                technical_indicators['MACD'] = macd.iloc[:, 0]
-                technical_indicators['MACD_signal'] = macd.iloc[:, 2]  # Use the signal line
+                technical_indicators['MACD'] = macd['MACD_14_50_9']
+                technical_indicators['MACD_signal'] = macd['MACDs_14_50_9']
             
             elif indicator == 'ema':
                 technical_indicators['EMA'] = ta.ema(data['Close'], length=self.params['mid_term_period'])
@@ -105,9 +105,9 @@ class Plugin:
                 print(f"ADX columns returned: {adx.columns}")  # Print the actual ADX column names
                 
                 # Store each ADX component as a separate column
-                technical_indicators['ADX'] = adx.iloc[:, 0]  # ADX
-                technical_indicators['DMP'] = adx.iloc[:, 1]  # D+ (Directional Movement Plus)
-                technical_indicators['DMN'] = adx.iloc[:, 2]  # D- (Directional Movement Minus)
+                technical_indicators['ADX'] = adx['ADX_50']
+                technical_indicators['DMP'] = adx['DMP_50']
+                technical_indicators['DMN'] = adx['DMN_50']
             
             elif indicator == 'atr':
                 technical_indicators['ATR'] = ta.atr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -135,20 +135,23 @@ class Plugin:
                 technical_indicators['IchimokuB'] = ichimoku[1]  # Base line (Kijun-sen)
 
         # Flatten and split multi-column indicators to separate columns
+        final_technical_indicators = {}
         for key, value in technical_indicators.items():
             if isinstance(value, pd.DataFrame):
                 for column in value.columns:
-                    technical_indicators[f"{key}_{column}"] = value[column]
-                del technical_indicators[key]
+                    final_technical_indicators[f"{key}_{column}"] = value[column]
+            else:
+                final_technical_indicators[key] = value
 
         # Create a DataFrame from the calculated technical indicators
-        indicator_df = pd.DataFrame(technical_indicators)
+        indicator_df = pd.DataFrame(final_technical_indicators)
 
         # Update debug info with the names of the output columns
         self.params['output_columns'] = list(indicator_df.columns)
         print(f"Calculated technical indicators: {self.params['output_columns']}")
 
         return indicator_df
+
 
 
 
