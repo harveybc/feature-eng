@@ -35,21 +35,31 @@ class Plugin:
         """
         ohlc_order = self.params['ohlc_order']
 
-        # Adjust according to the real column names from the file
+        # Map c1, c2, c3, c4 to Open, High, Low, Close (or inverted based on ohlc_order)
         columns_map = {
-            'o': 'BO',   # Open
-            'h': 'BH',   # High
-            'l': 'BL',   # Low
-            'c': 'BC'    # Close
+            'o': 'c1',   # Open mapped to c1
+            'h': 'c2',   # High mapped to c2
+            'l': 'c3',   # Low mapped to c3
+            'c': 'c4'    # Close mapped to c4
         }
 
+        # Generate the correctly ordered column names based on the user-specified order
         ordered_columns = [columns_map[col] for col in ohlc_order]
-        
+
         # Debugging the OHLC column names before and after renaming
-        print(f"Original columns before renaming: {data.columns}")
         print(f"Renaming columns to match OHLC order: {ordered_columns}")
 
-        return data[ordered_columns]
+        # Rename c1, c2, c3, c4 to Open, High, Low, Close (or the specified ohlc order)
+        data_renamed = data.rename(columns={
+            'c1': 'Open',
+            'c2': 'High',
+            'c3': 'Low',
+            'c4': 'Close'
+        })
+
+        # Return only the ordered OHLC columns for the plugin's calculations
+        return data_renamed[ordered_columns]
+
 
 
 
