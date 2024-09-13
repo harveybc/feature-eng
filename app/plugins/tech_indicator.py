@@ -59,6 +59,8 @@ class Plugin:
 
         # Return only the ordered OHLC columns for the plugin's calculations
         return data_renamed[ordered_columns]
+        
+
 
 
 
