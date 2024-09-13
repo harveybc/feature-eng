@@ -71,6 +71,11 @@ class Plugin:
         Returns:
         pd.DataFrame: DataFrame with the calculated technical indicators.
         """
+        # Set short, mid, and long-term periods as requested
+        self.params['short_term_period'] = 5
+        self.params['mid_term_period'] = 10
+        self.params['long_term_period'] = 20
+
         print(f"Calculating technical indicators with short_term={self.params['short_term_period']}, mid_term={self.params['mid_term_period']}, long_term={self.params['long_term_period']}")
 
         # Adjust the OHLC order of the columns
@@ -79,35 +84,37 @@ class Plugin:
         # Initialize a dictionary to hold all technical indicators
         technical_indicators = {}
 
+        # Validate if data contains non-zero values before processing
+        if data['Close'].sum() == 0:
+            print("Warning: Close prices are zero in all rows!")
+        
         # Calculate each indicator based on the type and the periods
         for indicator in self.params['indicators']:
             if indicator == 'rsi':
                 technical_indicators['RSI'] = ta.rsi(data['Close'], length=self.params['short_term_period'])
+                print(f"RSI calculated with shape: {technical_indicators['RSI'].shape}")
             
             elif indicator == 'macd':
                 macd = ta.macd(data['Close'], fast=self.params['short_term_period'], slow=self.params['mid_term_period'])
-                print(f"MACD columns returned: {macd.columns}")  # Add this to inspect the actual column names
-                
-                # Store each MACD component as a separate column
-                technical_indicators['MACD'] = macd['MACD_14_50_9']
-                technical_indicators['MACD_signal'] = macd['MACDs_14_50_9']
+                print(f"MACD columns returned: {macd.columns}")  # Debugging MACD
+                technical_indicators['MACD'] = macd['MACD_5_10_9'] if 'MACD_5_10_9' in macd.columns else macd.iloc[:, 0]
+                technical_indicators['MACD_signal'] = macd['MACDs_5_10_9'] if 'MACDs_5_10_9' in macd.columns else macd.iloc[:, 1]
             
             elif indicator == 'ema':
                 technical_indicators['EMA'] = ta.ema(data['Close'], length=self.params['mid_term_period'])
+                print(f"EMA calculated with shape: {technical_indicators['EMA'].shape}")
             
             elif indicator == 'stoch':
                 stoch = ta.stoch(data['High'], data['Low'], data['Close'])
-                technical_indicators['StochK'] = stoch['STOCHk_14_3_3']
-                technical_indicators['StochD'] = stoch['STOCHd_14_3_3']
+                technical_indicators['StochK'] = stoch['STOCHk_5_3_3']
+                technical_indicators['StochD'] = stoch['STOCHd_5_3_3']
             
             elif indicator == 'adx':
                 adx = ta.adx(data['High'], data['Low'], data['Close'], length=self.params['mid_term_period'])
-                print(f"ADX columns returned: {adx.columns}")  # Print the actual ADX column names
-                
-                # Store each ADX component as a separate column
-                technical_indicators['ADX'] = adx['ADX_50']
-                technical_indicators['DMP'] = adx['DMP_50']
-                technical_indicators['DMN'] = adx['DMN_50']
+                print(f"ADX columns returned: {adx.columns}")  # Debugging ADX
+                technical_indicators['ADX'] = adx['ADX_10'] if 'ADX_10' in adx.columns else adx.iloc[:, 0]
+                technical_indicators['DMP'] = adx['DMP_10'] if 'DMP_10' in adx.columns else adx.iloc[:, 1]
+                technical_indicators['DMN'] = adx['DMN_10'] if 'DMN_10' in adx.columns else adx.iloc[:, 2]
             
             elif indicator == 'atr':
                 technical_indicators['ATR'] = ta.atr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -117,8 +124,8 @@ class Plugin:
             
             elif indicator == 'bbands':
                 bbands = ta.bbands(data['Close'], length=self.params['short_term_period'])
-                technical_indicators['BB_Upper'] = bbands['BBU_14_2.0']
-                technical_indicators['BB_Lower'] = bbands['BBL_14_2.0']
+                technical_indicators['BB_Upper'] = bbands['BBU_5_2.0']
+                technical_indicators['BB_Lower'] = bbands['BBL_5_2.0']
             
             elif indicator == 'williams':
                 technical_indicators['WilliamsR'] = ta.willr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -128,9 +135,11 @@ class Plugin:
             
             elif indicator == 'roc':
                 technical_indicators['ROC'] = ta.roc(data['Close'], length=self.params['short_term_period'])
+                print(f"ROC calculated with shape: {technical_indicators['ROC'].shape}")
             
             elif indicator == 'ichimoku':
                 ichimoku = ta.ichimoku(data['High'], data['Low'], data['Close'], tenkan=self.params['short_term_period'], kijun=self.params['mid_term_period'], senkou=self.params['long_term_period'])
+                print(f"Ichimoku columns returned: {ichimoku[0].shape}")  # Debugging Ichimoku
                 technical_indicators['IchimokuA'] = ichimoku[0]  # Conversion line (Tenkan-sen)
                 technical_indicators['IchimokuB'] = ichimoku[1]  # Base line (Kijun-sen)
 
