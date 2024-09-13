@@ -14,5 +14,6 @@ DEFAULT_VALUES = {
     'remote_load_config': None,
     'remote_log': None,
     'load_config': './config/input_config.json',
-    'save_config': './config/output_config.json'
+    'save_config': './config/output_config.json',
+    'headers': True
 }
