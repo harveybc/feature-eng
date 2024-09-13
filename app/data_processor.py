@@ -3,34 +3,51 @@ import time
 from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
 
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 def process_data(data, plugin, config):
     """
-    Processes the data using the specified plugin.
+    Processes the data using the specified plugin and performs additional analysis
+    if distribution_plot or correlation_analysis are set to True.
     """
     print("Processing data using plugin...")
 
-    # Separate the date column properly (if present) and work only with numeric data
-    date_column = data.index  # Date is set as index earlier
-
-    # Extract numeric columns starting from 'c1' and exclude the date column
-    numeric_data = data.iloc[:, :]  # Work with all non-date columns
-    print(f"Numeric columns before processing: {numeric_data.columns}")  # Debugging line
-
-
+    # Keep the date column separate
+    date_column = data.iloc[:, 0]
+    
+    # Process only the non-date columns (assuming OHLC data starts from column 1)
+    numeric_data = data.iloc[:, 1:]
+    
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
     
-    # Debugging the numeric columns after processing
-    print(f"Numeric columns before processing: {numeric_data.columns}")
-    print(f"First 5 rows of numeric data before conversion:\n{numeric_data.head()}")
-
     # Use the plugin to process the numeric data (e.g., feature extraction)
     processed_data = plugin.process(numeric_data)
     
     # Debugging message to confirm the shape of the processed data
     print(f"Processed data shape: {processed_data.shape}")
     
+    # Check if distribution_plot is set to True in config
+    if config.get('distribution_plot', False):
+        print("Generating distribution plots for each technical indicator...")
+        for column in processed_data.columns:
+            plt.figure(figsize=(10, 6))
+            sns.histplot(processed_data[column], kde=True)
+            plt.title(f"Distribution of {column}")
+            plt.show()
+
+    # Check if correlation_analysis is set to True in config
+    if config.get('correlation_analysis', False):
+        print("Performing correlation analysis...")
+        corr_matrix = processed_data.corr()
+        plt.figure(figsize=(12, 8))
+        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt='.2f')
+        plt.title("Correlation Matrix of Technical Indicators")
+        plt.show()
+    
     return processed_data
+
 
 
 
