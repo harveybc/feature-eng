@@ -6,7 +6,7 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'predictor=app.main:main'
+            'feature-eng=app.main:main'
         ],
         'predictor.plugins': [
             'default=app.plugins.technical_indicator:Plugin',
