@@ -84,10 +84,6 @@ class Plugin:
         # Initialize a dictionary to hold all technical indicators
         technical_indicators = {}
 
-        # Validate if data contains non-zero values before processing
-        if data['Close'].sum() == 0:
-            print("Warning: Close prices are zero in all rows!")
-        
         # Calculate each indicator based on the type and the periods
         for indicator in self.params['indicators']:
             if indicator == 'rsi':
@@ -97,8 +93,9 @@ class Plugin:
             elif indicator == 'macd':
                 macd = ta.macd(data['Close'], fast=self.params['short_term_period'], slow=self.params['mid_term_period'])
                 print(f"MACD columns returned: {macd.columns}")  # Debugging MACD
-                technical_indicators['MACD'] = macd['MACD_5_10_9'] if 'MACD_5_10_9' in macd.columns else macd.iloc[:, 0]
-                technical_indicators['MACD_signal'] = macd['MACDs_5_10_9'] if 'MACDs_5_10_9' in macd.columns else macd.iloc[:, 1]
+                # Dynamically select the appropriate columns
+                technical_indicators['MACD'] = macd.filter(like='MACD').iloc[:, 0]  # Grab the first matching MACD column
+                technical_indicators['MACD_signal'] = macd.filter(like='MACDs').iloc[:, 0]  # Grab the first matching MACD signal column
             
             elif indicator == 'ema':
                 technical_indicators['EMA'] = ta.ema(data['Close'], length=self.params['mid_term_period'])
@@ -106,15 +103,18 @@ class Plugin:
             
             elif indicator == 'stoch':
                 stoch = ta.stoch(data['High'], data['Low'], data['Close'])
-                technical_indicators['StochK'] = stoch['STOCHk_5_3_3']
-                technical_indicators['StochD'] = stoch['STOCHd_5_3_3']
+                print(f"Stochastic columns returned: {stoch.columns}")  # Debugging Stochastic
+                # Dynamically select the appropriate columns
+                technical_indicators['StochK'] = stoch.filter(like='STOCHk').iloc[:, 0]  # Grab the first matching Stochastic %K
+                technical_indicators['StochD'] = stoch.filter(like='STOCHd').iloc[:, 0]  # Grab the first matching Stochastic %D
             
             elif indicator == 'adx':
                 adx = ta.adx(data['High'], data['Low'], data['Close'], length=self.params['mid_term_period'])
                 print(f"ADX columns returned: {adx.columns}")  # Debugging ADX
-                technical_indicators['ADX'] = adx['ADX_10'] if 'ADX_10' in adx.columns else adx.iloc[:, 0]
-                technical_indicators['DMP'] = adx['DMP_10'] if 'DMP_10' in adx.columns else adx.iloc[:, 1]
-                technical_indicators['DMN'] = adx['DMN_10'] if 'DMN_10' in adx.columns else adx.iloc[:, 2]
+                # Dynamically select the appropriate columns
+                technical_indicators['ADX'] = adx.filter(like='ADX').iloc[:, 0]  # Grab the first matching ADX column
+                technical_indicators['DMP'] = adx.filter(like='DMP').iloc[:, 0]  # Grab the first matching +DM column
+                technical_indicators['DMN'] = adx.filter(like='DMN').iloc[:, 0]  # Grab the first matching -DM column
             
             elif indicator == 'atr':
                 technical_indicators['ATR'] = ta.atr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -124,8 +124,8 @@ class Plugin:
             
             elif indicator == 'bbands':
                 bbands = ta.bbands(data['Close'], length=self.params['short_term_period'])
-                technical_indicators['BB_Upper'] = bbands['BBU_5_2.0']
-                technical_indicators['BB_Lower'] = bbands['BBL_5_2.0']
+                technical_indicators['BB_Upper'] = bbands.filter(like='BBU').iloc[:, 0]  # Grab the first matching BB Upper Band
+                technical_indicators['BB_Lower'] = bbands.filter(like='BBL').iloc[:, 0]  # Grab the first matching BB Lower Band
             
             elif indicator == 'williams':
                 technical_indicators['WilliamsR'] = ta.willr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -160,6 +160,7 @@ class Plugin:
         print(f"Calculated technical indicators: {self.params['output_columns']}")
 
         return indicator_df
+
 
 
 
