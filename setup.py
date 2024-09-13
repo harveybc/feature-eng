@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='feature-eng',
+    name='feature_eng',
     version='0.1.0',
     packages=find_packages(),
     entry_points={
@@ -25,5 +25,5 @@ setup(
     ],
     author='Harvey Bastidas',
     author_email='your.email@example.com',
-    description='A timeseries prediction system that supports dynamic loading of predictor plugins for processing time series data.'
+    description='aa.'
 )
