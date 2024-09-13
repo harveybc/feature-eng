@@ -103,7 +103,8 @@ The application provides a command-line interface to control its behavior and ma
 To generate technical indicators using the default plugin:
 
 ```bash
-feature-engineering.bat --input_file data/eurusd.csv --output_file results/indicators.csv --plugin technical_indicator
+f-eng.bat tests/data/eurusd.csv
+
 ```
 
 #### Perform Singular Spectrum Analysis
@@ -111,7 +112,24 @@ feature-engineering.bat --input_file data/eurusd.csv --output_file results/indic
 To perform SSA feature extraction:
 
 ```bash
-feature-engineering.bat --input_file data/eurusd.csv --output_file results/ssa_features.csv --plugin ssa
+f-eng.bat tests/data/eurusd.csv --output_file results/indicators_output.csv --correlation_analysis
+
+```
+
+#### Run Correlation Analysis
+
+To compute and display correlation matrices for the generated features:
+
+```bash
+f-eng.bat --input_file data/eurusd.csv --correlation_analysis
+```
+
+#### Example with Distribution Plotting
+
+In this example, distribution plotting is enabled to visualize the distributions of the generated technical indicators:
+
+```bash
+f-eng.bat tests/data/eurusd.csv --distribution_plot
 ```
 
 #### Run Correlation Analysis
@@ -121,7 +139,6 @@ To compute and display correlation matrices for the generated features:
 ```bash
 feature-engineering.bat --input_file data/eurusd.csv --correlation_analysis
 ```
-
 ## Project Directory Structure
 
 ```md

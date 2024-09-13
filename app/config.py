@@ -1,8 +1,8 @@
 # config.py
 
 DEFAULT_VALUES = {
-    'input_file': './data/eurusd_1h.csv',
-    'output_file': './results/indicators_output.csv',
+    'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc.csv',
+    'output_file': './indicators_output.csv',
     'plugin': 'technical_indicator',
     'correlation_analysis': False,
     'distribution_plot': False,

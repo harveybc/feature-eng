@@ -11,11 +11,12 @@ class Plugin:
         'short_term_period': 14,
         'mid_term_period': 50,
         'long_term_period': 200,
-        'indicators': ['rsi', 'macd', 'ema', 'stoch', 'adx', 'atr', 'cci', 'bbands', 'williams', 'momentum', 'roc', 'pvt', 'cmf', 'obv', 'ichimoku'],
+        'indicators': ['rsi', 'macd', 'ema', 'stoch', 'adx', 'atr', 'cci', 'bbands', 'williams', 'momentum', 'roc', 'ichimoku'],
+        'ohlc_order': 'ohlc'  # Default column order: Open, High, Low, Close
     }
 
     # Debug variables to track important parameters and results
-    plugin_debug_vars = ['short_term_period', 'mid_term_period', 'long_term_period', 'output_columns']
+    plugin_debug_vars = ['short_term_period', 'mid_term_period', 'long_term_period', 'output_columns', 'ohlc_order']
 
     def __init__(self):
         self.params = self.plugin_params.copy()
@@ -28,17 +29,52 @@ class Plugin:
     def get_debug_info(self):
         return {var: self.params.get(var, None) for var in self.plugin_debug_vars}
 
+    def adjust_ohlc(self, data):
+        """
+        Adjusts the input data based on the specified OHLC order by renaming the columns accordingly.
+
+        Parameters:
+        data (pd.DataFrame): Input time-series data (excluding the date column).
+
+        Returns:
+        pd.DataFrame: Reordered DataFrame with renamed columns (Open, High, Low, Close).
+        """
+        ohlc_order = self.params['ohlc_order']
+        columns_map = {
+            'o': 'Open',
+            'h': 'High',
+            'l': 'Low',
+            'c': 'Close'
+        }
+
+        if len(ohlc_order) != 4 or not set(ohlc_order).issubset(set(columns_map.keys())):
+            raise ValueError("Invalid 'ohlc_order' format. It must be a string with the exact four characters: 'o', 'h', 'l', 'c'.")
+
+        # Map the current columns (e.g., c1, c2, c3, c4) to the corresponding OHLC names
+        current_columns = data.columns[:4]  # Assuming the first 4 columns represent OHLC values (without the date)
+        ordered_columns = [columns_map[col] for col in ohlc_order]
+        column_mapping = {current_columns[i]: ordered_columns[i] for i in range(4)}
+
+        print(f"Renaming columns to match OHLC order: {column_mapping}")
+        data = data.rename(columns=column_mapping)
+
+        return data
+
+
     def process(self, data):
         """
         Process the input data by calculating the specified technical indicators.
 
         Parameters:
-        data (pd.DataFrame): Input time-series data with 'Close', 'High', 'Low', 'Volume', etc.
+        data (pd.DataFrame): Input time-series data with renamed 'Open', 'High', 'Low', 'Close', etc.
 
         Returns:
         pd.DataFrame: DataFrame with the calculated technical indicators.
         """
         print(f"Calculating technical indicators with short_term={self.params['short_term_period']}, mid_term={self.params['mid_term_period']}, long_term={self.params['long_term_period']}")
+
+        # Adjust the OHLC order of the columns
+        data = self.adjust_ohlc(data)
 
         # Initialize a dictionary to hold all technical indicators
         technical_indicators = {}
@@ -73,12 +109,6 @@ class Plugin:
                 technical_indicators['Momentum'] = ta.mom(data['Close'], length=self.params['short_term_period'])
             elif indicator == 'roc':
                 technical_indicators['ROC'] = ta.roc(data['Close'], length=self.params['short_term_period'])
-            elif indicator == 'pvt':
-                technical_indicators['PVT'] = ta.pvt(data['Close'], data['Volume'])
-            elif indicator == 'cmf':
-                technical_indicators['CMF'] = ta.cmf(data['High'], data['Low'], data['Close'], data['Volume'], length=self.params['short_term_period'])
-            elif indicator == 'obv':
-                technical_indicators['OBV'] = ta.obv(data['Close'], data['Volume'])
             elif indicator == 'ichimoku':
                 ichimoku = ta.ichimoku(data['High'], data['Low'], data['Close'], tenkan=self.params['short_term_period'], kijun=self.params['mid_term_period'], senkou=self.params['long_term_period'])
                 technical_indicators['IchimokuA'] = ichimoku[0]  # Conversion line (Tenkan-sen)
