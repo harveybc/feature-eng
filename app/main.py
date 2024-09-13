@@ -1,4 +1,5 @@
 import sys
+print(sys.path)  # Print the current Python path for debugging
 import json
 from app.config_handler import load_config, save_config, remote_load_config, remote_save_config, remote_log
 from app.cli import parse_args
