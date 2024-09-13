@@ -21,4 +21,4 @@ def parse_args():
     parser.add_argument('--load_config', type=str, help='Path to load a configuration file.')
     parser.add_argument('--save_config', type=str, help='Path to save the current configuration.')
 
-    return parser.parse_args()
+    return parser.parse_known_args()  # This returns (args, unknown_args)
