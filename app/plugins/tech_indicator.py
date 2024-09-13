@@ -45,7 +45,10 @@ class Plugin:
         """
         print("Starting adjust_ohlc method...")
         
-        # Step 1: Define the renaming order based on OHLC parameter
+        # Step 1: Print the current columns before any renaming to verify 'c1' exists
+        print(f"Initial data columns: {data.columns}")
+        
+        # Step 2: Define the renaming order based on OHLC parameter
         print(f"Received OHLC order: {self.params['ohlc_order']}")
         if self.params['ohlc_order'] == 'ohlc':
             ordered_columns = ['Open', 'High', 'Low', 'Close']
@@ -55,7 +58,7 @@ class Plugin:
             print("Invalid OHLC order specified. Raising ValueError.")
             raise ValueError("Invalid OHLC order specified")
         
-        # Step 2: Define the renaming map
+        # Step 3: Define the renaming map
         rename_map = {
             'c1': ordered_columns[0],
             'c2': ordered_columns[1],
@@ -66,7 +69,7 @@ class Plugin:
         # Debugging: Print renaming map before applying
         print(f"Renaming columns map: {rename_map}")
         
-        # Step 3: Rename columns and store the result
+        # Step 4: Rename columns and store the result
         try:
             data_renamed = data.rename(columns=rename_map)
         except Exception as e:
@@ -77,19 +80,20 @@ class Plugin:
         print("First 5 rows of renamed data:")
         print(data_renamed.head())
         
-        # Step 4: Check if all renamed columns are in the dataset
+        # Step 5: Check if all renamed columns are in the dataset
         print(f"Checking if the renamed columns exist in the DataFrame...")
         print(f"Expected columns after renaming: {ordered_columns}")
         missing_columns = [col for col in ordered_columns if col not in data_renamed.columns]
         
         if missing_columns:
             print(f"Error: Missing columns after renaming - {missing_columns}")
+            print(f"Available columns: {data_renamed.columns}")
             raise KeyError(f"Missing columns after renaming: {missing_columns}")
         
         # Debugging: Confirm all expected columns are present
         print(f"All expected columns found: {ordered_columns}")
 
-        # Step 5: Return data with columns ordered according to the OHLC order
+        # Step 6: Return data with columns ordered according to the OHLC order
         try:
             result = data_renamed[ordered_columns]
         except KeyError as e:
@@ -102,6 +106,7 @@ class Plugin:
         print(f"Final column names: {result.columns}")
 
         return result
+
 
 
 
