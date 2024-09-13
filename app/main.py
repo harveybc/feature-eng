@@ -4,7 +4,7 @@ import json
 from app.config_handler import load_config, save_config, remote_load_config, remote_save_config, remote_log
 from app.cli import parse_args
 from app.data_processor import run_feature_engineering_pipeline
-from app.data_handler import load_data
+from app.data_handler import load_csv
 from app.config import DEFAULT_VALUES
 from app.plugin_loader import load_plugin
 from config_merger import merge_config, process_unknown_args
@@ -35,7 +35,7 @@ def main():
 
     # Load data using data_handler
     print(f"Loading data from {config['input_file']}...")
-    data = load_data(config['input_file'])
+    data = load_csv(config['input_file'])
 
     # Plugin loading and processing
     plugin_name = config['plugin']
