@@ -34,38 +34,74 @@ class Plugin:
     def adjust_ohlc(self, data):
         """
         Adjust the OHLC columns based on the ohlc_order parameter.
-        """
-        print("Renaming columns to match OHLC order...")
+        This method renames 'c1', 'c2', 'c3', and 'c4' to 'Open', 'High', 'Low', and 'Close'
+        according to the OHLC order provided, and then ensures the correct columns are selected.
 
-        # Define the renaming map for OHLC columns based on the OHLC order
+        Parameters:
+        data (pd.DataFrame): Input DataFrame with the columns ['c1', 'c2', 'c3', 'c4', ...]
+
+        Returns:
+        pd.DataFrame: DataFrame with the OHLC columns renamed and ordered.
+        """
+        print("Starting adjust_ohlc method...")
+        
+        # Step 1: Define the renaming order based on OHLC parameter
+        print(f"Received OHLC order: {self.params['ohlc_order']}")
         if self.params['ohlc_order'] == 'ohlc':
             ordered_columns = ['Open', 'High', 'Low', 'Close']
         elif self.params['ohlc_order'] == 'olhc':
             ordered_columns = ['Open', 'Low', 'High', 'Close']
         else:
+            print("Invalid OHLC order specified. Raising ValueError.")
             raise ValueError("Invalid OHLC order specified")
-
-        # Rename the OHLC columns
+        
+        # Step 2: Define the renaming map
         rename_map = {
             'c1': ordered_columns[0],
             'c2': ordered_columns[1],
             'c3': ordered_columns[2],
             'c4': ordered_columns[3]
         }
+        
+        # Debugging: Print renaming map before applying
+        print(f"Renaming columns map: {rename_map}")
+        
+        # Step 3: Rename columns and store the result
+        try:
+            data_renamed = data.rename(columns=rename_map)
+        except Exception as e:
+            print(f"Error during renaming columns: {e}")
+            raise
 
-        # Debugging: Print rename map
-        print(f"Renaming columns: {rename_map}")
+        # Debugging: Print first few rows of the renamed data
+        print("First 5 rows of renamed data:")
+        print(data_renamed.head())
+        
+        # Step 4: Check if all renamed columns are in the dataset
+        print(f"Checking if the renamed columns exist in the DataFrame...")
+        print(f"Expected columns after renaming: {ordered_columns}")
+        missing_columns = [col for col in ordered_columns if col not in data_renamed.columns]
+        
+        if missing_columns:
+            print(f"Error: Missing columns after renaming - {missing_columns}")
+            raise KeyError(f"Missing columns after renaming: {missing_columns}")
+        
+        # Debugging: Confirm all expected columns are present
+        print(f"All expected columns found: {ordered_columns}")
 
-        # Apply the renaming and ensure the dataset contains the expected columns
-        data_renamed = data.rename(columns=rename_map)
+        # Step 5: Return data with columns ordered according to the OHLC order
+        try:
+            result = data_renamed[ordered_columns]
+        except KeyError as e:
+            print(f"KeyError when selecting ordered columns: {e}")
+            print(f"Available columns: {data_renamed.columns}")
+            raise
+        
+        # Debugging: Print the shape of the final DataFrame and column names
+        print(f"Final data shape: {result.shape}")
+        print(f"Final column names: {result.columns}")
 
-        # Debugging: Check renamed columns
-        print(f"Renamed columns: {data_renamed.columns}")
-
-        # Return the renamed data in the expected order
-        return data_renamed[ordered_columns]
-
-
+        return result
 
 
 
