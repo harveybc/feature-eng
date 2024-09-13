@@ -40,7 +40,7 @@ def main():
     # Plugin loading and processing
     plugin_name = config['plugin']
     print(f"Loading plugin: {plugin_name}")
-    plugin_class, _ = load_plugin('app.plugins', plugin_name)
+    plugin_class, _ = load_plugin('feature_eng.plugins', plugin_name)
     plugin = plugin_class()
 
     print("Running the feature engineering pipeline...")
