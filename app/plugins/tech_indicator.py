@@ -88,13 +88,9 @@ class Plugin:
                 macd = ta.macd(data['Close'], fast=self.params['short_term_period'], slow=self.params['mid_term_period'])
                 print(f"MACD columns returned: {macd.columns}")  # Add this to inspect the actual column names
                 
-                # Dynamically use the returned column names
-                if 'MACD_12_26_9' in macd.columns:
-                    technical_indicators['MACD'] = macd['MACD_12_26_9']
-                    technical_indicators['MACD_signal'] = macd['MACDs_12_26_9']
-                else:
-                    technical_indicators['MACD'] = macd.iloc[:, 0]  # Fallback to first MACD column
-                    technical_indicators['MACD_signal'] = macd.iloc[:, 1]  # Fallback to signal column
+                # Store each MACD component as a separate column
+                technical_indicators['MACD'] = macd.iloc[:, 0]
+                technical_indicators['MACD_signal'] = macd.iloc[:, 2]  # Use the signal line
             
             elif indicator == 'ema':
                 technical_indicators['EMA'] = ta.ema(data['Close'], length=self.params['mid_term_period'])
@@ -108,11 +104,10 @@ class Plugin:
                 adx = ta.adx(data['High'], data['Low'], data['Close'], length=self.params['mid_term_period'])
                 print(f"ADX columns returned: {adx.columns}")  # Print the actual ADX column names
                 
-                # Dynamically handle the returned ADX column names
-                if 'ADX_14' in adx.columns:
-                    technical_indicators['ADX'] = adx['ADX_14']
-                else:
-                    technical_indicators['ADX'] = adx.iloc[:, 0]  # Fallback to first column
+                # Store each ADX component as a separate column
+                technical_indicators['ADX'] = adx.iloc[:, 0]  # ADX
+                technical_indicators['DMP'] = adx.iloc[:, 1]  # D+ (Directional Movement Plus)
+                technical_indicators['DMN'] = adx.iloc[:, 2]  # D- (Directional Movement Minus)
             
             elif indicator == 'atr':
                 technical_indicators['ATR'] = ta.atr(data['High'], data['Low'], data['Close'], length=self.params['short_term_period'])
@@ -139,6 +134,13 @@ class Plugin:
                 technical_indicators['IchimokuA'] = ichimoku[0]  # Conversion line (Tenkan-sen)
                 technical_indicators['IchimokuB'] = ichimoku[1]  # Base line (Kijun-sen)
 
+        # Flatten and split multi-column indicators to separate columns
+        for key, value in technical_indicators.items():
+            if isinstance(value, pd.DataFrame):
+                for column in value.columns:
+                    technical_indicators[f"{key}_{column}"] = value[column]
+                del technical_indicators[key]
+
         # Create a DataFrame from the calculated technical indicators
         indicator_df = pd.DataFrame(technical_indicators)
 
@@ -147,6 +149,7 @@ class Plugin:
         print(f"Calculated technical indicators: {self.params['output_columns']}")
 
         return indicator_df
+
 
 
 
