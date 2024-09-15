@@ -72,6 +72,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import skew, kurtosis, normaltest, shapiro
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import skew, kurtosis, normaltest, shapiro
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -88,7 +94,9 @@ def analyze_variability_and_normality(data):
 
     plot_index = 0
 
-    for column in transformed_data.columns:  
+    for column in list(transformed_data.columns):  
+        original_column = column  # Store the original column name
+
         # Handle missing values by filling with mean for analysis (silent operation)
         if transformed_data[column].isna().sum() > 0:
             transformed_data[column] = transformed_data[column].fillna(transformed_data[column].mean())
@@ -108,33 +116,26 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(transformed_data[column])
         column_kurtosis = kurtosis(transformed_data[column])
 
-        # Stricter threshold condition for EMA-like columns (more stringent criteria)
-        if 'EMA' in column or abs(column_skewness) > 0.25 or abs(column_kurtosis) > 1:
-            print(f"{column} is not normally distributed due to stricter thresholds.")
-            transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
-            transformed_data.drop(columns=[column], inplace=True)
-            column = f"Normalized_{column}"
-        else:
-            # Log transformation criteria (for skewed columns)
-            if abs(column_skewness) > 0.5:
-                print(f"Applying log transformation to {column} due to high skewness.")
-                transformed_data[f"Log_{column}"] = np.log1p(transformed_data[column].abs())  # Log-transformation
-                column = f"Log_{column}"  # Refer to the log-transformed column
-                column_skewness = skew(transformed_data[column])
-                column_kurtosis = kurtosis(transformed_data[column])
+        # Log transformation criteria (for skewed columns)
+        if abs(column_skewness) > 0.5:
+            print(f"Applying log transformation to {original_column} due to high skewness.")
+            transformed_data[f"Log_{original_column}"] = np.log1p(transformed_data[column].abs())  # Log-transformation
+            column = f"Log_{original_column}"  # Now refer to the log-transformed column
+            column_skewness = skew(transformed_data[column])
+            column_kurtosis = kurtosis(transformed_data[column])
 
-            # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
-            if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
-                print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
-                transformed_data[f"Standardized_{column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
-                transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
-            else:
-                print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
-                transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
-                transformed_data.drop(columns=[column], inplace=True)
+        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
+        if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
+            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+            transformed_data[f"Standardized_{original_column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
+            transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
+        else:
+            print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
+            transformed_data[f"Normalized_{original_column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
+            transformed_data.drop(columns=[column], inplace=True)
 
         # Plotting the transformed distribution (use the final transformed column name)
-        final_column_name = f"Standardized_{column}" if f"Standardized_{column}" in transformed_data.columns else f"Normalized_{column}"
+        final_column_name = f"Standardized_{original_column}" if f"Standardized_{original_column}" in transformed_data.columns else f"Normalized_{original_column}"
         sns.histplot(transformed_data[final_column_name], kde=True, ax=axes[plot_index])
         axes[plot_index].set_title(f"{final_column_name} (Transformed)", fontsize=10)
         plot_index += 1
@@ -144,6 +145,7 @@ def analyze_variability_and_normality(data):
     plt.show()
 
     return transformed_data
+
 
 
 
