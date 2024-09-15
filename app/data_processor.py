@@ -7,54 +7,6 @@ import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, normaltest, shapiro
 import numpy as np
 
-def process_data(data, plugin, config):
-    """
-    Processes the data using the specified plugin and performs additional analysis
-    if distribution_plot or correlation_analysis are set to True.
-    """
-    print("Processing data using plugin...")
-
-    # Keep the date column separate
-    if 'date' in data.columns:
-        date_column = data['date']
-    else:
-        date_column = data.index
-
-    # Debugging: Show the data columns before processing
-    print(f"Data columns before processing: {data.columns}")
-
-    # Select OHLC columns by name explicitly (or the expected columns)
-    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # These are placeholders for OHLC
-    if all(col in data.columns for col in ohlc_columns):
-        numeric_data = data[ohlc_columns]
-    else:
-        raise KeyError(f"Missing expected OHLC columns: {ohlc_columns}")
-
-    # Ensure input data is numeric
-    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
-    
-    # Use the plugin to process the numeric data (e.g., feature extraction)
-    processed_data = plugin.process(numeric_data)
-    
-    # Debugging message to confirm the shape of the processed data
-    print(f"Processed data shape: {processed_data.shape}")
-    
-    # Analyze variability and normality
-    analyze_variability_and_normality(processed_data)
-
-    # Check if distribution_plot is set to True in config
-    if config.get('distribution_plot', False):
-        plot_distributions(processed_data)
-
-    # Check if correlation_analysis is set to True in config
-    if config.get('correlation_analysis', False):
-        perform_correlation_analysis(processed_data)
-
-    return processed_data
-
-
-
-
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -68,6 +20,11 @@ def analyze_variability_and_normality(data):
         if data[column].isna().sum() > 0:
             print(f"{column} contains NaN values. Filling with column mean for analysis.")
             data[column] = data[column].fillna(data[column].mean())
+
+        # Apply log transformation to highly skewed columns (e.g., ADX, DI+, DI-, ATR)
+        if column in ['ADX', 'DI+', 'DI-', 'ATR']:
+            print(f"Applying log transformation to {column} due to high skewness.")
+            data[column] = np.log1p(data[column])  # Log(1 + x) to avoid log(0) issue
 
         # Variability (standard deviation)
         variability = np.std(data[column])
@@ -94,6 +51,29 @@ def analyze_variability_and_normality(data):
 
     return data
 
+# Example usage with a dummy dataset (replace with actual dataset)
+# df = pd.read_csv('your_data.csv')
+# df = analyze_variability_and_normality(df)
+
+# For plotting the distributions after normalization
+def plot_distributions(data):
+    """
+    Plots the distributions of the normalized data.
+    """
+    fig, axes = plt.subplots(4, 4, figsize=(16, 12))
+    axes = axes.flatten()
+
+    for idx, column in enumerate(data.columns):
+        ax = axes[idx]
+        sns.histplot(data[column], kde=True, ax=ax)
+        ax.set_title(f"Distribution of {column}")
+
+    plt.tight_layout()
+    plt.show()
+
+
+
+v
 
 
 
