@@ -14,11 +14,21 @@ def process_data(data, plugin, config):
     print("Processing data using plugin...")
 
     # Keep the date column separate
-    date_column = data.iloc[:, 0]
-    
-    # Process only the non-date columns (assuming OHLC data starts from column 1)
-    numeric_data = data.iloc[:, 1:]
-    
+    if 'date' in data.columns:
+        date_column = data['date']
+    else:
+        date_column = data.index
+
+    # Debugging: Show the data columns before processing
+    print(f"Data columns before processing: {data.columns}")
+
+    # Select OHLC columns by name explicitly (or the expected columns)
+    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # These are placeholders for OHLC
+    if all(col in data.columns for col in ohlc_columns):
+        numeric_data = data[ohlc_columns]
+    else:
+        raise KeyError(f"Missing expected OHLC columns: {ohlc_columns}")
+
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
     
@@ -45,8 +55,9 @@ def process_data(data, plugin, config):
         sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt='.2f')
         plt.title("Correlation Matrix of Technical Indicators")
         plt.show()
-    
+
     return processed_data
+
 
 
 
