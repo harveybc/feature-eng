@@ -56,17 +56,22 @@ def process_data(data, plugin, config):
 
 
 
+import numpy as np
+import pandas as pd
+from scipy.stats import normaltest, shapiro, skew, kurtosis
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
-    Refines thresholds to more accurately classify normality, skewness, and kurtosis.
+    Based on the metrics, applies log transformation, z-score normalization, or min-max normalization.
+    Prints a detailed explanation for each decision in one line with all calculated values.
     """
     print("Analyzing variability and normality of each column...")
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis
         if data[column].isna().sum() > 0:
-            #print(f"{column} contains NaN values. Filling with column mean for analysis.")
+            print(f"{column} contains NaN values. Filling with column mean for analysis.")
             data[column] = data[column].fillna(data[column].mean())
 
         # Variability (standard deviation)
@@ -76,35 +81,33 @@ def analyze_variability_and_normality(data):
         dagostino_result = normaltest(data[column])
         shapiro_result = shapiro(data[column])
 
+        # p-values
+        p_value_normaltest = dagostino_result.pvalue
+        p_value_shapiro = shapiro_result.pvalue
+
         # Skewness and Kurtosis
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Additional normality test: Anderson-Darling
-        anderson_result = anderson(data[column])
-        anderson_statistic = anderson_result.statistic
-
-        # Threshold refinement
-        if (-0.4 < column_skewness < 0.4 and 
-            -1 < column_kurtosis < 3 and 
-            dagostino_result.pvalue > 0.05 and 
-            shapiro_result.pvalue > 0.05):
-            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.4, 0.4] and kurtosis is {column_kurtosis:.5f} in [-1, 3]. Applying z-score normalization.")
-            data[column] = (data[column] - data[column].mean()) / data[column].std()
-        elif column_skewness > 0.5 or column_skewness < -0.5:  # Check for high skewness
+        # Log transformation logic: Apply if skewness is high (>0.5 or <-0.5)
+        if column_skewness > 0.5 or column_skewness < -0.5:
             print(f"Applying log transformation to {column} due to high skewness.")
-            data[column] = np.log1p(data[column])
-            # Reapply normality checks after transformation
+            data[column] = np.log1p(data[column].abs())  # Apply log transformation
+
+            # Recalculate metrics after log transformation
             column_skewness = skew(data[column])
             column_kurtosis = kurtosis(data[column])
-            if (-0.4 < column_skewness < 0.4 and -1 < column_kurtosis < 3):
-                print(f"{column} is now almost normally distributed after log transform because skewness is {column_skewness:.5f} in [-0.4, 0.4] and kurtosis is {column_kurtosis:.5f} in [-1, 3]. Applying z-score normalization.")
-                data[column] = (data[column] - data[column].mean()) / data[column].std()
-            else:
-                print(f"{column} is still not normally distributed after log transform, applying min-max normalization.")
-                data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
+            dagostino_result = normaltest(data[column])
+            shapiro_result = shapiro(data[column])
+            p_value_normaltest = dagostino_result.pvalue
+            p_value_shapiro = shapiro_result.pvalue
+
+        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
+        if -0.4 < column_skewness < 0.4 and -1.0 < column_kurtosis < 6.0:
+            print(f"{column} is almost normally distributed after log transform because skewness is {column_skewness:.5f} in [-0.4, 0.4] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+            data[column] = (data[column] - data[column].mean()) / data[column].std()
         else:
-            print(f"{column} is not normally distributed because D'Agostino p-value is {dagostino_result.pvalue:.5f} <= 0.05 or Shapiro-Wilk p-value is {shapiro_result.pvalue:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
+            print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
             data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
     return data
