@@ -49,10 +49,10 @@ def analyze_and_plot_columns(processed_data):
 
     print("Analyzing variability and normality of each column...")
 
-    # Prepare for multiple subplots
+    # Prepare for multiple subplots (4 columns as per your request)
     num_columns = len(processed_data.columns)
-    num_rows = int(np.ceil(num_columns / 3))
-    fig, axes = plt.subplots(num_rows, 3, figsize=(15, 5 * num_rows))
+    num_rows = int(np.ceil(num_columns / 4))  # 4 columns
+    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
     axes = axes.flatten()
 
     for idx, column in enumerate(processed_data.columns):
@@ -88,11 +88,12 @@ def analyze_and_plot_columns(processed_data):
         processed_data[column] = normalized_column
 
     # Adjust the layout to prevent overlap
-    plt.tight_layout(pad=3.0)  # Add more padding to avoid overlap
-    plt.subplots_adjust(hspace=0.3)  # Add space between plots vertically
+    plt.tight_layout(pad=3.0)  # Add padding to avoid overlap
+    plt.subplots_adjust(hspace=0.4)  # Add more vertical space between rows
     plt.show()
 
     return processed_data
+
 
 
 def run_feature_engineering_pipeline(config, plugin):
