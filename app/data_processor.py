@@ -54,12 +54,12 @@ def process_data(data, plugin, config):
 
 def analyze_variability_and_normality(data):
     """
-    Analyzes each column's variability, normality, and skewness. 
-    Based on the metrics, applies either log transformation, z-score normalization, or min-max normalization.
+    Analyzes each column's variability, normality, and skewness.
+    Based on the metrics, applies log transformation, z-score normalization, or min-max normalization.
     Detailed reasoning for each normalization decision is printed.
     """
     print("Analyzing variability and normality of each column...")
-    
+
     for column in data.columns:
         # Handle missing values by filling with mean for analysis
         if data[column].isna().sum() > 0:
@@ -77,20 +77,24 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Normality decision based on thresholds for p-values and skewness
-        if p_value_normaltest > 0.05 and p_value_shapiro > 0.05:  # More lenient normality check
+        # Refined Normality Decision Logic
+        if p_value_normaltest > 0.05 and p_value_shapiro > 0.05:
+            # Check skewness and kurtosis for near-normal distributions
             if -0.5 < column_skewness < 0.5 and -0.2 < column_kurtosis < 0.2:
                 print(f"{column} is almost normal because D'Agostino p-value > 0.05, Shapiro-Wilk p-value > 0.05, skewness in [-0.5, 0.5], and kurtosis in [-0.2, 0.2]. Applying z-score normalization.")
                 data[column] = (data[column] - data[column].mean()) / data[column].std()
             else:
-                print(f"{column} is almost normal but skewed because D'Agostino p-value > 0.05, Shapiro-Wilk p-value > 0.05, but skewness exceeds 0.5 or kurtosis exceeds 0.2. Applying log transformation and z-score normalization.")
+                # Log transform for almost normal with skewness issues
+                print(f"{column} is almost normal but skewed with skewness = {column_skewness}. Applying log transformation and z-score normalization.")
                 data[column] = np.log1p(data[column] - min(data[column]) + 1)
                 data[column] = (data[column] - data[column].mean()) / data[column].std()
         else:
+            # Non-normal distributions
             print(f"{column} is not normally distributed because D'Agostino p-value <= 0.05 or Shapiro-Wilk p-value <= 0.05. Applying min-max normalization.")
             data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
     return data
+
 
 
 
