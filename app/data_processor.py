@@ -67,13 +67,20 @@ from scipy.stats import normaltest, shapiro, skew, kurtosis
 import numpy as np
 from scipy.stats import normaltest, shapiro, skew, kurtosis
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis, normaltest, shapiro
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
-    Based on the metrics, applies log transformation, z-score normalization, or min-max normalization.
-    Prints a detailed explanation for each decision in one line with all calculated values.
+    Applies log transformation, z-score normalization, or min-max normalization.
+    Returns transformed data with modified column names.
     """
     print("Analyzing variability and normality of each column...")
+
+    transformed_data = data.copy()
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis
@@ -96,22 +103,38 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Adjustments based on skewness, kurtosis and log transformation for high skew
-        if abs(column_skewness) > 0.5:  # Apply log transform for high skewness
-            print(f"Applying log transformation to {column} due to high skewness.")
-            data[column] = np.log1p(data[column] - data[column].min() + 1)
-            column_skewness = skew(data[column])
-            column_kurtosis = kurtosis(data[column])
+        # Plotting the original distribution before transformation
+        plt.figure(figsize=(10, 6))
+        sns.histplot(data[column], kde=True)
+        plt.title(f"Distribution of {column} (Original)")
+        plt.show()
 
-        # Refined Normality Decision Logic
-        if -0.5 < column_skewness < 0.5 and -0.5 < column_kurtosis < 6.0:
-            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-0.5, 6]. Applying z-score normalization.")
-            data[column] = (data[column] - data[column].mean()) / data[column].std()
+        # Log transformation criteria (for skewed columns)
+        if abs(column_skewness) > 0.5:
+            print(f"Applying log transformation to {column} due to high skewness.")
+            transformed_data[f"Log_{column}"] = np.log1p(data[column].abs())  # Log-transformation of absolute values
+            column = f"Log_{column}"
+            column_skewness = skew(transformed_data[column])
+            column_kurtosis = kurtosis(transformed_data[column])
+
+            # Plot the transformed distribution
+            plt.figure(figsize=(10, 6))
+            sns.histplot(transformed_data[column], kde=True)
+            plt.title(f"Distribution of {column} (Log Transformed)")
+            plt.show()
+
+        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
+        if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
+            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+            transformed_data[f"Standardized_{column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
+            transformed_data.drop(columns=[column], inplace=True)
         else:
             print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
-            data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
+            transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
+            transformed_data.drop(columns=[column], inplace=True)
 
-    return data
+    return transformed_data
+
 
 
 
