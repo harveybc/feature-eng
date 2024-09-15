@@ -54,15 +54,18 @@ import matplotlib.pyplot as plt
 def analyze_and_plot_columns(processed_data):
     """
     Analyze each column for variability, normality, and apply normalization/log transformation if needed.
+    Impute NaN values and return cleaned, normalized data.
     Generate a distribution plot for each column.
     """
     print("Analyzing variability and normality of each column...")
 
     # Prepare for multiple subplots (4 columns as per your request)
     num_columns = len(processed_data.columns)
-    num_rows = int(np.ceil(num_columns / 4))  # 4 columns
+    num_rows = int(np.ceil(num_columns / 4))  # 4 columns per row
     fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
     axes = axes.flatten()
+
+    cleaned_data = processed_data.copy()  # Create a copy to store cleaned and normalized data
 
     for idx, column in enumerate(processed_data.columns):
         data_column = processed_data[column]
@@ -71,10 +74,20 @@ def analyze_and_plot_columns(processed_data):
         if data_column.isna().any():
             print(f"{column} contains NaN values. Filling with column mean for analysis.")
             data_column = data_column.fillna(data_column.mean())
+            cleaned_data[column] = data_column  # Store the imputed data
 
         # Variability check: Calculate the standard deviation
         variability = data_column.std()
         print(f"Variability for {column}: {variability}")
+
+        # Normality check: Shapiro-Wilk test or D'Agostino test
+        try:
+            stat, p_value = stats.normaltest(data_column)
+            skewness = stats.skew(data_column)
+        except Exception as e:
+            print(f"Could not perform normality test for {column}: {e}")
+            p_value = np.nan
+            skewness = np.nan
 
         # If variability is too low, skip the normality test
         if variability < 1e-5:
@@ -82,30 +95,18 @@ def analyze_and_plot_columns(processed_data):
             normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
 
         else:
-            # Normality check: Shapiro-Wilk test or D'Agostino test
-            try:
-                stat, p_value = stats.normaltest(data_column)
-                skewness = stats.skew(data_column)
-            except Exception as e:
-                print(f"Could not perform normality test for {column}: {e}")
-                p_value = np.nan
-                skewness = np.nan
-
-            # Check if normal and decide on transformations
-            if np.isnan(p_value) or np.isnan(skewness):
-                print(f"Skipping normality checks for {column} due to invalid statistics. Applying min-max normalization.")
-                normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
-            elif p_value > 0.05 and abs(skewness) < 0.5:
-                print(f"{column} is normally distributed with low skewness. Applying z-score normalization.")
+            # Check for normal-like distribution (low skewness)
+            if p_value > 0.05 and abs(skewness) < 0.5:
+                print(f"{column} is normally distributed. Applying z-score normalization.")
                 normalized_column = stats.zscore(data_column)
-            elif p_value > 0.05 and skewness > 0.5:
-                print(f"{column} is normally distributed but right-skewed. Applying log transformation and z-score normalization.")
+
+            # Check for right-skewed distributions (benefit from log transformation)
+            elif skewness > 0.5:
+                print(f"{column} is right-skewed. Applying log transformation and z-score normalization.")
                 log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
                 normalized_column = stats.zscore(log_transformed)
-            elif p_value <= 0.05 and skewness > 0.5:
-                print(f"{column} is right-skewed and not normal. Applying log transformation and min-max normalization.")
-                log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
-                normalized_column = (log_transformed - log_transformed.min()) / (log_transformed.max() - log_transformed.min())
+
+            # Apply min-max normalization for non-normal distributions
             else:
                 print(f"{column} is not normally distributed. Applying min-max normalization.")
                 normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
@@ -116,14 +117,14 @@ def analyze_and_plot_columns(processed_data):
         axes[idx].set_xlabel(column, labelpad=10)  # Adjust label padding if needed
 
         # Update the processed data with normalized values
-        processed_data[column] = normalized_column
+        cleaned_data[column] = normalized_column
 
     # Adjust the layout to prevent overlap
     plt.tight_layout(pad=4.0)  # Add padding to avoid overlap
     plt.subplots_adjust(hspace=0.6)  # Add more vertical space between rows
     plt.show()
 
-    return processed_data
+    return cleaned_data  # Return cleaned and normalized data
 
 
 
