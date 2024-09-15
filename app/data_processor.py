@@ -66,7 +66,7 @@ def analyze_variability_and_normality(data):
     for column in data.columns:
         # Handle missing values by filling with mean for analysis
         if data[column].isna().sum() > 0:
-            print(f"{column} contains NaN values. Filling with column mean for analysis.")
+            #print(f"{column} contains NaN values. Filling with column mean for analysis.")
             data[column] = data[column].fillna(data[column].mean())
 
         # Variability (standard deviation)
