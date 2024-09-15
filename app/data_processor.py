@@ -4,7 +4,7 @@ from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
 import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy.stats import normaltest, shapiro, skew, kurtosis
+from scipy.stats import normaltest, shapiro, skew, kurtosis, anderson
 import numpy as np
 
 def process_data(data, plugin, config):
@@ -40,18 +40,37 @@ def process_data(data, plugin, config):
     print(f"Processed data shape: {processed_data.shape}")
     
     # Analyze variability and normality
-    processed_data = analyze_variability_and_normality(processed_data)
+    analyze_variability_and_normality(processed_data)
 
     # Check if distribution_plot is set to True in config
     if config.get('distribution_plot', False):
         plot_distributions(processed_data)
 
     # Check if correlation_analysis is set to True in config
-    #if config.get('correlation_analysis', False):
-        #perform_correlation_analysis(processed_data)
+    if config.get('correlation_analysis', False):
+        perform_correlation_analysis(processed_data)
 
     return processed_data
 
+
+
+
+
+import numpy as np
+import pandas as pd
+from scipy.stats import normaltest, shapiro, skew, kurtosis
+
+import numpy as np
+import pandas as pd
+from scipy.stats import normaltest, shapiro, skew, kurtosis
+
+import numpy as np
+from scipy.stats import normaltest, shapiro, skew, kurtosis
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis, normaltest, shapiro
 
 def analyze_variability_and_normality(data):
     """
@@ -62,16 +81,8 @@ def analyze_variability_and_normality(data):
     print("Analyzing variability and normality of each column...")
 
     transformed_data = data.copy()
-    num_columns = len(data.columns)
-    num_rows = (num_columns + 3) // 4  # Adjust to show 4 columns of plots
-    fig, axes = plt.subplots(num_rows, 4, figsize=(20, num_rows * 5))
-    axes = axes.flatten()
 
-    plot_index = 0
-
-    for column in list(data.columns):  # Create a list of original columns to iterate over
-        original_column = column  # Keep track of the original column name
-        
+    for column in data.columns:
         # Handle missing values by filling with mean for analysis
         if data[column].isna().sum() > 0:
             print(f"{column} contains NaN values. Filling with column mean for analysis.")
@@ -92,39 +103,47 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
+        # Plotting the original distribution before transformation
+        plt.figure(figsize=(10, 6))
+        sns.histplot(data[column], kde=True)
+        plt.title(f"Distribution of {column} (Original)")
+        plt.show()
+
         # Log transformation criteria (for skewed columns)
         if abs(column_skewness) > 0.5:
             print(f"Applying log transformation to {column} due to high skewness.")
             transformed_data[f"Log_{column}"] = np.log1p(data[column].abs())  # Log-transformation of absolute values
-            column = f"Log_{column}"  # Now refer to the log-transformed column
+            column = f"Log_{column}"
             column_skewness = skew(transformed_data[column])
             column_kurtosis = kurtosis(transformed_data[column])
 
+            # Plot the transformed distribution
+            plt.figure(figsize=(10, 6))
+            sns.histplot(transformed_data[column], kde=True)
+            plt.title(f"Distribution of {column} (Log Transformed)")
+            plt.show()
+
         # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
         if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
-            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
             transformed_data[f"Standardized_{column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
-            transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
+            transformed_data.drop(columns=[column], inplace=True)
         else:
-            print(f"{original_column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
+            print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
             transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
             transformed_data.drop(columns=[column], inplace=True)
-
-        # Plotting the transformed distribution (use the final transformed column name)
-        final_column_name = f"Standardized_{column}" if f"Standardized_{column}" in transformed_data.columns else f"Normalized_{column}"
-        sns.histplot(transformed_data[final_column_name], kde=True, ax=axes[plot_index])
-        axes[plot_index].set_title(f"{final_column_name} (Transformed)", fontsize=10)
-        axes[plot_index].title.set_position([0.5, 1.05])  # Adjust title position to avoid overlap
-        plot_index += 1
-
-    # Adjust layout and vertical separation
-    plt.tight_layout(h_pad=5, w_pad=2)  # Increase vertical padding
-    plt.subplots_adjust(top=0.9, bottom=0.1)  # Ensure sufficient space for titles and labels
-    plt.show()
 
     return transformed_data
 
 
+
+
+
+
+
+# Example usage with a dummy dataset (replace with actual dataset)
+# df = pd.read_csv('your_data.csv')
+# df = analyze_variability_and_normality(df)
 
 # For plotting the distributions after normalization
 def plot_distributions(data):
@@ -139,8 +158,21 @@ def plot_distributions(data):
         sns.histplot(data[column], kde=True, ax=ax)
         ax.set_title(f"Distribution of {column}")
 
-    plt.tight_layout(h_pad=3)
+    plt.tight_layout()
     plt.show()
+
+# Example: After running the normalization function, plot the distributions
+# plot_distributions(df)
+
+
+
+
+
+
+
+
+
+
 
 def run_feature_engineering_pipeline(config, plugin):
     """
