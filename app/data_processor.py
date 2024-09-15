@@ -7,6 +7,55 @@ import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, normaltest, shapiro
 import numpy as np
 
+def process_data(data, plugin, config):
+    """
+    Processes the data using the specified plugin and performs additional analysis
+    if distribution_plot or correlation_analysis are set to True.
+    """
+    print("Processing data using plugin...")
+
+    # Keep the date column separate
+    if 'date' in data.columns:
+        date_column = data['date']
+    else:
+        date_column = data.index
+
+    # Debugging: Show the data columns before processing
+    print(f"Data columns before processing: {data.columns}")
+
+    # Select OHLC columns by name explicitly (or the expected columns)
+    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # These are placeholders for OHLC
+    if all(col in data.columns for col in ohlc_columns):
+        numeric_data = data[ohlc_columns]
+    else:
+        raise KeyError(f"Missing expected OHLC columns: {ohlc_columns}")
+
+    # Ensure input data is numeric
+    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
+    
+    # Use the plugin to process the numeric data (e.g., feature extraction)
+    processed_data = plugin.process(numeric_data)
+    
+    # Debugging message to confirm the shape of the processed data
+    print(f"Processed data shape: {processed_data.shape}")
+    
+    # Analyze variability and normality
+    analyze_variability_and_normality(processed_data)
+
+    # Check if distribution_plot is set to True in config
+    if config.get('distribution_plot', False):
+        plot_distributions(processed_data)
+
+    # Check if correlation_analysis is set to True in config
+    if config.get('correlation_analysis', False):
+        perform_correlation_analysis(processed_data)
+
+    return processed_data
+
+
+
+
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -71,6 +120,8 @@ def plot_distributions(data):
     plt.tight_layout()
     plt.show()
 
+# Example: After running the normalization function, plot the distributions
+# plot_distributions(df)
 
 
 
@@ -81,39 +132,6 @@ def plot_distributions(data):
 
 
 
-
-
-def plot_distributions(data):
-    """
-    Plots the distribution of each column.
-    """
-    num_columns = data.shape[1]
-    num_rows = (num_columns // 4) + (num_columns % 4 > 0)  # Calculate rows for 4 plots per row
-    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 12))  # Adjust the figure size
-
-    # Flatten axes array to easily iterate
-    axes = axes.flatten()
-
-    for idx, column in enumerate(data.columns):
-        sns.histplot(data[column], kde=True, ax=axes[idx])
-        axes[idx].set_title(f"Distribution of {column}")
-
-    # Hide empty subplots if the number of columns is not a multiple of 4
-    for i in range(len(data.columns), len(axes)):
-        fig.delaxes(axes[i])
-
-    plt.tight_layout()
-    plt.show()
-
-def perform_correlation_analysis(data):
-    """
-    Performs a correlation analysis of the processed data.
-    """
-    corr_matrix = data.corr()
-    plt.figure(figsize=(12, 8))
-    sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt='.2f')
-    plt.title("Correlation Matrix of Technical Indicators")
-    plt.show()
 
 def run_feature_engineering_pipeline(config, plugin):
     """
