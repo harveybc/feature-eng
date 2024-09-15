@@ -54,8 +54,9 @@ def process_data(data, plugin, config):
 
 def analyze_variability_and_normality(data):
     """
-    Analyzes each column's variability, normality (p-value, skewness, kurtosis), 
-    and determines appropriate normalization based on thresholds.
+    Analyzes each column's variability, normality, and skewness. 
+    Based on the metrics, applies either log transformation, z-score normalization, or min-max normalization.
+    Detailed reasoning for each normalization decision is printed.
     """
     print("Analyzing variability and normality of each column...")
     
@@ -67,9 +68,8 @@ def analyze_variability_and_normality(data):
 
         # Variability (standard deviation)
         variability = np.std(data[column])
-        print(f"Variability for {column}: {variability}")
 
-        # Normality test using Shapiro-Wilk and D'Agostino's K^2
+        # Normality test using D'Agostino's K^2 and Shapiro-Wilk
         p_value_normaltest = normaltest(data[column]).pvalue
         p_value_shapiro = shapiro(data[column]).pvalue
 
@@ -77,25 +77,25 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        print(f"{column} p-value from D'Agostino's K^2 normality test: {p_value_normaltest}")
-        print(f"{column} p-value from Shapiro-Wilk normality test: {p_value_shapiro}")
-        print(f"{column} skewness: {column_skewness}")
-        print(f"{column} kurtosis: {column_kurtosis}")
-
-        # Normality decision based on p-values and skewness
-        if p_value_normaltest > 0.001 or p_value_shapiro > 0.001:  # Less strict
-            if -0.5 < column_skewness < 0.5:  # Consider almost normal based on skewness
-                print(f"{column} is almost normal. Applying z-score normalization.")
+        # Normality decision based on thresholds for p-values and skewness
+        if p_value_normaltest > 0.05 and p_value_shapiro > 0.05:  # More lenient normality check
+            if -0.5 < column_skewness < 0.5 and -0.2 < column_kurtosis < 0.2:
+                print(f"{column} is almost normal because D'Agostino p-value > 0.05, Shapiro-Wilk p-value > 0.05, skewness in [-0.5, 0.5], and kurtosis in [-0.2, 0.2]. Applying z-score normalization.")
                 data[column] = (data[column] - data[column].mean()) / data[column].std()
             else:
-                print(f"{column} is right/left skewed. Applying log transformation and z-score normalization.")
+                print(f"{column} is almost normal but skewed because D'Agostino p-value > 0.05, Shapiro-Wilk p-value > 0.05, but skewness exceeds 0.5 or kurtosis exceeds 0.2. Applying log transformation and z-score normalization.")
                 data[column] = np.log1p(data[column] - min(data[column]) + 1)
                 data[column] = (data[column] - data[column].mean()) / data[column].std()
         else:
-            print(f"{column} is not normally distributed. Applying min-max normalization.")
+            print(f"{column} is not normally distributed because D'Agostino p-value <= 0.05 or Shapiro-Wilk p-value <= 0.05. Applying min-max normalization.")
             data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
     return data
+
+
+
+
+
 
 def plot_distributions(data):
     """
