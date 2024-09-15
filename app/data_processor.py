@@ -4,7 +4,7 @@ from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
 import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy.stats import normaltest, shapiro, skew, kurtosis, anderson
+from scipy.stats import normaltest, shapiro, skew, kurtosis
 import numpy as np
 
 def process_data(data, plugin, config):
@@ -40,7 +40,7 @@ def process_data(data, plugin, config):
     print(f"Processed data shape: {processed_data.shape}")
     
     # Analyze variability and normality
-    analyze_variability_and_normality(processed_data)
+    processed_data = analyze_variability_and_normality(processed_data)
 
     # Check if distribution_plot is set to True in config
     if config.get('distribution_plot', False):
@@ -52,36 +52,6 @@ def process_data(data, plugin, config):
 
     return processed_data
 
-
-
-
-
-import numpy as np
-import pandas as pd
-from scipy.stats import normaltest, shapiro, skew, kurtosis
-
-import numpy as np
-import pandas as pd
-from scipy.stats import normaltest, shapiro, skew, kurtosis
-
-import numpy as np
-from scipy.stats import normaltest, shapiro, skew, kurtosis
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.stats import skew, kurtosis, normaltest, shapiro
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-from scipy.stats import skew, kurtosis, normaltest, shapiro
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import skew, kurtosis, normaltest, shapiro
 
 def analyze_variability_and_normality(data):
     """
@@ -148,21 +118,11 @@ def analyze_variability_and_normality(data):
 
     # Adjust layout and vertical separation
     plt.tight_layout(h_pad=3)
+    plt.subplots_adjust(top=0.9, bottom=0.1)  # Ensure sufficient space for titles and labels
     plt.show()
 
     return transformed_data
 
-
-
-
-
-
-
-
-
-# Example usage with a dummy dataset (replace with actual dataset)
-# df = pd.read_csv('your_data.csv')
-# df = analyze_variability_and_normality(df)
 
 # For plotting the distributions after normalization
 def plot_distributions(data):
@@ -177,21 +137,8 @@ def plot_distributions(data):
         sns.histplot(data[column], kde=True, ax=ax)
         ax.set_title(f"Distribution of {column}")
 
-    plt.tight_layout()
+    plt.tight_layout(h_pad=3)
     plt.show()
-
-# Example: After running the normalization function, plot the distributions
-# plot_distributions(df)
-
-
-
-
-
-
-
-
-
-
 
 def run_feature_engineering_pipeline(config, plugin):
     """
