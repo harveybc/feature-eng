@@ -5,7 +5,7 @@ DEFAULT_VALUES = {
     'output_file': './indicators_output.csv',
     'plugin': 'tech_indicator',
     'correlation_analysis': False,
-    'distribution_plot': False,
+    'distribution_plot': True,
     'quiet_mode': False,
     'save_log': './debug_log.json',
     'username': None,
