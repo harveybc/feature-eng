@@ -47,8 +47,8 @@ def process_data(data, plugin, config):
         plot_distributions(processed_data)
 
     # Check if correlation_analysis is set to True in config
-    if config.get('correlation_analysis', False):
-        perform_correlation_analysis(processed_data)
+    #if config.get('correlation_analysis', False):
+        #perform_correlation_analysis(processed_data)
 
     return processed_data
 
@@ -114,14 +114,16 @@ def analyze_variability_and_normality(data):
         final_column_name = f"Standardized_{column}" if f"Standardized_{column}" in transformed_data.columns else f"Normalized_{column}"
         sns.histplot(transformed_data[final_column_name], kde=True, ax=axes[plot_index])
         axes[plot_index].set_title(f"{final_column_name} (Transformed)", fontsize=10)
+        axes[plot_index].title.set_position([0.5, 1.05])  # Adjust title position to avoid overlap
         plot_index += 1
 
     # Adjust layout and vertical separation
-    plt.tight_layout(h_pad=3)
+    plt.tight_layout(h_pad=5, w_pad=2)  # Increase vertical padding
     plt.subplots_adjust(top=0.9, bottom=0.1)  # Ensure sufficient space for titles and labels
     plt.show()
 
     return transformed_data
+
 
 
 # For plotting the distributions after normalization
