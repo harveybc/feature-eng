@@ -81,12 +81,15 @@ def analyze_and_plot_columns(processed_data):
 
         # Plot the column data after any transformations
         sns.histplot(normalized_column, kde=True, ax=axes[idx])
-        axes[idx].set_title(f"Distribution of {column}")
+        axes[idx].set_title(f"Distribution of {column}", pad=15)  # Increase padding for title
+        axes[idx].set_xlabel(column, labelpad=10)  # Adjust label padding if needed
 
         # Update the processed data with normalized values
         processed_data[column] = normalized_column
 
-    plt.tight_layout()
+    # Adjust the layout to prevent overlap
+    plt.tight_layout(pad=3.0)  # Add more padding to avoid overlap
+    plt.subplots_adjust(hspace=0.3)  # Add space between plots vertically
     plt.show()
 
     return processed_data
