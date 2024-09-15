@@ -84,16 +84,16 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Refined Normality Decision Logic with Relaxed Thresholds for "Almost Normal"
-        # Relaxing kurtosis threshold to [-1, 4]
-        if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 4.0:
-            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 4]. Applying z-score normalization.")
+        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
+        if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
+            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
             data[column] = (data[column] - data[column].mean()) / data[column].std()
         else:
             print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
             data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
     return data
+
 
 
 
