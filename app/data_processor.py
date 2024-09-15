@@ -40,42 +40,32 @@ def process_data(data, plugin, config):
     print(f"Processed data shape: {processed_data.shape}")
     
     # Analyze variability and normality
-    analyze_variability_and_normality(processed_data)
+    transformed_data = analyze_variability_and_normality(processed_data)
 
     # Check if distribution_plot is set to True in config
     if config.get('distribution_plot', False):
-        plot_distributions(processed_data)
+        plot_distributions(transformed_data)
 
     # Check if correlation_analysis is set to True in config
     if config.get('correlation_analysis', False):
-        perform_correlation_analysis(processed_data)
+        perform_correlation_analysis(transformed_data)
 
-    return processed_data
-
-
-
-
-
-import numpy as np
-import pandas as pd
-from scipy.stats import normaltest, shapiro, skew, kurtosis
-
-import numpy as np
-import pandas as pd
-from scipy.stats import normaltest, shapiro, skew, kurtosis
-
-import numpy as np
-from scipy.stats import normaltest, shapiro, skew, kurtosis
+    return transformed_data
 
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
     Based on the metrics, applies log transformation, z-score normalization, or min-max normalization.
     Prints a detailed explanation for each decision in one line with all calculated values.
+    Returns the transformed data with renamed columns based on the transformation applied.
     """
     print("Analyzing variability and normality of each column...")
 
+    transformed_data = data.copy()
+
     for column in data.columns:
+        original_column = column  # Keep track of the original column name
+        
         # Handle missing values by filling with mean for analysis
         if data[column].isna().sum() > 0:
             print(f"{column} contains NaN values. Filling with column mean for analysis.")
@@ -99,57 +89,40 @@ def analyze_variability_and_normality(data):
         # Adjustments based on skewness, kurtosis and log transformation for high skew
         if abs(column_skewness) > 0.5:  # Apply log transform for high skewness
             print(f"Applying log transformation to {column} due to high skewness.")
-            data[column] = np.log1p(data[column] - data[column].min() + 1)
-            column_skewness = skew(data[column])
-            column_kurtosis = kurtosis(data[column])
+            transformed_data[f"Log_{column}"] = np.log1p(data[column] - data[column].min() + 1)
+            column = f"Log_{column}"  # Update the column name after log transformation
+            column_skewness = skew(transformed_data[column])
+            column_kurtosis = kurtosis(transformed_data[column])
 
         # Refined Normality Decision Logic
         if -0.5 < column_skewness < 0.5 and -0.5 < column_kurtosis < 6.0:
-            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-0.5, 6]. Applying z-score normalization.")
-            data[column] = (data[column] - data[column].mean()) / data[column].std()
+            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-0.5, 6]. Applying z-score normalization.")
+            transformed_data[f"Standardized_{column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
+            transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
         else:
-            print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
-            data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
+            print(f"{original_column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
+            transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
+            transformed_data.drop(columns=[column], inplace=True)
 
-    return data
+    return transformed_data
 
-
-
-
-
-
-# Example usage with a dummy dataset (replace with actual dataset)
-# df = pd.read_csv('your_data.csv')
-# df = analyze_variability_and_normality(df)
-
-# For plotting the distributions after normalization
+# For plotting the distributions after normalization with the updated column names
 def plot_distributions(data):
     """
-    Plots the distributions of the normalized data.
+    Plots the distributions of the normalized and transformed data.
     """
-    fig, axes = plt.subplots(4, 4, figsize=(16, 12))
+    num_columns = len(data.columns)
+    num_rows = (num_columns + 3) // 4  # Adjust to show 4 columns of plots
+    fig, axes = plt.subplots(num_rows, 4, figsize=(20, num_rows * 5))
     axes = axes.flatten()
 
     for idx, column in enumerate(data.columns):
-        ax = axes[idx]
-        sns.histplot(data[column], kde=True, ax=ax)
-        ax.set_title(f"Distribution of {column}")
+        sns.histplot(data[column], kde=True, ax=axes[idx])
+        axes[idx].set_title(f"{column} (Transformed)", fontsize=10)
 
-    plt.tight_layout()
+    # Adjust layout and vertical separation
+    plt.tight_layout(h_pad=3)
     plt.show()
-
-# Example: After running the normalization function, plot the distributions
-# plot_distributions(df)
-
-
-
-
-
-
-
-
-
-
 
 def run_feature_engineering_pipeline(config, plugin):
     """
@@ -181,7 +154,7 @@ def run_feature_engineering_pipeline(config, plugin):
     if config.get('save_log'):
         save_debug_info(debug_info, config['save_log'])
         print(f"Debug info saved to {config['save_log']}.")
-
+    
     # Remote log debug info and config if specified
     if config.get('remote_log'):
         remote_log(config, debug_info, config['remote_log'], config['username'], config['password'])
