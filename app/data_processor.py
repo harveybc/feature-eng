@@ -130,9 +130,9 @@ def analyze_variability_and_normality(data):
             column_skewness = skew(transformed_data[column])
             column_kurtosis = kurtosis(transformed_data[column])
 
-        # Refined Normality Decision Logic with Corrected Thresholds
-        if -0.5 < column_skewness < 0.5 and -1 < column_kurtosis < 6:
-            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+        # Refined Normality Decision Logic with Corrected Kurtosis Thresholds
+        if -0.5 < column_skewness < 0.5 and 0 <= column_kurtosis < 6:
+            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [0, 6]. Applying z-score normalization.")
             transformed_data[f"Standardized_{original_column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
             transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
         else:
