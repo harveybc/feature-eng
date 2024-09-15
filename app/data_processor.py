@@ -7,31 +7,8 @@ import time
 from app.data_handler import load_csv
 from app.config_handler import save_debug_info, remote_log
 
-def process_data(data, plugin, config):
-    """
-    Processes the data using the specified plugin to calculate technical indicators.
-    """
-    print("Processing data using plugin...")
-
-    # Process only the non-date columns (assuming OHLC data starts from column 1)
-    numeric_data = data.iloc[:, 1:]
-    
-    # Ensure input data is numeric
-    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
-    
-    # Use the plugin to process the numeric data (e.g., feature extraction)
-    processed_data = plugin.process(numeric_data)
-    
-    # Debugging message to confirm the shape of the processed data
-    print(f"Processed data shape: {processed_data.shape}")
-    
-    return processed_data
-
 def is_normal(data, alpha=0.05):
-    """ 
-    Perform Shapiro-Wilk test to check if the data is normally distributed. 
-    Returns True if data is normally distributed.
-    """
+    """ Perform Shapiro-Wilk test to check if the data is normally distributed. """
     stat, p_value = shapiro(data)
     return p_value > alpha
 
