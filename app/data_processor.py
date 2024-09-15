@@ -41,6 +41,11 @@ def process_data(data, plugin, config):
     return processed_data
 
 
+from scipy import stats
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 def analyze_and_plot_columns(processed_data):
     """
     Analyze each column for variability, normality, and apply normalization/log transformation if needed.
@@ -64,17 +69,27 @@ def analyze_and_plot_columns(processed_data):
 
         # Normality check: Shapiro-Wilk test or D'Agostino test
         stat, p_value = stats.normaltest(data_column)
+        skewness = stats.skew(data_column)
         is_normal = p_value > 0.05
 
-        # If not normal and skewed, apply log transformation
-        if not is_normal and stats.skew(data_column) > 0.5:
-            print(f"Applying log transformation to {column}")
-            data_column = np.log1p(data_column)
+        print(f"{column} p-value from normality test: {p_value}")
+        print(f"{column} skewness: {skewness}")
 
-        # After transformation, check again if the column should use z-score or min-max normalization
-        if is_normal:
-            print(f"{column} seems to be normally distributed. Applying z-score normalization.")
+        # Decision logic for normalization
+        if is_normal and abs(skewness) < 0.5:
+            print(f"{column} is normally distributed with low skewness. Applying z-score normalization.")
             normalized_column = stats.zscore(data_column)
+
+        elif is_normal and skewness > 0.5:
+            print(f"{column} is normally distributed but right-skewed. Applying log transformation and z-score normalization.")
+            log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
+            normalized_column = stats.zscore(log_transformed)
+
+        elif not is_normal and skewness > 0.5:
+            print(f"{column} is right-skewed and not normal. Applying log transformation and min-max normalization.")
+            log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
+            normalized_column = (log_transformed - log_transformed.min()) / (log_transformed.max() - log_transformed.min())
+
         else:
             print(f"{column} is not normally distributed. Applying min-max normalization.")
             normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
@@ -93,6 +108,7 @@ def analyze_and_plot_columns(processed_data):
     plt.show()
 
     return processed_data
+
 
 
 
