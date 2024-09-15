@@ -56,6 +56,11 @@ def process_data(data, plugin, config):
 
 
 
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import normaltest, shapiro, skew, kurtosis
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -69,11 +74,6 @@ def analyze_variability_and_normality(data):
         if data[column].isna().sum() > 0:
             print(f"{column} contains NaN values. Filling with column mean for analysis.")
             data[column] = data[column].fillna(data[column].mean())
-
-        # Apply log transformation to highly skewed columns (e.g., ADX, DI+, DI-, ATR)
-        if column in ['ADX', 'DI+', 'DI-', 'ATR']:
-            print(f"Applying log transformation to {column} due to high skewness.")
-            data[column] = np.log1p(data[column])  # Log(1 + x) to avoid log(0) issue
 
         # Variability (standard deviation)
         variability = np.std(data[column])
@@ -90,6 +90,14 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
+        # If the skewness is above a certain threshold, apply a log transformation
+        if abs(column_skewness) > 0.5:
+            print(f"Applying log transformation to {column} due to high skewness {column_skewness:.5f}.")
+            data[column] = np.log1p(data[column])  # Log(1 + x) transformation to avoid log(0)
+            # Recalculate skewness and kurtosis after log transformation
+            column_skewness = skew(data[column])
+            column_kurtosis = kurtosis(data[column])
+
         # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
         if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
             print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
@@ -99,6 +107,8 @@ def analyze_variability_and_normality(data):
             data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
     return data
+
+
 
 # Example usage with a dummy dataset (replace with actual dataset)
 # df = pd.read_csv('your_data.csv')
