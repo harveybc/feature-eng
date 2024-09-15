@@ -127,7 +127,7 @@ def analyze_variability_and_normality(data):
         plot_index += 1
 
     # Adjust layout and vertical separation
-    plt.tight_layout(h_pad=3, pad=3)  # Added padding to prevent overlap
+    plt.tight_layout(h_pad=1, pad=6)  # Added padding to prevent overlap
     plt.show()
 
     return transformed_data
