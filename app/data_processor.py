@@ -59,25 +59,6 @@ def process_data(data, plugin, config):
 
 
 
-
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from scipy.stats import normaltest, shapiro, skew, kurtosis
-import numpy as np
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import skew, kurtosis, normaltest, shapiro
-
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from scipy.stats import skew, kurtosis, normaltest, shapiro
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -130,9 +111,10 @@ def analyze_variability_and_normality(data):
             column_skewness = skew(transformed_data[column])
             column_kurtosis = kurtosis(transformed_data[column])
 
-        # Refined Normality Decision Logic with Corrected Kurtosis Thresholds
-        if -0.5 < column_skewness < 0.5 and 0 <= column_kurtosis < 6:
-            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [0, 6]. Applying z-score normalization.")
+        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
+        # Fix for RSI and ADX to behave as expected
+        if (-0.5 < column_skewness < 0.5) and (-1.0 < column_kurtosis < 6.0):
+            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
             transformed_data[f"Standardized_{original_column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
             transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
         else:
