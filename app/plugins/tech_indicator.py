@@ -76,20 +76,6 @@ class Plugin:
         print(f"Renaming successful. Available columns: {data_renamed.columns}")
         return data_renamed
 
-
-
-
-
-
-
-
-
-
-
-    # File: tech_indicator.py
-
-    # File: tech_indicator.py
-
     def process(self, data):
         """
         Process the input data by calculating the specified technical indicators using their default parameters.
