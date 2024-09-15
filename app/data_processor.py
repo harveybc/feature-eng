@@ -4,12 +4,13 @@ from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis, normaltest, shapiro
 import numpy as np
-from scipy import stats
 
 def process_data(data, plugin, config):
     """
-    Processes the data using the specified plugin.
+    Processes the data using the specified plugin and performs additional analysis
+    if distribution_plot or correlation_analysis are set to True.
     """
     print("Processing data using plugin...")
 
@@ -31,117 +32,106 @@ def process_data(data, plugin, config):
 
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
-
+    
     # Use the plugin to process the numeric data (e.g., feature extraction)
     processed_data = plugin.process(numeric_data)
-
+    
     # Debugging message to confirm the shape of the processed data
     print(f"Processed data shape: {processed_data.shape}")
+    
+    # Analyze variability and normality
+    analyze_variability_and_normality(processed_data)
+
+    # Check if distribution_plot is set to True in config
+    if config.get('distribution_plot', False):
+        plot_distributions(processed_data)
+
+    # Check if correlation_analysis is set to True in config
+    if config.get('correlation_analysis', False):
+        perform_correlation_analysis(processed_data)
 
     return processed_data
 
-
-from scipy import stats
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-from scipy import stats
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-from scipy import stats
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-from scipy import stats
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-def analyze_and_plot_columns(processed_data):
+def analyze_variability_and_normality(data):
     """
-    Analyze each column for variability, normality, and apply normalization/log transformation if needed.
-    Impute NaN values and return cleaned, normalized data.
-    Generate a distribution plot for each column.
+    Analyzes each column's variability, normality (p-value, skewness, kurtosis), 
+    and determines appropriate normalization based on thresholds.
     """
     print("Analyzing variability and normality of each column...")
-
-    # Prepare for multiple subplots (4 columns per row)
-    num_columns = len(processed_data.columns)
-    num_rows = int(np.ceil(num_columns / 4))  # 4 columns per row
-    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
-    axes = axes.flatten()
-
-    cleaned_data = processed_data.copy()  # Create a copy to store cleaned and normalized data
-
-    for idx, column in enumerate(processed_data.columns):
-        data_column = processed_data[column]
-
-        # Check for NaN values and handle them (e.g., fill or drop)
-        if data_column.isna().any():
+    
+    for column in data.columns:
+        # Handle missing values by filling with mean for analysis
+        if data[column].isna().sum() > 0:
             print(f"{column} contains NaN values. Filling with column mean for analysis.")
-            data_column = data_column.fillna(data_column.mean())
-            cleaned_data[column] = data_column  # Store the imputed data
+            data[column] = data[column].fillna(data[column].mean())
 
-        # Variability check: Calculate the standard deviation
-        variability = data_column.std()
+        # Variability (standard deviation)
+        variability = np.std(data[column])
         print(f"Variability for {column}: {variability}")
 
-        # Normality check: Shapiro-Wilk test or D'Agostino test
-        try:
-            stat, p_value = stats.normaltest(data_column)
-            skewness = stats.skew(data_column)
-            print(f"{column} p-value from normality test: {p_value}")
-            print(f"{column} skewness: {skewness}")
-        except Exception as e:
-            print(f"Could not perform normality test for {column}: {e}")
-            p_value = np.nan
-            skewness = np.nan
+        # Normality test using Shapiro-Wilk and D'Agostino's K^2
+        p_value_normaltest = normaltest(data[column]).pvalue
+        p_value_shapiro = shapiro(data[column]).pvalue
 
-        # Logic for "almost normal" distributions
-        if p_value > 0.01 and -1 < skewness < 1:
-            if abs(skewness) > 0.5:  # Detect skewness
-                print(f"{column} is almost normal but skewed. Applying log transformation and z-score normalization.")
-                log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
-                normalized_column = stats.zscore(log_transformed)
-            else:
+        # Skewness and Kurtosis
+        column_skewness = skew(data[column])
+        column_kurtosis = kurtosis(data[column])
+
+        print(f"{column} p-value from D'Agostino's K^2 normality test: {p_value_normaltest}")
+        print(f"{column} p-value from Shapiro-Wilk normality test: {p_value_shapiro}")
+        print(f"{column} skewness: {column_skewness}")
+        print(f"{column} kurtosis: {column_kurtosis}")
+
+        # Normality decision based on p-values and skewness
+        if p_value_normaltest > 0.001 or p_value_shapiro > 0.001:  # Less strict
+            if -0.5 < column_skewness < 0.5:  # Consider almost normal based on skewness
                 print(f"{column} is almost normal. Applying z-score normalization.")
-                normalized_column = stats.zscore(data_column)
-        elif skewness > 1 or skewness < -1:
-            print(f"{column} is right-skewed. Applying log transformation and z-score normalization.")
-            log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
-            normalized_column = stats.zscore(log_transformed)
+                data[column] = (data[column] - data[column].mean()) / data[column].std()
+            else:
+                print(f"{column} is right/left skewed. Applying log transformation and z-score normalization.")
+                data[column] = np.log1p(data[column] - min(data[column]) + 1)
+                data[column] = (data[column] - data[column].mean()) / data[column].std()
         else:
             print(f"{column} is not normally distributed. Applying min-max normalization.")
-            normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
+            data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
-        # Plot the column data after any transformations
-        sns.histplot(normalized_column, kde=True, ax=axes[idx])
-        axes[idx].set_title(f"Distribution of {column}", pad=20)  # Increase padding for title
-        axes[idx].set_xlabel(column, labelpad=10)  # Adjust label padding if needed
+    return data
 
-        # Update the processed data with normalized values
-        cleaned_data[column] = normalized_column
+def plot_distributions(data):
+    """
+    Plots the distribution of each column.
+    """
+    num_columns = data.shape[1]
+    num_rows = (num_columns // 4) + (num_columns % 4 > 0)  # Calculate rows for 4 plots per row
+    fig, axes = plt.subplots(num_rows, 4, figsize=(20, 12))  # Adjust the figure size
 
-    # Adjust the layout to prevent overlap
-    plt.tight_layout(pad=4.0)  # Add padding to avoid overlap
-    plt.subplots_adjust(hspace=0.6)  # Add more vertical space between rows
+    # Flatten axes array to easily iterate
+    axes = axes.flatten()
+
+    for idx, column in enumerate(data.columns):
+        sns.histplot(data[column], kde=True, ax=axes[idx])
+        axes[idx].set_title(f"Distribution of {column}")
+
+    # Hide empty subplots if the number of columns is not a multiple of 4
+    for i in range(len(data.columns), len(axes)):
+        fig.delaxes(axes[i])
+
+    plt.tight_layout()
     plt.show()
 
-    return cleaned_data  # Return cleaned and normalized data
-
-
-
-
-
-
+def perform_correlation_analysis(data):
+    """
+    Performs a correlation analysis of the processed data.
+    """
+    corr_matrix = data.corr()
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt='.2f')
+    plt.title("Correlation Matrix of Technical Indicators")
+    plt.show()
 
 def run_feature_engineering_pipeline(config, plugin):
     """
-    Runs the feature-engineering pipeline using the plugin and performs additional analysis.
+    Runs the feature-engineering pipeline using the plugin.
     """
     start_time = time.time()
 
@@ -152,10 +142,6 @@ def run_feature_engineering_pipeline(config, plugin):
 
     # Process the data
     processed_data = process_data(data, plugin, config)
-
-    # Analyze and plot if distribution_plot is enabled
-    if config.get('distribution_plot', False):
-        processed_data = analyze_and_plot_columns(processed_data)
 
     # Save the processed data to the output file if specified
     if config['output_file']:
@@ -180,4 +166,3 @@ def run_feature_engineering_pipeline(config, plugin):
         print(f"Debug info saved to {config['remote_log']}.")
 
     print(f"Execution time: {execution_time} seconds")
-
