@@ -73,7 +73,6 @@ def plot_distributions(data):
 
 
 
-v
 
 
 
