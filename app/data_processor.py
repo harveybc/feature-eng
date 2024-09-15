@@ -72,6 +72,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.stats import skew, kurtosis, normaltest, shapiro
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy.stats import skew, kurtosis, normaltest, shapiro
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -134,6 +139,7 @@ def analyze_variability_and_normality(data):
             transformed_data.drop(columns=[column], inplace=True)
 
     return transformed_data
+
 
 
 
