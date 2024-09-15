@@ -51,6 +51,11 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+from scipy import stats
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 def analyze_and_plot_columns(processed_data):
     """
     Analyze each column for variability, normality, and apply normalization/log transformation if needed.
@@ -59,7 +64,7 @@ def analyze_and_plot_columns(processed_data):
     """
     print("Analyzing variability and normality of each column...")
 
-    # Prepare for multiple subplots (4 columns as per your request)
+    # Prepare for multiple subplots (4 columns per row)
     num_columns = len(processed_data.columns)
     num_rows = int(np.ceil(num_columns / 4))  # 4 columns per row
     fig, axes = plt.subplots(num_rows, 4, figsize=(20, 5 * num_rows))
@@ -84,32 +89,26 @@ def analyze_and_plot_columns(processed_data):
         try:
             stat, p_value = stats.normaltest(data_column)
             skewness = stats.skew(data_column)
+            print(f"{column} p-value from normality test: {p_value}")
+            print(f"{column} skewness: {skewness}")
         except Exception as e:
             print(f"Could not perform normality test for {column}: {e}")
             p_value = np.nan
             skewness = np.nan
 
-        # If variability is too low, skip the normality test
-        if variability < 1e-5:
-            print(f"{column} has very low variability. Skipping normality test and applying min-max normalization.")
-            normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
-
-        else:
-            # Check for normal-like distribution (low skewness)
-            if p_value > 0.05 and abs(skewness) < 0.5:
-                print(f"{column} is normally distributed. Applying z-score normalization.")
-                normalized_column = stats.zscore(data_column)
-
-            # Check for right-skewed distributions (benefit from log transformation)
-            elif skewness > 0.5:
-                print(f"{column} is right-skewed. Applying log transformation and z-score normalization.")
+        # Check thresholds for "almost normal" and skewness
+        if p_value > 0.05 and abs(skewness) < 1.5:
+            if abs(skewness) > 0.5:  # Detect skewness
+                print(f"{column} is almost normal but right-skewed. Applying log transformation and z-score normalization.")
                 log_transformed = np.log1p(data_column - data_column.min() + 1)  # Ensure non-negative values
                 normalized_column = stats.zscore(log_transformed)
-
-            # Apply min-max normalization for non-normal distributions
             else:
-                print(f"{column} is not normally distributed. Applying min-max normalization.")
-                normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
+                print(f"{column} is almost normal. Applying z-score normalization.")
+                normalized_column = stats.zscore(data_column)
+
+        else:
+            print(f"{column} is not normally distributed. Applying min-max normalization.")
+            normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
 
         # Plot the column data after any transformations
         sns.histplot(normalized_column, kde=True, ax=axes[idx])
@@ -125,6 +124,7 @@ def analyze_and_plot_columns(processed_data):
     plt.show()
 
     return cleaned_data  # Return cleaned and normalized data
+
 
 
 
