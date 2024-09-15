@@ -60,6 +60,12 @@ def process_data(data, plugin, config):
 
 
 
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import normaltest, shapiro, skew, kurtosis
+import numpy as np
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -114,17 +120,18 @@ def analyze_variability_and_normality(data):
             transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
             transformed_data.drop(columns=[column], inplace=True)
 
-        # Plotting the transformed distribution
+        # Plotting the transformed distribution (use the final transformed column name)
         final_column_name = f"Standardized_{column}" if f"Standardized_{column}" in transformed_data.columns else f"Normalized_{column}"
         sns.histplot(transformed_data[final_column_name], kde=True, ax=axes[plot_index])
         axes[plot_index].set_title(f"{final_column_name} (Transformed)", fontsize=10)
         plot_index += 1
 
     # Adjust layout and vertical separation
-    plt.tight_layout(h_pad=3)
+    plt.tight_layout(h_pad=3, pad=3)  # Added padding to prevent overlap
     plt.show()
 
     return transformed_data
+
 
 
 
