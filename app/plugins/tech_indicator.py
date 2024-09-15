@@ -88,6 +88,8 @@ class Plugin:
 
     # File: tech_indicator.py
 
+    # File: tech_indicator.py
+
     def process(self, data):
         """
         Process the input data by calculating the specified technical indicators using their default parameters.
@@ -117,19 +119,85 @@ class Plugin:
             print(f"Processing indicator: {indicator}")
 
             if indicator == 'rsi':
-                rsi = ta.rsi(data['Close'])
+                rsi = ta.rsi(data['Close'])  # Default length is 14
                 if rsi is not None:
                     technical_indicators['RSI'] = rsi
                     print(f"RSI calculated with shape: {rsi.shape}")
 
             elif indicator == 'macd':
-                macd = ta.macd(data['Close'])
+                macd = ta.macd(data['Close'])  # Default fast, slow, signal periods
                 if 'MACD_12_26_9' in macd.columns:
                     technical_indicators['MACD'] = macd['MACD_12_26_9']
+                if 'MACDh_12_26_9' in macd.columns:
+                    technical_indicators['MACD_Histogram'] = macd['MACDh_12_26_9']
+                if 'MACDs_12_26_9' in macd.columns:
+                    technical_indicators['MACD_Signal'] = macd['MACDs_12_26_9']
                 print(f"MACD columns returned: {macd.columns}")
 
-            # Add more indicators processing here...
-        
+            elif indicator == 'ema':
+                ema = ta.ema(data['Close'])  # Default length is 20
+                if ema is not None:
+                    technical_indicators['EMA'] = ema
+                    print(f"EMA calculated with shape: {ema.shape}")
+
+            elif indicator == 'stoch':
+                stoch = ta.stoch(data['High'], data['Low'], data['Close'])  # Default %K, %D values
+                if 'STOCHk_14_3_3' in stoch.columns:
+                    technical_indicators['Stochastic_%K'] = stoch['STOCHk_14_3_3']
+                if 'STOCHd_14_3_3' in stoch.columns:
+                    technical_indicators['Stochastic_%D'] = stoch['STOCHd_14_3_3']
+                print(f"Stochastic columns returned: {stoch.columns}")
+
+            elif indicator == 'adx':
+                adx = ta.adx(data['High'], data['Low'], data['Close'])  # Default length is 14
+                if 'ADX_14' in adx.columns:
+                    technical_indicators['ADX'] = adx['ADX_14']
+                if 'DMP_14' in adx.columns:
+                    technical_indicators['DI+'] = adx['DMP_14']
+                if 'DMN_14' in adx.columns:
+                    technical_indicators['DI-'] = adx['DMN_14']
+                print(f"ADX columns returned: {adx.columns}")
+
+            elif indicator == 'atr':
+                atr = ta.atr(data['High'], data['Low'], data['Close'])  # Default length is 14
+                if atr is not None:
+                    technical_indicators['ATR'] = atr
+                    print(f"ATR calculated with shape: {atr.shape}")
+
+            elif indicator == 'cci':
+                cci = ta.cci(data['High'], data['Low'], data['Close'])  # Default length is 20
+                if cci is not None:
+                    technical_indicators['CCI'] = cci
+                    print(f"CCI calculated with shape: {cci.shape}")
+
+            elif indicator == 'bbands':
+                bbands = ta.bbands(data['Close'])  # Default length is 20
+                if 'BBU_20_2.0' in bbands.columns:
+                    technical_indicators['BB_Upper'] = bbands['BBU_20_2.0']
+                if 'BBM_20_2.0' in bbands.columns:
+                    technical_indicators['BB_Middle'] = bbands['BBM_20_2.0']
+                if 'BBL_20_2.0' in bbands.columns:
+                    technical_indicators['BB_Lower'] = bbands['BBL_20_2.0']
+                print(f"Bollinger Bands columns returned: {bbands.columns}")
+
+            elif indicator == 'williams':
+                williams = ta.willr(data['High'], data['Low'], data['Close'])  # Default length is 14
+                if williams is not None:
+                    technical_indicators['WilliamsR'] = williams
+                    print(f"WilliamsR calculated with shape: {williams.shape}")
+
+            elif indicator == 'momentum':
+                momentum = ta.mom(data['Close'])  # Default length is 10
+                if momentum is not None:
+                    technical_indicators['Momentum'] = momentum
+                    print(f"Momentum calculated with shape: {momentum.shape}")
+
+            elif indicator == 'roc':
+                roc = ta.roc(data['Close'])  # Default length is 10
+                if roc is not None:
+                    technical_indicators['ROC'] = roc
+                    print(f"ROC calculated with shape: {roc.shape}")
+
         # Create a DataFrame from the calculated technical indicators
         indicator_df = pd.DataFrame(technical_indicators)
 
@@ -137,6 +205,7 @@ class Plugin:
         print(f"Calculated technical indicators: {indicator_df.columns}")
 
         return indicator_df
+
 
 
 
