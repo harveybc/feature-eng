@@ -46,13 +46,6 @@ def process_data(data, plugin, config):
     # Analyze variability and normality
     transformed_data = analyze_variability_and_normality(processed_data)
 
-    # Check if distribution_plot is set to True in config
-    if config.get('distribution_plot', False):
-        plot_distributions(transformed_data)
-
-    # Check if correlation_analysis is set to True in config
-    if config.get('correlation_analysis', False):
-        perform_correlation_analysis(transformed_data)
 
     return transformed_data
 
