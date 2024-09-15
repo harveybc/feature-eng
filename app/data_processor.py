@@ -4,7 +4,7 @@ from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
 import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy.stats import skew, kurtosis, normaltest, shapiro
+from scipy.stats import normaltest, shapiro, skew, kurtosis, anderson
 import numpy as np
 
 def process_data(data, plugin, config):
