@@ -86,15 +86,15 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Adjustments based on skewness, kurtosis and log transformation for high skew
-        if abs(column_skewness) > 0.5:  # Apply log transform for high skewness
+        # Decision logic for log transform based on skewness threshold
+        if abs(column_skewness) > 0.5 and column in ['ADX', 'DI+', 'ATR']:  # Apply log transform only to ADX, DI+, and ATR
             print(f"Applying log transformation to {column} due to high skewness.")
             transformed_data[f"Log_{column}"] = np.log1p(data[column] - data[column].min() + 1)
             column = f"Log_{column}"  # Update the column name after log transformation
             column_skewness = skew(transformed_data[column])
             column_kurtosis = kurtosis(transformed_data[column])
 
-        # Refined Normality Decision Logic
+        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
         if -0.5 < column_skewness < 0.5 and -0.5 < column_kurtosis < 6.0:
             print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-0.5, 6]. Applying z-score normalization.")
             transformed_data[f"Standardized_{column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
@@ -105,6 +105,7 @@ def analyze_variability_and_normality(data):
             transformed_data.drop(columns=[column], inplace=True)
 
     return transformed_data
+
 
 # For plotting the distributions after normalization with the updated column names
 def plot_distributions(data):
