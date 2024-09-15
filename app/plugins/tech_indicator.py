@@ -114,6 +114,7 @@ class Plugin:
 
 
 
+
     def process(self, data):
         """
         Process the input data by calculating the specified technical indicators using their default parameters.
