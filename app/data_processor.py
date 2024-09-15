@@ -2,51 +2,14 @@ import pandas as pd
 import time
 from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
-
 import seaborn as sns
 import matplotlib.pyplot as plt
-from scipy.stats import shapiro, skew
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 import numpy as np
-
-def normalize_column(data_column):
-    """
-    Normalizes a column based on its distribution:
-    - Applies z-score normalization if the column is normally distributed.
-    - Applies min-max normalization if the column is not normally distributed.
-    - Applies log transformation if the column has a right-tailed distribution.
-    """
-    # Test for normality using the Shapiro-Wilk test (p-value threshold of 0.05)
-    stat, p_value = shapiro(data_column)
-    skewness = skew(data_column)
-
-    print(f"Column {data_column.name}: Shapiro-Wilk p-value = {p_value}, skewness = {skewness}")
-
-    # Log transformation for right-skewed distributions
-    if skewness > 1:
-        print(f"Applying log transformation to {data_column.name} due to right skewness.")
-        data_column = np.log1p(data_column - data_column.min() + 1)  # Ensure positive values for log transformation
-
-    # Re-test normality after log transformation if applied
-    stat, p_value = shapiro(data_column)
-    if p_value > 0.05:
-        print(f"{data_column.name} is normally distributed. Applying z-score normalization.")
-        # Apply z-score normalization
-        scaler = StandardScaler()
-        normalized_data = scaler.fit_transform(data_column.values.reshape(-1, 1)).flatten()
-    else:
-        print(f"{data_column.name} is not normally distributed. Applying min-max normalization.")
-        # Apply min-max normalization
-        scaler = MinMaxScaler()
-        normalized_data = scaler.fit_transform(data_column.values.reshape(-1, 1)).flatten()
-
-    return pd.Series(normalized_data, name=data_column.name)
-
+from scipy import stats
 
 def process_data(data, plugin, config):
     """
-    Processes the data using the specified plugin and performs additional analysis
-    if distribution_plot or correlation_analysis are set to True.
+    Processes the data using the specified plugin.
     """
     print("Processing data using plugin...")
 
@@ -75,35 +38,63 @@ def process_data(data, plugin, config):
     # Debugging message to confirm the shape of the processed data
     print(f"Processed data shape: {processed_data.shape}")
 
-    # Apply normalization to the processed data
-    print("Normalizing processed data based on distribution characteristics...")
-    for column in processed_data.columns:
-        processed_data[column] = normalize_column(processed_data[column])
+    return processed_data
 
-    # Check if distribution_plot is set to True in config
-    if config.get('distribution_plot', False):
-        print("Generating distribution plots for each technical indicator...")
-        for column in processed_data.columns:
-            plt.figure(figsize=(10, 6))
-            sns.histplot(processed_data[column], kde=True)
-            plt.title(f"Distribution of {column}")
-            plt.show()
 
-    # Check if correlation_analysis is set to True in config
-    if config.get('correlation_analysis', False):
-        print("Performing correlation analysis...")
-        corr_matrix = processed_data.corr()
-        plt.figure(figsize=(12, 8))
-        sns.heatmap(corr_matrix, annot=True, cmap="coolwarm", fmt='.2f')
-        plt.title("Correlation Matrix of Technical Indicators")
-        plt.show()
+def analyze_and_plot_columns(processed_data):
+    """
+    Analyze each column for variability, normality, and apply normalization/log transformation if needed.
+    Generate a distribution plot for each column.
+    """
+
+    print("Analyzing variability and normality of each column...")
+
+    # Prepare for multiple subplots
+    num_columns = len(processed_data.columns)
+    num_rows = int(np.ceil(num_columns / 3))
+    fig, axes = plt.subplots(num_rows, 3, figsize=(15, 5 * num_rows))
+    axes = axes.flatten()
+
+    for idx, column in enumerate(processed_data.columns):
+        data_column = processed_data[column]
+
+        # Variability check: Calculate the standard deviation and mean
+        variability = data_column.std()
+        print(f"Variability for {column}: {variability}")
+
+        # Normality check: Shapiro-Wilk test or D'Agostino test
+        stat, p_value = stats.normaltest(data_column)
+        is_normal = p_value > 0.05
+
+        # If not normal and skewed, apply log transformation
+        if not is_normal and stats.skew(data_column) > 0.5:
+            print(f"Applying log transformation to {column}")
+            data_column = np.log1p(data_column)
+
+        # After transformation, check again if the column should use z-score or min-max normalization
+        if is_normal:
+            print(f"{column} seems to be normally distributed. Applying z-score normalization.")
+            normalized_column = stats.zscore(data_column)
+        else:
+            print(f"{column} is not normally distributed. Applying min-max normalization.")
+            normalized_column = (data_column - data_column.min()) / (data_column.max() - data_column.min())
+
+        # Plot the column data after any transformations
+        sns.histplot(normalized_column, kde=True, ax=axes[idx])
+        axes[idx].set_title(f"Distribution of {column}")
+
+        # Update the processed data with normalized values
+        processed_data[column] = normalized_column
+
+    plt.tight_layout()
+    plt.show()
 
     return processed_data
 
 
 def run_feature_engineering_pipeline(config, plugin):
     """
-    Runs the feature-engineering pipeline using the plugin.
+    Runs the feature-engineering pipeline using the plugin and performs additional analysis.
     """
     start_time = time.time()
 
@@ -114,6 +105,10 @@ def run_feature_engineering_pipeline(config, plugin):
 
     # Process the data
     processed_data = process_data(data, plugin, config)
+
+    # Analyze and plot if distribution_plot is enabled
+    if config.get('distribution_plot', False):
+        processed_data = analyze_and_plot_columns(processed_data)
 
     # Save the processed data to the output file if specified
     if config['output_file']:
@@ -138,3 +133,4 @@ def run_feature_engineering_pipeline(config, plugin):
         print(f"Debug info saved to {config['remote_log']}.")
 
     print(f"Execution time: {execution_time} seconds")
+
