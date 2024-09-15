@@ -78,6 +78,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import skew, kurtosis, normaltest, shapiro
 
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import skew, kurtosis, normaltest, shapiro
+
 def analyze_variability_and_normality(data):
     """
     Analyzes each column's variability, normality, and skewness.
@@ -124,13 +130,13 @@ def analyze_variability_and_normality(data):
             column_skewness = skew(transformed_data[column])
             column_kurtosis = kurtosis(transformed_data[column])
 
-        # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
-        if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
-            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+        # Refined Normality Decision Logic with Corrected Thresholds
+        if -0.5 < column_skewness < 0.5 and -1 < column_kurtosis < 6:
+            print(f"{original_column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
             transformed_data[f"Standardized_{original_column}"] = (transformed_data[column] - transformed_data[column].mean()) / transformed_data[column].std()
             transformed_data.drop(columns=[column], inplace=True)  # Drop the old column
         else:
-            print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
+            print(f"{original_column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
             transformed_data[f"Normalized_{original_column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
             transformed_data.drop(columns=[column], inplace=True)
 
@@ -145,6 +151,7 @@ def analyze_variability_and_normality(data):
     plt.show()
 
     return transformed_data
+
 
 
 
