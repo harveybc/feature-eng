@@ -30,82 +30,51 @@ class Plugin:
         return {var: self.params.get(var, None) for var in self.plugin_debug_vars}
 
 
+    # File: tech_indicator.py
 
     def adjust_ohlc(self, data):
         """
-        Adjust the OHLC columns based on the ohlc_order parameter.
-        This method renames 'c1', 'c2', 'c3', and 'c4' to 'Open', 'High', 'Low', and 'Close'
-        according to the OHLC order provided, and then ensures the correct columns are selected.
-
+        Adjust OHLC columns by renaming them according to the expected OHLC order.
         Parameters:
-        data (pd.DataFrame): Input DataFrame with the columns ['c1', 'c2', 'c3', 'c4', ...]
+        - data (pd.DataFrame): Input data with generic column names (c1, c2, c3, c4, etc.)
 
         Returns:
-        pd.DataFrame: DataFrame with the OHLC columns renamed and ordered.
+        - pd.DataFrame: Data with columns renamed to 'Open', 'High', 'Low', 'Close'
         """
         print("Starting adjust_ohlc method...")
-        
-        # Step 1: Print the current columns before any renaming to verify 'c1' exists
-        print(f"Initial data columns: {data.columns}")
-        
-        # Step 2: Define the renaming order based on OHLC parameter
-        print(f"Received OHLC order: {self.params['ohlc_order']}")
-        if self.params['ohlc_order'] == 'ohlc':
-            ordered_columns = ['Open', 'High', 'Low', 'Close']
-        elif self.params['ohlc_order'] == 'olhc':
-            ordered_columns = ['Open', 'Low', 'High', 'Close']
-        else:
-            print("Invalid OHLC order specified. Raising ValueError.")
-            raise ValueError("Invalid OHLC order specified")
-        
-        # Step 3: Define the renaming map
-        rename_map = {
-            'c1': ordered_columns[0],
-            'c2': ordered_columns[1],
-            'c3': ordered_columns[2],
-            'c4': ordered_columns[3]
-        }
-        
-        # Debugging: Print renaming map before applying
-        print(f"Renaming columns map: {rename_map}")
-        
-        # Step 4: Rename columns and store the result
-        try:
-            data_renamed = data.rename(columns=rename_map)
-        except Exception as e:
-            print(f"Error during renaming columns: {e}")
-            raise
 
-        # Debugging: Print first few rows of the renamed data
-        print("First 5 rows of renamed data:")
-        print(data_renamed.head())
-        
-        # Step 5: Check if all renamed columns are in the dataset
-        print(f"Checking if the renamed columns exist in the DataFrame...")
-        print(f"Expected columns after renaming: {ordered_columns}")
-        missing_columns = [col for col in ordered_columns if col not in data_renamed.columns]
-        
+        # Debug: Show initial columns of the data
+        print(f"Initial data columns: {data.columns}")
+
+        # Expected renaming map
+        renaming_map = {'c1': 'Open', 'c2': 'High', 'c3': 'Low', 'c4': 'Close'}
+
+        # Check if 'c1' is in the data and ensure it's numeric
+        if 'c1' in data.columns:
+            data['c1'] = pd.to_numeric(data['c1'], errors='coerce')  # Convert 'c1' to numeric if not
+            print(f"Column 'c1' converted to numeric. First few values:\n{data['c1'].head()}")
+
+        # Debug: Show renaming map
+        print(f"Renaming columns map: {renaming_map}")
+
+        # Apply renaming
+        data_renamed = data.rename(columns=renaming_map)
+
+        # Debug: Show first few rows after renaming
+        print(f"First 5 rows of renamed data:\n{data_renamed.head()}")
+
+        # Check if all expected columns exist
+        expected_columns = ['Open', 'High', 'Low', 'Close']
+        missing_columns = [col for col in expected_columns if col not in data_renamed.columns]
+
+        # If any columns are missing, raise an error
         if missing_columns:
             print(f"Error: Missing columns after renaming - {missing_columns}")
             print(f"Available columns: {data_renamed.columns}")
             raise KeyError(f"Missing columns after renaming: {missing_columns}")
-        
-        # Debugging: Confirm all expected columns are present
-        print(f"All expected columns found: {ordered_columns}")
 
-        # Step 6: Return data with columns ordered according to the OHLC order
-        try:
-            result = data_renamed[ordered_columns]
-        except KeyError as e:
-            print(f"KeyError when selecting ordered columns: {e}")
-            print(f"Available columns: {data_renamed.columns}")
-            raise
-        
-        # Debugging: Print the shape of the final DataFrame and column names
-        print(f"Final data shape: {result.shape}")
-        print(f"Final column names: {result.columns}")
-
-        return result
+        print(f"Renaming successful. Available columns: {data_renamed.columns}")
+        return data_renamed
 
 
 
@@ -115,80 +84,60 @@ class Plugin:
 
 
 
+
+
+    # File: tech_indicator.py
 
     def process(self, data):
         """
         Process the input data by calculating the specified technical indicators using their default parameters.
-        
+
         Parameters:
-        data (pd.DataFrame): Input time-series data with renamed 'Open', 'High', 'Low', 'Close', etc.
-        
+        - data (pd.DataFrame): Input time-series data with renamed 'Open', 'High', 'Low', 'Close', etc.
+
         Returns:
-        pd.DataFrame: DataFrame with the calculated technical indicators.
+        - pd.DataFrame: DataFrame with the calculated technical indicators.
         """
-        print(f"Starting process method...")
-        
-        # Step 1: Print the initial data columns
+        print("Starting process method...")
+
+        # Debug: Show initial data columns before any processing
         print(f"Initial data columns before any processing: {data.columns}")
-        
-        # Step 2: Adjust the OHLC order of the columns
-        try:
-            data = self.adjust_ohlc(data)
-            print(f"Data columns after adjust_ohlc: {data.columns}")
-        except KeyError as e:
-            print(f"Error in adjust_ohlc: {e}")
-            raise
-        
-        # Debug: Print the first 50 rows of the data to verify input
-        print(f"First 50 rows of data after OHLC adjustment:\n{data.head(50)}")
-        
+
+        # Adjust the OHLC order of the columns
+        data = self.adjust_ohlc(data)
+
+        # Debug: Show the columns after adjustment
+        print(f"Data columns after OHLC adjustment: {data.columns}")
+
         # Initialize a dictionary to hold all technical indicators
         technical_indicators = {}
-        
-        # Step 3: Start calculating each indicator and print debug messages
+
+        # Loop through the specified indicators and calculate them
         for indicator in self.params['indicators']:
-            print(f"Calculating {indicator}...")
-            
+            print(f"Processing indicator: {indicator}")
+
             if indicator == 'rsi':
-                try:
-                    rsi = ta.rsi(data['Close'])  # Using default length of 14
+                rsi = ta.rsi(data['Close'])
+                if rsi is not None:
                     technical_indicators['RSI'] = rsi
                     print(f"RSI calculated with shape: {rsi.shape}")
-                except Exception as e:
-                    print(f"Error calculating RSI: {e}")
-            
+
             elif indicator == 'macd':
-                try:
-                    macd = ta.macd(data['Close'])  # Using default fast, slow, and signal periods
+                macd = ta.macd(data['Close'])
+                if 'MACD_12_26_9' in macd.columns:
                     technical_indicators['MACD'] = macd['MACD_12_26_9']
-                    technical_indicators['MACD_signal'] = macd['MACDs_12_26_9']
-                    print(f"MACD columns returned: {macd.columns}")
-                except Exception as e:
-                    print(f"Error calculating MACD: {e}")
-            
-            elif indicator == 'ema':
-                try:
-                    ema = ta.ema(data['Close'])  # Using default length of 20
-                    technical_indicators['EMA'] = ema
-                    print(f"EMA calculated with shape: {ema.shape}")
-                except Exception as e:
-                    print(f"Error calculating EMA: {e}")
-            
-            # Continue for other indicators, printing the results similarly
-            
-        # Step 4: Create a DataFrame from the calculated technical indicators
-        try:
-            indicator_df = pd.DataFrame(technical_indicators)
-            print(f"Indicator DataFrame created with columns: {indicator_df.columns}")
-        except Exception as e:
-            print(f"Error creating DataFrame for technical indicators: {e}")
-            raise
+                print(f"MACD columns returned: {macd.columns}")
+
+            # Add more indicators processing here...
         
-        # Debug: Print the shape and column names of the final DataFrame
-        print(f"Final indicator DataFrame shape: {indicator_df.shape}")
-        print(f"Final indicator DataFrame columns: {indicator_df.columns}")
-        
+        # Create a DataFrame from the calculated technical indicators
+        indicator_df = pd.DataFrame(technical_indicators)
+
+        # Debug: Show the calculated technical indicators
+        print(f"Calculated technical indicators: {indicator_df.columns}")
+
         return indicator_df
+
 
 
 
