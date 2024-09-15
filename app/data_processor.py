@@ -86,6 +86,12 @@ def analyze_variability_and_normality(data):
     print("Analyzing variability and normality of each column...")
 
     transformed_data = data.copy()
+    num_columns = len(data.columns)
+    num_rows = (num_columns + 3) // 4  # Adjust to show 4 columns of plots
+    fig, axes = plt.subplots(num_rows, 4, figsize=(20, num_rows * 5))
+    axes = axes.flatten()
+
+    plot_index = 0
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis
@@ -108,12 +114,6 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Plotting the original distribution before transformation
-        plt.figure(figsize=(10, 6))
-        sns.histplot(data[column], kde=True)
-        plt.title(f"Distribution of {column} (Original)")
-        plt.show()
-
         # Log transformation criteria (for skewed columns)
         if abs(column_skewness) > 0.5:
             print(f"Applying log transformation to {column} due to high skewness.")
@@ -121,12 +121,6 @@ def analyze_variability_and_normality(data):
             column = f"Log_{column}"
             column_skewness = skew(transformed_data[column])
             column_kurtosis = kurtosis(transformed_data[column])
-
-            # Plot the transformed distribution
-            plt.figure(figsize=(10, 6))
-            sns.histplot(transformed_data[column], kde=True)
-            plt.title(f"Distribution of {column} (Log Transformed)")
-            plt.show()
 
         # Refined Normality Decision Logic with Expanded Kurtosis Threshold [-1, 6]
         if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 6.0:
@@ -137,6 +131,15 @@ def analyze_variability_and_normality(data):
             print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
             transformed_data[f"Normalized_{column}"] = (transformed_data[column] - transformed_data[column].min()) / (transformed_data[column].max() - transformed_data[column].min())
             transformed_data.drop(columns=[column], inplace=True)
+
+        # Plotting the transformed distribution
+        sns.histplot(transformed_data[column], kde=True, ax=axes[plot_index])
+        axes[plot_index].set_title(f"{column} (Transformed)", fontsize=10)
+        plot_index += 1
+
+    # Adjust layout and vertical separation
+    plt.tight_layout(h_pad=3)
+    plt.show()
 
     return transformed_data
 
