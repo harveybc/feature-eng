@@ -81,20 +81,16 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Refined Normality Decision Logic with All Values in One Line
-        if p_value_normaltest > 0.05 and p_value_shapiro > 0.05:
-            if -0.5 < column_skewness < 0.5 and -0.2 < column_kurtosis < 0.2:
-                print(f"{column} is almost normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} > 0.05, Shapiro-Wilk p-value is {p_value_shapiro:.5f} > 0.05, skewness is {column_skewness:.5f} in [-0.5, 0.5], and kurtosis is {column_kurtosis:.5f} in [-0.2, 0.2]. Applying z-score normalization.")
-                data[column] = (data[column] - data[column].mean()) / data[column].std()
-            else:
-                print(f"{column} is almost normally distributed but skewed because D'Agostino p-value is {p_value_normaltest:.5f} > 0.05, Shapiro-Wilk p-value is {p_value_shapiro:.5f} > 0.05, skewness is {column_skewness:.5f} not in [-0.5, 0.5], and kurtosis is {column_kurtosis:.5f}. Applying log transformation and z-score normalization.")
-                data[column] = np.log1p(data[column] - min(data[column]) + 1)
-                data[column] = (data[column] - data[column].mean()) / data[column].std()
+        # Refined Normality Decision Logic with Relaxed Thresholds for "Almost Normal"
+        if -0.5 < column_skewness < 0.5 and -1.0 < column_kurtosis < 1.0:
+            print(f"{column} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 1]. Applying z-score normalization.")
+            data[column] = (data[column] - data[column].mean()) / data[column].std()
         else:
             print(f"{column} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
             data[column] = (data[column] - data[column].min()) / (data[column].max() - data[column].min())
 
     return data
+
 
 
 
