@@ -43,12 +43,13 @@ def process_data(data, plugin, config):
     # Debugging message to confirm the shape of the processed data
     print(f"Processed data shape: {processed_data.shape}")
     
-    # Analyze variability and normality
-    transformed_data = analyze_variability_and_normality(processed_data)
-
     # If the paarameter include_close in the config is set to True, include the 'Close' column
     if config.get('include_close'):
-        transformed_data['Close'] = numeric_data['c4']
+        # Analyze variability and normality
+        transformed_data = analyze_variability_and_normality(processed_data, close = numeric_data['c4'])
+    else:
+        transformed_data = analyze_variability_and_normality(processed_data)
+
 
     return transformed_data
 
@@ -61,7 +62,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import normaltest, shapiro, skew, kurtosis
 
-def analyze_variability_and_normality(data):
+def analyze_variability_and_normality(data, close=None):
     """
     Analyzes each column's variability, normality, and skewness.
     Applies log transformation if it improves normality.
@@ -76,6 +77,11 @@ def analyze_variability_and_normality(data):
     axes = axes.flatten()
 
     plot_index = 0
+
+
+    # if close is present, add it to the data
+    if close is not None:
+        data['Close'] = close
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis (silent operation)
