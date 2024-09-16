@@ -139,6 +139,7 @@ def analyze_variability_and_normality(data):
             axes[plot_index].set_title(f"{column} (Original)", fontsize=10)
         plot_index += 1
 
+
     # Adjust layout and vertical separation
     plt.tight_layout(h_pad=10, pad=3)  # Added padding to prevent overlap
     plt.show()
