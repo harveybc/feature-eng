@@ -97,17 +97,26 @@ def analyze_variability_and_normality(data):
             log_transformed_column = np.log1p(data[column].abs())  # Log-transformation
             transformed_columns[f"Log_{column}"] = log_transformed_column
             column_to_use = f"Log_{column}"  # Update reference to log-transformed column
+            # Update skewness and kurtosis after transformation
             column_skewness = skew(log_transformed_column)
             column_kurtosis = kurtosis(log_transformed_column)
 
         # Apply z-score normalization or min-max normalization
         if abs(column_skewness) <= 0.5 and -1.0 <= column_kurtosis <= 6.0 and "EMA" not in column_to_use:
             print(f"{column_to_use} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
-            standardized_column = (transformed_columns[column_to_use] if column_to_use.startswith("Log_") else data[column_to_use] - data[column_to_use].mean()) / data[column_to_use].std()
+            # Ensure the column exists in transformed_columns before accessing it
+            if column_to_use in transformed_columns:
+                standardized_column = (transformed_columns[column_to_use] - transformed_columns[column_to_use].mean()) / transformed_columns[column_to_use].std()
+            else:
+                standardized_column = (data[column_to_use] - data[column_to_use].mean()) / data[column_to_use].std()
             transformed_columns[f"Standardized_{column_to_use}"] = standardized_column
         else:
             print(f"{column_to_use} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
-            normalized_column = (transformed_columns[column_to_use] if column_to_use.startswith("Log_") else data[column_to_use] - data[column_to_use].min()) / (data[column_to_use].max() - data[column_to_use].min())
+            # Ensure the column exists in transformed_columns before accessing it
+            if column_to_use in transformed_columns:
+                normalized_column = (transformed_columns[column_to_use] - transformed_columns[column_to_use].min()) / (transformed_columns[column_to_use].max() - transformed_columns[column_to_use].min())
+            else:
+                normalized_column = (data[column_to_use] - data[column_to_use].min()) / (data[column_to_use].max() - data[column_to_use].min())
             transformed_columns[f"Normalized_{column_to_use}"] = normalized_column
 
         # Plotting the transformed distribution (use the final transformed column name)
