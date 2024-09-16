@@ -71,7 +71,7 @@ def analyze_variability_and_normality(data):
     for column in data.columns:  
         # Handle missing values by filling with mean for analysis (silent operation)
         if data[column].isna().sum() > 0:
-            data[column] = data[column].fillna(data[column].mean())
+            data[column] = data[column].fillna(0)
 
         # Variability (standard deviation)
         variability = np.std(data[column])
