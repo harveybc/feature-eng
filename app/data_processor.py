@@ -79,9 +79,11 @@ def analyze_variability_and_normality(data, close=None):
     plot_index = 0
 
 
-    # if close is present, add it to the data
+    # if close is present, add it to the data as the first column
     if close is not None:
-        data['Close'] = close
+        data = pd.concat([close, data], axis=1)
+                
+        
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis (silent operation)
