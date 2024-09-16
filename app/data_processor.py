@@ -88,8 +88,10 @@ def analyze_variability_and_normality(data):
         column_skewness = skew(data[column])
         column_kurtosis = kurtosis(data[column])
 
-        # Log transformation criteria (for skewed columns)
+        # Determine which column name to use for further transformations
         column_to_use = column  # Initialize reference to the original column
+
+        # Log transformation criteria (for skewed columns)
         if abs(column_skewness) > 0.5:
             print(f"Applying log transformation to {column} due to high skewness.")
             log_transformed_column = np.log1p(data[column].abs())  # Log-transformation
@@ -122,6 +124,7 @@ def analyze_variability_and_normality(data):
     transformed_data = pd.DataFrame(transformed_columns)
     
     return transformed_data
+
 
 
 
