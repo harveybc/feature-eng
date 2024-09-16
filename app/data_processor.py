@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import normaltest, shapiro, skew, kurtosis
 import time
+from app.data_handler import load_csv, write_csv
 
 def analyze_variability_and_normality(data, config):
     """
