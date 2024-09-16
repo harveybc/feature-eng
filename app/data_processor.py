@@ -89,28 +89,27 @@ def analyze_variability_and_normality(data):
         column_kurtosis = kurtosis(data[column])
 
         # Log transformation criteria (for skewed columns)
+        column_to_use = column  # Initialize reference to the original column
         if abs(column_skewness) > 0.5:
             print(f"Applying log transformation to {column} due to high skewness.")
             log_transformed_column = np.log1p(data[column].abs())  # Log-transformation
             transformed_columns[f"Log_{column}"] = log_transformed_column
-            column_name_after_log = f"Log_{column}"  # Update reference to log-transformed column
+            column_to_use = f"Log_{column}"  # Update reference to log-transformed column
             column_skewness = skew(log_transformed_column)
             column_kurtosis = kurtosis(log_transformed_column)
-        else:
-            column_name_after_log = column  # If no log transform, the column name remains the same
 
         # Apply z-score normalization or min-max normalization
-        if abs(column_skewness) <= 0.5 and -1.0 <= column_kurtosis <= 6.0 and "EMA" not in column_name_after_log:
-            print(f"{column_name_after_log} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
-            standardized_column = (log_transformed_column if column_name_after_log.startswith("Log_") else data[column_name_after_log] - data[column_name_after_log].mean()) / data[column_name_after_log].std()
-            transformed_columns[f"Standardized_{column_name_after_log}"] = standardized_column
+        if abs(column_skewness) <= 0.5 and -1.0 <= column_kurtosis <= 6.0 and "EMA" not in column_to_use:
+            print(f"{column_to_use} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
+            standardized_column = (transformed_columns[column_to_use] if column_to_use.startswith("Log_") else data[column_to_use] - data[column_to_use].mean()) / data[column_to_use].std()
+            transformed_columns[f"Standardized_{column_to_use}"] = standardized_column
         else:
-            print(f"{column_name_after_log} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
-            normalized_column = (log_transformed_column if column_name_after_log.startswith("Log_") else data[column_name_after_log] - data[column_name_after_log].min()) / (data[column_name_after_log].max() - data[column_name_after_log].min())
-            transformed_columns[f"Normalized_{column_name_after_log}"] = normalized_column
+            print(f"{column_to_use} is not normally distributed because D'Agostino p-value is {p_value_normaltest:.5f} <= 0.05 or Shapiro-Wilk p-value is {p_value_shapiro:.5f} <= 0.05, and skewness is {column_skewness:.5f}, kurtosis is {column_kurtosis:.5f}. Applying min-max normalization.")
+            normalized_column = (transformed_columns[column_to_use] if column_to_use.startswith("Log_") else data[column_to_use] - data[column_to_use].min()) / (data[column_to_use].max() - data[column_to_use].min())
+            transformed_columns[f"Normalized_{column_to_use}"] = normalized_column
 
         # Plotting the transformed distribution (use the final transformed column name)
-        final_column_name = f"Standardized_{column_name_after_log}" if f"Standardized_{column_name_after_log}" in transformed_columns else f"Normalized_{column_name_after_log}"
+        final_column_name = f"Standardized_{column_to_use}" if f"Standardized_{column_to_use}" in transformed_columns else f"Normalized_{column_to_use}"
         sns.histplot(transformed_columns[final_column_name], kde=True, ax=axes[plot_index])
         axes[plot_index].set_title(f"{final_column_name} (Transformed)", fontsize=10)
         plot_index += 1
@@ -123,6 +122,7 @@ def analyze_variability_and_normality(data):
     transformed_data = pd.DataFrame(transformed_columns)
     
     return transformed_data
+
 
 
 
