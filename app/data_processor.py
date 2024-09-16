@@ -97,11 +97,12 @@ def analyze_variability_and_normality(data):
             log_transformed_column = np.log1p(data[column].abs())  # Log-transformation
             transformed_columns[f"Log_{column}"] = log_transformed_column
             column_to_use = f"Log_{column}"  # Update reference to log-transformed column
+            # Update skewness and kurtosis after log transformation
             column_skewness = skew(log_transformed_column)
             column_kurtosis = kurtosis(log_transformed_column)
 
         # Apply z-score normalization or min-max normalization
-        if abs(column_skewness) <= 0.5 and -1.0 <= column_kurtosis <= 6.0 and "EMA" not in column_to_use:
+        if abs(column_skewness) <= 0.5 and -1.0 <= column_kurtosis <= 6.0:
             print(f"{column_to_use} is almost normally distributed because skewness is {column_skewness:.5f} in [-0.5, 0.5] and kurtosis is {column_kurtosis:.5f} in [-1, 6]. Applying z-score normalization.")
             standardized_column = (transformed_columns[column_to_use] if column_to_use.startswith("Log_") else data[column_to_use] - data[column_to_use].mean()) / data[column_to_use].std()
             transformed_columns[f"Standardized_{column_to_use}"] = standardized_column
@@ -124,6 +125,7 @@ def analyze_variability_and_normality(data):
     transformed_data = pd.DataFrame(transformed_columns)
     
     return transformed_data
+
 
 
 
