@@ -8,7 +8,7 @@ def parse_args():
     
     # Optional arguments
     parser.add_argument('--output_file', type=str, help='Path to the output CSV file (optional).')
-    parser.add_argument('--include_close',action='store_true', help='Include close values in output dataset (min-max normalized, save mina nd max in log file)')
+    parser.add_argument('--include_original_5',action='store_true', help='Include first 4 columns of input dataset: date, open, low,high and close values in output dataset.')
     
     parser.add_argument('--plugin', type=str, help='Name of the plugin to use for feature generation.')
     parser.add_argument('--correlation_analysis', action='store_true', help='Compute and display Pearson and Spearman correlation matrices.')

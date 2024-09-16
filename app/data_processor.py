@@ -43,13 +43,12 @@ def process_data(data, plugin, config):
     # Debugging message to confirm the shape of the processed data
     print(f"Processed data shape: {processed_data.shape}")
     
-    # If the paarameter include_close in the config is set to True, include the 'Close' column
-    if config.get('include_close'):
-        # Analyze variability and normality
-        transformed_data = analyze_variability_and_normality(processed_data, close = numeric_data['c4'])
-    else:
-        transformed_data = analyze_variability_and_normality(processed_data)
-
+    # analyze_variability_and_normality
+    transformed_data = analyze_variability_and_normality(processed_data, config)
+    # If the paarameter include_original_5 in the config is set to True, include the original firsst 5 columns(starting by date,c1,c2,c3,c4) in the processed data
+    if config.get('include_original_5'):
+        # Add the columns date, c1,c2,c3,c4 to  processed_data columns 
+        transformed_data = pd.concat([date_column, data[ohlc_columns], transformed_data], axis=1)
 
     return transformed_data
 
@@ -62,7 +61,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import normaltest, shapiro, skew, kurtosis
 
-def analyze_variability_and_normality(data, close=None):
+def analyze_variability_and_normality(data, config):
     """
     Analyzes each column's variability, normality, and skewness.
     Applies log transformation if it improves normality.
@@ -79,12 +78,7 @@ def analyze_variability_and_normality(data, close=None):
     plot_index = 0
 
 
-    # if close is present, add it to the data as the first column (rename it as Close)
-    if close is not None:
-        data = pd.concat([close, data], axis=1)
-        data.rename(columns={'c4': 'Close'}, inplace=True)
-
-        
+      
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis (silent operation)

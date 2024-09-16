@@ -3,7 +3,7 @@
 DEFAULT_VALUES = {
     'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc.csv',
     'output_file': './indicators_output.csv',
-    'include_close': True,
+    'include_original_5': True,
     'plugin': 'tech_indicator',
     'correlation_analysis': False,
     'distribution_plot': True,
