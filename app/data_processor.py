@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import normaltest, shapiro, skew, kurtosis
+import time
 
 def analyze_variability_and_normality(data, config):
     """
