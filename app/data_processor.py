@@ -46,6 +46,9 @@ def process_data(data, plugin, config):
     # Analyze variability and normality
     transformed_data = analyze_variability_and_normality(processed_data)
 
+    # If the paarameter include_close in the config is set to True, include the 'Close' column
+    if config.get('include_close'):
+        transformed_data['Close'] = numeric_data['c4']
 
     return transformed_data
 
