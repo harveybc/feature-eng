@@ -1,60 +1,3 @@
-import pandas as pd
-import time
-from app.data_handler import load_csv, write_csv
-from app.config_handler import save_debug_info, remote_log
-import seaborn as sns
-import matplotlib.pyplot as plt
-from scipy.stats import normaltest, shapiro, skew, kurtosis, anderson
-import numpy as np
-import warnings
-# Suppress the specific UserWarning from scipy.stats about p-values for large datasets
-warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5000.")
-
-
-def process_data(data, plugin, config):
-    """
-    Processes the data using the specified plugin and performs additional analysis
-    if distribution_plot or correlation_analysis are set to True.
-    """
-    print("Processing data using plugin...")
-
-    # Keep the date column separate
-    if 'date' in data.columns:
-        date_column = data['date']
-    else:
-        date_column = data.index
-
-    # Debugging: Show the data columns before processing
-    print(f"Data columns before processing: {data.columns}")
-
-    # Select OHLC columns by name explicitly (or the expected columns)
-    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # These are placeholders for OHLC
-    if all(col in data.columns for col in ohlc_columns):
-        numeric_data = data[ohlc_columns]
-    else:
-        raise KeyError(f"Missing expected OHLC columns: {ohlc_columns}")
-
-    # Ensure input data is numeric
-    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
-    
-    # Use the plugin to process the numeric data (e.g., feature extraction)
-    processed_data = plugin.process(numeric_data)
-    
-    # Debugging message to confirm the shape of the processed data
-    print(f"Processed data shape: {processed_data.shape}")
-    
-    # analyze_variability_and_normality
-    transformed_data = analyze_variability_and_normality(processed_data, config)
-    # If the paarameter include_original_5 in the config is set to True, include the original firsst 5 columns(starting by date,c1,c2,c3,c4) in the processed data
-    if config.get('include_original_5'):
-        # Add the columns date, c1,c2,c3,c4 to  processed_data columns 
-        transformed_data = pd.concat([date_column, data[ohlc_columns], transformed_data], axis=1)
-
-    return transformed_data
-
-
-
-
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -76,9 +19,6 @@ def analyze_variability_and_normality(data, config):
     axes = axes.flatten()
 
     plot_index = 0
-
-
-      
 
     for column in data.columns:
         # Handle missing values by filling with mean for analysis (silent operation)
@@ -109,10 +49,7 @@ def analyze_variability_and_normality(data, config):
         if (original_data <= 0).any():
             # Since log cannot handle zero or negative values, we can shift the data if needed
             min_value = original_data.min()
-            if min_value <= 0:
-                shifted_data = original_data - min_value + 1  # Shift data to make it all positive
-            else:
-                shifted_data = original_data
+            shifted_data = original_data - min_value + 1  # Shift data to make it all positive
         else:
             shifted_data = original_data
 
@@ -127,7 +64,7 @@ def analyze_variability_and_normality(data, config):
         kurtosis_log = kurtosis(log_transformed_data)
 
         # Decide whether to use log-transformed data or original data
-        # Criteria: if log-transformed data has p-values closer to 1, or skewness closer to 0
+        # Criteria: if log-transformed data has a lower normality score
         normality_score_original = abs(skewness_original) + abs(kurtosis_original)
         normality_score_log = abs(skewness_log) + abs(kurtosis_log)
 
@@ -154,10 +91,53 @@ def analyze_variability_and_normality(data, config):
     
     return transformed_data
 
+def process_data(data, plugin, config):
+    """
+    Processes the data using the specified plugin and performs additional analysis
+    if distribution_plot or correlation_analysis are set to True.
+    """
+    print("Processing data using plugin...")
 
+    # Keep the date column separate
+    if 'date' in data.columns:
+        date_column = data[['date']]  # Ensure it's a DataFrame
+    else:
+        # Convert the index to a DataFrame
+        date_column = data.index.to_frame(index=False)
+        date_column.columns = ['date']  # Name the column
 
+    # Debugging: Show the data columns before processing
+    print(f"Data columns before processing: {data.columns}")
 
+    # Select OHLC columns by name explicitly (or the expected columns)
+    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # These are placeholders for OHLC
+    if all(col in data.columns for col in ohlc_columns):
+        numeric_data = data[ohlc_columns]
+    else:
+        raise KeyError(f"Missing expected OHLC columns: {ohlc_columns}")
 
+    # Ensure input data is numeric
+    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
+    
+    # Use the plugin to process the numeric data (e.g., feature extraction)
+    processed_data = plugin.process(numeric_data)
+    
+    # Debugging message to confirm the shape of the processed data
+    print(f"Processed data shape: {processed_data.shape}")
+    
+    # Analyze variability and normality
+    transformed_data = analyze_variability_and_normality(processed_data, config)
+    
+    # If the parameter include_original_5 in the config is set to True, include the original first 5 columns (starting with date, c1, c2, c3, c4) in the processed data
+    if config.get('include_original_5'):
+        # Concatenate date_column, OHLC columns, and transformed_data
+        transformed_data = pd.concat([
+            date_column.reset_index(drop=True),
+            data[ohlc_columns].reset_index(drop=True),
+            transformed_data.reset_index(drop=True)
+        ], axis=1)
+
+    return transformed_data
 
 
 
