@@ -13,23 +13,28 @@ warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5
 
 def analyze_variability_and_normality(data, config):
     """
-    Analyzes each column's variability, normality, and skewness.
-    Measures variability and prints whether it is high or low variability.
-    Applies log transformation if it improves normality.
+    Analyzes each column's variability using the Coefficient of Variation (CV),
+    normality, and skewness. Measures variability and prints whether it is high
+    or low variability. Applies log transformation if it improves normality.
     Returns transformed data with modified column names.
     """
     print("Analyzing variability and normality of each column...")
 
-    # First, compute variability (standard deviation) for all columns
-    variabilities = {}
+    # First, compute Coefficient of Variation (CV) for all columns
+    cvs = {}
+    epsilon = 1e-8  # Small value to prevent division by zero
     for column in data.columns:
         # Handle missing values by filling with mean for analysis (silent operation)
         column_data = data[column].fillna(data[column].mean())
-        variability = column_data.std()
-        variabilities[column] = variability
+        mean = column_data.mean()
+        std_dev = column_data.std()
+        # Avoid division by zero or near-zero mean
+        adjusted_mean = mean if abs(mean) > epsilon else epsilon
+        cv = std_dev / abs(adjusted_mean)
+        cvs[column] = cv
 
-    # Compute the median variability
-    median_variability = np.median(list(variabilities.values()))
+    # Compute the median CV
+    median_cv = np.median(list(cvs.values()))
 
     # Now, proceed to analyze each column
     transformed_columns = {}  # Dictionary to store transformed column names and their data
@@ -48,22 +53,18 @@ def analyze_variability_and_normality(data, config):
         # Analyze original data
         original_data = data[column]
 
-        # Variability (standard deviation)
-        variability_original = np.std(original_data)
+        # Variability using CV
+        cv = cvs[column]
 
         # Determine high or low variability
-        if variability_original > median_variability:
+        if cv > median_cv:
             variability_status = "High Variability"
         else:
             variability_status = "Low Variability"
 
-        print(f"{column} has variability {variability_original:.5f} ({variability_status}).")
+        print(f"{column} has CV {cv:.5f} ({variability_status}).")
 
         # Normality test using D'Agostino's K^2 and Shapiro-Wilk
-        dagostino_result_original = normaltest(original_data)
-        shapiro_result_original = shapiro(original_data)
-
-        # Skewness and Kurtosis
         skewness_original = skew(original_data)
         kurtosis_original = kurtosis(original_data)
 
@@ -110,6 +111,9 @@ def analyze_variability_and_normality(data, config):
     transformed_data = pd.DataFrame(transformed_columns)
 
     return transformed_data
+
+
+
 
 def process_data(data, plugin, config):
     """
