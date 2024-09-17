@@ -14,11 +14,24 @@ warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5
 def analyze_variability_and_normality(data, config):
     """
     Analyzes each column's variability, normality, and skewness.
+    Measures variability and prints whether it is high or low variability.
     Applies log transformation if it improves normality.
     Returns transformed data with modified column names.
     """
     print("Analyzing variability and normality of each column...")
 
+    # First, compute variability (standard deviation) for all columns
+    variabilities = {}
+    for column in data.columns:
+        # Handle missing values by filling with mean for analysis (silent operation)
+        column_data = data[column].fillna(data[column].mean())
+        variability = column_data.std()
+        variabilities[column] = variability
+
+    # Compute the median variability
+    median_variability = np.median(list(variabilities.values()))
+
+    # Now, proceed to analyze each column
     transformed_columns = {}  # Dictionary to store transformed column names and their data
     num_columns = len(data.columns)
     num_rows = (num_columns + 3) // 4  # Adjust to show 4 columns of plots
@@ -38,13 +51,17 @@ def analyze_variability_and_normality(data, config):
         # Variability (standard deviation)
         variability_original = np.std(original_data)
 
+        # Determine high or low variability
+        if variability_original > median_variability:
+            variability_status = "High Variability"
+        else:
+            variability_status = "Low Variability"
+
+        print(f"{column} has variability {variability_original:.5f} ({variability_status}).")
+
         # Normality test using D'Agostino's K^2 and Shapiro-Wilk
         dagostino_result_original = normaltest(original_data)
         shapiro_result_original = shapiro(original_data)
-
-        # p-values
-        p_value_normaltest_original = dagostino_result_original.pvalue
-        p_value_shapiro_original = shapiro_result_original.pvalue
 
         # Skewness and Kurtosis
         skewness_original = skew(original_data)
@@ -63,10 +80,6 @@ def analyze_variability_and_normality(data, config):
         log_transformed_data = np.log(shifted_data)
 
         # Analyze log-transformed data
-        dagostino_result_log = normaltest(log_transformed_data)
-        shapiro_result_log = shapiro(log_transformed_data)
-        p_value_normaltest_log = dagostino_result_log.pvalue
-        p_value_shapiro_log = shapiro_result_log.pvalue
         skewness_log = skew(log_transformed_data)
         kurtosis_log = kurtosis(log_transformed_data)
 
@@ -95,7 +108,7 @@ def analyze_variability_and_normality(data, config):
 
     # Convert the transformed columns dictionary back into a DataFrame and return it
     transformed_data = pd.DataFrame(transformed_columns)
-    
+
     return transformed_data
 
 def process_data(data, plugin, config):
@@ -143,6 +156,18 @@ def process_data(data, plugin, config):
             data[ohlc_columns].reset_index(drop=True),
             transformed_data.reset_index(drop=True)
         ], axis=1)
+
+        # Rename the c1-c4 columns based on c2 and c3
+        # Determine whether to rename c2 as High or Low
+        c2_greater_c3 = data['c2'] > data['c3']
+        if c2_greater_c3.mean() > 0.5:
+            # If c2 > c3 in more than 50% of cases
+            transformed_data.rename(columns={'c1': 'Open', 'c2': 'High', 'c3': 'Low', 'c4': 'Close'}, inplace=True)
+            print("Renamed c1-c4 to Open, High, Low, Close based on c2 > c3.")
+        else:
+            # If c2 <= c3 in more than 50% of cases
+            transformed_data.rename(columns={'c1': 'Open', 'c2': 'Low', 'c3': 'High', 'c4': 'Close'}, inplace=True)
+            print("Renamed c1-c4 to Open, Low, High, Close based on c2 <= c3.")
 
     return transformed_data
 
