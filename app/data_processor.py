@@ -6,6 +6,9 @@ from scipy.stats import normaltest, shapiro, skew, kurtosis
 import time
 from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
+import warnings
+# Suppress the specific UserWarning from scipy.stats about p-values for large datasets
+warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5000.")
 
 
 def analyze_variability_and_normality(data, config):
