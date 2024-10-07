@@ -16,20 +16,20 @@ This tool is designed for data scientists, quantitative analysts, and machine le
 
 ## Installation Instructions
 
-To install and set up the feature-engineering application, follow these steps:
+To install and set up the feature-eng application, follow these steps:
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/harveybc/feature-engineering.git
-    cd feature-engineering
+    git clone https://github.com/harveybc/feature-eng.git
+    cd feature-eng
     ```
 
 2. **Create and Activate a Virtual Environment**:
 
     - **Using `conda`**:
         ```bash
-        conda create --name feature-engineering-env python=3.9
-        conda activate feature-engineering-env
+        conda create --name feature-eng-env python=3.9
+        conda activate feature-eng-env
         ```
 
 3. **Install Dependencies**:
@@ -48,14 +48,14 @@ To install and set up the feature-engineering application, follow these steps:
     pip install .
     ```
 
-6. **(Optional) Run the feature-engineering CLI**:
+6. **(Optional) Run the feature-eng CLI**:
     - On Windows, verify installation:
         ```bash
-        feature-engineering.bat --help
+        feature-eng.bat --help
         ```
     - On Linux:
         ```bash
-        sh feature-engineering.sh --help
+        sh feature-eng.sh --help
         ```
 
 7. **(Optional) Run Tests**:
@@ -145,7 +145,7 @@ f-eng.bat --input_file tests/data/eurusd_hour_2005_2020_ohlc.csv --correlation_a
 ## Project Directory Structure
 
 ```md
-feature-engineering/
+feature-eng/
 │
 ├── app/                           # Main application package
 │   ├── cli.py                     # Handles command-line argument parsing
