@@ -9,3 +9,5 @@ pdoc3
 matplotlib
 Pillow
 kiwisolver
+requests
+seaborn
