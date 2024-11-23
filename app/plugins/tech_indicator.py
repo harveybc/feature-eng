@@ -1,5 +1,6 @@
 import pandas_ta as ta
 import pandas as pd
+from app.data_handler import load_csv, write_csv
 
 class Plugin:
     """
