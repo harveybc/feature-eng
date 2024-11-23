@@ -229,20 +229,20 @@ class Plugin:
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
-            forex_features = self.process_forex_data(config['forex_datasets'], data)
+            forex_features = self.process_forex_data(config['forex_datasets'], data, config=config)
             additional_features.update(forex_features)
 
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_data = load_csv(config['sp500_dataset'])
+            sp500_data = load_csv(config['sp500_dataset'], config)
             sp500_features = self.process_sp500_data(sp500_data, data)
             additional_features.update(sp500_features.to_dict(orient="list"))
 
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_data = load_csv(config['vix_dataset'])
+            vix_data = load_csv(config['vix_dataset'], config)
             vix_features = self.process_vix_data(vix_data, data)
             additional_features.update(vix_features.to_dict(orient="list"))
 
@@ -271,7 +271,7 @@ class Plugin:
         high_freq_data = load_csv(
             high_freq_file,
             has_headers=True,
-            column_map={'DATE_TIME': 'datetime', 'OPEN': 'open', 'HIGH': 'high', 'LOW': 'low', 'CLOSE': 'close'}
+            config= config
         )
 
         # Resample to hourly resolution
@@ -493,7 +493,7 @@ class Plugin:
         return result
 
 
-    def process_forex_data(self, forex_files, hourly_data):
+    def process_forex_data(self, forex_files, hourly_data, config):
         """
         Processes and aligns multiple Forex rate datasets with the hourly dataset.
 
@@ -514,7 +514,7 @@ class Plugin:
             forex_data = load_csv(
                 file_path,
                 has_headers=True,
-                column_map={'DATE_TIME': 'datetime', 'OPEN': 'open', 'HIGH': 'high', 'LOW': 'low', 'CLOSE': 'close'}
+                config = config
             )
             
             # Resample to hourly resolution
@@ -556,44 +556,6 @@ class Plugin:
 
 
     
-    def process_forex_datasets(self, hourly_data, forex_files, target_frequency):
-        """
-        Processes Forex datasets and aligns them with the hourly dataset.
-
-        Parameters:
-        - hourly_data (pd.DataFrame): The hourly dataset.
-        - forex_files (list): List of file paths for Forex datasets.
-        - target_frequency (str): Target resampling frequency (e.g., '1H').
-
-        Returns:
-        - pd.DataFrame: Aligned Forex features.
-        """
-        print("Processing Forex datasets...")
-        forex_features = {}
-
-        for forex_file in forex_files:
-            print(f"Processing Forex dataset: {forex_file}")
-            forex_data = load_csv(forex_file)
-            forex_data.index = pd.to_datetime(forex_data['datetime'])
-
-            # Resample to the target frequency
-            resampled_forex = forex_data.resample(target_frequency).last()
-
-            # Forward-fill missing values
-            resampled_forex = resampled_forex.ffill()
-
-            # Align with the hourly dataset
-            aligned_forex = resampled_forex.reindex(hourly_data.index, method='ffill').fillna(0)
-
-            # Extract column name prefix from the file name
-            prefix = forex_file.split('/')[-1].split('-')[0]
-            for col in aligned_forex.columns:
-                forex_features[f"{prefix}_{col}"] = aligned_forex[col]
-
-        print("Forex datasets processed successfully.")
-        return pd.DataFrame(forex_features)
-
-
 
 
     def process_sub_periodicities(self, hourly_data, sub_periodicity_data, window_size):

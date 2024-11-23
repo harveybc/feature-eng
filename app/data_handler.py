@@ -14,7 +14,8 @@ def load_csv(file_path, has_headers=True, dataset_type=None, config=None):
     - pd.DataFrame: Processed DataFrame with standardized column names.
     """
     try:
-        header_mappings = config.get('header_mappings', {})
+        # Default to an empty dictionary if config is None
+        header_mappings = config.get('header_mappings', {}) if config else {}
         column_map = header_mappings.get(dataset_type, {})
 
         # Read CSV
@@ -22,15 +23,16 @@ def load_csv(file_path, has_headers=True, dataset_type=None, config=None):
             data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
             data.rename(columns=column_map, inplace=True)
         else:
-            column_names = list(column_map.values())
+            column_names = list(column_map.values()) if column_map else None
             data = pd.read_csv(file_path, sep=',', header=None, names=column_names, parse_dates=[0], dayfirst=True)
 
         # Ensure 'date' or 'datetime' column is set as index
         date_col = column_map.get('date', 'date') if 'date' in column_map else column_map.get('datetime', 'datetime')
-        data.set_index(date_col, inplace=True)
+        if date_col in data.columns:
+            data.set_index(date_col, inplace=True)
 
         print(f"Loaded data columns: {data.columns}")  # Debugging line
-        
+
         # Convert all non-date columns to numeric
         for col in data.columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
@@ -40,9 +42,6 @@ def load_csv(file_path, has_headers=True, dataset_type=None, config=None):
         raise
 
     return data
-
-
-
 
 
 
