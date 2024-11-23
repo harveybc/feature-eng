@@ -360,10 +360,15 @@ class Plugin:
         if not isinstance(econ_data.index, pd.DatetimeIndex):
             raise ValueError("econ_data index is not a valid DatetimeIndex after datetime parsing.")
 
-        # Ensure max_time is a proper Timestamp
-        max_time = pd.to_datetime(hourly_data.index.max())
+        # Ensure hourly_data.index is a DatetimeIndex
+        hourly_data.index = pd.to_datetime(hourly_data.index, errors='coerce')
+
+        # Validate hourly_data index type
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            raise ValueError("hourly_data index is not a valid DatetimeIndex.")
 
         # Generate positional encodings for the events
+        max_time = hourly_data.index.max()  # Get maximum timestamp
         econ_data['position'] = econ_data.index.map(lambda t: (max_time - t).total_seconds() / 3600)  # Hours from max_time
         num_features = config.get('positional_encoding_dim', 8)  # Positional encoding dimension
         econ_data_positional_encoding = generate_positional_encoding(len(econ_data), num_features)
@@ -394,6 +399,10 @@ class Plugin:
         processed_features = []
 
         for timestamp in hourly_data.index:
+            # Convert timestamp to datetime if necessary
+            if not isinstance(timestamp, pd.Timestamp):
+                timestamp = pd.Timestamp(timestamp)
+
             # Get rolling window of events up to the current timestamp
             window = econ_data.loc[:timestamp].tail(window_size)
 
@@ -415,6 +424,7 @@ class Plugin:
 
         print(f"Processed economic calendar features with shape: {processed_df.shape}")
         return processed_df
+
 
 
 
