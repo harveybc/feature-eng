@@ -325,12 +325,12 @@ class Plugin:
         return hourly_features
     
 
-    def process_economic_calendar_with_attention(econ_data, hourly_data, config):
+    def process_economic_calendar_with_attention(self, econ_data_path, hourly_data, config):
         """
         Processes economic calendar using temporal attention to generate continuous signals.
 
         Parameters:
-        - econ_data (pd.DataFrame): Economic calendar data.
+        - econ_data_path (str): Path to the economic calendar CSV file.
         - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings for processing.
         
@@ -339,10 +339,24 @@ class Plugin:
         """
         print("Processing economic calendar with attention...")
 
-        # Parse datetime and set index
-        econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'], format='%Y/%m/%d %H:%M:%S'
+        # Column names for the economic calendar dataset
+        column_names = [
+            'event_date', 'event_time', 'country', 'volatility', 'description',
+            'evaluation', 'data_format', 'actual', 'forecast', 'previous'
+        ]
+
+        # Load the economic calendar dataset
+        econ_data = pd.read_csv(
+            econ_data_path,
+            header=None,
+            names=column_names
         )
+
+        # Parse datetime and set as index
+        econ_data['datetime'] = pd.to_datetime(
+            econ_data['event_date'] + ' ' + econ_data['event_time'], format='%Y/%m/%d %H:%M:%S', errors='coerce'
+        )
+        econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
         # Filter relevant countries and volatility levels
@@ -357,7 +371,7 @@ class Plugin:
             """
             time_diff = (current_time - window.index).total_seconds() / 3600  # Convert to hours
             weights = np.exp(-time_diff / config.get('temporal_decay', 24))  # Exponential decay
-            weighted_values = window.select_dtypes(include=[np.number]).multiply(weights, axis=0)
+            weighted_values = window[['actual', 'forecast', 'previous']].apply(pd.to_numeric, errors='coerce').multiply(weights, axis=0)
             return weighted_values.sum()
 
         # Rolling window processing
@@ -372,7 +386,7 @@ class Plugin:
                 weighted_features = apply_attention_weights(window, timestamp)
             else:
                 # Fill with zeros if no events in the window
-                weighted_features = pd.Series(dtype='float64')
+                weighted_features = pd.Series(index=['actual', 'forecast', 'previous'], dtype='float64').fillna(0)
 
             # Add timestamp for alignment
             weighted_features['timestamp'] = timestamp
