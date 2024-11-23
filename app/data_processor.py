@@ -117,8 +117,8 @@ def analyze_variability_and_normality(data, config):
 
 def process_data(data, plugin, config):
     """
-    Processes the data using the specified plugin and performs additional analysis
-    if distribution_plot or correlation_analysis are set to True.
+    Processes the data using the specified plugin and handles additional features
+    from high-frequency data, S&P, VIX, and the economic calendar.
     """
     print("Processing data using plugin...")
 
@@ -133,8 +133,8 @@ def process_data(data, plugin, config):
     # Debugging: Show the data columns before processing
     print(f"Data columns before processing: {data.columns}")
 
-    # Select OHLC columns by name explicitly (or the expected columns)
-    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # These are placeholders for OHLC
+    # Select OHLC columns explicitly
+    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # Replace with actual OHLC column names
     if all(col in data.columns for col in ohlc_columns):
         numeric_data = data[ohlc_columns]
     else:
@@ -142,38 +142,23 @@ def process_data(data, plugin, config):
 
     # Ensure input data is numeric
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
-    
-    # Use the plugin to process the numeric data (e.g., feature extraction)
+
+    # Process technical indicators
     processed_data = plugin.process(numeric_data)
-    
-    # Debugging message to confirm the shape of the processed data
-    print(f"Processed data shape: {processed_data.shape}")
-    
-    # Analyze variability and normality
+
+    # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
-    
-    # If the parameter include_original_5 in the config is set to True, include the original first 5 columns (starting with date, c1, c2, c3, c4) in the processed data
-    if config.get('include_original_5'):
-        # Concatenate date_column, OHLC columns, and transformed_data
-        transformed_data = pd.concat([
-            date_column.reset_index(drop=True),
-            data[ohlc_columns].reset_index(drop=True),
-            transformed_data.reset_index(drop=True)
-        ], axis=1)
 
-        # Rename the c1-c4 columns based on c2 and c3
-        # Determine whether to rename c2 as High or Low
-        c2_greater_c3 = data['c2'] > data['c3']
-        if c2_greater_c3.mean() > 0.5:
-            # If c2 > c3 in more than 50% of cases
-            transformed_data.rename(columns={'c1': 'Open', 'c2': 'High', 'c3': 'Low', 'c4': 'Close'}, inplace=True)
-            print("Renamed c1-c4 to Open, High, Low, Close based on c2 > c3.")
-        else:
-            # If c2 <= c3 in more than 50% of cases
-            transformed_data.rename(columns={'c1': 'Open', 'c2': 'Low', 'c3': 'High', 'c4': 'Close'}, inplace=True)
-            print("Renamed c1-c4 to Open, Low, High, Close based on c2 <= c3.")
+    # Process additional datasets separately
+    additional_features = plugin.process_additional_datasets(data, config)
 
-    return transformed_data
+    # Combine processed technical indicators with additional features
+    final_data = pd.concat([transformed_data, additional_features], axis=1)
+
+    print(f"Final dataset shape: {final_data.shape}")
+    return final_data
+
+
 
 
 
@@ -210,10 +195,11 @@ def run_feature_engineering_pipeline(config, plugin):
     if config.get('save_log'):
         save_debug_info(debug_info, config['save_log'])
         print(f"Debug info saved to {config['save_log']}.")
-    
+
     # Remote log debug info and config if specified
     if config.get('remote_log'):
         remote_log(config, debug_info, config['remote_log'], config['username'], config['password'])
         print(f"Debug info saved to {config['remote_log']}.")
 
     print(f"Execution time: {execution_time} seconds")
+

@@ -194,6 +194,67 @@ class Plugin:
 
 
 
+    def process_additional_datasets(self, data, config):
+        """
+        Process additional datasets (e.g., sub-periodicities, S&P, VIX, economic calendar, positional encoding).
+
+        Parameters:
+        - data (pd.DataFrame): Full dataset including additional time-series data.
+        - config (dict): Configuration settings for processing.
+
+        Returns:
+        - pd.DataFrame: DataFrame with additional features.
+        """
+        print("Processing additional datasets...")
+
+        additional_features = {}
+
+        # Sub-Periodicities
+        if config.get('high_freq_dataset'):
+            print("Processing high-frequency data...")
+            high_freq_data = load_csv(config['high_freq_dataset'])
+            high_freq_data.index = pd.to_datetime(high_freq_data['datetime'])
+            for col in ['Close']:
+                additional_features[f'{col}_15m'] = high_freq_data[col].resample('15T').last().resample('1H').ffill()
+                additional_features[f'{col}_30m'] = high_freq_data[col].resample('30T').last().resample('1H').ffill()
+
+        # S&P Features
+        if config.get('sp_300_daily_dataset'):
+            print("Processing S&P data...")
+            sp_data = load_csv(config['sp_300_daily_dataset'])
+            sp_data.index = pd.to_datetime(sp_data['datetime'])
+            sp_data = sp_data.resample('1H').ffill()
+            sp_mean = sp_data['sp_close'].rolling(window=7).mean()
+            additional_features['SP_rolling_mean'] = sp_mean
+
+        # VIX Features
+        if config.get('vix_daily_dataset'):
+            print("Processing VIX data...")
+            vix_data = load_csv(config['vix_daily_dataset'])
+            vix_data.index = pd.to_datetime(vix_data['datetime'])
+            vix_data = vix_data.resample('1H').ffill()
+            vix_std = vix_data['vix_close'].rolling(window=7).std()
+            additional_features['VIX_rolling_std'] = vix_std
+
+        # Economic Calendar
+        if config.get('economic_calendar'):
+            print("Processing economic calendar data...")
+            econ_data = load_csv(config['economic_calendar'])
+            econ_data.index = pd.to_datetime(econ_data['datetime'])
+            econ_emb = generate_economic_embeddings(econ_data)
+            additional_features.update(econ_emb.to_dict(orient='list'))
+
+        # Positional Encoding
+        if 'pos_enc_0' in data:
+            print("Adding positional encoding...")
+            pos_enc = data.filter(like='pos_enc')
+            additional_features.update(pos_enc.to_dict(orient='list'))
+
+        # Combine all additional features into a DataFrame
+        additional_features_df = pd.DataFrame(additional_features)
+
+        print(f"Additional features processed: {additional_features_df.columns}")
+        return additional_features_df
 
 
 
