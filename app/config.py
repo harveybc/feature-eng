@@ -1,5 +1,5 @@
 DEFAULT_VALUES = {
-    'input_file': 'tests/data/EUR_USD-2000-2020-1h.csv',
+    'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc',
     'output_file': './indicators_output.csv',
     'include_original_5': True,
     'plugin': 'tech_indicator',
