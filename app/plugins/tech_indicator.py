@@ -328,7 +328,7 @@ class Plugin:
         - econ_data_path (str): Path to the economic calendar CSV file.
         - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings for processing.
-        
+
         Returns:
         - pd.DataFrame: Aligned event impact features with positional encodings.
         """
@@ -356,8 +356,12 @@ class Plugin:
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
-        # Ensure max_time is a Timestamp
-        max_time = pd.Timestamp(hourly_data.index.max())
+        # Ensure econ_data.index is a DatetimeIndex
+        if not isinstance(econ_data.index, pd.DatetimeIndex):
+            raise ValueError("econ_data index is not a valid DatetimeIndex after datetime parsing.")
+
+        # Use hourly_data.index.max() directly
+        max_time = hourly_data.index.max()
 
         # Generate positional encodings for the events
         econ_data['position'] = (max_time - econ_data.index).total_seconds() / 3600  # Hours from max_time
