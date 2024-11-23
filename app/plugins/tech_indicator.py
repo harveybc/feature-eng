@@ -252,46 +252,54 @@ class Plugin:
         return additional_features_df
 
 
-    def process_economic_calendar(self, econ_data, hourly_index, config):
+    def process_economic_calendar(self, econ_data_path, hourly_index, config):
         """
-        Processes economic calendar data into an aligned hourly dataset.
+        Processes economic calendar data and transforms sparse events into hourly time series.
 
         Parameters:
-        - econ_data (pd.DataFrame): Economic calendar raw data.
-        - hourly_index (pd.DatetimeIndex): Target hourly timestamps for alignment.
-        - config (dict): Configuration settings.
+        - econ_data_path (str): Path to the economic calendar dataset.
+        - hourly_index (pd.DatetimeIndex): Index of the hourly dataset for alignment.
+        - config (dict): Configuration dictionary.
 
         Returns:
-        - dict: Dictionary with hourly-aligned features from economic calendar.
+        - pd.DataFrame: Processed time series with temporal weighting.
         """
         print("Processing economic calendar with temporal weighting...")
 
-        # Ensure datetime parsing and alignment
+        # Explicitly define column names because the dataset has no headers
+        column_names = [
+            'event_date', 'event_time', 'country', 'volatility', 'description',
+            'evaluation', 'data_format', 'actual_value', 'forecast_value', 'previous_value'
+        ]
+
+        # Load the dataset without headers
+        econ_data = pd.read_csv(econ_data_path, header=None, names=column_names)
+
+        # Combine date and time into a single datetime column
         econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'], format='%Y/%m/%d %H:%M:%S'
+            econ_data['event_date'] + ' ' + econ_data['event_time'],
+            format='%Y/%m/%d %H:%M:%S'
         )
         econ_data.set_index('datetime', inplace=True)
 
-        # Filter by relevant countries
+        # Filter by relevant countries if specified in config
         relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
         econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
         print(f"Filtered events to relevant countries: {relevant_countries}")
 
-        # Filter by volatility
+        # Filter by volatility if specified in config
         if config.get('filter_by_volatility', True):
-            econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+            econ_data = econ_data[
+                econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])
+            ]
             print("Filtered events by moderate/high volatility.")
 
-        # Add numerical feature transformations
-        econ_data['actual_minus_forecast'] = econ_data['actual_value'] - econ_data['forecast_value']
-        econ_data['actual_minus_previous'] = econ_data['actual_value'] - econ_data['previous_value']
+        # Compute temporal weights
+        window_size = config.get('temporal_window_size', 8)  # Default window size in hours
+        weighted_features = self.compute_temporal_weights(econ_data, hourly_index, window_size)
 
-        # Temporal decay-based transformation to align events
-        window_size = config.get('event_window_size', 8)  # Hours to look back
-        decay_rate = config.get('event_decay_rate', 0.1)  # Decay rate for weighting
-        aligned_features = self.events_to_hourly_timeseries(econ_data, hourly_index, window_size, decay_rate)
-
-        return aligned_features
+        print(f"Processed economic calendar with {len(weighted_features.columns)} features.")
+        return weighted_features
 
 
     def events_to_hourly_timeseries(self, events, hourly_index, window_size, decay_rate):
