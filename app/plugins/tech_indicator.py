@@ -356,8 +356,10 @@ class Plugin:
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
+        # Ensure max_time is a Timestamp
+        max_time = pd.Timestamp(hourly_data.index.max())
+
         # Generate positional encodings for the events
-        max_time = hourly_data.index.max()
         econ_data['position'] = (max_time - econ_data.index).total_seconds() / 3600  # Hours from max_time
         num_features = config.get('positional_encoding_dim', 8)  # Positional encoding dimension
         econ_data_positional_encoding = generate_positional_encoding(len(econ_data), num_features)
@@ -409,6 +411,7 @@ class Plugin:
 
         print(f"Processed economic calendar features with shape: {processed_df.shape}")
         return processed_df
+
 
 
 
