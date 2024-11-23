@@ -32,32 +32,35 @@ class Plugin:
         return {var: self.params.get(var, None) for var in self.plugin_debug_vars}
 
 
-    # File: tech_indicator.py
 
     def adjust_ohlc(self, data):
         """
         Adjust OHLC columns by renaming them according to the expected OHLC order.
+        Handles case insensitivity for column names.
+
         Parameters:
-        - data (pd.DataFrame): Input data with generic column names (c1, c2, c3, c4, etc.)
+        - data (pd.DataFrame): Input data with generic column names (e.g., 'OPEN', 'HIGH', 'LOW', 'CLOSE').
 
         Returns:
-        - pd.DataFrame: Data with columns renamed to 'Open', 'High', 'Low', 'Close'
+        - pd.DataFrame: Data with columns renamed to 'Open', 'High', 'Low', 'Close'.
         """
         print("Starting adjust_ohlc method...")
 
         # Debug: Show initial columns of the data
         print(f"Initial data columns: {data.columns}")
 
-        # Expected renaming map
-        renaming_map = {'c1': 'Open', 'c2': 'High', 'c3': 'Low', 'c4': 'Close'}
+        # Normalize column names to lowercase for consistent handling
+        data.columns = data.columns.str.lower()
 
-        # Check if 'c1' is in the data and ensure it's numeric
-        if 'c1' in data.columns:
-            data['c1'] = pd.to_numeric(data['c1'], errors='coerce')  # Convert 'c1' to numeric if not
-            print(f"Column 'c1' converted to numeric. First few values:\n{data['c1'].head()}")
+        # Expected renaming map (lowercase keys to handle normalized column names)
+        renaming_map = {'open': 'Open', 'high': 'High', 'low': 'Low', 'close': 'Close'}
 
-        # Debug: Show renaming map
-        print(f"Renaming columns map: {renaming_map}")
+        # Check if all required columns are present after normalization
+        missing_columns = [col for col in renaming_map.keys() if col not in data.columns]
+        if missing_columns:
+            print(f"Error: Missing columns after renaming - {missing_columns}")
+            print(f"Available columns: {data.columns}")
+            raise KeyError(f"Missing columns after renaming: {missing_columns}")
 
         # Apply renaming
         data_renamed = data.rename(columns=renaming_map)
@@ -65,18 +68,9 @@ class Plugin:
         # Debug: Show first few rows after renaming
         print(f"First 5 rows of renamed data:\n{data_renamed.head()}")
 
-        # Check if all expected columns exist
-        expected_columns = ['Open', 'High', 'Low', 'Close']
-        missing_columns = [col for col in expected_columns if col not in data_renamed.columns]
-
-        # If any columns are missing, raise an error
-        if missing_columns:
-            print(f"Error: Missing columns after renaming - {missing_columns}")
-            print(f"Available columns: {data_renamed.columns}")
-            raise KeyError(f"Missing columns after renaming: {missing_columns}")
-
         print(f"Renaming successful. Available columns: {data_renamed.columns}")
         return data_renamed
+
 
     def process(self, data):
         """
