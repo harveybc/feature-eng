@@ -17,7 +17,7 @@ DEFAULT_VALUES = {
     'headers': True,
 
     # Additional datasets
-    'high_freq_dataset': 'tests/data/EUR_USD-2000-2020-15m.csv',
+    'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
     'sp500_dataset': 'tests/data/SP500-2000-2020.csv',
     'vix_dataset': 'tests/data/VIX-2000-2020.csv',
     'economic_calendar': 'tests/data/Economic_Calendar.csv',

@@ -212,54 +212,24 @@ class Plugin:
 
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
-            print("Processing economic calendar data with temporal weighting...")
-            econ_calendar = load_csv(
-                config['economic_calendar'], 
-                has_headers=False, 
-                column_map={
-                    0: 'event_date', 
-                    1: 'event_time', 
-                    2: 'country', 
-                    3: 'volatility', 
-                    4: 'description', 
-                    5: 'evaluation', 
-                    6: 'data_format', 
-                    7: 'actual_value', 
-                    8: 'forecast_value', 
-                    9: 'previous_value'
-                }
+            print("Processing economic calendar data...")
+            econ_calendar = self.process_economic_calendar_with_attention(
+                config['economic_calendar'], data, config
             )
-            econ_calendar_features = self.process_economic_calendar(
-                econ_calendar, 
-                data.index, 
-                config
-            )
-            additional_features.update(econ_calendar_features.to_dict(orient="list"))
+            additional_features.update(econ_calendar.to_dict(orient="list"))
 
-        # Process Sub-Periodicities
+        # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
-            print("Processing sub-periodicities...")
-            high_freq_data = load_csv(
-                config['high_freq_dataset'], 
-                has_headers=True, 
-                column_map={'datetime': 'datetime'}
+            print("Processing high-frequency EUR/USD dataset...")
+            high_freq_features = self.process_high_frequency_data(
+                config['high_freq_dataset'], data, config
             )
-            high_freq_data.index = pd.to_datetime(high_freq_data['datetime'])
-
-            for periodicity, freq in [('15m', '15T'), ('30m', '30T')]:
-                print(f"Processing {periodicity} sub-periodicity...")
-                sub_periodicity_data = high_freq_data.resample(freq).last()
-                window_size = config.get('sub_periodicity_window_size', 8)
-                sub_periodicity_features = self.process_sub_periodicities(data, sub_periodicity_data, window_size)
-                additional_features.update(sub_periodicity_features)
+            additional_features.update(high_freq_features.to_dict(orient="list"))
 
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
-            forex_features = self.process_forex_data(
-                config['forex_datasets'], 
-                data
-            )
+            forex_features = self.process_forex_data(config['forex_datasets'], data)
             additional_features.update(forex_features)
 
         # Process S&P 500 Data
@@ -277,11 +247,41 @@ class Plugin:
             additional_features.update(vix_features.to_dict(orient="list"))
 
         # Combine into a DataFrame
-        additional_features_df = pd.DataFrame(additional_features, index=data.index)
+        additional_features_df = pd.DataFrame(additional_features)
         print(f"Additional features processed: {additional_features_df.columns}")
         return additional_features_df
 
 
+
+    def process_high_frequency_data(self, high_freq_file, hourly_data, config):
+        """
+        Processes high-frequency data (e.g., 15-minute EUR/USD dataset) and aligns it with the hourly dataset.
+
+        Parameters:
+        - high_freq_file (str): Path to the high-frequency dataset.
+        - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings.
+
+        Returns:
+        - pd.DataFrame: Processed high-frequency features.
+        """
+        print(f"Processing high-frequency dataset: {high_freq_file}")
+
+        # Load the high-frequency data
+        high_freq_data = load_csv(
+            high_freq_file,
+            has_headers=True,
+            column_map={'DATE_TIME': 'datetime', 'OPEN': 'open', 'HIGH': 'high', 'LOW': 'low', 'CLOSE': 'close'}
+        )
+
+        # Resample to hourly resolution
+        high_freq_data = high_freq_data.resample('1H').mean()
+
+        # Align with the hourly dataset
+        aligned_high_freq = high_freq_data.reindex(hourly_data.index, method='ffill').fillna(0)
+
+        print(f"High-frequency dataset aligned with hourly dataset. Shape: {aligned_high_freq.shape}")
+        return aligned_high_freq
 
 
     def process_economic_calendar(self, econ_data, hourly_data, config):
