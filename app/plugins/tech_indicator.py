@@ -360,11 +360,11 @@ class Plugin:
         if not isinstance(econ_data.index, pd.DatetimeIndex):
             raise ValueError("econ_data index is not a valid DatetimeIndex after datetime parsing.")
 
-        # Use hourly_data.index.max() directly
-        max_time = hourly_data.index.max()
+        # Ensure max_time is a proper Timestamp
+        max_time = pd.to_datetime(hourly_data.index.max())
 
         # Generate positional encodings for the events
-        econ_data['position'] = (max_time - econ_data.index).total_seconds() / 3600  # Hours from max_time
+        econ_data['position'] = econ_data.index.map(lambda t: (max_time - t).total_seconds() / 3600)  # Hours from max_time
         num_features = config.get('positional_encoding_dim', 8)  # Positional encoding dimension
         econ_data_positional_encoding = generate_positional_encoding(len(econ_data), num_features)
         positional_encoding_df = pd.DataFrame(
