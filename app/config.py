@@ -32,4 +32,43 @@ DEFAULT_VALUES = {
 
     'sub_periodicity_window_size': 8,  # Default window size for sub-periodicities
     'output_resample_frequency': '1H',  # Target frequency for resampling
+    'ohlc_columns': ['open', 'high', 'low', 'close'],
+
+        'header_mappings': {
+        'forex_15m': {
+            'datetime': 'DATE_TIME',
+            'open': 'OPEN',
+            'high': 'HIGH',
+            'low': 'LOW',
+            'close': 'CLOSE'
+        },
+        'sp500': {
+            'date': 'Date',
+            'open': 'Open',
+            'high': 'High',
+            'low': 'Low',
+            'close': 'Close'
+        },
+        'vix': {
+            'date': 'date',
+            'open': 'open',
+            'high': 'high',
+            'low': 'low',
+            'close': 'close'
+        },
+        'economic_calendar': {
+            'event_date': 'c1',
+            'event_time': 'c2',
+            'country': 'c3',
+            'volatility': 'c4',
+            'description': 'c5',
+            'evaluation': 'c6',
+            'data_format': 'c7',
+            'actual': 'c8',
+            'forecast': 'c9',
+            'previous': 'c10'
+        }
+    },
+    'dataset_type': 'forex_15m',  # Example default dataset type
+
 }

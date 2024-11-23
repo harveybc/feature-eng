@@ -118,7 +118,7 @@ def analyze_variability_and_normality(data, config):
 def process_data(data, plugin, config):
     """
     Processes the data using the specified plugin and handles additional features
-    from high-frequency data, S&P, VIX, Forex, and the economic calendar.
+    from high-frequency data, S&P, VIX, and the economic calendar.
     """
     print("Processing data using plugin...")
 
@@ -133,8 +133,18 @@ def process_data(data, plugin, config):
     # Debugging: Show the data columns before processing
     print(f"Data columns before processing: {data.columns}")
 
-    # Select OHLC columns explicitly
-    ohlc_columns = ['c1', 'c2', 'c3', 'c4']  # Replace with actual OHLC column names
+    # Dynamically map the dataset headers based on the configuration
+    header_mappings = config.get('header_mappings', {})
+    dataset_type = config.get('dataset_type', 'default')  # Default dataset type
+    dataset_headers = header_mappings.get(dataset_type, [])
+
+    # Map and verify OHLC columns
+    if dataset_headers:
+        ohlc_columns = [header_mappings[dataset_type].get(k, k) for k in ['open', 'high', 'low', 'close']]
+    else:
+        ohlc_columns = ['open', 'high', 'low', 'close']  # Fallback to default OHLC column names
+
+    # Verify if the required OHLC columns are present
     if all(col in data.columns for col in ohlc_columns):
         numeric_data = data[ohlc_columns]
     else:
@@ -157,6 +167,7 @@ def process_data(data, plugin, config):
 
     print(f"Final dataset shape: {final_data.shape}")
     return final_data
+
 
 
 
