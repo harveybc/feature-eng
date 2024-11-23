@@ -1,50 +1,46 @@
 import pandas as pd
 
-def load_csv(file_path, has_headers=True, header=None, column_map=None):
+def load_csv(file_path, has_headers=True, dataset_type=None, config=None):
     """
-    Load a CSV file with optional handling for missing headers and column renaming.
+    Load a CSV file with dynamic column mapping based on dataset type.
 
     Parameters:
     - file_path (str): Path to the CSV file.
-    - has_headers (bool): Whether the CSV file has headers. Default is True.
-    - header (list): If `has_headers=False`, provide a list of column names.
-    - column_map (dict): Mapping of current column names to standardized names.
+    - has_headers (bool): Whether the CSV file includes headers.
+    - dataset_type (str): The type of dataset being loaded (e.g., 'forex_15m').
+    - config (dict): Configuration for header mappings.
 
     Returns:
-    - pd.DataFrame: Loaded and processed DataFrame.
+    - pd.DataFrame: Processed DataFrame with standardized column names.
     """
     try:
-        # Read CSV with or without headers
+        header_mappings = config.get('header_mappings', {})
+        column_map = header_mappings.get(dataset_type, {})
+
+        # Read CSV
         if has_headers:
             data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
-        else:
-            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True, header=None)
-            if header:
-                data.columns = header
-        
-        # Apply column renaming if provided
-        if column_map:
             data.rename(columns=column_map, inplace=True)
+        else:
+            column_names = list(column_map.values())
+            data = pd.read_csv(file_path, sep=',', header=None, names=column_names, parse_dates=[0], dayfirst=True)
 
-        # Standardize column names (lowercase)
-        data.columns = [col.lower() for col in data.columns]
+        # Ensure 'date' or 'datetime' column is set as index
+        date_col = column_map.get('date', 'date') if 'date' in column_map else column_map.get('datetime', 'datetime')
+        data.set_index(date_col, inplace=True)
 
-        # Ensure the first column is datetime
-        data.iloc[:, 0] = pd.to_datetime(data.iloc[:, 0])
-        data.set_index(data.columns[0], inplace=True)
-
-        # Convert all non-datetime columns to numeric
+        print(f"Loaded data columns: {data.columns}")  # Debugging line
+        
+        # Convert all non-date columns to numeric
         for col in data.columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
-
-        print(f"Loaded data columns: {data.columns}")
-        print(f"First 5 rows of the data:\n{data.head()}")
 
     except Exception as e:
         print(f"An error occurred while loading the CSV: {e}")
         raise
 
     return data
+
 
 
 
