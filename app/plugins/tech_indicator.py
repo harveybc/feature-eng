@@ -353,6 +353,9 @@ class Plugin:
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
+        # Ensure the index is sorted for proper slicing
+        econ_data.sort_index(inplace=True)
+
         # Filter relevant countries and volatility levels
         relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
         econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
@@ -374,7 +377,10 @@ class Plugin:
 
         for timestamp in hourly_data.index:
             # Get rolling window of events up to the current timestamp
-            window = econ_data.loc[:timestamp].tail(window_size)
+            try:
+                window = econ_data.loc[:timestamp].tail(window_size)
+            except KeyError:
+                window = pd.DataFrame()  # Empty window if timestamp not in index
 
             if not window.empty:
                 weighted_features = apply_attention_weights(window, timestamp)
