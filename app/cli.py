@@ -1,4 +1,4 @@
-# cli.py
+import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Feature Engineering System: A tool for generating and selecting features from time-series data with plugin support.")
