@@ -196,71 +196,257 @@ class Plugin:
 
     def process_additional_datasets(self, data, config):
         """
-        Process additional datasets (e.g., sub-periodicities, S&P, VIX, economic calendar, positional encoding).
+        Processes additional datasets (e.g., economic calendar, sub-periodicities, S&P 500, VIX).
 
         Parameters:
-        - data (pd.DataFrame): Full dataset including additional time-series data.
-        - config (dict): Configuration settings for processing.
+        - data (pd.DataFrame): Full dataset (hourly resolution).
+        - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: DataFrame with additional features.
+        - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
-
         additional_features = {}
 
-        # Sub-Periodicities
+        # Process Economic Calendar Data
+        if config.get('economic_calendar'):
+            print("Loading and processing economic calendar...")
+            econ_calendar = self.clean_and_filter_economic_calendar(config['economic_calendar'], data, config)
+            additional_features.update(econ_calendar.to_dict(orient="list"))
+
+        # Process Sub-Periodicities
         if config.get('high_freq_dataset'):
-            print("Processing high-frequency data...")
+            print("Processing sub-periodicities...")
             high_freq_data = load_csv(config['high_freq_dataset'])
             high_freq_data.index = pd.to_datetime(high_freq_data['datetime'])
-            for col in ['Close']:
-                additional_features[f'{col}_15m'] = high_freq_data[col].resample('15T').last().resample('1H').ffill()
-                additional_features[f'{col}_30m'] = high_freq_data[col].resample('30T').last().resample('1H').ffill()
 
-        # S&P Features
-        if config.get('sp_300_daily_dataset'):
-            print("Processing S&P data...")
-            sp_data = load_csv(config['sp_300_daily_dataset'])
-            sp_data.index = pd.to_datetime(sp_data['datetime'])
-            sp_data = sp_data.resample('1H').ffill()
-            sp_mean = sp_data['sp_close'].rolling(window=7).mean()
-            additional_features['SP_rolling_mean'] = sp_mean
+            for periodicity, freq in [('15m', '15T'), ('30m', '30T')]:
+                print(f"Processing {periodicity} sub-periodicity...")
+                sub_periodicity_data = high_freq_data.resample(freq).last()
+                window_size = config.get('sub_periodicity_window_size', 8)
+                sub_periodicity_features = self.process_sub_periodicities(data, sub_periodicity_data, window_size)
+                additional_features.update(sub_periodicity_features)
 
-        # VIX Features
-        if config.get('vix_daily_dataset'):
+        # Process S&P 500 Data
+        if config.get('sp500_dataset'):
+            print("Processing S&P 500 data...")
+            sp500_data = load_csv(config['sp500_dataset'])
+            sp500_features = self.process_sp500_data(sp500_data, data)
+            additional_features.update(sp500_features.to_dict(orient="list"))
+
+        # Process VIX Data
+        if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_data = load_csv(config['vix_daily_dataset'])
-            vix_data.index = pd.to_datetime(vix_data['datetime'])
-            vix_data = vix_data.resample('1H').ffill()
-            vix_std = vix_data['vix_close'].rolling(window=7).std()
-            additional_features['VIX_rolling_std'] = vix_std
+            vix_data = load_csv(config['vix_dataset'])
+            vix_features = self.process_vix_data(vix_data, data)
+            additional_features.update(vix_features.to_dict(orient="list"))
 
-        # Economic Calendar
-        if config.get('economic_calendar'):
-            print("Processing economic calendar data...")
-            econ_data = load_csv(config['economic_calendar'])
-            econ_data.index = pd.to_datetime(econ_data['datetime'])
-            econ_emb = generate_economic_embeddings(econ_data)
-            additional_features.update(econ_emb.to_dict(orient='list'))
-
-        # Positional Encoding
-        if 'pos_enc_0' in data:
-            print("Adding positional encoding...")
-            pos_enc = data.filter(like='pos_enc')
-            additional_features.update(pos_enc.to_dict(orient='list'))
-
-        # Combine all additional features into a DataFrame
+        # Combine into a DataFrame
         additional_features_df = pd.DataFrame(additional_features)
-
         print(f"Additional features processed: {additional_features_df.columns}")
         return additional_features_df
 
 
 
 
+    def process_sub_periodicities(self, hourly_data, sub_periodicity_data, window_size):
+        """
+        Processes sub-periodicity data for integration with the hourly dataset.
+
+        Parameters:
+        - hourly_data (pd.DataFrame): The hourly dataset.
+        - sub_periodicity_data (pd.DataFrame): Sub-periodicity data (e.g., 15m, 30m).
+        - window_size (int): Number of previous ticks to include for each hourly tick.
+
+        Returns:
+        - dict: Dictionary with sub-periodicity feature columns.
+        """
+        print(f"Processing sub-periodicities with window size: {window_size}...")
+
+        # Ensure datetime index for both datasets
+        hourly_data.index = pd.to_datetime(hourly_data.index)
+        sub_periodicity_data.index = pd.to_datetime(sub_periodicity_data.index)
+
+        sub_periodicity_features = {}
+
+        # Iterate over each hourly tick
+        for timestamp in hourly_data.index:
+            # Get the current hour's sub-periodicity data
+            window = sub_periodicity_data.loc[:timestamp].tail(window_size)
+
+            # Pad with NaN if the window is incomplete
+            if len(window) < window_size:
+                padding = pd.DataFrame(index=range(window_size - len(window)))
+                window = pd.concat([padding, window])
+
+            # Add columns for each tick in the window
+            for i, col in enumerate(window.columns):
+                sub_periodicity_features[f"{col}_{i+1}"] = window[col].values
+
+        print("Sub-periodicities processed successfully.")
+        return sub_periodicity_features
 
 
+    def process_sp500_data(self, sp500_data, hourly_data):
+        """
+        Processes S&P 500 data and aligns it with the hourly dataset.
+
+        Parameters:
+        - sp500_data (pd.DataFrame): S&P 500 dataset (daily resolution).
+        - hourly_data (pd.DataFrame): Hourly dataset.
+
+        Returns:
+        - pd.DataFrame: Aligned S&P 500 features.
+        """
+        print("Processing S&P 500 data...")
+
+        # Ensure datetime parsing and alignment
+        sp500_data['date'] = pd.to_datetime(sp500_data['date'])
+        sp500_data.set_index('date', inplace=True)
+
+        # Forward-fill daily data to hourly resolution
+        sp500_data = sp500_data.resample('1H').ffill()
+
+        # Align with the hourly dataset
+        aligned_sp500 = sp500_data.reindex(hourly_data.index, method='ffill').fillna(0)
+        print("S&P 500 data aligned with hourly dataset.")
+        return aligned_sp500
+
+    def process_vix_data(self, vix_data, hourly_data):
+        """
+        Processes VIX data and aligns it with the hourly dataset.
+
+        Parameters:
+        - vix_data (pd.DataFrame): VIX dataset (daily resolution).
+        - hourly_data (pd.DataFrame): Hourly dataset.
+
+        Returns:
+        - pd.DataFrame: Aligned VIX features.
+        """
+        print("Processing VIX data...")
+
+        # Ensure datetime parsing and alignment
+        vix_data['date'] = pd.to_datetime(vix_data['date'])
+        vix_data.set_index('date', inplace=True)
+
+        # Forward-fill daily data to hourly resolution
+        vix_data = vix_data.resample('1H').ffill()
+
+        # Align with the hourly dataset
+        aligned_vix = vix_data.reindex(hourly_data.index, method='ffill').fillna(0)
+        print("VIX data aligned with hourly dataset.")
+        return aligned_vix
+
+    def process_economic_calendar(self, econ_data, hourly_data, config):
+        """
+        Processes economic calendar data and generates features aligned with the hourly dataset.
+
+        Parameters:
+        - econ_data (pd.DataFrame): Economic calendar raw data.
+        - hourly_data (pd.DataFrame): Hourly resolution dataset.
+        - config (dict): Configuration settings.
+
+        Returns:
+        - pd.DataFrame: Processed economic calendar features.
+        """
+        print("Processing economic calendar...")
+
+        # Ensure datetime parsing and alignment
+        econ_data['datetime'] = pd.to_datetime(
+            econ_data['event_date'] + ' ' + econ_data['event_time'], format='%Y/%m/%d %H:%M:%S'
+        )
+        econ_data.set_index('datetime', inplace=True)
+
+        # Filter by relevant countries
+        relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
+        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
+        print(f"Filtered events to relevant countries: {relevant_countries}")
+
+        # Filter by volatility
+        if config.get('filter_by_volatility', True):
+            econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+            print("Filtered events by moderate/high volatility.")
+
+        # Process numerical features
+        econ_data['actual_minus_forecast'] = econ_data['actual_value'] - econ_data['forecast_value']
+        econ_data['actual_minus_previous'] = econ_data['actual_value'] - econ_data['previous_value']
+
+        # One-hot encode categorical features
+        categorical_features = pd.get_dummies(econ_data[['country', 'volatility', 'data_format']], prefix=['ctry', 'vol', 'fmt'])
+
+        # Aggregate features to hourly granularity
+        aggregated = econ_data.resample('1H').agg({
+            'actual_minus_forecast': 'mean',
+            'actual_minus_previous': 'mean',
+            'actual_value': ['mean', 'max', 'min'],
+            'forecast_value': 'mean',
+            'previous_value': 'mean'
+        })
+        aggregated.columns = ['_'.join(col) for col in aggregated.columns]  # Flatten multi-index columns
+
+        # Merge with one-hot encoded features
+        hourly_categorical = categorical_features.resample('1H').sum()
+        result = pd.concat([aggregated, hourly_categorical], axis=1)
+
+        # Align with the hourly dataset
+        aligned = hourly_data.index.join(result, how='left').fillna(0)
+        print("Economic calendar data aligned with the hourly dataset.")
+
+        return aligned
+
+    def clean_and_filter_economic_calendar(self, file_path, hourly_data, config):
+        """
+        Cleans and filters the economic calendar, aligning it with the hourly dataset.
+
+        Parameters:
+        - file_path (str): Path to the economic calendar dataset.
+        - hourly_data (pd.DataFrame): The hourly dataset.
+        - config (dict): Configuration settings.
+
+        Returns:
+        - pd.DataFrame: Processed economic calendar features aligned with the hourly dataset.
+        """
+        print("Cleaning and filtering economic calendar...")
+        
+        # Load dataset
+        try:
+            econ_data = pd.read_csv(file_path, encoding='utf-8')
+        except Exception as e:
+            raise RuntimeError(f"Error loading file: {e}")
+
+        # Drop rows with too many missing fields
+        econ_data.dropna(thresh=len(econ_data.columns) * 0.5, inplace=True)
+
+        # Filter by relevant countries
+        relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
+        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
+        print(f"Filtered by relevant countries: {relevant_countries}")
+
+        # Filter by volatility
+        if config.get('filter_by_volatility', True):
+            econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+            print("Filtered by moderate/high volatility.")
+
+        # Handle numeric columns
+        numeric_columns = ['Actual', 'Previous', 'Forecast']
+        for col in numeric_columns:
+            econ_data[col] = pd.to_numeric(econ_data[col], errors='coerce').fillna(econ_data[col].mean())
+
+        # Add derived features
+        econ_data['actual_minus_forecast'] = econ_data['Actual'] - econ_data['Forecast']
+        econ_data['actual_minus_previous'] = econ_data['Actual'] - econ_data['Previous']
+
+        # Align with hourly dataset
+        econ_data['datetime'] = pd.to_datetime(econ_data['event_date'] + ' ' + econ_data['event_time'])
+        econ_data.set_index('datetime', inplace=True)
+
+        # Aggregate to hourly resolution
+        aggregated = econ_data.resample('1H').mean()
+
+        # Align with the hourly dataset
+        aligned = aggregated.reindex(hourly_data.index, method='ffill').fillna(0)
+        print("Economic calendar aligned successfully.")
+        return aligned
 
     def add_debug_info(self, debug_info):
         plugin_debug_info = self.get_debug_info()

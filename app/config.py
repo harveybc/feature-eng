@@ -18,9 +18,14 @@ DEFAULT_VALUES = {
     'save_config': './output_config.json',
     'headers': True,
 
-    # New defaults for additional datasets
-    'high_freq_dataset': 'tests/data/eurusd_5m_2002_2020.csv',
-    'sp_300_daily_dataset': 'tests/data/sp_300_day_1927_2020.csv',
-    'vix_daily_dataset': 'tests/data/vix_day_1990_2024.csv',
-    'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv'
+    # Paths for additional datasets
+    'high_freq_dataset': 'tests/data/eurusd_5m_2002_2020.csv',  # 5-minute data for sub-periodicities
+    'sp500_dataset': 'tests/data/sp_500_day_1927_2020.csv',      # S&P 500 daily data
+    'vix_dataset': 'tests/data/vix_day_1990_2024.csv',           # VIX daily data
+    'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',  # Economic calendar events
+
+    # Additional parameters
+    'sub_periodicity_window_size': 8,  # Default window size for sub-periodicities
+    'relevant_countries': ['United States', 'Euro Zone'],  # Filter events by country
+    'filter_by_volatility': True  # Filter events by volatility level
 }
