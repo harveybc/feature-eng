@@ -118,7 +118,7 @@ def analyze_variability_and_normality(data, config):
 def process_data(data, plugin, config):
     """
     Processes the data using the specified plugin and handles additional features
-    from high-frequency data, S&P, VIX, and the economic calendar.
+    from high-frequency data, S&P, VIX, Forex, and the economic calendar.
     """
     print("Processing data using plugin...")
 
@@ -157,8 +157,6 @@ def process_data(data, plugin, config):
 
     print(f"Final dataset shape: {final_data.shape}")
     return final_data
-
-
 
 
 

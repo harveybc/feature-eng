@@ -1,21 +1,39 @@
 import pandas as pd
 
-def load_csv(file_path):
+def load_csv(file_path, has_headers=True, header=None, column_map=None):
     """
-    Load a CSV file assuming it has a 'date' column at the beginning and headers.
-    Renames the columns from the headers to 'date', 'c1', 'c2', etc.
+    Load a CSV file with optional handling for missing headers and column renaming.
+
+    Parameters:
+    - file_path (str): Path to the CSV file.
+    - has_headers (bool): Whether the CSV file has headers. Default is True.
+    - header (list): If `has_headers=False`, provide a list of column names.
+    - column_map (dict): Mapping of current column names to standardized names.
+
+    Returns:
+    - pd.DataFrame: Loaded and processed DataFrame.
     """
     try:
-        # Read CSV with headers and date parsing for the first column
-        data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+        # Read CSV with or without headers
+        if has_headers:
+            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+        else:
+            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True, header=None)
+            if header:
+                data.columns = header
         
-        # Correctly set column names including 'date'
-        data.columns = ['date'] + [f'c{i}' for i in range(1, len(data.columns))]
-        data.set_index('date', inplace=True)
+        # Apply column renaming if provided
+        if column_map:
+            data.rename(columns=column_map, inplace=True)
 
-        print(f"Loaded data columns: {data.columns}")  # Debugging line
-        
-        # Convert all non-date columns to numeric, coercing errors to NaN
+        # Standardize column names (lowercase)
+        data.columns = [col.lower() for col in data.columns]
+
+        # Ensure the first column is datetime
+        data.iloc[:, 0] = pd.to_datetime(data.iloc[:, 0])
+        data.set_index(data.columns[0], inplace=True)
+
+        # Convert all non-datetime columns to numeric
         for col in data.columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
 
@@ -27,6 +45,8 @@ def load_csv(file_path):
         raise
 
     return data
+
+
 
 
 
