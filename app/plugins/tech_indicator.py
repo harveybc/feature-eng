@@ -2,6 +2,7 @@ import pandas_ta as ta
 import pandas as pd
 import numpy as np
 from app.data_handler import load_csv, write_csv
+from app.positional_encoding import generate_positional_encoding
 
 class Plugin:
     """
@@ -321,49 +322,56 @@ class Plugin:
 
     def process_economic_calendar_with_attention(self, econ_data_path, hourly_data, config):
         """
-        Processes economic calendar using temporal attention to generate continuous signals.
+        Processes economic calendar using temporal attention with positional encoding.
 
         Parameters:
         - econ_data_path (str): Path to the economic calendar CSV file.
         - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings for processing.
-
+        
         Returns:
-        - pd.DataFrame: Aligned event impact features.
+        - pd.DataFrame: Aligned event impact features with positional encodings.
         """
-        print("Processing economic calendar with attention...")
+        print("Processing economic calendar with attention and positional encoding...")
 
-        # Explicit column names based on the sample dataset
+        # Column names for the economic calendar dataset
         column_names = [
             'event_date', 'event_time', 'country', 'volatility', 'description',
             'evaluation', 'data_format', 'actual', 'forecast', 'previous'
         ]
 
-        # Load the dataset without headers
+        # Load the economic calendar dataset
         econ_data = pd.read_csv(
             econ_data_path,
-            header=None,  # No headers in the CSV
-            names=column_names,  # Assigning column names
-            skip_blank_lines=True,  # Skip empty lines
-            na_values=["", " ", "vised From"],  # Handle common missing value markers
-            encoding='utf-8'
+            header=None,
+            names=column_names
         )
 
         # Parse datetime and set as index
         econ_data['datetime'] = pd.to_datetime(
             econ_data['event_date'] + ' ' + econ_data['event_time'],
-            format='%Y/%m/%d %H:%M:%S', errors='coerce'
+            format='%Y/%m/%d %H:%M:%S',
+            errors='coerce'
         )
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
-        # Sort the index for proper slicing
-        econ_data.sort_index(inplace=True)
+        # Generate positional encodings for the events
+        max_time = hourly_data.index.max()
+        econ_data['position'] = (max_time - econ_data.index).total_seconds() / 3600  # Hours from max_time
+        num_features = config.get('positional_encoding_dim', 8)  # Positional encoding dimension
+        econ_data_positional_encoding = generate_positional_encoding(len(econ_data), num_features)
+        positional_encoding_df = pd.DataFrame(
+            econ_data_positional_encoding,
+            index=econ_data.index,
+            columns=[f'pos_enc_{i}' for i in range(num_features)]
+        )
+        econ_data = pd.concat([econ_data, positional_encoding_df], axis=1)
 
         # Filter relevant countries and volatility levels
         relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
-        econ_data = econ_data[econ_data['country'].str.strip().isin(relevant_countries)]
-        econ_data = econ_data[econ_data['volatility'].str.strip().isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
+        econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
 
         # Temporal weighting mechanism
         def apply_attention_weights(window, current_time):
@@ -381,10 +389,7 @@ class Plugin:
 
         for timestamp in hourly_data.index:
             # Get rolling window of events up to the current timestamp
-            try:
-                window = econ_data.loc[:timestamp].tail(window_size)
-            except KeyError:
-                window = pd.DataFrame()  # Empty window if timestamp not in index
+            window = econ_data.loc[:timestamp].tail(window_size)
 
             if not window.empty:
                 weighted_features = apply_attention_weights(window, timestamp)

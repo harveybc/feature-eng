@@ -7,6 +7,8 @@ import time
 from app.data_handler import load_csv, write_csv
 from app.config_handler import save_debug_info, remote_log
 import warnings
+from app.positional_encoding import generate_positional_encoding
+
 # Suppress the specific UserWarning from scipy.stats about p-values for large datasets
 warnings.filterwarnings("ignore", message="p-value may not be accurate for N > 5000.")
 
@@ -162,7 +164,22 @@ def process_data(data, plugin, config):
     # Combine processed technical indicators with additional features
     final_data = pd.concat([transformed_data, additional_features], axis=1)
 
-    print(f"Final dataset shape: {final_data.shape}")
+    # After combining processed_data and additional_features
+    num_positions = len(final_data)
+    num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
+
+    # Generate positional encoding for the final dataset
+    positional_encoding = generate_positional_encoding(num_positions, num_features)
+
+    # Add positional encoding to the final dataset
+    positional_encoding_df = pd.DataFrame(
+        positional_encoding,
+        columns=[f'pos_enc_{i}' for i in range(num_features)]
+    )
+    final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
+
+    print(f"Final dataset shape with positional encoding: {final_data.shape}")
+
     return final_data
 
 
