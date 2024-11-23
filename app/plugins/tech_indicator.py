@@ -327,39 +327,43 @@ class Plugin:
         - econ_data_path (str): Path to the economic calendar CSV file.
         - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings for processing.
-        
+
         Returns:
         - pd.DataFrame: Aligned event impact features.
         """
         print("Processing economic calendar with attention...")
 
-        # Column names for the economic calendar dataset
+        # Explicit column names based on the sample dataset
         column_names = [
             'event_date', 'event_time', 'country', 'volatility', 'description',
             'evaluation', 'data_format', 'actual', 'forecast', 'previous'
         ]
 
-        # Load the economic calendar dataset
+        # Load the dataset without headers
         econ_data = pd.read_csv(
             econ_data_path,
-            header=None,
-            names=column_names
+            header=None,  # No headers in the CSV
+            names=column_names,  # Assigning column names
+            skip_blank_lines=True,  # Skip empty lines
+            na_values=["", " ", "vised From"],  # Handle common missing value markers
+            encoding='utf-8'
         )
 
         # Parse datetime and set as index
         econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'], format='%Y/%m/%d %H:%M:%S', errors='coerce'
+            econ_data['event_date'] + ' ' + econ_data['event_time'],
+            format='%Y/%m/%d %H:%M:%S', errors='coerce'
         )
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
-        # Ensure the index is sorted for proper slicing
+        # Sort the index for proper slicing
         econ_data.sort_index(inplace=True)
 
         # Filter relevant countries and volatility levels
         relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
-        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
-        econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+        econ_data = econ_data[econ_data['country'].str.strip().isin(relevant_countries)]
+        econ_data = econ_data[econ_data['volatility'].str.strip().isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
 
         # Temporal weighting mechanism
         def apply_attention_weights(window, current_time):
@@ -400,6 +404,7 @@ class Plugin:
 
         print(f"Processed economic calendar features with shape: {processed_df.shape}")
         return processed_df
+
 
 
     
