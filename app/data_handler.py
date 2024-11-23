@@ -1,41 +1,42 @@
 import pandas as pd
 
-def load_csv(file_path, has_headers=True, dataset_type=None, config=None):
+def load_csv(file_path, config=None):
     """
-    Load a CSV file with dynamic column mapping based on dataset type.
+    Load a CSV file dynamically based on header mappings and configurations.
 
     Parameters:
-    - file_path (str): Path to the CSV file.
-    - has_headers (bool): Whether the CSV file includes headers.
-    - dataset_type (str): The type of dataset being loaded (e.g., 'forex_15m').
+    - file_path (str): Path to the file.
     - config (dict): Configuration for header mappings.
 
     Returns:
-    - pd.DataFrame: Processed DataFrame with standardized column names.
+    - pd.DataFrame: Loaded and processed data.
     """
     try:
-        # Default to an empty dictionary if config is None
+        # Load header mappings from config if available
         header_mappings = config.get('header_mappings', {}) if config else {}
+
+        # Check for dataset type
+        dataset_type = config.get('dataset_type', 'default') if config else 'default'
         column_map = header_mappings.get(dataset_type, {})
 
-        # Read CSV
-        if has_headers:
-            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+        # Load the CSV file
+        data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+
+        # Apply column mappings
+        if column_map:
             data.rename(columns=column_map, inplace=True)
-        else:
-            column_names = list(column_map.values()) if column_map else None
-            data = pd.read_csv(file_path, sep=',', header=None, names=column_names, parse_dates=[0], dayfirst=True)
 
-        # Ensure 'date' or 'datetime' column is set as index
-        date_col = column_map.get('date', 'date') if 'date' in column_map else column_map.get('datetime', 'datetime')
-        if date_col in data.columns:
-            data.set_index(date_col, inplace=True)
+        # Ensure date column is parsed
+        if 'date' in data.columns:
+            data['date'] = pd.to_datetime(data['date'], errors='coerce')
+            data.set_index('date', inplace=True)
 
-        print(f"Loaded data columns: {data.columns}")  # Debugging line
-
-        # Convert all non-date columns to numeric
-        for col in data.columns:
+        # Convert numeric columns
+        for col in data.select_dtypes(include=['object', 'category']).columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
+
+        print(f"Loaded data columns: {list(data.columns)}")
+        print(f"First 5 rows of data:\n{data.head()}")
 
     except Exception as e:
         print(f"An error occurred while loading the CSV: {e}")

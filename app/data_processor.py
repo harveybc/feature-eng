@@ -131,26 +131,23 @@ def process_data(data, plugin, config):
         date_column.columns = ['date']  # Name the column
 
     # Debugging: Show the data columns before processing
-    print(f"Data columns before processing: {data.columns}")
+    print(f"Data columns before processing: {list(data.columns)}")
 
     # Dynamically map the dataset headers based on the configuration
     header_mappings = config.get('header_mappings', {})
     dataset_type = config.get('dataset_type', 'default')  # Default dataset type
-    dataset_headers = header_mappings.get(dataset_type, [])
+    dataset_headers = header_mappings.get(dataset_type, {})
 
     # Map and verify OHLC columns
-    if dataset_headers:
-        ohlc_columns = [header_mappings[dataset_type].get(k, k) for k in ['open', 'high', 'low', 'close']]
-    else:
-        ohlc_columns = ['open', 'high', 'low', 'close']  # Fallback to default OHLC column names
+    ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
 
     # Verify if the required OHLC columns are present
-    if all(col in data.columns for col in ohlc_columns):
-        numeric_data = data[ohlc_columns]
-    else:
-        raise KeyError(f"Missing expected OHLC columns: {ohlc_columns}")
+    missing_columns = [col for col in ohlc_columns if col not in data.columns]
+    if missing_columns:
+        raise KeyError(f"Missing expected OHLC columns: {missing_columns}. Available columns: {list(data.columns)}")
 
-    # Ensure input data is numeric
+    # Filter the numeric OHLC columns
+    numeric_data = data[ohlc_columns]
     numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
 
     # Process technical indicators
@@ -159,7 +156,7 @@ def process_data(data, plugin, config):
     # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
 
-    # Process additional datasets separately
+    # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
 
     # Combine processed technical indicators with additional features
@@ -167,7 +164,6 @@ def process_data(data, plugin, config):
 
     print(f"Final dataset shape: {final_data.shape}")
     return final_data
-
 
 
 
@@ -194,19 +190,13 @@ def run_feature_engineering_pipeline(config, plugin):
     # Save final configuration and debug information
     end_time = time.time()
     execution_time = end_time - start_time
-    debug_info = {
-        'execution_time': float(execution_time)
-    }
+    debug_info = {'execution_time': float(execution_time)}
 
     # Save debug info if specified
     if config.get('save_log'):
         save_debug_info(debug_info, config['save_log'])
         print(f"Debug info saved to {config['save_log']}.")
 
-    # Remote log debug info and config if specified
-    if config.get('remote_log'):
-        remote_log(config, debug_info, config['remote_log'], config['username'], config['password'])
-        print(f"Debug info saved to {config['remote_log']}.")
-
     print(f"Execution time: {execution_time} seconds")
+
 
