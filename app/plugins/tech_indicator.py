@@ -427,8 +427,6 @@ class Plugin:
 
 
 
-
-
     
     def compute_temporal_impact(self, econ_data, hourly_index, impact_window):
         """
