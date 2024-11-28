@@ -403,6 +403,11 @@ class Plugin:
             if not isinstance(timestamp, pd.Timestamp):
                 timestamp = pd.Timestamp(timestamp)
 
+            # Ensure timestamp is within the range of econ_data.index
+            if timestamp not in econ_data.index:
+                print(f"Warning: {timestamp} is not in the economic data index.")
+                continue  # Skip this timestamp if not found in econ_data
+
             # Get rolling window of events up to the current timestamp
             window = econ_data.loc[:timestamp].tail(window_size)
 
