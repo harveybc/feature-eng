@@ -320,39 +320,90 @@ class Plugin:
         return hourly_features
     
 
-    import pandas as pd
-
-    def process_economic_calendar_with_attention(self, hourly_data, econ_data, window_size):
+    def process_economic_calendar_with_attention(self, econ_data_path, hourly_data, config):
         """
-        Processes economic calendar data with attention weights, aligning it with hourly data.
-        
-        Args:
-            hourly_data (pd.DataFrame): The hourly data to align with the economic calendar.
-            econ_data (pd.DataFrame): The economic calendar data.
-            window_size (int): The size of the window to consider for attention weighting.
-        
+        Processes economic calendar using temporal attention with positional encoding.
+
+        Parameters:
+        - econ_data_path (str): Path to the economic calendar CSV file.
+        - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings for processing.
+
         Returns:
-            pd.DataFrame: A DataFrame containing the processed features with attention applied.
+        - pd.DataFrame: Aligned event impact features with positional encodings.
         """
+        print("Processing economic calendar with attention and positional encoding...")
+
+        # Column names for the economic calendar dataset
+        column_names = [
+            'event_date', 'event_time', 'country', 'volatility', 'description',
+            'evaluation', 'data_format', 'actual', 'forecast', 'previous'
+        ]
+
+        # Load the economic calendar dataset
+        econ_data = pd.read_csv(
+            econ_data_path,
+            header=None,
+            names=column_names
+        )
+
+        # Parse datetime and set as index
+        econ_data['datetime'] = pd.to_datetime(
+            econ_data['event_date'] + ' ' + econ_data['event_time'],
+            format='%Y/%m/%d %H:%M:%S',
+            errors='coerce'
+        )
+        econ_data.dropna(subset=['datetime'], inplace=True)
+        econ_data.set_index('datetime', inplace=True)
+
+        # Ensure econ_data.index is a DatetimeIndex
+        if not isinstance(econ_data.index, pd.DatetimeIndex):
+            raise ValueError("econ_data index is not a valid DatetimeIndex after datetime parsing.")
+
         # Ensure hourly_data.index is a DatetimeIndex
-        try:
-            hourly_data.index = pd.to_datetime(hourly_data.index, errors='raise')
-        except Exception as e:
-            print(f"Error in parsing hourly_data index: {e}")
-            return pd.DataFrame()  # Return empty DataFrame in case of error
+        hourly_data.index = pd.to_datetime(hourly_data.index, errors='coerce')
 
-        # Check the ranges of the two datasets
-        print(f"Economic data range: {econ_data.index.min()} to {econ_data.index.max()}")
-        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
+        # Validate hourly_data index type
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            raise ValueError("hourly_data index is not a valid DatetimeIndex.")
 
-        # Initialize an empty list to store processed features
+        # Generate positional encodings for the events
+        max_time = hourly_data.index.max()  # Get maximum timestamp
+        econ_data['position'] = econ_data.index.map(lambda t: (max_time - t).total_seconds() / 3600)  # Hours from max_time
+        num_features = config.get('positional_encoding_dim', 8)  # Positional encoding dimension
+        econ_data_positional_encoding = generate_positional_encoding(len(econ_data), num_features)
+        positional_encoding_df = pd.DataFrame(
+            econ_data_positional_encoding,
+            index=econ_data.index,
+            columns=[f'pos_enc_{i}' for i in range(num_features)]
+        )
+        econ_data = pd.concat([econ_data, positional_encoding_df], axis=1)
+
+        # Filter relevant countries and volatility levels
+        relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
+        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
+        econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+
+        # Temporal weighting mechanism
+        def apply_attention_weights(window, current_time):
+            """
+            Assigns weights to events in the window based on their temporal proximity.
+            """
+            time_diff = (current_time - window.index).total_seconds() / 3600  # Convert to hours
+            weights = np.exp(-time_diff / config.get('temporal_decay', 24))  # Exponential decay
+            weighted_values = window[['actual', 'forecast', 'previous']].apply(pd.to_numeric, errors='coerce').multiply(weights, axis=0)
+            return weighted_values.sum()
+
+        # Rolling window processing
+        window_size = config.get('event_window_size', 8)
         processed_features = []
 
-        # Loop through each timestamp in hourly_data
         for timestamp in hourly_data.index:
-            print(f"Processing timestamp: {timestamp}")
+            # Convert timestamp to datetime if necessary
+            if not isinstance(timestamp, pd.Timestamp):
+                timestamp = pd.Timestamp(timestamp)
 
-            # Check if timestamp exists in the economic data index
+            # Ensure timestamp is within the range of econ_data.index
             if timestamp not in econ_data.index:
                 print(f"Warning: {timestamp} is not in the economic data index.")
                 continue  # Skip this timestamp if not found in econ_data
@@ -360,41 +411,34 @@ class Plugin:
             # Get rolling window of events up to the current timestamp
             window = econ_data.loc[:timestamp].tail(window_size)
 
-            # If no events are found in the window, skip this timestamp
-            if window.empty:
-                print(f"No events found for timestamp {timestamp}. Skipping...")
-                continue
+            if not window.empty:
+                weighted_features = apply_attention_weights(window, timestamp)
+            else:
+                # Fill with zeros if no events in the window
+                weighted_features = pd.Series(index=['actual', 'forecast', 'previous'], dtype='float64').fillna(0)
 
-            print(f"Found {len(window)} events for timestamp {timestamp}. Applying attention weights...")
-
-            # Apply temporal attention weights (this function should be defined elsewhere)
-            try:
-                weighted_features = self.apply_attention_weights(window, timestamp)
-            except Exception as e:
-                print(f"Error in applying attention weights at timestamp {timestamp}: {e}")
-                continue  # Skip this timestamp in case of an error in applying weights
-
-            # Add timestamp to the processed features
+            # Add timestamp for alignment
             weighted_features['timestamp'] = timestamp
             processed_features.append(weighted_features)
 
-        # Check if any features were processed
+        # Check the structure of processed_features before creating DataFrame
         if not processed_features:
-            print("No features were generated after processing all timestamps.")
             raise ValueError("No processed features were generated. Check the processing loop.")
 
-        # Convert the list of processed features into a DataFrame and set the timestamp as the index
+        # Create DataFrame from processed features
         processed_df = pd.DataFrame(processed_features)
 
-        # Ensure that the 'timestamp' column exists before setting it as the index
+        # Ensure the 'timestamp' column is present
         if 'timestamp' not in processed_df.columns:
-            print("Error: 'timestamp' column is missing from the processed features.")
-            return pd.DataFrame()  # Return empty DataFrame if 'timestamp' column is missing
+            raise KeyError("'timestamp' column is missing from processed features.")
 
         processed_df.set_index('timestamp', inplace=True)
 
-        return processed_df
+        # Align with the hourly dataset
+        processed_df = processed_df.reindex(hourly_data.index).fillna(0)
 
+        print(f"Processed economic calendar features with shape: {processed_df.shape}")
+        return processed_df
 
 
 
