@@ -421,8 +421,18 @@ class Plugin:
             weighted_features['timestamp'] = timestamp
             processed_features.append(weighted_features)
 
+        # Check the structure of processed_features before creating DataFrame
+        if not processed_features:
+            raise ValueError("No processed features were generated. Check the processing loop.")
+
         # Create DataFrame from processed features
-        processed_df = pd.DataFrame(processed_features).set_index('timestamp')
+        processed_df = pd.DataFrame(processed_features)
+
+        # Ensure the 'timestamp' column is present
+        if 'timestamp' not in processed_df.columns:
+            raise KeyError("'timestamp' column is missing from processed features.")
+
+        processed_df.set_index('timestamp', inplace=True)
 
         # Align with the hourly dataset
         processed_df = processed_df.reindex(hourly_data.index).fillna(0)
