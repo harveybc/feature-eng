@@ -563,6 +563,7 @@ class Plugin:
         Parameters:
         - forex_files (list): List of file paths for Forex rate datasets.
         - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings.
 
         Returns:
         - dict: Processed Forex features.
@@ -570,28 +571,52 @@ class Plugin:
         print("Processing multiple Forex datasets...")
 
         forex_features = {}
+
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
             
-            # Load the Forex data
-            forex_data = load_csv(
-                file_path,
-                has_headers=True,
-                config = config
-            )
-            
+            # Validate the file path
+            try:
+                forex_data = load_csv(
+                    file_path,
+                    has_headers=True,
+                    config=config
+                )
+            except FileNotFoundError:
+                print(f"Warning: File not found - {file_path}. Skipping.")
+                continue
+
+            # Ensure datetime parsing and alignment
+            try:
+                forex_data.index = pd.to_datetime(forex_data.index, errors='coerce')
+                forex_data.dropna(subset=forex_data.index.names, inplace=True)
+            except Exception as e:
+                print(f"Error parsing datetime index for {file_path}: {e}")
+                continue
+
+            # Validate required columns
+            required_columns = config.get('forex_required_columns', ['Close'])
+            missing_columns = [col for col in required_columns if col not in forex_data.columns]
+            if missing_columns:
+                print(f"Warning: Missing required columns in {file_path} - {missing_columns}. Skipping.")
+                continue
+
             # Resample to hourly resolution
             forex_data = forex_data.resample('1H').mean()
-            
+
             # Align with the hourly dataset
-            forex_data = forex_data.reindex(hourly_data.index, method='ffill').fillna(0)
+            aligned_forex = forex_data.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
 
             # Add processed Forex features to the output
-            for col in forex_data.columns:
-                forex_features[f"{file_path.split('/')[-1].split('.')[0]}_{col}"] = forex_data[col].values
+            for col in aligned_forex.columns:
+                forex_features[f"{file_path.split('/')[-1].split('.')[0]}_{col}"] = aligned_forex[col].values
 
+        if not forex_features:
+            raise ValueError("No Forex datasets were successfully processed. Check the file paths or data formats.")
+        
         print(f"Processed Forex datasets: {list(forex_features.keys())}")
         return forex_features
+
 
     def align_datasets(self, base_data, additional_datasets):
         """
