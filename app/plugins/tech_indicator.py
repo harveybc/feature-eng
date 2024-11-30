@@ -724,6 +724,7 @@ class Plugin:
 
 
 
+
     def clean_and_filter_economic_calendar(self, file_path, hourly_data, config):
         """
         Cleans and filters the economic calendar, aligning it with the hourly dataset.
