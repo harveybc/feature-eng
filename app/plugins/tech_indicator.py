@@ -248,35 +248,58 @@ class Plugin:
 
 
 
-    def process_high_frequency_data(self, high_freq_file, hourly_data, config):
+    def process_high_frequency_data(self, high_freq_file, hourly_data, config, window_size=4):
         """
-        Processes high-frequency data (e.g., 15-minute EUR/USD dataset) and aligns it with the hourly dataset.
+        Procesa datos de alta frecuencia y los integra como características adicionales.
+        
+        Parámetros:
+        - high_freq_file (str): Ruta al archivo de datos de alta frecuencia.
+        - hourly_data (pd.DataFrame): Datos con resolución horaria.
+        - config (dict): Configuración.
+        - window_size (int): Tamaño de la ventana de datos históricos a incluir.
 
-        Parameters:
-        - high_freq_file (str): Path to the high-frequency dataset.
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings.
-
-        Returns:
-        - pd.DataFrame: Processed high-frequency features.
+        Retorna:
+        - pd.DataFrame: Datos de alta frecuencia procesados con características adicionales.
         """
-        print(f"Processing high-frequency dataset: {high_freq_file}")
+        print(f"Procesando datos de alta frecuencia desde: {high_freq_file}")
 
-        # Load the high-frequency data
+        # Cargar los datos de alta frecuencia
         high_freq_data = load_csv(
             high_freq_file,
             has_headers=True,
-            config= config
+            config=config
         )
 
-        # Resample to hourly resolution
-        high_freq_data = high_freq_data.resample('1H').mean()
+        # Asegurarse de que el índice es un DatetimeIndex
+        high_freq_data.index = pd.to_datetime(high_freq_data.index, errors='coerce')
 
-        # Align with the hourly dataset
-        aligned_high_freq = high_freq_data.reindex(hourly_data.index, method='ffill').fillna(0)
+        # Reescalar a resolución horaria con agregación promedio
+        high_freq_resampled = high_freq_data.resample('1H').mean()
 
-        print(f"High-frequency dataset aligned with hourly dataset. Shape: {aligned_high_freq.shape}")
-        return aligned_high_freq
+        # Alinear con los datos horarios
+        aligned_high_freq = high_freq_resampled.reindex(hourly_data.index, method='ffill').fillna(0)
+
+        # Generar ventanas deslizantes para cada hora
+        high_freq_features = {}
+        for timestamp in hourly_data.index:
+            # Extraer la ventana de datos pasados
+            window = high_freq_data.loc[:timestamp].tail(window_size)
+
+            # Agregar las columnas de la ventana como nuevas características
+            for i, col in enumerate(window.columns):
+                for j, value in enumerate(window[col].values[::-1]):  # Orden inverso (más reciente primero)
+                    high_freq_features.setdefault(f"{col}_t-{j+1}", []).append(value)
+
+        # Agregar los valores actuales de alta frecuencia
+        for col in aligned_high_freq.columns:
+            high_freq_features[col] = aligned_high_freq[col].values
+
+        # Combinar en un DataFrame
+        high_freq_features_df = pd.DataFrame(high_freq_features, index=hourly_data.index)
+
+        print(f"Datos de alta frecuencia procesados con forma: {high_freq_features_df.shape}")
+        return high_freq_features_df
+
 
 
     def process_economic_calendar(self, econ_data, hourly_data, config):
@@ -649,17 +672,24 @@ class Plugin:
         """
         print("Processing S&P 500 data...")
 
+        # Validate that 'date' column exists
+        if 'date' not in sp500_data.columns:
+            raise KeyError("S&P 500 data must contain a 'date' column.")
+
         # Ensure datetime parsing and alignment
-        sp500_data['date'] = pd.to_datetime(sp500_data['date'])
+        sp500_data['date'] = pd.to_datetime(sp500_data['date'], errors='coerce')
+        sp500_data.dropna(subset=['date'], inplace=True)  # Drop rows with invalid dates
         sp500_data.set_index('date', inplace=True)
 
-        # Forward-fill daily data to hourly resolution
-        sp500_data = sp500_data.resample('1H').ffill()
+        # Resample to hourly resolution
+        sp500_resampled = sp500_data.resample('1H').ffill()
 
         # Align with the hourly dataset
-        aligned_sp500 = sp500_data.reindex(hourly_data.index, method='ffill').fillna(0)
+        aligned_sp500 = sp500_resampled.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
+
         print("S&P 500 data aligned with hourly dataset.")
         return aligned_sp500
+
 
     def process_vix_data(self, vix_data, hourly_data):
         """
@@ -674,17 +704,24 @@ class Plugin:
         """
         print("Processing VIX data...")
 
+        # Validate that 'date' column exists
+        if 'date' not in vix_data.columns:
+            raise KeyError("VIX data must contain a 'date' column.")
+
         # Ensure datetime parsing and alignment
-        vix_data['date'] = pd.to_datetime(vix_data['date'])
+        vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
+        vix_data.dropna(subset=['date'], inplace=True)  # Drop rows with invalid dates
         vix_data.set_index('date', inplace=True)
 
-        # Forward-fill daily data to hourly resolution
-        vix_data = vix_data.resample('1H').ffill()
+        # Resample to hourly resolution
+        vix_resampled = vix_data.resample('1H').ffill()
 
         # Align with the hourly dataset
-        aligned_vix = vix_data.reindex(hourly_data.index, method='ffill').fillna(0)
+        aligned_vix = vix_resampled.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
+
         print("VIX data aligned with hourly dataset.")
         return aligned_vix
+
 
 
     def clean_and_filter_economic_calendar(self, file_path, hourly_data, config):
