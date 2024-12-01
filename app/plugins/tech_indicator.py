@@ -1013,13 +1013,13 @@ class Plugin:
     def process_sp500_data(self, sp500_data_path, config, common_start, common_end):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
-
+        
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - config (dict): Configuration settings.
         - common_start (str or pd.Timestamp): The common start date for alignment.
         - common_end (str or pd.Timestamp): The common end date for alignment.
-
+        
         Returns:
         - dict: Aligned S&P 500 features or None if processing fails.
         """
@@ -1045,7 +1045,6 @@ class Plugin:
         if not isinstance(hourly_data.index, pd.DatetimeIndex):
             raise ValueError("Hourly data must have a valid DatetimeIndex.")
 
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the S&P 500 dataset
@@ -1061,14 +1060,17 @@ class Plugin:
         if not isinstance(sp500_data.index, pd.DatetimeIndex):
             raise ValueError("S&P 500 data must have a valid DatetimeIndex.")
 
-        print(f"Loaded S&P 500 data columns: {list(sp500_data.columns)}")
-        print(f"First 5 rows of S&P 500 data:\n{sp500_data.head()}")
+        print(f"S&P 500 data range: {sp500_data.index.min()} to {sp500_data.index.max()}")
 
         # Resample the S&P 500 data to hourly frequency
         sp500_close = sp500_data['Close'].resample('1H').ffill()
 
+        print(f"S&P 500 resampled range: {sp500_close.index.min()} to {sp500_close.index.max()}")
+
         # Align with the hourly dataset
         aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
+
+        print(f"Aligned S&P 500 range before filtering: {aligned_sp500.index.min()} to {aligned_sp500.index.max()}")
 
         # Apply common start and end date range filter
         aligned_sp500 = aligned_sp500[(aligned_sp500.index >= common_start) & (aligned_sp500.index <= common_end)]
