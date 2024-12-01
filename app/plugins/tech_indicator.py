@@ -596,7 +596,7 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - dict: Processed Forex features.
+        - pd.DataFrame: Processed Forex features with only CLOSE values.
         """
         print("Processing multiple Forex datasets...")
 
@@ -610,26 +610,29 @@ class Plugin:
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
 
-            # Load the Forex data using the new function
+            # Load the Forex data
             forex_data = load_additional_csv(file_path, dataset_type='forex_15m', config=config)
 
-            # Verify that the index is a DatetimeIndex
-            if not isinstance(forex_data.index, pd.DatetimeIndex):
-                raise ValueError(f"Forex data from {file_path} does not have a valid DatetimeIndex after parsing.")
+            # Ensure the 'CLOSE' column exists
+            if 'CLOSE' not in forex_data.columns:
+                raise KeyError(f"The Forex dataset {file_path} must contain a 'CLOSE' column.")
 
             # Resample to hourly resolution
-            forex_data = forex_data.resample('1h').mean()
+            forex_close = forex_data['CLOSE'].resample('1H').mean()
 
             # Align with the hourly dataset
-            forex_data = forex_data.reindex(hourly_data.index, method='ffill').fillna(0)
+            aligned_forex_close = forex_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-            # Add processed Forex features to the output
-            for col in forex_data.columns:
-                forex_features[f"{file_path.split('/')[-1].split('.')[0]}_{col}"] = forex_data[col].values
+            # Add processed Forex CLOSE feature to the output
+            feature_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
+            forex_features[feature_name] = aligned_forex_close.values
 
-        print(f"Processed Forex datasets: {list(forex_features.keys())}")
-        return forex_features
+        # Convert to DataFrame
+        forex_features_df = pd.DataFrame(forex_features, index=hourly_data.index)
 
+        print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features_df.head()}")
+        print(f"Forex features processed successfully. Shape: {forex_features_df.shape}")
+        return forex_features_df
 
 
 
@@ -699,31 +702,40 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, hourly_data, config=None):
+    def process_sp500_data(self, sp500_data_path, hourly_data, config):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings (not used here for S&P 500).
+        - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned S&P 500 features.
+        - pd.DataFrame: Aligned S&P 500 CLOSE feature.
         """
         print("Processing S&P 500 data...")
 
-        # Use the dedicated loader for S&P 500 data
-        sp500_data = load_sp500_csv(sp500_data_path)
+        # Load the S&P 500 data
+        sp500_data = load_additional_csv(sp500_data_path, dataset_type='sp500', config=config)
+
+        # Ensure the 'Close' column exists
+        if 'Close' not in sp500_data.columns:
+            raise KeyError("The S&P 500 dataset must contain a 'Close' column.")
 
         # Resample to hourly resolution
-        sp500_data = sp500_data.resample('1h').ffill()
+        sp500_close = sp500_data['Close'].resample('1h').ffill()
 
         # Align with the hourly dataset
-        aligned_sp500 = sp500_data.reindex(hourly_data.index, method='ffill').fillna(0)
+        aligned_sp500_close = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-        print("S&P 500 data aligned with hourly dataset.")
-        return aligned_sp500
+        # Convert to DataFrame
+        sp500_features_df = pd.DataFrame({'SP500_CLOSE': aligned_sp500_close}, index=hourly_data.index)
+
+        print(f"Processed S&P 500 CLOSE feature (first 5 rows):\n{sp500_features_df.head()}")
+        print(f"S&P 500 feature processed successfully. Shape: {sp500_features_df.shape}")
+        return sp500_features_df
+
 
 
 
@@ -737,29 +749,30 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned VIX features.
+        - pd.DataFrame: Aligned VIX CLOSE feature.
         """
         print("Processing VIX data...")
 
-        # Load the VIX data using the new function
-        vix_data = load_additional_csv(
-            vix_data_path,
-            dataset_type='vix',
-            config=config
-        )
+        # Load the VIX data
+        vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
 
-        # Verify that the index is a DatetimeIndex
-        if not isinstance(vix_data.index, pd.DatetimeIndex):
-            raise ValueError(f"VIX data from {vix_data_path} does not have a valid DatetimeIndex.")
+        # Ensure the 'close' column exists
+        if 'close' not in vix_data.columns:
+            raise KeyError("The VIX dataset must contain a 'close' column.")
 
         # Resample to hourly resolution
-        vix_resampled = vix_data.resample('1h').ffill()
+        vix_close = vix_data['close'].resample('1H').ffill()
 
         # Align with the hourly dataset
-        aligned_vix = vix_resampled.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
+        aligned_vix_close = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-        print("VIX data aligned with hourly dataset.")
-        return aligned_vix
+        # Convert to DataFrame
+        vix_features_df = pd.DataFrame({'VIX_CLOSE': aligned_vix_close}, index=hourly_data.index)
+
+        print(f"Processed VIX CLOSE feature (first 5 rows):\n{vix_features_df.head()}")
+        print(f"VIX feature processed successfully. Shape: {vix_features_df.shape}")
+        return vix_features_df
+
 
 
 
