@@ -197,32 +197,48 @@ class Plugin:
         return indicator_df
 
 
-
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, sub-periodicities, S&P 500, VIX, and Forex pairs).
-
+        
         Parameters:
         - data (pd.DataFrame): Full dataset (hourly resolution).
         - config (dict): Configuration settings.
-
+        
         Returns:
         - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
         additional_features = {}
 
+        # Step 1: Calculate the common date range across all datasets
+        common_start = data.index.min()  # Start with the base dataset's start time
+        common_end = data.index.max()  # Start with the base dataset's end time
+
+        # Collect dataset ranges
+        dataset_ranges = []
+
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
             forex_features = self.process_forex_data(config['forex_datasets'], config=config)
             additional_features.update(forex_features)
+            
+            # Get the Forex datasets range
+            forex_start = forex_features.index.min()
+            forex_end = forex_features.index.max()
+            dataset_ranges.append((forex_start, forex_end))
 
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
             sp500_features = self.process_sp500_data(config['sp500_dataset'], config)
-            additional_features.update(sp500_features)  # No .to_dict()
+            additional_features.update(sp500_features)
+
+            # Get the S&P 500 dataset range
+            sp500_start = sp500_features.index.min()
+            sp500_end = sp500_features.index.max()
+            dataset_ranges.append((sp500_start, sp500_end))
 
         # Process VIX Data
         if config.get('vix_dataset'):
@@ -230,27 +246,47 @@ class Plugin:
             vix_features = self.process_vix_data(config['vix_dataset'], config)
             additional_features.update(vix_features)
 
+            # Get the VIX dataset range
+            vix_start = vix_features.index.min()
+            vix_end = vix_features.index.max()
+            dataset_ranges.append((vix_start, vix_end))
+
         # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
             print("Processing high-frequency EUR/USD dataset...")
-            high_freq_features = self.process_high_frequency_data(
-                config['high_freq_dataset'], config
-            )
+            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config)
             additional_features.update(high_freq_features)
+
+            # Get the high-frequency dataset range
+            high_freq_start = high_freq_features.index.min()
+            high_freq_end = high_freq_features.index.max()
+            dataset_ranges.append((high_freq_start, high_freq_end))
 
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
-            econ_calendar = self.process_economic_calendar(
-                config['economic_calendar'], config
-            )
+            econ_calendar = self.process_economic_calendar(config['economic_calendar'], config)
             additional_features.update(econ_calendar)
 
-        # Combine into a DataFrame
+            # Get the economic calendar dataset range
+            econ_start = econ_calendar.index.min()
+            econ_end = econ_calendar.index.max()
+            dataset_ranges.append((econ_start, econ_end))
+
+        # Step 2: Find the common valid range
+        for start, end in dataset_ranges:
+            common_start = max(common_start, start)  # Start from the maximum start time
+            common_end = min(common_end, end)  # End at the minimum end time
+
+        # Step 3: Align all datasets to the common date range
+        for key, dataset in additional_features.items():
+            additional_features[key] = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+
+        # Step 4: Combine into a DataFrame
         additional_features_df = pd.DataFrame(additional_features)
         print(f"Additional features processed: {additional_features_df.columns}")
-        return additional_features_df
 
+        return additional_features_df
 
 
     def process_high_frequency_data(self, high_freq_data_path, config):
@@ -369,7 +405,7 @@ class Plugin:
         # Combine hourly data with predictions for verification
         verification_df = pd.concat([hourly_data['close'], aligned_trend, aligned_volatility], axis=1)
         print("Verification of alignment between hourly data and predictions (first 10 rows):")
-        print(verification_df.head(10))
+        print(verification_df.head(200))
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
