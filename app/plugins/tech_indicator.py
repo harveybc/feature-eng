@@ -586,6 +586,7 @@ class Plugin:
         Parameters:
         - forex_files (list): List of file paths for Forex rate datasets.
         - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings.
 
         Returns:
         - dict: Processed Forex features.
@@ -593,29 +594,41 @@ class Plugin:
         print("Processing multiple Forex datasets...")
 
         forex_features = {}
-        forex_columns = ['DATE_TIME', 'HIGH', 'LOW', 'OPEN', 'CLOSE']
-
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
-
-            # Load the Forex data with explicit column names
+            
+            # Load the Forex data
             forex_data = load_csv(
                 file_path,
                 config=config
             )
+            
+            # Ensure the DATE_TIME column is parsed as a datetime
+            if 'DATE_TIME' in forex_data.columns:
+                forex_data['DATE_TIME'] = pd.to_datetime(
+                    forex_data['DATE_TIME'],
+                    format='%Y.%m.%d %H:%M:%S',
+                    errors='coerce'  # Handle parsing errors gracefully
+                )
+                forex_data.set_index('DATE_TIME', inplace=True)
+
+            # Verify that the index is a DatetimeIndex
+            if not isinstance(forex_data.index, pd.DatetimeIndex):
+                raise ValueError(f"Forex data from {file_path} does not have a valid DatetimeIndex after parsing.")
 
             # Resample to hourly resolution
-            forex_data = forex_data.resample('1h').mean()
+            forex_data = forex_data.resample('1H').mean()
 
             # Align with the hourly dataset
             forex_data = forex_data.reindex(hourly_data.index, method='ffill').fillna(0)
 
             # Add processed Forex features to the output
-            for col in ['HIGH', 'LOW', 'OPEN', 'CLOSE']:
+            for col in forex_data.columns:
                 forex_features[f"{file_path.split('/')[-1].split('.')[0]}_{col}"] = forex_data[col].values
 
         print(f"Processed Forex datasets: {list(forex_features.keys())}")
         return forex_features
+
 
 
 
