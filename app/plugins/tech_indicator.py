@@ -205,14 +205,6 @@ class Plugin:
         print("Processing additional datasets...")
         additional_features = {}
 
-        # Process High-Frequency EUR/USD Dataset
-        if config.get('high_freq_dataset'):
-            print("Processing high-frequency EUR/USD dataset...")
-            high_freq_features = self.process_high_frequency_data(
-                config['high_freq_dataset'], data, config
-            )
-            additional_features.update(high_freq_features.to_dict(orient="list"))
-
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
@@ -232,11 +224,20 @@ class Plugin:
             vix_data = load_csv(config['vix_dataset'], config)
             vix_features = self.process_vix_data(vix_data, data)
             additional_features.update(vix_features.to_dict(orient="list"))
-    
+
+        # Process High-Frequency EUR/USD Dataset
+        if config.get('high_freq_dataset'):
+            print("Processing high-frequency EUR/USD dataset...")
+            high_freq_features = self.process_high_frequency_data(
+                config['high_freq_dataset'], data, config
+            )
+            additional_features.update(high_freq_features.to_dict(orient="list"))
+
+
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
-            econ_calendar = self.process_economic_calendar_with_attention(
+            econ_calendar = self.process_economic_calendar(
                 config['economic_calendar'], data, config
             )
             additional_features.update(econ_calendar.to_dict(orient="list"))
@@ -303,91 +304,49 @@ class Plugin:
 
 
 
-    def process_economic_calendar(econ_data_path, hourly_data, config):
+    def process_economic_calendar(self, econ_data_path, hourly_data, config):
         """
-        Processes the economic calendar dataset into an hourly-aligned time series.
+        Processes economic calendar data into a time-series aligned with hourly data.
 
         Parameters:
-        - econ_data_path (str): Path to the economic calendar dataset.
-        - hourly_data (pd.DataFrame): Primary dataset with hourly resolution.
-        - config (dict): Configuration containing window size, relevant countries, etc.
+        - econ_data_path (str): Path to the economic calendar CSV file.
+        - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Time series aligned with hourly_data containing processed event features.
+        - pd.DataFrame: Processed economic calendar features aligned to hourly data.
         """
-        print("Processing economic calendar...")
+        print("Processing economic calendar data...")
 
-        # Load the dataset
-        column_names = [
-            'event_date', 'event_time', 'country', 'volatility', 'description',
-            'evaluation', 'data_format', 'actual_value', 'forecast_value', 'previous_value'
+        econ_columns = [
+            'Event date', 'Event time', 'Country', 'Volatility',
+            'Description', 'Evaluation', 'Data format',
+            'Actual', 'Forecast', 'Previous'
         ]
-        econ_data = pd.read_csv(econ_data_path, header=None, names=column_names)
 
-        # Combine date and time into a single datetime column
-        econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'], errors='coerce'
+        # Load the economic calendar data
+        econ_data = load_csv(
+            econ_data_path,
+            has_headers=False,  # Economic calendar has no headers
+            columns=econ_columns
         )
-        econ_data.dropna(subset=['datetime'], inplace=True)
+
+        # Combine event date and time into a single datetime column
+        econ_data['datetime'] = pd.to_datetime(
+            econ_data['Event date'] + ' ' + econ_data['Event time'],
+            format='%Y/%m/%d %H:%M:%S',
+            errors='coerce'
+        )
         econ_data.set_index('datetime', inplace=True)
 
-        # Filter relevant events
-        relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
-        econ_data = econ_data[econ_data['country'].str.strip().isin(relevant_countries)]
+        # Process and align the economic calendar data
+        aligned_econ = self.events_to_hourly_timeseries(
+            econ_data, hourly_data.index, config['window_size'], config['temporal_decay']
+        )
 
-        if config.get('filter_by_volatility', True):
-            econ_data = econ_data[econ_data['volatility'].str.contains('High|Moderate', na=False)]
+        print("Economic calendar processed successfully.")
+        return pd.DataFrame(aligned_econ, index=hourly_data.index)
 
-        # Handle categorical features using embeddings
-        embedding_columns = ['country', 'volatility', 'description', 'evaluation']
-        embeddings = {col: econ_data[col].astype('category').cat.codes for col in embedding_columns}
-        for col, codes in embeddings.items():
-            econ_data[col + '_embedding'] = codes
-
-        # Handle numerical features and standardize units
-        numerical_columns = ['actual_value', 'forecast_value', 'previous_value']
-        econ_data[numerical_columns] = econ_data[numerical_columns].apply(pd.to_numeric, errors='coerce')
-
-        # Add derived features
-        econ_data['actual_minus_forecast'] = econ_data['actual_value'] - econ_data['forecast_value']
-        econ_data['actual_minus_previous'] = econ_data['actual_value'] - econ_data['previous_value']
-
-        # Sliding window processing
-        window_size = config.get('window_size', 8)
-        processed_features = []
-
-        for timestamp in hourly_data.index:
-            # Get the window of events up to the current timestamp
-            window = econ_data.loc[:timestamp].tail(window_size)
-
-            if not window.empty:
-                # Calculate time differences
-                time_diff = (timestamp - window.index).total_seconds() / 3600  # Hours
-                window['time_diff'] = time_diff
-
-                # Aggregate features using a weighted average (based on recency)
-                weights = np.exp(-time_diff / config.get('temporal_decay', 24))
-                aggregated_features = window[numerical_columns + ['actual_minus_forecast', 'actual_minus_previous']].multiply(weights, axis=0).sum()
-
-                # Encode categorical data with weighted frequency
-                for col in embedding_columns:
-                    value_counts = (window[col + '_embedding'] * weights).value_counts(normalize=True)
-                    aggregated_features[col + '_most_relevant'] = value_counts.idxmax() if not value_counts.empty else -1
-
-                # Add timestamp and aggregated features
-                aggregated_features['timestamp'] = timestamp
-                processed_features.append(aggregated_features)
-
-        # Convert to DataFrame
-        if not processed_features:
-            raise ValueError("No processed features were generated from the economic calendar.")
-
-        processed_df = pd.DataFrame(processed_features).set_index('timestamp')
-
-        # Align with the hourly dataset
-        processed_df = processed_df.reindex(hourly_data.index).fillna(0)
-        print(f"Economic calendar processing completed. Shape: {processed_df.shape}")
-        return processed_df
 
     
 
@@ -570,7 +529,14 @@ class Plugin:
         """
         print("Transforming sparse events to dense hourly features...")
 
-        result = {}
+        # Ensure numeric columns are correctly converted
+        for col in ['actual_minus_forecast', 'actual_minus_previous', 'actual_value', 'forecast_value']:
+            events[col] = pd.to_numeric(events[col], errors='coerce')
+
+        # Initialize the result dictionary with empty lists for each feature
+        result = {f'{col}_weighted_mean': [] for col in ['actual_minus_forecast', 'actual_minus_previous', 'actual_value', 'forecast_value']}
+        result['volatility_weighted'] = []
+
         for current_time in hourly_index:
             # Define the time window
             window_start = current_time - pd.Timedelta(hours=window_size)
@@ -578,30 +544,39 @@ class Plugin:
 
             # Skip if no events in the window
             if window_events.empty:
+                # Append default values (zeros) for this timestamp
+                for col in ['actual_minus_forecast', 'actual_minus_previous', 'actual_value', 'forecast_value']:
+                    result[f'{col}_weighted_mean'].append(0)
+                result['volatility_weighted'].append(0)
                 continue
 
             # Calculate time difference and weights
-            window_events['time_diff'] = (current_time - window_events.index).total_seconds() / 3600
-            window_events['weight'] = np.exp(-decay_rate * window_events['time_diff'])
+            time_diff = (current_time - window_events.index).total_seconds() / 3600  # Convert to hours
+            weights = np.exp(-decay_rate * time_diff)
+
+            # Ensure weights sum is non-zero
+            weight_sum = weights.sum()
+            if weight_sum == 0:
+                weight_sum = 1  # Avoid division by zero
 
             # Aggregate numerical features with weights
             for col in ['actual_minus_forecast', 'actual_minus_previous', 'actual_value', 'forecast_value']:
-                result.setdefault(f'{col}_weighted_mean', []).append(
-                    (window_events[col] * window_events['weight']).sum() / window_events['weight'].sum()
-                )
+                weighted_mean = (window_events[col] * weights).sum() / weight_sum
+                result[f'{col}_weighted_mean'].append(weighted_mean)
 
-            # Aggregate volatility using weighted frequency
-            volatility_one_hot = pd.get_dummies(window_events['volatility'])
-            weighted_volatility = volatility_one_hot.mul(window_events['weight'], axis=0)
-            most_relevant_volatility = weighted_volatility.sum().idxmax()
-            result.setdefault('volatility_weighted', []).append(most_relevant_volatility)
+            # Aggregate volatility using weighted mode
+            volatility_counts = window_events['volatility'].value_counts(normalize=True) * weight_sum
+            most_relevant_volatility = volatility_counts.idxmax() if not volatility_counts.empty else 0
+            result['volatility_weighted'].append(most_relevant_volatility)
 
         # Ensure alignment with hourly index
-        for key in result.keys():
-            while len(result[key]) < len(hourly_index):
-                result[key].append(0)  # Fill with zero if no events are present
+        for key, values in result.items():
+            while len(values) < len(hourly_index):
+                values.append(0)  # Fill with zero if no events are present
 
+        print("Sparse events successfully transformed to dense hourly features.")
         return result
+
 
 
     def process_forex_data(self, forex_files, hourly_data, config):
@@ -611,7 +586,6 @@ class Plugin:
         Parameters:
         - forex_files (list): List of file paths for Forex rate datasets.
         - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings.
 
         Returns:
         - dict: Processed Forex features.
@@ -619,51 +593,31 @@ class Plugin:
         print("Processing multiple Forex datasets...")
 
         forex_features = {}
+        forex_columns = ['DATE_TIME', 'HIGH', 'LOW', 'OPEN', 'CLOSE']
 
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
-            
-            # Validate the file path
-            try:
-                forex_data = load_csv(
-                    file_path,
-                    has_headers=True,
-                    config=config
-                )
-            except FileNotFoundError:
-                print(f"Warning: File not found - {file_path}. Skipping.")
-                continue
 
-            # Ensure datetime parsing and alignment
-            try:
-                forex_data.index = pd.to_datetime(forex_data.index, errors='coerce')
-                forex_data.dropna(subset=forex_data.index.names, inplace=True)
-            except Exception as e:
-                print(f"Error parsing datetime index for {file_path}: {e}")
-                continue
-
-            # Validate required columns
-            required_columns = config.get('forex_required_columns', ['Close'])
-            missing_columns = [col for col in required_columns if col not in forex_data.columns]
-            if missing_columns:
-                print(f"Warning: Missing required columns in {file_path} - {missing_columns}. Skipping.")
-                continue
+            # Load the Forex data with explicit column names
+            forex_data = load_csv(
+                file_path,
+                has_headers=True,  # Forex datasets have headers
+                columns=forex_columns
+            )
 
             # Resample to hourly resolution
             forex_data = forex_data.resample('1H').mean()
 
             # Align with the hourly dataset
-            aligned_forex = forex_data.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
+            forex_data = forex_data.reindex(hourly_data.index, method='ffill').fillna(0)
 
             # Add processed Forex features to the output
-            for col in aligned_forex.columns:
-                forex_features[f"{file_path.split('/')[-1].split('.')[0]}_{col}"] = aligned_forex[col].values
+            for col in ['HIGH', 'LOW', 'OPEN', 'CLOSE']:
+                forex_features[f"{file_path.split('/')[-1].split('.')[0]}_{col}"] = forex_data[col].values
 
-        if not forex_features:
-            raise ValueError("No Forex datasets were successfully processed. Check the file paths or data formats.")
-        
         print(f"Processed Forex datasets: {list(forex_features.keys())}")
         return forex_features
+
 
 
     def align_datasets(self, base_data, additional_datasets):
@@ -732,12 +686,12 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data, hourly_data):
+    def process_sp500_data(self, sp500_data_path, hourly_data):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
         Parameters:
-        - sp500_data (pd.DataFrame): S&P 500 dataset (daily resolution).
+        - sp500_data_path (str): Path to the S&P 500 dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
 
         Returns:
@@ -745,23 +699,27 @@ class Plugin:
         """
         print("Processing S&P 500 data...")
 
-        # Validate that 'date' column exists
-        if 'date' not in sp500_data.columns:
-            raise KeyError("S&P 500 data must contain a 'date' column.")
+        sp500_columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
+
+        # Load the S&P 500 data
+        sp500_data = load_csv(
+            sp500_data_path,
+            has_headers=True,  # S&P 500 dataset has headers
+            columns=sp500_columns
+        )
 
         # Ensure datetime parsing and alignment
-        sp500_data['date'] = pd.to_datetime(sp500_data['date'], errors='coerce')
-        sp500_data.dropna(subset=['date'], inplace=True)  # Drop rows with invalid dates
-        sp500_data.set_index('date', inplace=True)
+        sp500_data.index = pd.to_datetime(sp500_data.index, errors='coerce')
 
-        # Resample to hourly resolution
-        sp500_resampled = sp500_data.resample('1H').ffill()
+        # Forward-fill daily data to hourly resolution
+        sp500_data = sp500_data.resample('1H').ffill()
 
         # Align with the hourly dataset
-        aligned_sp500 = sp500_resampled.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
+        aligned_sp500 = sp500_data.reindex(hourly_data.index, method='ffill').fillna(0)
 
         print("S&P 500 data aligned with hourly dataset.")
         return aligned_sp500
+
 
 
     def process_vix_data(self, vix_data, hourly_data):
