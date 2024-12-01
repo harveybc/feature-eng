@@ -136,18 +136,22 @@ def load_sp500_csv(file_path):
 
         # Ensure the 'Date' column is properly parsed
         if 'Date' in data.columns:
+            data['Date'] = data['Date'].str.strip()  # Remove leading/trailing spaces
             data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
+
+            # Check for invalid dates and drop them
             invalid_dates = data['Date'].isna().sum()
             if invalid_dates > 0:
                 print(f"Warning: Found {invalid_dates} rows with invalid Date values. Dropping them.")
                 data = data.dropna(subset=['Date'])
-            data.set_index('Date', inplace=True)
 
+            # Set 'Date' as the index
+            data.set_index('Date', inplace=True)
         else:
             raise KeyError("The 'Date' column is missing from the S&P 500 dataset.")
 
         # Convert numeric columns
-        for col in data.select_dtypes(include='object').columns:
+        for col in data.select_dtypes(include=['object']).columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
 
         print(f"Loaded S&P 500 data columns: {list(data.columns)}")
@@ -158,6 +162,7 @@ def load_sp500_csv(file_path):
         raise
 
     return data
+
 
 
 
