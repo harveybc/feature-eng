@@ -701,8 +701,8 @@ class Plugin:
         """
         print("Processing S&P 500 data...")
 
-        # Load the S&P 500 data
-        sp500_data = load_additional_csv(sp500_data_path, config=config)
+        # Load the S&P 500 data with the correct dataset_type
+        sp500_data = load_additional_csv(sp500_data_path, config=config, dataset_type='sp500')
         print(f"Loaded data columns: {list(sp500_data.columns)}")
         print(f"First 5 rows of data:\n{sp500_data.head()}")
 
@@ -727,7 +727,6 @@ class Plugin:
 
         print("S&P 500 data aligned with hourly dataset.")
         return aligned_sp500
-
 
 
 
