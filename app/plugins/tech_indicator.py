@@ -692,30 +692,30 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, hourly_data):
+    def process_sp500_data(self, sp500_data_path, hourly_data, config):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings.
 
         Returns:
         - pd.DataFrame: Aligned S&P 500 features.
         """
         print("Processing S&P 500 data...")
 
-        sp500_columns = ['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume']
-
-        # Load the S&P 500 data
-        sp500_data = load_csv(
+        # Load the S&P 500 data using the new function
+        sp500_data = load_additional_csv(
             sp500_data_path,
-            has_headers=True,  # S&P 500 dataset has headers
-            columns=sp500_columns
+            dataset_type='sp500',
+            config=config
         )
 
-        # Ensure datetime parsing and alignment
-        sp500_data.index = pd.to_datetime(sp500_data.index, errors='coerce')
+        # Verify that the index is a DatetimeIndex
+        if not isinstance(sp500_data.index, pd.DatetimeIndex):
+            raise ValueError(f"S&P 500 data from {sp500_data_path} does not have a valid DatetimeIndex.")
 
         # Forward-fill daily data to hourly resolution
         sp500_data = sp500_data.resample('1H').ffill()
@@ -728,27 +728,31 @@ class Plugin:
 
 
 
-    def process_vix_data(self, vix_data, hourly_data):
+
+    def process_vix_data(self, vix_data_path, hourly_data, config):
         """
         Processes VIX data and aligns it with the hourly dataset.
 
         Parameters:
-        - vix_data (pd.DataFrame): VIX dataset (daily resolution).
+        - vix_data_path (str): Path to the VIX dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration settings.
 
         Returns:
         - pd.DataFrame: Aligned VIX features.
         """
         print("Processing VIX data...")
 
-        # Validate that 'date' column exists
-        if 'date' not in vix_data.columns:
-            raise KeyError("VIX data must contain a 'date' column.")
+        # Load the VIX data using the new function
+        vix_data = load_additional_csv(
+            vix_data_path,
+            dataset_type='vix',
+            config=config
+        )
 
-        # Ensure datetime parsing and alignment
-        vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
-        vix_data.dropna(subset=['date'], inplace=True)  # Drop rows with invalid dates
-        vix_data.set_index('date', inplace=True)
+        # Verify that the index is a DatetimeIndex
+        if not isinstance(vix_data.index, pd.DatetimeIndex):
+            raise ValueError(f"VIX data from {vix_data_path} does not have a valid DatetimeIndex.")
 
         # Resample to hourly resolution
         vix_resampled = vix_data.resample('1H').ffill()
@@ -758,6 +762,7 @@ class Plugin:
 
         print("VIX data aligned with hourly dataset.")
         return aligned_vix
+
 
 
 
