@@ -227,26 +227,31 @@ def load_high_frequency_data(file_path, config):
 
         # Load the CSV file
         data = pd.read_csv(file_path, sep=',', encoding='utf-8')
+        print(f"Loaded columns: {list(data.columns)}")
 
-        # Ensure datetime column exists
+        # Check if the datetime column exists
         if datetime_col not in data.columns:
-            raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the high-frequency dataset.")
+            raise ValueError(f"Expected datetime column '{datetime_col}' not found. Available columns: {list(data.columns)}")
 
-        # Parse and set datetime index
+        # Parse the datetime column
         data[datetime_col] = pd.to_datetime(data[datetime_col], format='%Y-%m-%d %H:%M:%S', errors='coerce')
         invalid_rows = data[datetime_col].isna().sum()
+        print(f"Invalid datetime values: {invalid_rows}")
+
         if invalid_rows > 0:
-            print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
+            print(f"Warning: Dropping {invalid_rows} rows with invalid datetime values.")
             data.dropna(subset=[datetime_col], inplace=True)
+
+        # Set the datetime column as index
         data.set_index(datetime_col, inplace=True)
 
         # Validate index
         if not isinstance(data.index, pd.DatetimeIndex):
             raise ValueError("The index of the high-frequency dataset is not a DatetimeIndex.")
 
-        # Drop unnecessary columns if needed
-        drop_columns = ['volume', 'BC-BO']  # Adjust based on the dataset
-        data = data.drop(columns=[col for col in drop_columns if col in data.columns], errors='ignore')
+        # Drop unnecessary columns (optional)
+        drop_columns = ['volume', 'BC-BO']
+        data.drop(columns=[col for col in drop_columns if col in data.columns], errors='ignore', inplace=True)
 
         print(f"High-frequency dataset successfully loaded. Index range: {data.index.min()} to {data.index.max()}")
         return data
@@ -254,6 +259,7 @@ def load_high_frequency_data(file_path, config):
     except Exception as e:
         print(f"An error occurred while loading the high-frequency dataset: {e}")
         raise
+
 
 
 
