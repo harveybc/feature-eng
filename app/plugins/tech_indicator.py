@@ -350,9 +350,16 @@ class Plugin:
         print("Training signals for trend and volatility generated.")
 
         # Train and predict trend and volatility using Conv1D
-        predicted_trend, predicted_volatility = self._predict_trend_and_volatility_with_conv1d(
-            econ_features, trend_signal, volatility_signal, window_size
+        # Corrected call to _predict_trend_and_volatility_with_conv1d
+        predictions = self._predict_trend_and_volatility_with_conv1d(
+            econ_features=econ_features, 
+            training_signals={'trend': trend_signal, 'volatility': volatility_signal}, 
+            window_size=window_size
         )
+
+        # Unpack predictions
+        predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
+
         print("Trend and volatility predictions complete.")
 
         # Align the predictions with the hourly data
@@ -496,30 +503,33 @@ class Plugin:
 
         Parameters:
         - econ_features (np.ndarray): Features generated from the sliding window.
-        - training_signals (dict): Dictionary with 'volatility' and 'trend' signals for training.
+        - training_signals (dict): Dictionary with 'trend' and 'volatility' signals for training.
         - window_size (int): Size of the sliding window.
 
         Returns:
         - np.ndarray: Predictions for trend and volatility for each hourly tick.
         """
         from keras.models import Sequential
-        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, ReLU, Dropout
+        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
         from keras.optimizers import Adam
         from sklearn.model_selection import train_test_split
 
         print("Training Conv1D model for trend and volatility predictions...")
 
+        # Prepare target variables
+        y = np.stack([training_signals['trend'], training_signals['volatility']], axis=1)
+
         # Split data into train and test
         X_train, X_test, y_train, y_test = train_test_split(
             econ_features, 
-            training_signals, 
+            y, 
             test_size=0.2, 
             random_state=42
         )
 
         # Build Conv1D model
         model = Sequential([
-            Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, 8)),
+            Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
             BatchNormalization(),
             Conv1D(64, kernel_size=3, activation='relu'),
             BatchNormalization(),
@@ -546,6 +556,7 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
 
 
     
