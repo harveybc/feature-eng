@@ -848,8 +848,6 @@ class Plugin:
 
 
 
-
-
     def process_vix_data(self, vix_data_path, config):
         """
         Processes VIX data and aligns it with the hourly dataset.
@@ -865,22 +863,13 @@ class Plugin:
 
         # Load the VIX data
         vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
-        
-        # Check for the 'date' column
-        if 'date' not in vix_data.columns:
-            raise ValueError("The VIX dataset must contain a 'date' column.")
-        
-        # Ensure the index is correctly set to 'date' and parsed as datetime
-        if not isinstance(vix_data.index, pd.DatetimeIndex):
-            vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
-            invalid_dates = vix_data['date'].isna().sum()
-            if invalid_dates > 0:
-                print(f"Warning: Found {invalid_dates} rows with invalid date values. Dropping them.")
-                vix_data.dropna(subset=['date'], inplace=True)
-            vix_data.set_index('date', inplace=True)
 
-        # Extract the 'CLOSE' column and resample to hourly resolution
-        vix_close = vix_data['CLOSE'].resample('1H').ffill()
+        # Ensure the index is correctly set to datetime
+        if not isinstance(vix_data.index, pd.DatetimeIndex):
+            raise ValueError("The VIX dataset must have a DatetimeIndex as its index.")
+
+        # Extract the 'close' column and resample to hourly resolution
+        vix_close = vix_data['close'].resample('1H').ffill()
 
         # Align with the hourly dataset
         hourly_data = self.load_and_fix_hourly_data(config['input_file'], config)
