@@ -289,13 +289,15 @@ class Plugin:
         return additional_features_df
 
 
-    def process_high_frequency_data(self, high_freq_data_path, config):
+    def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
         Processes the high-frequency dataset and aligns it with the hourly dataset.
 
         Parameters:
         - high_freq_data_path (str): Path to the high-frequency dataset.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: Aligned high-frequency features.
@@ -328,19 +330,24 @@ class Plugin:
             high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
             high_freq_features[f'CLOSE_30m_tick_{i}'] = high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
 
+        # Apply common start and end date range filter
+        high_freq_features = high_freq_features[(high_freq_features.index >= common_start) & (high_freq_features.index <= common_end)]
+
         # Debug: Print processed features
         print("Processed high-frequency features (first 5 rows):")
         print(high_freq_features.head())
 
         return high_freq_features
 
-    def process_economic_calendar(self, econ_calendar_path, config):
+    def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
         Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
@@ -402,6 +409,10 @@ class Plugin:
         aligned_trend = pd.Series(predicted_trend, index=hourly_data.index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=hourly_data.index, name="Predicted_Volatility")
 
+        # Apply common start and end date range filter
+        aligned_trend = aligned_trend[(aligned_trend.index >= common_start) & (aligned_trend.index <= common_end)]
+        aligned_volatility = aligned_volatility[(aligned_volatility.index >= common_start) & (aligned_volatility.index <= common_end)]
+
         # Combine hourly data with predictions for verification
         verification_df = pd.concat([hourly_data['close'], aligned_trend, aligned_volatility], axis=1)
         print("Verification of alignment between hourly data and predictions (first 10 rows):")
@@ -409,6 +420,7 @@ class Plugin:
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
 
