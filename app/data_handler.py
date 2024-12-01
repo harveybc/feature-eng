@@ -233,14 +233,21 @@ def load_high_frequency_data(file_path, config):
         if datetime_col not in data.columns:
             raise ValueError(f"Expected datetime column '{datetime_col}' not found. Available columns: {list(data.columns)}")
 
-        # Parse the datetime column
-        data[datetime_col] = pd.to_datetime(data[datetime_col], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+        # Parse the datetime column with the specific format
+        data[datetime_col] = pd.to_datetime(
+            data[datetime_col], 
+            format='%Y.%m.%d %H:%M:%S', 
+            errors='coerce'
+        )
         invalid_rows = data[datetime_col].isna().sum()
-        print(f"Invalid datetime values: {invalid_rows}")
 
+        # Debug: Log rows with invalid datetime
         if invalid_rows > 0:
-            print(f"Warning: Dropping {invalid_rows} rows with invalid datetime values.")
-            data.dropna(subset=[datetime_col], inplace=True)
+            print(f"Invalid datetime values detected: {invalid_rows} rows.")
+            print(f"Sample of rows with invalid datetime:\n{data[data[datetime_col].isna()].head()}")
+            print("Dropping invalid rows...")
+
+        data.dropna(subset=[datetime_col], inplace=True)
 
         # Set the datetime column as index
         data.set_index(datetime_col, inplace=True)
@@ -259,7 +266,6 @@ def load_high_frequency_data(file_path, config):
     except Exception as e:
         print(f"An error occurred while loading the high-frequency dataset: {e}")
         raise
-
 
 
 
