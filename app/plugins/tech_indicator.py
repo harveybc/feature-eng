@@ -221,7 +221,8 @@ class Plugin:
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
-            forex_features = self.process_forex_data(config['forex_datasets'], config=config)
+            # Pass common_start and common_end to process_forex_data
+            forex_features = self.process_forex_data(config['forex_datasets'], config=config, common_start=common_start, common_end=common_end)
             additional_features.update(forex_features)
             
             # Get the Forex datasets range
@@ -232,7 +233,7 @@ class Plugin:
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], config)
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
             additional_features.update(sp500_features)
 
             # Get the S&P 500 dataset range
@@ -243,7 +244,7 @@ class Plugin:
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], config)
+            vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
             additional_features.update(vix_features)
 
             # Get the VIX dataset range
@@ -287,6 +288,7 @@ class Plugin:
         print(f"Additional features processed: {additional_features_df.columns}")
 
         return additional_features_df
+
 
 
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
