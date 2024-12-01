@@ -717,22 +717,13 @@ class Plugin:
         print("Processing S&P 500 data...")
 
         # Load the S&P 500 data
-        sp500_data = load_sp500_csv(sp500_data_path)
+        sp500_data = load_additional_csv(sp500_data_path, dataset_type='sp500', config=config)
 
-        # Ensure the 'Close' column exists
+        # Validate that the 'Close' column exists
         if 'Close' not in sp500_data.columns:
             raise KeyError("The S&P 500 dataset must contain a 'Close' column.")
 
-        # Ensure 'Date' is parsed correctly and set as index
-        if sp500_data.index.name != 'date':  # Ensure the index is correctly set
-            sp500_data['date'] = pd.to_datetime(sp500_data['date'], errors='coerce')
-            invalid_dates = sp500_data['date'].isna().sum()
-            if invalid_dates > 0:
-                print(f"Warning: Found {invalid_dates} rows with invalid dates. Dropping them.")
-                sp500_data = sp500_data.dropna(subset=['date'])
-            sp500_data.set_index('date', inplace=True)
-
-        # Resample to hourly resolution
+        # Resample 'Close' column to hourly resolution
         sp500_close = sp500_data['Close'].resample('1H').ffill()
 
         # Align with the hourly dataset
