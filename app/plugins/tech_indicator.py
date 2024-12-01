@@ -205,14 +205,6 @@ class Plugin:
         print("Processing additional datasets...")
         additional_features = {}
 
-        # Process Economic Calendar Data
-        if config.get('economic_calendar'):
-            print("Processing economic calendar data...")
-            econ_calendar = self.process_economic_calendar_with_attention(
-                config['economic_calendar'], data, config
-            )
-            additional_features.update(econ_calendar.to_dict(orient="list"))
-
         # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
             print("Processing high-frequency EUR/USD dataset...")
@@ -240,6 +232,15 @@ class Plugin:
             vix_data = load_csv(config['vix_dataset'], config)
             vix_features = self.process_vix_data(vix_data, data)
             additional_features.update(vix_features.to_dict(orient="list"))
+    
+        # Process Economic Calendar Data
+        if config.get('economic_calendar'):
+            print("Processing economic calendar data...")
+            econ_calendar = self.process_economic_calendar_with_attention(
+                config['economic_calendar'], data, config
+            )
+            additional_features.update(econ_calendar.to_dict(orient="list"))
+
 
         # Combine into a DataFrame
         additional_features_df = pd.DataFrame(additional_features)
@@ -302,45 +303,92 @@ class Plugin:
 
 
 
-    def process_economic_calendar(self, econ_data, hourly_data, config):
+    def process_economic_calendar(econ_data_path, hourly_data, config):
         """
-        Processes economic calendar data into a time-series aligned with hourly data.
+        Processes the economic calendar dataset into an hourly-aligned time series.
 
         Parameters:
-        - econ_data (pd.DataFrame): Economic calendar raw data (no headers).
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings.
+        - econ_data_path (str): Path to the economic calendar dataset.
+        - hourly_data (pd.DataFrame): Primary dataset with hourly resolution.
+        - config (dict): Configuration containing window size, relevant countries, etc.
 
         Returns:
-        - pd.DataFrame: Processed economic calendar features aligned to hourly data.
+        - pd.DataFrame: Time series aligned with hourly_data containing processed event features.
         """
         print("Processing economic calendar...")
 
-        # Assign headers explicitly
-        econ_data.columns = [
+        # Load the dataset
+        column_names = [
             'event_date', 'event_time', 'country', 'volatility', 'description',
             'evaluation', 'data_format', 'actual_value', 'forecast_value', 'previous_value'
         ]
+        econ_data = pd.read_csv(econ_data_path, header=None, names=column_names)
 
-        # Combine event date and time into a single datetime column
+        # Combine date and time into a single datetime column
         econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'], format='%Y/%m/%d %H:%M:%S'
+            econ_data['event_date'] + ' ' + econ_data['event_time'], errors='coerce'
         )
+        econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
-        # Filter relevant events (by countries or volatility)
+        # Filter relevant events
         relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
-        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
+        econ_data = econ_data[econ_data['country'].str.strip().isin(relevant_countries)]
 
         if config.get('filter_by_volatility', True):
-            econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
+            econ_data = econ_data[econ_data['volatility'].str.contains('High|Moderate', na=False)]
 
-        # Temporal weighting based on event recency (e.g., 24-hour window)
-        window_size = config.get('temporal_window_size', 24)
-        hourly_features = self.temporal_weighting(econ_data, hourly_data.index, window_size)
+        # Handle categorical features using embeddings
+        embedding_columns = ['country', 'volatility', 'description', 'evaluation']
+        embeddings = {col: econ_data[col].astype('category').cat.codes for col in embedding_columns}
+        for col, codes in embeddings.items():
+            econ_data[col + '_embedding'] = codes
 
-        print("Economic calendar processed and aligned.")
-        return hourly_features
+        # Handle numerical features and standardize units
+        numerical_columns = ['actual_value', 'forecast_value', 'previous_value']
+        econ_data[numerical_columns] = econ_data[numerical_columns].apply(pd.to_numeric, errors='coerce')
+
+        # Add derived features
+        econ_data['actual_minus_forecast'] = econ_data['actual_value'] - econ_data['forecast_value']
+        econ_data['actual_minus_previous'] = econ_data['actual_value'] - econ_data['previous_value']
+
+        # Sliding window processing
+        window_size = config.get('window_size', 8)
+        processed_features = []
+
+        for timestamp in hourly_data.index:
+            # Get the window of events up to the current timestamp
+            window = econ_data.loc[:timestamp].tail(window_size)
+
+            if not window.empty:
+                # Calculate time differences
+                time_diff = (timestamp - window.index).total_seconds() / 3600  # Hours
+                window['time_diff'] = time_diff
+
+                # Aggregate features using a weighted average (based on recency)
+                weights = np.exp(-time_diff / config.get('temporal_decay', 24))
+                aggregated_features = window[numerical_columns + ['actual_minus_forecast', 'actual_minus_previous']].multiply(weights, axis=0).sum()
+
+                # Encode categorical data with weighted frequency
+                for col in embedding_columns:
+                    value_counts = (window[col + '_embedding'] * weights).value_counts(normalize=True)
+                    aggregated_features[col + '_most_relevant'] = value_counts.idxmax() if not value_counts.empty else -1
+
+                # Add timestamp and aggregated features
+                aggregated_features['timestamp'] = timestamp
+                processed_features.append(aggregated_features)
+
+        # Convert to DataFrame
+        if not processed_features:
+            raise ValueError("No processed features were generated from the economic calendar.")
+
+        processed_df = pd.DataFrame(processed_features).set_index('timestamp')
+
+        # Align with the hourly dataset
+        processed_df = processed_df.reindex(hourly_data.index).fillna(0)
+        print(f"Economic calendar processing completed. Shape: {processed_df.shape}")
+        return processed_df
+
     
 
     def process_economic_calendar_with_attention(self, econ_data_path, hourly_data, config):
