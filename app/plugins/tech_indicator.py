@@ -247,6 +247,8 @@ class Plugin:
         return additional_features_df
 
 
+
+
     def process_high_frequency_data(self, hf_data_path, hourly_data, config):
         """
         Processes high-frequency EUR/USD data (e.g., 15m and 30m tick data) and aligns it with hourly data.
@@ -579,7 +581,7 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Processed Forex features with only CLOSE values.
+        - pd.DataFrame: Processed Forex features containing only CLOSE prices.
         """
         print("Processing multiple Forex datasets...")
 
@@ -596,26 +598,31 @@ class Plugin:
             # Load the Forex data
             forex_data = load_additional_csv(file_path, dataset_type='forex_15m', config=config)
 
-            # Ensure the 'CLOSE' column exists
+            # Ensure 'CLOSE' column exists
             if 'CLOSE' not in forex_data.columns:
-                raise KeyError(f"The Forex dataset {file_path} must contain a 'CLOSE' column.")
+                raise KeyError(f"The Forex data from {file_path} must contain a 'CLOSE' column.")
 
-            # Resample to hourly resolution
+            print(f"Loaded Forex data columns: {list(forex_data.columns)}")
+            print(f"First 5 rows of data for {file_path}:\n{forex_data.head()}")
+
+            # Resample the CLOSE column to hourly resolution
             forex_close = forex_data['CLOSE'].resample('1H').mean()
 
             # Align with the hourly dataset
-            aligned_forex_close = forex_close.reindex(hourly_data.index, method='ffill').fillna(0)
+            aligned_forex = forex_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-            # Add processed Forex CLOSE feature to the output
+            # Add aligned features to the dictionary
             feature_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
-            forex_features[feature_name] = aligned_forex_close.values
+            forex_features[feature_name] = aligned_forex
 
-        # Convert to DataFrame
+        # Combine features into a DataFrame
         forex_features_df = pd.DataFrame(forex_features, index=hourly_data.index)
 
         print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features_df.head()}")
         print(f"Forex features processed successfully. Shape: {forex_features_df.shape}")
+
         return forex_features_df
+
 
 
 
