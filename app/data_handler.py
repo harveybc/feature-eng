@@ -143,6 +143,9 @@ def load_sp500_csv(file_path):
                 data = data.dropna(subset=['Date'])
             data.set_index('Date', inplace=True)
 
+        else:
+            raise KeyError("The 'Date' column is missing from the S&P 500 dataset.")
+
         # Convert numeric columns
         for col in data.select_dtypes(include='object').columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
@@ -155,6 +158,7 @@ def load_sp500_csv(file_path):
         raise
 
     return data
+
 
 
 
