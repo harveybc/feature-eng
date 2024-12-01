@@ -606,7 +606,7 @@ class Plugin:
             )
 
             # Resample to hourly resolution
-            forex_data = forex_data.resample('1H').mean()
+            forex_data = forex_data.resample('1h').mean()
 
             # Align with the hourly dataset
             forex_data = forex_data.reindex(hourly_data.index, method='ffill').fillna(0)
