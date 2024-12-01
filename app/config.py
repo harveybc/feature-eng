@@ -71,7 +71,14 @@ DEFAULT_VALUES = {
             'actual': 'c8',
             'forecast': 'c9',
             'previous': 'c10'
-        }
+        },
+        'hourly': {
+        'datetime': 'datetime',  # The column name for the datetime index
+        'open': 'open',
+        'high': 'high',
+        'low': 'low',
+        'close': 'close'
+        },
     },
 
     # Dataset types for loading

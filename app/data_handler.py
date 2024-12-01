@@ -173,18 +173,18 @@ def load_and_fix_hourly_data(file_path, config):
 
         # Load header mappings from config
         header_mappings = config.get('header_mappings', {})
-        hourly_mapping = header_mappings.get('forex_15m', {})
+        hourly_mapping = header_mappings.get('hourly', {})
+        datetime_col = hourly_mapping.get('datetime', 'datetime')  # Default to 'datetime'
 
         # Load the CSV file
-        data = pd.read_csv(file_path, sep=',', parse_dates=[0], encoding='utf-8', dayfirst=True)
+        data = pd.read_csv(file_path, sep=',', encoding='utf-8')
 
         # Check if datetime column exists
-        datetime_col = hourly_mapping.get('datetime', 'datetime')
         if datetime_col not in data.columns:
             raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the hourly dataset.")
 
         # Parse and set datetime index
-        data[datetime_col] = pd.to_datetime(data[datetime_col], errors='coerce')
+        data[datetime_col] = pd.to_datetime(data[datetime_col], dayfirst=True, errors='coerce')
         invalid_rows = data[datetime_col].isna().sum()
         if invalid_rows > 0:
             print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
@@ -195,12 +195,17 @@ def load_and_fix_hourly_data(file_path, config):
         if not isinstance(data.index, pd.DatetimeIndex):
             raise ValueError("The index of the hourly dataset is not a DatetimeIndex.")
 
+        # Drop unnecessary columns if needed
+        drop_columns = ['volume', 'BC-BO']  # Adjust if required
+        data = data.drop(columns=[col for col in drop_columns if col in data.columns], errors='ignore')
+
         print(f"Hourly dataset successfully loaded. Index range: {data.index.min()} to {data.index.max()}")
         return data
 
     except Exception as e:
         print(f"An error occurred while loading or fixing the hourly data: {e}")
         raise
+
 
 
 
