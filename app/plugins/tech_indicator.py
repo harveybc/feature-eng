@@ -712,40 +712,61 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, hourly_data, config=None):
+    def process_sp500_data(self, sp500_data_path, config):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings (optional).
+        - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned S&P 500 CLOSE values as a single column DataFrame.
+        - pd.DataFrame: Aligned S&P 500 CLOSE data with the hourly dataset.
         """
         print("Processing S&P 500 data...")
 
-        # Load the S&P 500 data using a dedicated loader
-        sp500_data = load_sp500_csv(sp500_data_path)
+        # Step 1: Load the hourly dataset from config['input_file']
+        hourly_data = load_csv(config['input_file'], config=config)
 
-        # Ensure the 'Date' column is properly parsed and the index is set
+        # Ensure the timestamp column is named 'datetime'
+        if 'DATE_TIME' in hourly_data.columns:
+            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
+
+        # Ensure the timestamp column exists
+        if 'datetime' not in hourly_data.columns:
+            raise ValueError("Hourly dataset must contain a 'datetime' column.")
+
+        # Parse the 'datetime' column and set as index
+        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
+        hourly_data.dropna(subset=['datetime'], inplace=True)
+        hourly_data.set_index('datetime', inplace=True)
+
+        # Ensure hourly data has a valid DatetimeIndex
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            raise ValueError("Hourly data must have a valid DatetimeIndex.")
+
+        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
+        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
+
+        # Step 2: Load the S&P 500 dataset
+        sp500_data = load_sp500_csv(sp500_data_path)
+        print(f"Loaded S&P 500 data (first 5 rows):\n{sp500_data.head()}")
+        print(f"S&P 500 data index (first 5): {sp500_data.index[:5]}")
+
+        # Ensure the S&P 500 dataset has a valid DatetimeIndex
         if not isinstance(sp500_data.index, pd.DatetimeIndex):
             raise ValueError("S&P 500 data must have a valid DatetimeIndex.")
 
-        # Extract the 'Close' column and resample to hourly resolution
-        sp500_close = sp500_data['Close'].resample('1H').ffill()
+        # Resample the CLOSE column to hourly frequency
+        sp500_close_hourly = sp500_data['Close'].resample('1H').ffill()
+        print(f"Resampled S&P 500 CLOSE data (first 5 rows):\n{sp500_close_hourly.head()}")
 
-        # Align with the hourly dataset's index
-        aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
+        # Align with the hourly dataset
+        aligned_sp500 = sp500_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
+        print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
-        # Convert the result into a DataFrame with a single column
-        aligned_sp500_df = pd.DataFrame({'S&P500_CLOSE': aligned_sp500})
+        return aligned_sp500
 
-        print("S&P 500 data aligned with hourly dataset successfully.")
-        print(f"First 5 rows of aligned S&P 500 CLOSE data:\n{aligned_sp500_df.head()}")
-
-        return aligned_sp500_df
 
 
 
