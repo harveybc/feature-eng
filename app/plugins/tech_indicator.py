@@ -215,7 +215,7 @@ class Plugin:
 
         # Process Forex Datasets
         if config.get('forex_datasets'):
-            forex_features = self.process_forex_data(config['forex_datasets'], data, config=config)
+            forex_features = self.process_forex_data(config['forex_datasets'], config=config)
             additional_features.update(forex_features)
 
         # Process S&P 500 Data
