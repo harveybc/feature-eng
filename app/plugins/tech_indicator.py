@@ -802,11 +802,11 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned S&P 500 CLOSE data with the hourly dataset.
+        - dict: Aligned S&P 500 features.
         """
         print("Processing S&P 500 data...")
 
-        # Step 1: Load the hourly dataset from config['input_file']
+        # Load the hourly dataset
         hourly_data = load_csv(config['input_file'], config=config)
 
         # Ensure the timestamp column is named 'datetime'
@@ -829,24 +829,33 @@ class Plugin:
         print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
-        # Step 2: Load the S&P 500 dataset
-        sp500_data = load_sp500_csv(sp500_data_path)
-        print(f"Loaded S&P 500 data (first 5 rows):\n{sp500_data.head()}")
-        print(f"S&P 500 data index (first 5): {sp500_data.index[:5]}")
+        # Load the S&P 500 dataset
+        sp500_data = load_csv(sp500_data_path, config=config)
 
-        # Ensure the S&P 500 dataset has a valid DatetimeIndex
+        # Ensure the 'Date' column is properly parsed and set as index
+        if 'Date' in sp500_data.columns:
+            sp500_data['Date'] = pd.to_datetime(sp500_data['Date'], errors='coerce')
+            sp500_data.dropna(subset=['Date'], inplace=True)
+            sp500_data.set_index('Date', inplace=True)
+
+        # Ensure S&P 500 data has a valid DatetimeIndex
         if not isinstance(sp500_data.index, pd.DatetimeIndex):
             raise ValueError("S&P 500 data must have a valid DatetimeIndex.")
 
-        # Resample the CLOSE column to hourly frequency
-        sp500_close_hourly = sp500_data['Close'].resample('1H').ffill()
-        print(f"Resampled S&P 500 CLOSE data (first 5 rows):\n{sp500_close_hourly.head()}")
+        print(f"Loaded S&P 500 data columns: {list(sp500_data.columns)}")
+        print(f"First 5 rows of S&P 500 data:\n{sp500_data.head()}")
+
+        # Resample the S&P 500 data to hourly frequency
+        sp500_close = sp500_data['Close'].resample('1H').ffill()
 
         # Align with the hourly dataset
-        aligned_sp500 = sp500_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
+        aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
+
         print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
-        return aligned_sp500
+        # Return as a dictionary
+        return {'sp500_close': aligned_sp500.values}
+
 
 
 
