@@ -120,6 +120,43 @@ def load_additional_csv(file_path, dataset_type, config=None):
 
     return data
 
+def load_sp500_csv(file_path):
+    """
+    Load and process S&P 500 dataset specifically.
+
+    Parameters:
+    - file_path (str): Path to the S&P 500 CSV file.
+
+    Returns:
+    - pd.DataFrame: Loaded and processed data with a valid DatetimeIndex.
+    """
+    try:
+        # Load the CSV
+        data = pd.read_csv(file_path, sep=',', encoding='utf-8')
+
+        # Ensure the 'Date' column is properly parsed
+        if 'Date' in data.columns:
+            data['Date'] = pd.to_datetime(data['Date'], format='%Y-%m-%d', errors='coerce')
+            invalid_dates = data['Date'].isna().sum()
+            if invalid_dates > 0:
+                print(f"Warning: Found {invalid_dates} rows with invalid Date values. Dropping them.")
+                data = data.dropna(subset=['Date'])
+            data.set_index('Date', inplace=True)
+
+        # Convert numeric columns
+        for col in data.select_dtypes(include='object').columns:
+            data[col] = pd.to_numeric(data[col], errors='coerce')
+
+        print(f"Loaded S&P 500 data columns: {list(data.columns)}")
+        print(f"First 5 rows of S&P 500 data:\n{data.head()}")
+
+    except Exception as e:
+        print(f"An error occurred while loading the S&P 500 CSV: {e}")
+        raise
+
+    return data
+
+
 
 def write_csv(file_path, data, include_date=True, headers=True):
     """
