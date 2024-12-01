@@ -221,14 +221,14 @@ class Plugin:
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], data, config=config)
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], config=config)
             additional_features.update(sp500_features.to_dict(orient="list"))
 
             
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], data, config=config)
+            vix_features = self.process_vix_data(config['vix_dataset'], config=config)
             additional_features.update(vix_features.to_dict(orient="list"))
 
         # Process High-Frequency EUR/USD Dataset
@@ -770,40 +770,69 @@ class Plugin:
 
 
 
-    def process_vix_data(self, vix_data_path, hourly_data, config):
+    def process_vix_data(self, vix_data_path, config):
         """
         Processes VIX data and aligns it with the hourly dataset.
 
         Parameters:
         - vix_data_path (str): Path to the VIX dataset.
-        - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned VIX CLOSE feature.
+        - pd.DataFrame: Aligned VIX CLOSE data with the hourly dataset.
         """
         print("Processing VIX data...")
 
-        # Load the VIX data
-        vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
+        # Step 1: Load the hourly dataset from config['input_file']
+        hourly_data = load_csv(config['input_file'], config=config)
 
-        # Ensure the 'close' column exists
-        if 'close' not in vix_data.columns:
-            raise KeyError("The VIX dataset must contain a 'close' column.")
+        # Ensure the timestamp column is named 'datetime'
+        if 'DATE_TIME' in hourly_data.columns:
+            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
 
-        # Resample to hourly resolution
-        vix_close = vix_data['close'].resample('1H').ffill()
+        # Ensure the timestamp column exists
+        if 'datetime' not in hourly_data.columns:
+            raise ValueError("Hourly dataset must contain a 'datetime' column.")
+
+        # Parse the 'datetime' column and set as index
+        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
+        hourly_data.dropna(subset=['datetime'], inplace=True)
+        hourly_data.set_index('datetime', inplace=True)
+
+        # Ensure hourly data has a valid DatetimeIndex
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            raise ValueError("Hourly data must have a valid DatetimeIndex.")
+
+        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
+        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
+
+        # Step 2: Load the VIX dataset
+        vix_data = load_csv(vix_data_path, config=config)
+
+        # Ensure the timestamp column is named 'date'
+        if 'date' in vix_data.columns:
+            vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
+            vix_data.dropna(subset=['date'], inplace=True)
+            vix_data.set_index('date', inplace=True)
+        else:
+            raise ValueError("The VIX dataset must contain a 'date' column.")
+
+        print(f"Loaded VIX data (first 5 rows):\n{vix_data.head()}")
+        print(f"VIX data index (first 5): {vix_data.index[:5]}")
+
+        # Ensure the VIX dataset has a valid DatetimeIndex
+        if not isinstance(vix_data.index, pd.DatetimeIndex):
+            raise ValueError("VIX data must have a valid DatetimeIndex.")
+
+        # Resample the CLOSE column to hourly frequency
+        vix_close_hourly = vix_data['close'].resample('1H').ffill()
+        print(f"Resampled VIX CLOSE data (first 5 rows):\n{vix_close_hourly.head()}")
 
         # Align with the hourly dataset
-        aligned_vix_close = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
+        aligned_vix = vix_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
+        print(f"Aligned VIX CLOSE data (first 5 rows):\n{aligned_vix.head()}")
 
-        # Convert to DataFrame
-        vix_features_df = pd.DataFrame({'VIX_CLOSE': aligned_vix_close}, index=hourly_data.index)
-
-        print(f"Processed VIX CLOSE feature (first 5 rows):\n{vix_features_df.head()}")
-        print(f"VIX feature processed successfully. Shape: {vix_features_df.shape}")
-        return vix_features_df
-
+        return aligned_vix
 
 
 
