@@ -352,6 +352,43 @@ class Plugin:
         print("Economic calendar processing complete.")
         return output_df
 
+    def _preprocess_economic_calendar_data(self, econ_data):
+        """
+        Preprocess the economic calendar data: clean and generate derived features.
+
+        Parameters:
+        - econ_data (pd.DataFrame): Raw economic calendar data.
+
+        Returns:
+        - pd.DataFrame: Preprocessed economic calendar data.
+        """
+        print("Preprocessing economic calendar data...")
+
+        # Drop rows with invalid numerical data
+        econ_data.dropna(subset=['forecast', 'actual', 'volatility'], inplace=True)
+
+        # Convert relevant columns to numeric
+        for col in ['forecast', 'actual', 'volatility']:
+            econ_data[col] = pd.to_numeric(econ_data[col], errors='coerce')
+
+        # Drop rows where conversion to numeric failed
+        econ_data.dropna(subset=['forecast', 'actual', 'volatility'], inplace=True)
+
+        # Generate derived features
+        econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
+        econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
+
+        # Normalize numerical features
+        numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
+        econ_data[numerical_cols] = econ_data[numerical_cols].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
+
+        # Encode categorical features
+        econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
+        econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
+
+        print("Economic calendar data preprocessing complete.")
+        return econ_data
+
 
     def _generate_training_signals(self, hourly_data, short_term_window):
         """
