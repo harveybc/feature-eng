@@ -257,24 +257,19 @@ class Plugin:
         Returns:
         - pd.DataFrame: Aligned high-frequency features.
         """
-        print(f"Loading high-frequency dataset: {high_freq_data_path}")
+        print(f"Processing high-frequency EUR/USD dataset...")
+
+        # Load and fix the hourly data
+        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
+        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the high-frequency data
+        print(f"Loading high-frequency dataset: {high_freq_data_path}")
         high_freq_data = load_high_frequency_data(high_freq_data_path, config)
         print(f"High-frequency dataset successfully loaded. Index range: {high_freq_data.index.min()} to {high_freq_data.index.max()}")
 
-        # Verify that the dataset contains the expected columns
-        datetime_col = 'DATE_TIME'
-        if datetime_col not in high_freq_data.columns and not isinstance(high_freq_data.index, pd.DatetimeIndex):
-            raise ValueError("High-frequency dataset must contain a 'DATE_TIME' column.")
-
-        # Debug: Print data summary after loading
-        print("High-frequency data summary (after loading):")
-        print(f"Columns: {list(high_freq_data.columns)}")
-        print(f"Index Type: {type(high_freq_data.index)}")
-        print(f"First 5 rows:\n{high_freq_data.head()}")
-
-        # Resample and process as needed
+        # Resample high-frequency data to 15m and 30m
         high_freq_15m = high_freq_data['CLOSE'].resample('15T').ffill()
         high_freq_30m = high_freq_data['CLOSE'].resample('30T').ffill()
 
@@ -284,7 +279,7 @@ class Plugin:
         print("Resampled 30m CLOSE data (first 5 rows):")
         print(high_freq_30m.head())
 
-        # Construct high-frequency feature DataFrame
+        # Construct high-frequency feature DataFrame aligned with hourly data
         high_freq_features = pd.DataFrame(index=hourly_data.index)
         for i in range(1, config['sub_periodicity_window_size'] + 1):
             high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
@@ -295,8 +290,6 @@ class Plugin:
         print(high_freq_features.head())
 
         return high_freq_features
-
-
 
     def process_economic_calendar(self, economic_calendar_path, config):
         """
