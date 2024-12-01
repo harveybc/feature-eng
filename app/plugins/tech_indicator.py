@@ -232,8 +232,12 @@ class Plugin:
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            # Pass common_start and common_end here as well
             sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
+            
+            # If sp500_features is a dictionary, extract the relevant DataFrame or Series
+            if isinstance(sp500_features, dict):
+                sp500_features = sp500_features.get('Close')  # Assuming 'Close' is the relevant column
+            
             additional_features.update(sp500_features)
 
             # Get the S&P 500 dataset range
@@ -288,6 +292,7 @@ class Plugin:
         print(f"Additional features processed: {additional_features_df.columns}")
 
         return additional_features_df
+
 
 
 
