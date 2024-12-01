@@ -717,7 +717,7 @@ class Plugin:
         print("Processing S&P 500 data...")
 
         # Load the S&P 500 data
-        sp500_data = load_additional_csv(sp500_data_path, dataset_type='sp500', config=config)
+        sp500_data = load_sp500_csv(sp500_data_path)
 
         # Ensure the 'Close' column exists
         if 'Close' not in sp500_data.columns:
