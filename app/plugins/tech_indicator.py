@@ -601,8 +601,7 @@ class Plugin:
             # Load the Forex data with explicit column names
             forex_data = load_csv(
                 file_path,
-                has_headers=True,  # Forex datasets have headers
-                columns=forex_columns
+                config=config
             )
 
             # Resample to hourly resolution

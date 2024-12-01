@@ -30,11 +30,13 @@ DEFAULT_VALUES = {
         'tests/data/AUDUSD-2000-2020-15m.csv'
     ],
 
+    # General configurations
     'sub_periodicity_window_size': 8,  # Default window size for sub-periodicities
     'output_resample_frequency': '1H',  # Target frequency for resampling
     'ohlc_columns': ['open', 'high', 'low', 'close'],
 
-        'header_mappings': {
+    # Header mappings for each dataset type
+    'header_mappings': {
         'forex_15m': {
             'datetime': 'DATE_TIME',
             'open': 'OPEN',
@@ -47,7 +49,9 @@ DEFAULT_VALUES = {
             'open': 'Open',
             'high': 'High',
             'low': 'Low',
-            'close': 'Close'
+            'close': 'Close',
+            'adj_close': 'Adj Close',
+            'volume': 'Volume'
         },
         'vix': {
             'date': 'date',
@@ -69,6 +73,20 @@ DEFAULT_VALUES = {
             'previous': 'c10'
         }
     },
-    'dataset_type': 'forex_15m',  # Example default dataset type
 
+    # Dataset types for loading
+    'dataset_type': 'forex_15m',  # Default dataset type
+    'dataset_types': {
+        'forex': ['forex_15m'],
+        'stock': ['sp500'],
+        'volatility': ['vix'],
+        'calendar': ['economic_calendar']
+    },
+
+    # Economic calendar settings
+    'calendar_window_size': 24,  # Default sliding window for events
+    'temporal_decay': 0.1,  # Decay rate for temporal weighting
+    'relevant_countries': ['United States', 'Euro Zone'],  # Filter countries
+    'filter_by_volatility': True,  # Only include moderate/high volatility events
+    'default_positional_encoding_dim': 8  # Dimension for positional encoding
 }
