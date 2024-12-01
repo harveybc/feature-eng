@@ -687,37 +687,22 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, hourly_data, config):
+    def process_sp500_data(self, sp500_data_path, hourly_data, config=None):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings.
+        - config (dict): Configuration settings (not used here for S&P 500).
 
         Returns:
         - pd.DataFrame: Aligned S&P 500 features.
         """
         print("Processing S&P 500 data...")
 
-        # Load the S&P 500 data with the correct dataset_type
-        sp500_data = load_additional_csv(sp500_data_path, config=config, dataset_type='sp500')
-        print(f"Loaded data columns: {list(sp500_data.columns)}")
-        print(f"First 5 rows of data:\n{sp500_data.head()}")
-
-        # Ensure the 'Date' column exists
-        if 'Date' not in sp500_data.columns:
-            raise ValueError("S&P 500 data must contain a 'Date' column.")
-
-        # Parse the 'Date' column as datetime
-        sp500_data['Date'] = pd.to_datetime(sp500_data['Date'], errors='coerce', format='%Y-%m-%d')
-        sp500_data.dropna(subset=['Date'], inplace=True)  # Drop rows with invalid dates
-        sp500_data.set_index('Date', inplace=True)  # Set 'Date' as the index
-
-        # Verify that the index is a DatetimeIndex
-        if not isinstance(sp500_data.index, pd.DatetimeIndex):
-            raise ValueError(f"S&P 500 data from {sp500_data_path} does not have a valid DatetimeIndex after parsing.")
+        # Use the dedicated loader for S&P 500 data
+        sp500_data = load_sp500_csv(sp500_data_path)
 
         # Resample to hourly resolution
         sp500_data = sp500_data.resample('1H').ffill()
