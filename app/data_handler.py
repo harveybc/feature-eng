@@ -20,38 +20,20 @@ def load_csv(file_path, config=None):
         column_map = header_mappings.get(dataset_type, {})
 
         # Load the CSV file
-        data = pd.read_csv(file_path, sep=',', encoding='utf-8')
+        data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
 
         # Apply column mappings
         if column_map:
             data.rename(columns=column_map, inplace=True)
 
-        # Parse the 'DATE_TIME' column if present
-        if 'DATE_TIME' in data.columns:
-            data['DATE_TIME'] = pd.to_datetime(
-                data['DATE_TIME'].str.strip(),
-                format='%Y.%m.%d %H:%M:%S',
-                errors='coerce'
-            )
-            invalid_rows = data['DATE_TIME'].isna().sum()
-            if invalid_rows > 0:
-                print(f"Warning: Found {invalid_rows} rows with invalid DATE_TIME values. Dropping them.")
-                data = data.dropna(subset=['DATE_TIME'])
-            data.set_index('DATE_TIME', inplace=True)
-
-        # Parse the 'date' column if present
-        elif 'date' in data.columns:
+        # Ensure date column is parsed
+        if 'date' in data.columns:
             data['date'] = pd.to_datetime(data['date'], errors='coerce')
-            invalid_rows = data['date'].isna().sum()
-            if invalid_rows > 0:
-                print(f"Warning: Found {invalid_rows} rows with invalid date values. Dropping them.")
-                data = data.dropna(subset=['date'])
             data.set_index('date', inplace=True)
 
         # Convert numeric columns
-        for col in data.columns:
-            if data[col].dtype == 'object':
-                data[col] = pd.to_numeric(data[col], errors='coerce')
+        for col in data.select_dtypes(include=['object', 'category']).columns:
+            data[col] = pd.to_numeric(data[col], errors='coerce')
 
         print(f"Loaded data columns: {list(data.columns)}")
         print(f"First 5 rows of data:\n{data.head()}")
@@ -61,11 +43,6 @@ def load_csv(file_path, config=None):
         raise
 
     return data
-
-
-
-
-
 
 
 
