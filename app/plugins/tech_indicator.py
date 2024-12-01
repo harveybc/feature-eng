@@ -702,7 +702,7 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, hourly_data, config):
+    def process_sp500_data(self, sp500_data_path, hourly_data, config=None):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
@@ -712,29 +712,34 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned S&P 500 CLOSE feature.
+        - pd.DataFrame: Aligned S&P 500 features.
         """
         print("Processing S&P 500 data...")
 
-        # Load the S&P 500 data
+        # Load the S&P 500 data using load_additional_csv
         sp500_data = load_additional_csv(sp500_data_path, dataset_type='sp500', config=config)
 
-        # Validate that the 'Close' column exists
-        if 'Close' not in sp500_data.columns:
-            raise KeyError("The S&P 500 dataset must contain a 'Close' column.")
+        # Ensure the index is correctly set to 'Date' and parsed as datetime
+        if not isinstance(sp500_data.index, pd.DatetimeIndex):
+            if 'Date' in sp500_data.columns:
+                sp500_data['Date'] = pd.to_datetime(sp500_data['Date'], errors='coerce')
+                invalid_dates = sp500_data['Date'].isna().sum()
+                if invalid_dates > 0:
+                    print(f"Warning: Found {invalid_dates} rows with invalid Date values. Dropping them.")
+                    sp500_data.dropna(subset=['Date'], inplace=True)
+                sp500_data.set_index('Date', inplace=True)
+            else:
+                raise ValueError("The 'Date' column is missing or not correctly parsed in the S&P 500 data.")
 
-        # Resample 'Close' column to hourly resolution
+        # Resample the S&P 500 close data to hourly
         sp500_close = sp500_data['Close'].resample('1H').ffill()
 
         # Align with the hourly dataset
-        aligned_sp500_close = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
+        aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-        # Convert to DataFrame
-        sp500_features_df = pd.DataFrame({'SP500_CLOSE': aligned_sp500_close}, index=hourly_data.index)
+        print("S&P 500 data aligned with hourly dataset.")
+        return aligned_sp500
 
-        print(f"Processed S&P 500 CLOSE feature (first 5 rows):\n{sp500_features_df.head()}")
-        print(f"S&P 500 feature processed successfully. Shape: {sp500_features_df.shape}")
-        return sp500_features_df
 
 
     def process_vix_data(self, vix_data_path, hourly_data, config):
