@@ -297,21 +297,23 @@ class Plugin:
 
         return high_freq_features
 
-    def process_economic_calendar(self, econ_calendar_path, hourly_data, config):
+    def process_economic_calendar(self, econ_calendar_path, config):
         """
-        Process the economic calendar dataset and use a Conv1D model to predict volatility.
+        Process the economic calendar dataset and use a Conv1D model to predict volatility and trend.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
-        - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration dictionary.
 
         Returns:
-        - pd.DataFrame: A DataFrame containing the predicted volatility for each tick.
+        - pd.DataFrame: A DataFrame containing the predicted volatility and trend for each tick.
         """
         print("Processing economic calendar data...")
 
-        # Load the dataset (no headers in economic calendar)
+        # Load the hourly data
+        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+
+        # Load the economic calendar dataset
         econ_data = pd.read_csv(
             econ_calendar_path,
             header=None,
@@ -345,9 +347,20 @@ class Plugin:
         window_size = config['calendar_window_size']
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
 
-        # Predict volatility using Conv1D model
-        predicted_volatility = self._predict_volatility_with_conv1d(econ_features, window_size)
-        return predicted_volatility
+        # Predict volatility and trend using Conv1D model
+        predicted_volatility, predicted_trend = self._predict_volatility_trend_with_conv1d(econ_features, window_size)
+
+        # Align predictions with the hourly dataset
+        predictions_df = pd.DataFrame(
+            index=hourly_data.index,
+            data={
+                'predicted_volatility': predicted_volatility,
+                'predicted_trend': predicted_trend
+            }
+        )
+
+        print("Economic calendar processing completed.")
+        return predictions_df
 
 
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
