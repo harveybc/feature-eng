@@ -690,39 +690,34 @@ class Plugin:
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings.
+        - config (dict): Configuration settings (optional).
 
         Returns:
-        - dict: Aligned S&P 500 features as a dictionary.
+        - pd.DataFrame: Aligned S&P 500 CLOSE values as a single column DataFrame.
         """
         print("Processing S&P 500 data...")
 
-        # Load the S&P 500 data using load_additional_csv
-        sp500_data = load_additional_csv(sp500_data_path, dataset_type='sp500', config=config)
+        # Load the S&P 500 data using a dedicated loader
+        sp500_data = load_sp500_csv(sp500_data_path)
 
-        # Ensure the index is correctly set to 'Date' and parsed as datetime
+        # Ensure the 'Date' column is properly parsed and the index is set
         if not isinstance(sp500_data.index, pd.DatetimeIndex):
-            if 'Date' in sp500_data.columns:
-                sp500_data['Date'] = pd.to_datetime(sp500_data['Date'], errors='coerce')
-                invalid_dates = sp500_data['Date'].isna().sum()
-                if invalid_dates > 0:
-                    print(f"Warning: Found {invalid_dates} rows with invalid Date values. Dropping them.")
-                    sp500_data.dropna(subset=['Date'], inplace=True)
-                sp500_data.set_index('Date', inplace=True)
-            else:
-                raise ValueError("The 'Date' column is missing or not correctly parsed in the S&P 500 data.")
+            raise ValueError("S&P 500 data must have a valid DatetimeIndex.")
 
-        # Resample the S&P 500 close data to hourly
+        # Extract the 'Close' column and resample to hourly resolution
         sp500_close = sp500_data['Close'].resample('1H').ffill()
 
-        # Align with the hourly dataset
+        # Align with the hourly dataset's index
         aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-        # Convert the aligned Series to a DataFrame for compatibility
-        aligned_sp500_df = aligned_sp500.to_frame(name='sp500_close')
+        # Convert the result into a DataFrame with a single column
+        aligned_sp500_df = pd.DataFrame({'S&P500_CLOSE': aligned_sp500})
 
-        print("S&P 500 data aligned with hourly dataset.")
+        print("S&P 500 data aligned with hourly dataset successfully.")
+        print(f"First 5 rows of aligned S&P 500 CLOSE data:\n{aligned_sp500_df.head()}")
+
         return aligned_sp500_df
+
 
 
     def process_vix_data(self, vix_data_path, hourly_data, config):
