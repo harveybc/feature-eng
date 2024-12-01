@@ -212,8 +212,8 @@ class Plugin:
         additional_features = {}
 
         # Step 1: Calculate the common date range across all datasets
-        common_start = data.index.min()  # Start with the base dataset's start time
-        common_end = data.index.max()  # Start with the base dataset's end time
+        common_start = pd.Timestamp(data.index.min())  # Ensure this is a Timestamp
+        common_end = pd.Timestamp(data.index.max())    # Ensure this is a Timestamp
 
         # Collect dataset ranges
         dataset_ranges = []
@@ -221,7 +221,6 @@ class Plugin:
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
-            # Pass common_start and common_end to process_forex_data
             forex_features = self.process_forex_data(config['forex_datasets'], config=config, common_start=common_start, common_end=common_end)
             additional_features.update(forex_features)
             
@@ -233,7 +232,7 @@ class Plugin:
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], config)
             additional_features.update(sp500_features)
 
             # Get the S&P 500 dataset range
@@ -244,7 +243,7 @@ class Plugin:
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
+            vix_features = self.process_vix_data(config['vix_dataset'], config)
             additional_features.update(vix_features)
 
             # Get the VIX dataset range
@@ -288,6 +287,7 @@ class Plugin:
         print(f"Additional features processed: {additional_features_df.columns}")
 
         return additional_features_df
+
 
 
 
