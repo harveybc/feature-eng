@@ -235,7 +235,7 @@ class Plugin:
         if config.get('high_freq_dataset'):
             print("Processing high-frequency EUR/USD dataset...")
             high_freq_features = self.process_high_frequency_data(
-                config['high_freq_dataset'], data, config
+                config['high_freq_dataset'], config
             )
             additional_features.update(high_freq_features.to_dict(orient="list"))
 
@@ -244,7 +244,7 @@ class Plugin:
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
             econ_calendar = self.process_economic_calendar(
-                config['economic_calendar'], data, config
+                config['economic_calendar'], config
             )
             additional_features.update(econ_calendar.to_dict(orient="list"))
 
