@@ -256,7 +256,7 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Processed high-frequency features with 8 past ticks for both 15-min and 30-min periodicities.
+        - pd.DataFrame: Processed high-frequency features with CLOSE values from 15-min and 30-min periodicities.
         """
         print(f"Processing high-frequency dataset: {high_freq_file}")
 
@@ -267,43 +267,46 @@ class Plugin:
             config=config
         )
 
-        # Resample to 30-minute data
-        high_freq_30m = high_freq_data.resample('30T').mean()
+        # Ensure the 'CLOSE' column exists
+        if 'CLOSE' not in high_freq_data.columns:
+            raise KeyError("The high-frequency dataset must contain a 'CLOSE' column.")
 
-        # Initialize feature storage
+        # Resample the data to 30-minute periodicity
+        high_freq_30m = high_freq_data['CLOSE'].resample('30T').mean()
+
+        # Initialize a dictionary to hold the features
         high_freq_features = {}
 
-        # Iterate over each hourly tick
+        # Process each hourly tick in the hourly dataset
         for timestamp in hourly_data.index:
-            # Get the last 8 15-minute ticks for the current hour
-            window_15m = high_freq_data.loc[:timestamp].tail(8)
+            # Get the last 8 CLOSE values at 15-minute periodicity
+            window_15m = high_freq_data.loc[:timestamp].tail(8)['CLOSE']
 
-            # Get the last 8 30-minute ticks for the current hour
+            # Get the last 8 CLOSE values at 30-minute periodicity
             window_30m = high_freq_30m.loc[:timestamp].tail(8)
 
-            # Add features for 15-minute periodicity
-            for i, col in enumerate(high_freq_data.columns):
-                for tick in range(8):
-                    feature_name = f"{col}_15m_tick_{tick + 1}"
-                    high_freq_features.setdefault(feature_name, []).append(
-                        window_15m[col].iloc[tick] if tick < len(window_15m) else 0
-                    )
+            # Add 15-minute periodicity features
+            for tick in range(8):
+                feature_name = f"CLOSE_15m_tick_{tick + 1}"
+                high_freq_features.setdefault(feature_name, []).append(
+                    window_15m.iloc[tick] if tick < len(window_15m) else 0
+                )
 
-            # Add features for 30-minute periodicity
-            for i, col in enumerate(high_freq_30m.columns):
-                for tick in range(8):
-                    feature_name = f"{col}_30m_tick_{tick + 1}"
-                    high_freq_features.setdefault(feature_name, []).append(
-                        window_30m[col].iloc[tick] if tick < len(window_30m) else 0
-                    )
+            # Add 30-minute periodicity features
+            for tick in range(8):
+                feature_name = f"CLOSE_30m_tick_{tick + 1}"
+                high_freq_features.setdefault(feature_name, []).append(
+                    window_30m.iloc[tick] if tick < len(window_30m) else 0
+                )
 
-        # Create DataFrame for high-frequency features
+        # Convert the features dictionary into a DataFrame
         high_freq_features_df = pd.DataFrame(high_freq_features, index=hourly_data.index)
 
-        print(f"High-frequency features processed. Shape: {high_freq_features_df.shape}")
+        # Print a preview of the processed data for verification
+        print(f"Processed high-frequency features (first 5 rows):\n{high_freq_features_df.head()}")
+
+        print(f"High-frequency features processed successfully. Shape: {high_freq_features_df.shape}")
         return high_freq_features_df
-
-
 
 
     def process_economic_calendar(self, econ_data_path, hourly_data, config):
