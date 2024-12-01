@@ -593,12 +593,19 @@ class Plugin:
 
         # Step 1: Load the hourly dataset from config['input_file']
         hourly_data = load_csv(config['input_file'], config=config)
-        if 'datetime' in hourly_data.columns:
-            hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
-            hourly_data.dropna(subset=['datetime'], inplace=True)
-            hourly_data.set_index('datetime', inplace=True)
-        else:
+
+        # Ensure the timestamp column is named 'datetime'
+        if 'DATE_TIME' in hourly_data.columns:
+            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
+
+        # Ensure the timestamp column exists
+        if 'datetime' not in hourly_data.columns:
             raise ValueError("Hourly dataset must contain a 'datetime' column.")
+
+        # Parse the 'datetime' column and set as index
+        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
+        hourly_data.dropna(subset=['datetime'], inplace=True)
+        hourly_data.set_index('datetime', inplace=True)
 
         # Ensure hourly data has a valid DatetimeIndex
         if not isinstance(hourly_data.index, pd.DatetimeIndex):
@@ -637,8 +644,6 @@ class Plugin:
 
         print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features.head()}")
         return forex_features
-
-
 
 
     def align_datasets(self, base_data, additional_datasets):
