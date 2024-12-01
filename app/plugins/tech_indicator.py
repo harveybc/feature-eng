@@ -247,60 +247,50 @@ class Plugin:
         return additional_features_df
 
 
-    def process_high_frequency_data(self, high_freq_data_path, hourly_data, config=None):
+    def process_high_frequency_data(self, hf_data_path, hourly_data, config):
         """
-        Processes high-frequency data (e.g., EUR/USD at 15-minute intervals) 
-        and generates features for the hourly dataset.
+        Processes high-frequency data (e.g., 15m and 30m tick data) and aligns it with hourly data.
 
         Parameters:
-        - high_freq_data_path (str): Path to the high-frequency dataset.
-        - hourly_data (pd.DataFrame): Hourly dataset for alignment.
+        - hf_data_path (str): Path to the high-frequency dataset.
+        - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned high-frequency features with the hourly dataset.
+        - pd.DataFrame: Aligned high-frequency features with previous 8 ticks.
         """
-        print(f"Processing high-frequency dataset: {high_freq_data_path}")
+        print(f"Processing high-frequency dataset: {hf_data_path}")
 
-        # Load the high-frequency dataset
-        high_freq_data = load_additional_csv(high_freq_data_path, dataset_type='forex_15m', config=config)
+        # Load high-frequency data
+        high_freq_data = load_additional_csv(hf_data_path, dataset_type='forex_15m', config=config)
 
-        # Debug: Print the first few rows of the loaded dataset
-        print("Loaded high-frequency data (first 5 rows):")
-        print(high_freq_data.head())
+        # Ensure 'CLOSE' column exists
+        if 'CLOSE' not in high_freq_data.columns:
+            raise KeyError(f"The high-frequency data must contain a 'CLOSE' column, but found {high_freq_data.columns}")
 
-        # Extract the CLOSE column
-        high_freq_data = high_freq_data[['CLOSE']]
-        print("Extracted CLOSE column (first 5 rows):")
-        print(high_freq_data.head())
+        print(f"Loaded high-frequency data columns: {list(high_freq_data.columns)}")
+        print(f"First 5 rows of high-frequency data:\n{high_freq_data.head()}")
 
-        # Generate 15-minute and 30-minute resampled datasets
-        high_freq_15m = high_freq_data['CLOSE'].resample('15T').mean()
-        high_freq_30m = high_freq_data['CLOSE'].resample('30T').mean()
+        # Resample to 15m and 30m periodicity
+        high_freq_15m = high_freq_data[['CLOSE']].resample('15T').mean()
+        high_freq_30m = high_freq_data[['CLOSE']].resample('30T').mean()
 
-        # Debug: Print resampled data
-        print("Resampled 15-minute data (first 5 rows):")
-        print(high_freq_15m.head())
-        print("Resampled 30-minute data (first 5 rows):")
-        print(high_freq_30m.head())
+        print(f"Resampled 15m CLOSE data (first 5 rows):\n{high_freq_15m.head()}")
+        print(f"Resampled 30m CLOSE data (first 5 rows):\n{high_freq_30m.head()}")
 
-        # Initialize the feature dictionary
-        high_freq_features = {}
-
-        # Create features for the last 8 ticks for both 15m and 30m periodicities
+        # Create columns for the last 8 ticks of each periodicity
+        features = {}
         for i in range(1, 9):
-            high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index, method='ffill').fillna(0)
-            high_freq_features[f'CLOSE_30m_tick_{i}'] = high_freq_30m.shift(i).reindex(hourly_data.index, method='ffill').fillna(0)
+            features[f'CLOSE_15m_tick_{i}'] = high_freq_15m['CLOSE'].shift(i).reindex(hourly_data.index, method='ffill').fillna(0)
+            features[f'CLOSE_30m_tick_{i}'] = high_freq_30m['CLOSE'].shift(i).reindex(hourly_data.index, method='ffill').fillna(0)
 
-        # Convert the feature dictionary to a DataFrame
-        high_freq_features_df = pd.DataFrame(high_freq_features, index=hourly_data.index)
+        # Combine features into a DataFrame
+        high_freq_features = pd.DataFrame(features, index=hourly_data.index)
 
-        # Debug: Print processed features
-        print("Processed high-frequency features (first 5 rows):")
-        print(high_freq_features_df.head())
+        print(f"Processed high-frequency features (first 5 rows):\n{high_freq_features.head()}")
+        print(f"High-frequency features processed successfully. Shape: {high_freq_features.shape}")
 
-        print(f"High-frequency features processed successfully. Shape: {high_freq_features_df.shape}")
-        return high_freq_features_df
+        return high_freq_features
 
 
 
