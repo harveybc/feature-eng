@@ -214,15 +214,13 @@ class Plugin:
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_data = load_csv(config['sp500_dataset'], config)
-            sp500_features = self.process_sp500_data(sp500_data, data)
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], data, config=config)
             additional_features.update(sp500_features.to_dict(orient="list"))
 
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_data = load_csv(config['vix_dataset'], config)
-            vix_features = self.process_vix_data(vix_data, data)
+            vix_features = self.process_vix_data(config['vix_dataset'], data, config=config)
             additional_features.update(vix_features.to_dict(orient="list"))
 
         # Process High-Frequency EUR/USD Dataset
@@ -233,7 +231,6 @@ class Plugin:
             )
             additional_features.update(high_freq_features.to_dict(orient="list"))
 
-
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
@@ -242,12 +239,10 @@ class Plugin:
             )
             additional_features.update(econ_calendar.to_dict(orient="list"))
 
-
         # Combine into a DataFrame
         additional_features_df = pd.DataFrame(additional_features)
         print(f"Additional features processed: {additional_features_df.columns}")
         return additional_features_df
-
 
 
     def process_high_frequency_data(self, high_freq_file, hourly_data, config, window_size=4):
