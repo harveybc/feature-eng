@@ -203,33 +203,25 @@ class Plugin:
         - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
-            # Ensure hourly_data has a valid DatetimeIndex
-        if not isinstance(data.index, pd.DatetimeIndex):
-            try:
-                data.index = pd.to_datetime(data.index, errors='coerce')
-                if data.index.isna().any():
-                    raise ValueError("Hourly data contains invalid datetime values.")
-            except Exception as e:
-                raise ValueError(f"Failed to set DatetimeIndex for hourly data: {e}")
         additional_features = {}
 
         # Process Forex Datasets
         if config.get('forex_datasets'):
+            print("Processing Forex datasets...")
             forex_features = self.process_forex_data(config['forex_datasets'], config=config)
             additional_features.update(forex_features)
 
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], config=config)
-            additional_features.update(sp500_features.to_dict(orient="list"))
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], config)
+            additional_features.update(sp500_features)  # No .to_dict()
 
-            
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], config=config)
-            additional_features.update(vix_features.to_dict(orient="list"))
+            vix_features = self.process_vix_data(config['vix_dataset'], config)
+            additional_features.update(vix_features)
 
         # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
@@ -237,8 +229,7 @@ class Plugin:
             high_freq_features = self.process_high_frequency_data(
                 config['high_freq_dataset'], config
             )
-            additional_features.update(high_freq_features.to_dict(orient="list"))
-
+            additional_features.update(high_freq_features)
 
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
@@ -246,13 +237,12 @@ class Plugin:
             econ_calendar = self.process_economic_calendar(
                 config['economic_calendar'], config
             )
-            additional_features.update(econ_calendar.to_dict(orient="list"))
+            additional_features.update(econ_calendar)
 
         # Combine into a DataFrame
         additional_features_df = pd.DataFrame(additional_features)
         print(f"Additional features processed: {additional_features_df.columns}")
         return additional_features_df
-
 
 
 
