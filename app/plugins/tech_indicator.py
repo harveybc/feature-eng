@@ -299,138 +299,182 @@ class Plugin:
 
     def process_economic_calendar(self, econ_calendar_path, config):
         """
-        Process the economic calendar dataset and use a Conv1D model to predict volatility and trend.
+        Process the economic calendar dataset and use a Conv1D model to predict trend and volatility.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
 
         Returns:
-        - pd.DataFrame: A DataFrame containing the predicted volatility and trend for each tick.
+        - pd.DataFrame: A DataFrame containing predicted trend and volatility for each tick.
         """
         print("Processing economic calendar data...")
 
-        # Load the hourly data
-        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+        # Load hourly data
+        hourly_data = self._load_hourly_data(config)
 
-        # Load the economic calendar dataset
+        # Load economic calendar
         econ_data = pd.read_csv(
             econ_calendar_path,
             header=None,
             names=[
-                'event_date', 'event_time', 'country', 'volatility', 
-                'description', 'evaluation', 'data_format', 
-                'actual', 'forecast', 'previous'
+                'event_date', 'event_time', 'country', 'volatility',
+                'description', 'evaluation', 'data_format', 'actual',
+                'forecast', 'previous'
             ],
             parse_dates={'datetime': ['event_date', 'event_time']},
-            dayfirst=True,
+            dayfirst=True
         )
-
-        # Drop rows with invalid datetime values
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
 
-        # Convert 'actual', 'forecast', and 'volatility' to numeric
-        econ_data['actual'] = pd.to_numeric(econ_data['actual'], errors='coerce')
-        econ_data['forecast'] = pd.to_numeric(econ_data['forecast'], errors='coerce')
-        econ_data['volatility'] = pd.to_numeric(econ_data['volatility'], errors='coerce')
+        # Clean and preprocess economic calendar
+        econ_data = self._preprocess_economic_calendar_data(econ_data)
 
-        # Drop rows with NaN in critical columns
-        econ_data.dropna(subset=['actual', 'forecast', 'volatility'], inplace=True)
-        print(f"Economic calendar data after cleaning has {len(econ_data)} events.")
-
-        # Generate derived features
-        econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
-
-        # Convert 'forecast_diff' and 'volatility' to numeric (ensure proper types)
-        econ_data['forecast_diff'] = pd.to_numeric(econ_data['forecast_diff'], errors='coerce')
-        econ_data['volatility_weighted_diff'] = (
-            econ_data['forecast_diff'] * econ_data['volatility']
-        )
-
-        # Normalize numerical features
-        numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
-        econ_data[numerical_cols] = econ_data[numerical_cols].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
-
-        # Encode categorical features
-        econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
-        econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
-
-        # Sliding window extraction
+        # Generate sliding window features
         window_size = config['calendar_window_size']
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
 
-        # Predict volatility and trend using Conv1D model
-        predicted_volatility, predicted_trend = self._predict_volatility_trend_with_conv1d(econ_features, window_size)
+        # Generate training signals
+        short_term_window = max(1, window_size // 10)
+        training_signals = self._generate_training_signals(hourly_data, short_term_window)
 
-        # Align predictions with the hourly dataset
-        predictions_df = pd.DataFrame(
-            index=hourly_data.index,
-            data={
-                'predicted_volatility': predicted_volatility,
-                'predicted_trend': predicted_trend
-            }
+        # Predict trend and volatility
+        predictions = self._predict_trend_and_volatility_with_conv1d(econ_features, training_signals, window_size)
+
+        # Align with hourly data
+        output_df = pd.DataFrame(
+            predictions, 
+            columns=['predicted_trend', 'predicted_volatility'], 
+            index=hourly_data.index
         )
+        print("Economic calendar processing complete.")
+        return output_df
 
-        print("Economic calendar processing completed.")
-        return predictions_df
+
+    def _generate_training_signals(self, hourly_data, short_term_window):
+        """
+        Generate training signals for short-term trend and volatility.
+
+        Parameters:
+        - hourly_data (pd.DataFrame): Hourly dataset.
+        - short_term_window (int): Short-term window size for training signals.
+
+        Returns:
+        - np.ndarray: Training signals (trend and volatility) for each hourly tick.
+        """
+        print(f"Generating training signals with short-term window size: {short_term_window}")
+
+        trend_signal = hourly_data['close'].ewm(span=short_term_window).mean().diff().fillna(0).values
+        volatility_signal = hourly_data['close'].rolling(window=short_term_window).std().fillna(0).values
+
+        training_signals = np.column_stack([trend_signal, volatility_signal])
+        print(f"Training signals generated. Shape: {training_signals.shape}")
+        return training_signals
+
 
 
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         """
-        Generate sliding window features for Conv1D input.
+        Generate sliding window features for economic calendar data, structured for Conv1D input.
 
         Parameters:
-        - econ_data (pd.DataFrame): Processed economic calendar data.
-        - hourly_data (pd.DataFrame): Hourly dataset with datetime index.
+        - econ_data (pd.DataFrame): Cleaned economic calendar data.
+        - hourly_data (pd.DataFrame): Hourly dataset.
         - window_size (int): Size of the sliding window.
 
         Returns:
-        - np.ndarray: Sliding window input features for Conv1D.
+        - np.ndarray: Features in sliding window format.
         """
-        print(f"Generating sliding window features with size {window_size}...")
+        print("Generating sliding window features...")
+
         features = []
-        for timestamp in hourly_data.index:
-            # Select events in the sliding window
+        for timestamp in tqdm(hourly_data.index, desc="Processing Windows", unit="window"):
+            # Define the window range
             window_start = timestamp - pd.Timedelta(hours=window_size)
             window_data = econ_data.loc[window_start:timestamp]
 
-            # Pad or truncate to match the window size
-            if len(window_data) < window_size:
-                padding = pd.DataFrame(0, index=range(window_size - len(window_data)), columns=window_data.columns)
-                window_data = pd.concat([padding, window_data])
+            # Initialize window matrix with padding
+            window_matrix = np.zeros((window_size, 8))  # 5 numerical + 2 categorical + 1 event mask
+            padding_row = np.zeros(8)  # Represents no-event padding: all zeros
 
-            # Extract relevant features
-            numerical_features = window_data[['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']].values
-            categorical_features = window_data[['country_encoded', 'description_encoded']].values
-            features.append(np.concatenate([numerical_features, categorical_features], axis=1))
+            # Populate window matrix
+            for i, (event_time, event_row) in enumerate(window_data.iterrows()):
+                relative_index = (event_time - window_start) // pd.Timedelta(hours=1)
+                if 0 <= relative_index < window_size:
+                    window_matrix[relative_index, :5] = event_row[
+                        ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
+                    ].values
+                    window_matrix[relative_index, 5:7] = event_row[
+                        ['country_encoded', 'description_encoded']
+                    ].values
+                    window_matrix[relative_index, 7] = 1  # Event mask
 
-        print(f"Sliding window feature generation complete. Shape: {np.array(features).shape}")
-        return np.array(features)
+            features.append(window_matrix)
 
-    def _predict_volatility_with_conv1d(self, features, window_size):
+        features = np.array(features)
+        print(f"Sliding window feature generation complete. Shape: {features.shape}")
+        return features
+
+
+    def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
-        Predict volatility using a pretrained Conv1D model.
+        Train and use a Conv1D model to predict short-term trend and volatility.
 
         Parameters:
-        - features (np.ndarray): Sliding window features.
+        - econ_features (np.ndarray): Features generated from the sliding window.
+        - training_signals (dict): Dictionary with 'volatility' and 'trend' signals for training.
         - window_size (int): Size of the sliding window.
 
         Returns:
-        - pd.Series: Predicted volatility for each timestamp.
+        - np.ndarray: Predictions for trend and volatility for each hourly tick.
         """
-        from keras.models import load_model
+        from keras.models import Sequential
+        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, ReLU, Dropout
+        from keras.optimizers import Adam
+        from sklearn.model_selection import train_test_split
 
-        print("Loading pretrained Conv1D model for volatility prediction...")
-        model_path = 'models/conv1d_volatility_model.h5'
-        model = load_model(model_path)
+        print("Training Conv1D model for trend and volatility predictions...")
 
-        print("Predicting volatility...")
-        predictions = model.predict(features)
-        print(f"Volatility predictions complete. Shape: {predictions.shape}")
+        # Split data into train and test
+        X_train, X_test, y_train, y_test = train_test_split(
+            econ_features, 
+            training_signals, 
+            test_size=0.2, 
+            random_state=42
+        )
 
-        return pd.Series(predictions.flatten())
+        # Build Conv1D model
+        model = Sequential([
+            Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, 8)),
+            BatchNormalization(),
+            Conv1D(64, kernel_size=3, activation='relu'),
+            BatchNormalization(),
+            Dropout(0.3),
+            Flatten(),
+            Dense(64, activation='relu'),
+            Dense(2, activation='linear')  # Two outputs: trend and volatility
+        ])
+        model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
+
+        # Train the model
+        history = model.fit(
+            X_train, 
+            y_train, 
+            validation_data=(X_test, y_test), 
+            epochs=20, 
+            batch_size=32, 
+            verbose=1
+        )
+
+        print("Conv1D model training complete.")
+
+        # Predict on all data
+        predictions = model.predict(econ_features)
+        print(f"Predictions shape: {predictions.shape}")
+        return predictions
+
 
     
     def train_economic_calendar_model(self, econ_calendar_path, hourly_data_path, config):
