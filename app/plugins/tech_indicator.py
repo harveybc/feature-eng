@@ -3,6 +3,12 @@ import pandas as pd
 import numpy as np
 from app.data_handler import load_csv, write_csv, load_additional_csv,load_sp500_csv, load_and_fix_hourly_data, load_high_frequency_data
 from app.positional_encoding import generate_positional_encoding
+import pandas as pd
+import numpy as np
+from keras.models import Sequential, load_model
+from keras.layers import Conv1D, Dense, GlobalAveragePooling1D, Flatten
+from keras.optimizers import Adam
+import os
 
 class Plugin:
     """
@@ -291,221 +297,229 @@ class Plugin:
 
         return high_freq_features
 
-    def process_economic_calendar(self, economic_calendar_path, config):
+    def process_economic_calendar(self, econ_calendar_path, hourly_data, config):
         """
-        Processes the economic calendar data, aligns it with the hourly dataset, 
-        and generates features based on event details.
+        Process the economic calendar dataset and use a Conv1D model to predict volatility.
 
         Parameters:
-        - economic_calendar_path (str): Path to the economic calendar dataset.
-        - config (dict): Configuration settings.
+        - econ_calendar_path (str): Path to the economic calendar dataset.
+        - hourly_data (pd.DataFrame): Hourly dataset.
+        - config (dict): Configuration dictionary.
 
         Returns:
-        - pd.DataFrame: Economic calendar features aligned with the hourly dataset.
+        - pd.DataFrame: A DataFrame containing the predicted volatility for each tick.
         """
         print("Processing economic calendar data...")
 
-        # Step 1: Load the hourly dataset
-        hourly_data = load_csv(config['input_file'], config=config)
-
-        # Ensure the timestamp column is named 'datetime'
-        if 'DATE_TIME' in hourly_data.columns:
-            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
-
-        # Ensure the timestamp column exists
-        if 'datetime' not in hourly_data.columns:
-            raise ValueError("Hourly dataset must contain a 'datetime' column.")
-
-        # Parse the 'datetime' column and set as index
-        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
-        hourly_data.dropna(subset=['datetime'], inplace=True)
-        hourly_data.set_index('datetime', inplace=True)
-
-        # Ensure hourly data has a valid DatetimeIndex
-        if not isinstance(hourly_data.index, pd.DatetimeIndex):
-            raise ValueError("Hourly data must have a valid DatetimeIndex.")
-
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
-        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
-
-        # Step 2: Load the economic calendar dataset
-        econ_data = load_csv(economic_calendar_path, config=config)
-
-        # Ensure the required columns are present
-        required_columns = ['event_date', 'event_time', 'country', 'volatility', 'actual', 'forecast', 'previous']
-        missing_columns = [col for col in required_columns if col not in econ_data.columns]
-        if missing_columns:
-            raise ValueError(f"Missing required columns in economic calendar data: {missing_columns}")
-
-        # Parse event datetime
-        econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'],
-            format='%Y/%m/%d %H:%M:%S', errors='coerce'
+        # Load the dataset (no headers in economic calendar)
+        econ_data = pd.read_csv(
+            econ_calendar_path,
+            header=None,
+            names=[
+                'event_date', 'event_time', 'country', 'volatility', 
+                'description', 'evaluation', 'data_format', 
+                'actual', 'forecast', 'previous'
+            ],
+            parse_dates={'datetime': ['event_date', 'event_time']},
+            dayfirst=True,
         )
+
+        # Drop rows with invalid datetime values
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
+        print(f"Economic calendar data loaded with {len(econ_data)} events.")
 
-        # Ensure economic calendar data has a valid DatetimeIndex
-        if not isinstance(econ_data.index, pd.DatetimeIndex):
-            raise ValueError("Economic calendar data must have a valid DatetimeIndex.")
+        # Generate derived features
+        econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
+        econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
 
-        print(f"Loaded economic calendar data (first 5 rows):\n{econ_data.head()}")
-        print(f"Economic calendar data range: {econ_data.index.min()} to {econ_data.index.max()}")
+        # Normalize numerical features
+        numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
+        econ_data[numerical_cols] = econ_data[numerical_cols].apply(lambda x: (x - x.min()) / (x.max() - x.min()))
 
-        # Step 3: Filter relevant events based on config
-        if config.get('filter_by_volatility', False):
-            econ_data = econ_data[econ_data['volatility'].isin(['Moderate', 'High'])]
+        # Encode categorical features
+        econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
+        econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
 
-        if 'relevant_countries' in config:
-            econ_data = econ_data[econ_data['country'].isin(config['relevant_countries'])]
+        # Sliding window extraction
+        window_size = config['calendar_window_size']
+        econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
 
-        print(f"Filtered economic calendar data (first 5 rows):\n{econ_data.head()}")
+        # Predict volatility using Conv1D model
+        predicted_volatility = self._predict_volatility_with_conv1d(econ_features, window_size)
+        return predicted_volatility
 
-        # Step 4: Align economic calendar data with the hourly dataset
-        aligned_calendar = econ_data.reindex(hourly_data.index, method='ffill').fillna(0)
 
-        # Step 5: Generate sliding window features
-        window_size = config.get('calendar_window_size', 24)
-        features = {}
-        for i in range(1, window_size + 1):
-            features[f'event_volatility_{i}'] = aligned_calendar['volatility'].shift(i).fillna(0).values
-            features[f'event_actual_{i}'] = aligned_calendar['actual'].shift(i).fillna(0).values
-            features[f'event_forecast_{i}'] = aligned_calendar['forecast'].shift(i).fillna(0).values
-            features[f'event_previous_{i}'] = aligned_calendar['previous'].shift(i).fillna(0).values
-
-        # Convert to DataFrame and align with hourly data
-        econ_calendar_features = pd.DataFrame(features, index=hourly_data.index)
-
-        print(f"Processed economic calendar features (first 5 rows):\n{econ_calendar_features.head()}")
-        print(f"Economic calendar features processed successfully. Shape: {econ_calendar_features.shape}")
-
-        return econ_calendar_features
-
-    
-
-    def process_economic_calendar_with_attention(self, econ_data_path, hourly_data, config):
+    def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         """
-        Processes economic calendar using temporal attention with positional encoding.
+        Generate sliding window features for Conv1D input.
 
         Parameters:
-        - econ_data_path (str): Path to the economic calendar CSV file.
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - config (dict): Configuration settings for processing.
+        - econ_data (pd.DataFrame): Processed economic calendar data.
+        - hourly_data (pd.DataFrame): Hourly dataset with datetime index.
+        - window_size (int): Size of the sliding window.
 
         Returns:
-        - pd.DataFrame: Aligned event impact features with positional encodings.
+        - np.ndarray: Sliding window input features for Conv1D.
         """
-        print("Processing economic calendar with attention and positional encoding...")
-
-        # Column names for the economic calendar dataset
-        column_names = [
-            'event_date', 'event_time', 'country', 'volatility', 'description',
-            'evaluation', 'data_format', 'actual', 'forecast', 'previous'
-        ]
-
-        # Load the economic calendar dataset
-        econ_data = pd.read_csv(
-            econ_data_path,
-            header=None,
-            names=column_names
-        )
-
-        # Parse datetime and set as index
-        econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'] + ' ' + econ_data['event_time'],
-            format='%Y/%m/%d %H:%M:%S',
-            errors='coerce'
-        )
-        econ_data.dropna(subset=['datetime'], inplace=True)
-        econ_data.set_index('datetime', inplace=True)
-
-        # Ensure econ_data.index is a DatetimeIndex
-        if not isinstance(econ_data.index, pd.DatetimeIndex):
-            raise ValueError("econ_data index is not a valid DatetimeIndex after datetime parsing.")
-
-        # Ensure hourly_data.index is a DatetimeIndex
-        hourly_data.index = pd.to_datetime(hourly_data.index, errors='coerce')
-
-        # Validate hourly_data index type
-        if not isinstance(hourly_data.index, pd.DatetimeIndex):
-            raise ValueError("hourly_data index is not a valid DatetimeIndex.")
-
-        # Generate positional encodings for the events
-        max_time = hourly_data.index.max()  # Get maximum timestamp
-        econ_data['position'] = econ_data.index.map(lambda t: (max_time - t).total_seconds() / 3600)  # Hours from max_time
-        num_features = config.get('positional_encoding_dim', 8)  # Positional encoding dimension
-        econ_data_positional_encoding = generate_positional_encoding(len(econ_data), num_features)
-        positional_encoding_df = pd.DataFrame(
-            econ_data_positional_encoding,
-            index=econ_data.index,
-            columns=[f'pos_enc_{i}' for i in range(num_features)]
-        )
-        econ_data = pd.concat([econ_data, positional_encoding_df], axis=1)
-
-        # Filter relevant countries and volatility levels
-        relevant_countries = config.get('relevant_countries', ['United States', 'Euro Zone'])
-        econ_data = econ_data[econ_data['country'].isin(relevant_countries)]
-        econ_data = econ_data[econ_data['volatility'].isin(['Moderate Volatility Expected', 'High Volatility Expected'])]
-
-        # Temporal weighting mechanism
-        def apply_attention_weights(window, current_time):
-            """
-            Assigns weights to events in the window based on their temporal proximity.
-            """
-            time_diff = (current_time - window.index).total_seconds() / 3600  # Convert to hours
-            weights = np.exp(-time_diff / config.get('temporal_decay', 24))  # Exponential decay
-            weighted_values = window[['actual', 'forecast', 'previous']].apply(pd.to_numeric, errors='coerce').multiply(weights, axis=0)
-            return weighted_values.sum()
-
-        # Rolling window processing
-        window_size = config.get('event_window_size', 8)
-        processed_features = []
-
+        print(f"Generating sliding window features with size {window_size}...")
+        features = []
         for timestamp in hourly_data.index:
-            # Convert timestamp to datetime if necessary
-            if not isinstance(timestamp, pd.Timestamp):
-                timestamp = pd.Timestamp(timestamp)
+            # Select events in the sliding window
+            window_start = timestamp - pd.Timedelta(hours=window_size)
+            window_data = econ_data.loc[window_start:timestamp]
 
-            # Ensure timestamp is within the range of econ_data.index
-            if timestamp not in econ_data.index:
-                print(f"Warning: {timestamp} is not in the economic data index.")
-                continue  # Skip this timestamp if not found in econ_data
+            # Pad or truncate to match the window size
+            if len(window_data) < window_size:
+                padding = pd.DataFrame(0, index=range(window_size - len(window_data)), columns=window_data.columns)
+                window_data = pd.concat([padding, window_data])
 
-            # Get rolling window of events up to the current timestamp
-            window = econ_data.loc[:timestamp].tail(window_size)
+            # Extract relevant features
+            numerical_features = window_data[['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']].values
+            categorical_features = window_data[['country_encoded', 'description_encoded']].values
+            features.append(np.concatenate([numerical_features, categorical_features], axis=1))
 
-            if not window.empty:
-                weighted_features = apply_attention_weights(window, timestamp)
-            else:
-                # Fill with zeros if no events in the window
-                weighted_features = pd.Series(index=['actual', 'forecast', 'previous'], dtype='float64').fillna(0)
+        print(f"Sliding window feature generation complete. Shape: {np.array(features).shape}")
+        return np.array(features)
 
-            # Add timestamp for alignment
-            weighted_features['timestamp'] = timestamp
-            processed_features.append(weighted_features)
+    def _predict_volatility_with_conv1d(self, features, window_size):
+        """
+        Predict volatility using a pretrained Conv1D model.
 
-        # Check the structure of processed_features before creating DataFrame
-        if not processed_features:
-            raise ValueError("No processed features were generated. Check the processing loop.")
+        Parameters:
+        - features (np.ndarray): Sliding window features.
+        - window_size (int): Size of the sliding window.
 
-        # Create DataFrame from processed features
-        processed_df = pd.DataFrame(processed_features)
+        Returns:
+        - pd.Series: Predicted volatility for each timestamp.
+        """
+        from keras.models import load_model
 
-        # Ensure the 'timestamp' column is present
-        if 'timestamp' not in processed_df.columns:
-            raise KeyError("'timestamp' column is missing from processed features.")
+        print("Loading pretrained Conv1D model for volatility prediction...")
+        model_path = 'models/conv1d_volatility_model.h5'
+        model = load_model(model_path)
 
-        processed_df.set_index('timestamp', inplace=True)
+        print("Predicting volatility...")
+        predictions = model.predict(features)
+        print(f"Volatility predictions complete. Shape: {predictions.shape}")
 
-        # Align with the hourly dataset
-        processed_df = processed_df.reindex(hourly_data.index).fillna(0)
-
-        print(f"Processed economic calendar features with shape: {processed_df.shape}")
-        return processed_df
-
-
+        return pd.Series(predictions.flatten())
 
     
+    def train_economic_calendar_model(self, econ_calendar_path, hourly_data_path, config):
+        """
+        Train the Conv1D model for predicting short-term volatility and trend variation.
+
+        Parameters:
+        - econ_calendar_path (str): Path to the economic calendar dataset.
+        - hourly_data_path (str): Path to the hourly dataset for calculating targets.
+        - config (dict): Configuration dictionary.
+
+        Returns:
+        - keras.Model: Trained Conv1D model.
+        """
+        print("Training economic calendar Conv1D model...")
+        
+        # Load and preprocess the economic calendar data
+        econ_calendar_data = self.load_economic_calendar(econ_calendar_path, config)
+        hourly_data = load_and_fix_hourly_data(hourly_data_path, config)
+        
+        # Generate sliding window data
+        window_size = config['calendar_window_size']
+        X, y_volatility, y_trend = self.generate_training_data(econ_calendar_data, hourly_data, window_size, config)
+
+        # Build the Conv1D model
+        input_shape = X.shape[1:]  # (window_size, num_features)
+        model = self.build_conv1d_model(input_shape)
+
+        # Compile the model
+        model.compile(
+            optimizer='adam',
+            loss={'volatility_output': 'mse', 'trend_output': 'mse'},
+            metrics={'volatility_output': 'mae', 'trend_output': 'mae'}
+        )
+        
+        # Train the model
+        model.fit(
+            X,
+            {'volatility_output': y_volatility, 'trend_output': y_trend},
+            epochs=config.get('epochs', 50),
+            batch_size=config.get('batch_size', 32),
+            validation_split=0.2,
+            verbose=1
+        )
+        print("Model training completed.")
+        return model
+
+    def generate_training_data(self, econ_calendar_data, hourly_data, window_size, config):
+        """
+        Generate training data for Conv1D model using economic calendar and hourly data.
+
+        Parameters:
+        - econ_calendar_data (pd.DataFrame): Processed economic calendar data.
+        - hourly_data (pd.DataFrame): Hourly dataset with close prices.
+        - window_size (int): Number of ticks in the sliding window.
+        - config (dict): Configuration dictionary.
+
+        Returns:
+        - X (np.ndarray): Input features for the Conv1D model.
+        - y_volatility (np.ndarray): Target volatility values.
+        - y_trend (np.ndarray): Target trend variation values.
+        """
+        print("Generating training data for economic calendar model...")
+        
+        event_features = econ_calendar_data.values  # Event data as array
+        prices = hourly_data['close'].values  # Close prices
+        ema = hourly_data['close'].ewm(span=window_size).mean().values  # EMA for trend calculation
+
+        X, y_volatility, y_trend = [], [], []
+        
+        for i in range(window_size, len(hourly_data)):
+            # Input features from economic calendar events in the window
+            X_window = event_features[i - window_size:i]
+            
+            # Target: Volatility in the short-term window
+            price_window = prices[i - window_size:i]
+            volatility = price_window.max() - price_window.min()
+            
+            # Target: Trend variation (relative change in EMA)
+            trend_variation = (ema[i] - ema[i - window_size]) / ema[i - window_size]
+            
+            X.append(X_window)
+            y_volatility.append(volatility)
+            y_trend.append(trend_variation)
+        
+        return np.array(X), np.array(y_volatility), np.array(y_trend)
+
+    def build_conv1d_model(self, input_shape):
+        """
+        Build the Conv1D model for predicting volatility and trend variation.
+
+        Parameters:
+        - input_shape (tuple): Shape of the input data (window_size, num_features).
+
+        Returns:
+        - keras.Model: Compiled Conv1D model.
+        """
+        from tensorflow.keras import layers, Model
+
+        input_layer = layers.Input(shape=input_shape)
+
+        # Conv1D layers
+        x = layers.Conv1D(filters=32, kernel_size=3, activation='relu')(input_layer)
+        x = layers.Conv1D(filters=64, kernel_size=3, activation='relu')(x)
+        x = layers.GlobalMaxPooling1D()(x)
+
+        # Outputs
+        volatility_output = layers.Dense(1, name='volatility_output')(x)
+        trend_output = layers.Dense(1, name='trend_output')(x)
+
+        # Model
+        model = Model(inputs=input_layer, outputs=[volatility_output, trend_output])
+        print("Conv1D model built successfully.")
+        return model
+
+
     def compute_temporal_impact(self, econ_data, hourly_index, impact_window):
         """
         Computes the temporal impact of economic events within a given window.
@@ -610,6 +624,42 @@ class Plugin:
         print("Sparse events successfully transformed to dense hourly features.")
         return result
 
+    def transform_economic_calendar(self, econ_calendar_path, hourly_data_path, model, config):
+        """
+        Transform the economic calendar into an hourly dataset with predicted volatility and trend.
+
+        Parameters:
+        - econ_calendar_path (str): Path to the economic calendar dataset.
+        - hourly_data_path (str): Path to the hourly dataset.
+        - model (keras.Model): Trained Conv1D model.
+        - config (dict): Configuration dictionary.
+
+        Returns:
+        - pd.DataFrame: Hourly dataset with predicted volatility and trend.
+        """
+        print("Transforming economic calendar into hourly dataset...")
+
+        # Load data
+        econ_calendar_data = self.load_economic_calendar(econ_calendar_path, config)
+        hourly_data = load_and_fix_hourly_data(hourly_data_path, config)
+
+        # Generate sliding window data
+        window_size = config['calendar_window_size']
+        X, _, _ = self.generate_training_data(econ_calendar_data, hourly_data, window_size, config)
+
+        # Predict with the model
+        predictions = model.predict(X)
+        predicted_volatility = predictions[0].flatten()
+        predicted_trend = predictions[1].flatten()
+
+        # Build the hourly dataset
+        transformed_data = pd.DataFrame({
+            'datetime': hourly_data.index[window_size:],
+            'predicted_volatility': predicted_volatility,
+            'predicted_trend': predicted_trend
+        })
+        print("Economic calendar successfully transformed.")
+        return transformed_data
 
 
     def process_forex_data(self, forex_files, config):
