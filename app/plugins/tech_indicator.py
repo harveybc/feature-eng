@@ -712,7 +712,7 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned S&P 500 features.
+        - dict: Aligned S&P 500 features as a dictionary.
         """
         print("Processing S&P 500 data...")
 
@@ -737,9 +737,11 @@ class Plugin:
         # Align with the hourly dataset
         aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
-        print("S&P 500 data aligned with hourly dataset.")
-        return aligned_sp500
+        # Convert the aligned Series to a DataFrame for compatibility
+        aligned_sp500_df = aligned_sp500.to_frame(name='sp500_close')
 
+        print("S&P 500 data aligned with hourly dataset.")
+        return aligned_sp500_df
 
 
     def process_vix_data(self, vix_data_path, hourly_data, config):
