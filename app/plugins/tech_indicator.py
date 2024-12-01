@@ -314,7 +314,7 @@ class Plugin:
         print("Processing economic calendar data...")
 
         # Load the hourly dataset
-        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+        hourly_data = self._load_and_fix_hourly_data(config['input_file'], config)
 
         # Load the economic calendar dataset
         econ_data = pd.read_csv(
@@ -343,10 +343,16 @@ class Plugin:
 
         # Generate sliding window features
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
-        print("Sliding window features generated.")
+        print(f"Sliding window feature generation complete. Shape: {econ_features.shape}")
 
-        # Predict trend and volatility
-        predicted_trend, predicted_volatility = self._predict_trend_and_volatility_with_conv1d(econ_features, window_size)
+        # Generate training signals for trend and volatility
+        trend_signal, volatility_signal = self._generate_training_signals(hourly_data, config)
+        print("Training signals for trend and volatility generated.")
+
+        # Train and predict trend and volatility using Conv1D
+        predicted_trend, predicted_volatility = self._predict_trend_and_volatility_with_conv1d(
+            econ_features, trend_signal, volatility_signal, window_size
+        )
         print("Trend and volatility predictions complete.")
 
         # Align the predictions with the hourly data
@@ -360,6 +366,7 @@ class Plugin:
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
     def _preprocess_economic_calendar_data(self, econ_data):
