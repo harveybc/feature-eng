@@ -593,33 +593,37 @@ class Plugin:
         """
         print("Processing multiple Forex datasets...")
 
+        # Ensure hourly_data index is a DatetimeIndex
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            hourly_data.index = pd.to_datetime(hourly_data.index, errors='coerce')
+            if hourly_data.index.isna().any():
+                raise ValueError("Hourly data index contains invalid dates after conversion.")
+        
         forex_features = {}
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
             
             # Load the Forex data
-            forex_data = load_csv(
-                file_path,
-                config=config
-            )
+            forex_data = load_csv(file_path, config=config)
             
             # Ensure the DATE_TIME column is parsed as a datetime
             if 'DATE_TIME' in forex_data.columns:
                 forex_data['DATE_TIME'] = pd.to_datetime(
                     forex_data['DATE_TIME'],
                     format='%Y.%m.%d %H:%M:%S',
-                    errors='coerce'  # Convert invalid formats to NaT
+                    errors='coerce'
                 )
-                # Check for NaT and drop those rows
-                if forex_data['DATE_TIME'].isna().any():
-                    print(f"Warning: Found {forex_data['DATE_TIME'].isna().sum()} rows with invalid DATE_TIME values. Dropping them.")
+                # Log and drop rows with NaT in DATE_TIME
+                invalid_dates = forex_data['DATE_TIME'].isna().sum()
+                if invalid_dates > 0:
+                    print(f"Warning: Dropping {invalid_dates} rows with invalid DATE_TIME values.")
                     forex_data.dropna(subset=['DATE_TIME'], inplace=True)
                 forex_data.set_index('DATE_TIME', inplace=True)
 
             # Verify that the index is a DatetimeIndex
             if not isinstance(forex_data.index, pd.DatetimeIndex):
                 raise ValueError(f"Forex data from {file_path} does not have a valid DatetimeIndex after parsing.")
-
+            
             # Resample to hourly resolution
             forex_data = forex_data.resample('1h').mean()
 
@@ -632,7 +636,6 @@ class Plugin:
 
         print(f"Processed Forex datasets: {list(forex_features.keys())}")
         return forex_features
-
 
 
 
