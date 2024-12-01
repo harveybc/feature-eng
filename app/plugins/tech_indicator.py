@@ -1,7 +1,7 @@
 import pandas_ta as ta
 import pandas as pd
 import numpy as np
-from app.data_handler import load_csv, write_csv
+from app.data_handler import load_csv, write_csv, load_additional_csv
 from app.positional_encoding import generate_positional_encoding
 
 class Plugin:
@@ -598,36 +598,18 @@ class Plugin:
             hourly_data.index = pd.to_datetime(hourly_data.index, errors='coerce')
             if hourly_data.index.isna().any():
                 raise ValueError("Hourly data index contains invalid dates after conversion.")
-        
+
         forex_features = {}
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
-            
-            # Load the Forex data
-            forex_data = load_csv(file_path, config=config)
-            print(f"Raw DATE_TIME after loadcsv, column sample:\n{forex_data['DATE_TIME'].head()}")
 
-            # Ensure the DATE_TIME column is parsed as a datetime
-            if 'DATE_TIME' in forex_data.columns:
-                forex_data['DATE_TIME'] = forex_data['DATE_TIME'].str.strip()  # Strip leading/trailing spaces
-                forex_data['DATE_TIME'] = pd.to_datetime(
-                    forex_data['DATE_TIME'],
-                    format='%Y.%m.%d %H:%M:%S',
-                    errors='coerce',  # Gracefully handle invalid formats
-                    infer_datetime_format=True  # Allow pandas to infer format if possible
-                )
-                # Log and drop rows with NaT in DATE_TIME
-                invalid_dates = forex_data['DATE_TIME'].isna().sum()
-                if invalid_dates > 0:
-                    print(f"Warning: Dropping {invalid_dates} rows with invalid DATE_TIME values.")
-                    forex_data.dropna(subset=['DATE_TIME'], inplace=True)
-                forex_data.set_index('DATE_TIME', inplace=True)
-
+            # Load the Forex data using the new function
+            forex_data = load_additional_csv(file_path, dataset_type='forex_15m', config=config)
 
             # Verify that the index is a DatetimeIndex
             if not isinstance(forex_data.index, pd.DatetimeIndex):
                 raise ValueError(f"Forex data from {file_path} does not have a valid DatetimeIndex after parsing.")
-            
+
             # Resample to hourly resolution
             forex_data = forex_data.resample('1h').mean()
 
