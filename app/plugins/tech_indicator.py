@@ -331,17 +331,23 @@ class Plugin:
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
 
-        # Convert 'actual' and 'forecast' to numeric, coerce errors to NaN
+        # Convert 'actual', 'forecast', and 'volatility' to numeric
         econ_data['actual'] = pd.to_numeric(econ_data['actual'], errors='coerce')
         econ_data['forecast'] = pd.to_numeric(econ_data['forecast'], errors='coerce')
+        econ_data['volatility'] = pd.to_numeric(econ_data['volatility'], errors='coerce')
 
         # Drop rows with NaN in critical columns
-        econ_data.dropna(subset=['actual', 'forecast'], inplace=True)
+        econ_data.dropna(subset=['actual', 'forecast', 'volatility'], inplace=True)
         print(f"Economic calendar data after cleaning has {len(econ_data)} events.")
 
         # Generate derived features
         econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
-        econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
+
+        # Convert 'forecast_diff' and 'volatility' to numeric (ensure proper types)
+        econ_data['forecast_diff'] = pd.to_numeric(econ_data['forecast_diff'], errors='coerce')
+        econ_data['volatility_weighted_diff'] = (
+            econ_data['forecast_diff'] * econ_data['volatility']
+        )
 
         # Normalize numerical features
         numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
