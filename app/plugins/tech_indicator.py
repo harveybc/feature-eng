@@ -9,6 +9,7 @@ from keras.models import Sequential, load_model
 from keras.layers import Conv1D, Dense, GlobalAveragePooling1D, Flatten
 from keras.optimizers import Adam
 import os
+from tqdm import tqdm  # For progress indication
 
 class Plugin:
     """
