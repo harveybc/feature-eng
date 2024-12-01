@@ -248,85 +248,54 @@ class Plugin:
 
     def process_high_frequency_data(self, high_freq_data_path, config):
         """
-        Processes the high-frequency EUR/USD dataset, extracting the CLOSE values
-        for the last 8 ticks of 15-minute and 30-minute periodicities, aligned with the hourly dataset.
+        Processes the high-frequency dataset and aligns it with the hourly dataset.
 
         Parameters:
         - high_freq_data_path (str): Path to the high-frequency dataset.
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: High-frequency features aligned with the hourly dataset.
+        - pd.DataFrame: Aligned high-frequency features.
         """
-        print("Processing high-frequency EUR/USD dataset...")
+        print(f"Loading high-frequency dataset: {high_freq_data_path}")
 
-        # Step 1: Load the hourly dataset from config['input_file']
-        hourly_data = load_csv(config['input_file'], config=config)
+        # Load the high-frequency data
+        high_freq_data = load_high_frequency_data(high_freq_data_path, config)
+        print(f"High-frequency dataset successfully loaded. Index range: {high_freq_data.index.min()} to {high_freq_data.index.max()}")
 
-        # Ensure the timestamp column is named 'datetime'
-        if 'DATE_TIME' in hourly_data.columns:
-            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
-
-        # Ensure the timestamp column exists
-        if 'datetime' not in hourly_data.columns:
-            raise ValueError("Hourly dataset must contain a 'datetime' column.")
-
-        # Parse the 'datetime' column and set as index
-        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
-        hourly_data.dropna(subset=['datetime'], inplace=True)
-        hourly_data.set_index('datetime', inplace=True)
-
-        # Ensure hourly data has a valid DatetimeIndex
-        if not isinstance(hourly_data.index, pd.DatetimeIndex):
-            raise ValueError("Hourly data must have a valid DatetimeIndex.")
-
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
-        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
-
-        # Step 2: Load the high-frequency dataset
-        high_freq_data = load_high_frequency_data(config['high_freq_dataset'], config)
-
-
-        # Ensure the timestamp column is named 'DATE_TIME'
-        if 'DATE_TIME' not in high_freq_data.columns:
+        # Verify that the dataset contains the expected columns
+        datetime_col = 'DATE_TIME'
+        if datetime_col not in high_freq_data.columns and not isinstance(high_freq_data.index, pd.DatetimeIndex):
             raise ValueError("High-frequency dataset must contain a 'DATE_TIME' column.")
 
-        # Parse 'DATE_TIME' and set as index
-        high_freq_data['DATE_TIME'] = pd.to_datetime(high_freq_data['DATE_TIME'], errors='coerce')
-        high_freq_data.dropna(subset=['DATE_TIME'], inplace=True)
-        high_freq_data.set_index('DATE_TIME', inplace=True)
+        # Debug: Print data summary after loading
+        print("High-frequency data summary (after loading):")
+        print(f"Columns: {list(high_freq_data.columns)}")
+        print(f"Index Type: {type(high_freq_data.index)}")
+        print(f"First 5 rows:\n{high_freq_data.head()}")
 
-        # Ensure high-frequency data has a valid DatetimeIndex
-        if not isinstance(high_freq_data.index, pd.DatetimeIndex):
-            raise ValueError("High-frequency data must have a valid DatetimeIndex.")
-
-        print(f"Loaded high-frequency data (first 5 rows):\n{high_freq_data.head()}")
-        print(f"High-frequency data range: {high_freq_data.index.min()} to {high_freq_data.index.max()}")
-
-        # Step 3: Extract and resample CLOSE values for 15m and 30m periodicities
+        # Resample and process as needed
         high_freq_15m = high_freq_data['CLOSE'].resample('15T').ffill()
         high_freq_30m = high_freq_data['CLOSE'].resample('30T').ffill()
 
-        print(f"Resampled 15m CLOSE data (first 5 rows):\n{high_freq_15m.head()}")
-        print(f"Resampled 30m CLOSE data (first 5 rows):\n{high_freq_30m.head()}")
+        # Debug: Print resampled data summaries
+        print("Resampled 15m CLOSE data (first 5 rows):")
+        print(high_freq_15m.head())
+        print("Resampled 30m CLOSE data (first 5 rows):")
+        print(high_freq_30m.head())
 
-        # Step 4: Align 15m and 30m CLOSE data with the hourly dataset
-        aligned_15m = high_freq_15m.reindex(hourly_data.index, method='ffill').fillna(0)
-        aligned_30m = high_freq_30m.reindex(hourly_data.index, method='ffill').fillna(0)
-
-        # Step 5: Create lagged features for the last 8 ticks of each periodicity
-        features = {}
+        # Construct high-frequency feature DataFrame
+        high_freq_features = pd.DataFrame(index=hourly_data.index)
         for i in range(1, config['sub_periodicity_window_size'] + 1):
-            features[f'CLOSE_15m_tick_{i}'] = aligned_15m.shift(i).fillna(0).values
-            features[f'CLOSE_30m_tick_{i}'] = aligned_30m.shift(i).fillna(0).values
+            high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
+            high_freq_features[f'CLOSE_30m_tick_{i}'] = high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
 
-        # Convert to DataFrame and align with hourly data
-        high_freq_features = pd.DataFrame(features, index=hourly_data.index)
-
-        print(f"Processed high-frequency features (first 5 rows):\n{high_freq_features.head()}")
-        print(f"High-frequency features processed successfully. Shape: {high_freq_features.shape}")
+        # Debug: Print processed features
+        print("Processed high-frequency features (first 5 rows):")
+        print(high_freq_features.head())
 
         return high_freq_features
+
 
 
     def process_economic_calendar(self, economic_calendar_path, config):
