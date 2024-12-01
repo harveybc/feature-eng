@@ -852,13 +852,15 @@ class Plugin:
         return transformed_data
 
 
-    def process_forex_data(self, forex_files, config):
+    def process_forex_data(self, forex_files, config, common_start, common_end):
         """
         Processes and aligns multiple Forex rate datasets with the hourly dataset.
 
         Parameters:
         - forex_files (list): List of file paths for Forex rate datasets.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: Processed Forex CLOSE features aligned with the hourly dataset.
@@ -915,6 +917,9 @@ class Plugin:
             # Add the aligned data to the output DataFrame
             column_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
             forex_features[column_name] = aligned_forex.values
+
+        # Apply common start and end date range filter
+        forex_features = forex_features[(forex_features.index >= common_start) & (forex_features.index <= common_end)]
 
         print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features.head()}")
         return forex_features
