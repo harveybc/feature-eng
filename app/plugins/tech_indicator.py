@@ -701,18 +701,25 @@ class Plugin:
         """
         print("Processing S&P 500 data...")
 
-        # Load the S&P 500 data using the new function
-        sp500_data = load_additional_csv(
-            sp500_data_path,
-            dataset_type='sp500',
-            config=config
-        )
+        # Load the S&P 500 data
+        sp500_data = load_additional_csv(sp500_data_path, config=config)
+        print(f"Loaded data columns: {list(sp500_data.columns)}")
+        print(f"First 5 rows of data:\n{sp500_data.head()}")
+
+        # Ensure the 'Date' column exists
+        if 'Date' not in sp500_data.columns:
+            raise ValueError("S&P 500 data must contain a 'Date' column.")
+
+        # Parse the 'Date' column as datetime
+        sp500_data['Date'] = pd.to_datetime(sp500_data['Date'], errors='coerce', format='%Y-%m-%d')
+        sp500_data.dropna(subset=['Date'], inplace=True)  # Drop rows with invalid dates
+        sp500_data.set_index('Date', inplace=True)  # Set 'Date' as the index
 
         # Verify that the index is a DatetimeIndex
         if not isinstance(sp500_data.index, pd.DatetimeIndex):
-            raise ValueError(f"S&P 500 data from {sp500_data_path} does not have a valid DatetimeIndex.")
+            raise ValueError(f"S&P 500 data from {sp500_data_path} does not have a valid DatetimeIndex after parsing.")
 
-        # Forward-fill daily data to hourly resolution
+        # Resample to hourly resolution
         sp500_data = sp500_data.resample('1H').ffill()
 
         # Align with the hourly dataset
