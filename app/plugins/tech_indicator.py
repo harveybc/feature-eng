@@ -203,11 +203,18 @@ class Plugin:
         - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
+            # Ensure hourly_data has a valid DatetimeIndex
+        if not isinstance(data.index, pd.DatetimeIndex):
+            try:
+                data.index = pd.to_datetime(data.index, errors='coerce')
+                if data.index.isna().any():
+                    raise ValueError("Hourly data contains invalid datetime values.")
+            except Exception as e:
+                raise ValueError(f"Failed to set DatetimeIndex for hourly data: {e}")
         additional_features = {}
 
         # Process Forex Datasets
         if config.get('forex_datasets'):
-            print("Processing Forex datasets...")
             forex_features = self.process_forex_data(config['forex_datasets'], data, config=config)
             additional_features.update(forex_features)
 
