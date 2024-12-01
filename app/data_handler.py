@@ -45,51 +45,77 @@ def load_csv(file_path, config=None):
     return data
 
 
-def load_additional_csv(file_path, config=None, dataset_type=None):
+def load_additional_csv(file_path, dataset_type, config=None):
     """
-    Load an additional dataset (e.g., S&P 500, VIX) with appropriate parsing and column handling.
+    Load additional datasets with specific parsing requirements.
 
     Parameters:
     - file_path (str): Path to the file.
-    - config (dict): Configuration for header mappings and date parsing.
-    - dataset_type (str): Dataset type (e.g., 'sp500', 'vix', etc.) for specific parsing rules.
+    - dataset_type (str): Type of the dataset ('forex_15m', 'sp500', 'vix', 'economic_calendar').
+    - config (dict): Configuration for header mappings.
 
     Returns:
-    - pd.DataFrame: Loaded and processed DataFrame.
+    - pd.DataFrame: Loaded and processed data.
     """
     try:
-        # Retrieve header mappings for the specified dataset type
-        header_mappings = config.get('header_mappings', {}).get(dataset_type, {}) if config else {}
+        # Load header mappings from config
+        header_mappings = config.get('header_mappings', {}) if config else {}
+        column_map = header_mappings.get(dataset_type, {})
 
-        # Load the dataset
-        data = pd.read_csv(file_path, sep=',', header=0)
+        # Load the CSV file
+        data = pd.read_csv(file_path, sep=',', encoding='utf-8')
 
-        # Apply column mappings (if specified)
-        if header_mappings:
-            data.rename(columns=header_mappings, inplace=True)
+        # Apply column mappings
+        if column_map:
+            data.rename(columns=column_map, inplace=True)
 
-        # Parse the date column based on dataset type
-        if dataset_type == 'sp500' and 'Date' in data.columns:
-            data['Date'] = pd.to_datetime(data['Date'], errors='coerce', format='%Y-%m-%d')
+        # Parse 'DATE_TIME' for Forex datasets
+        if 'DATE_TIME' in data.columns:
+            data['DATE_TIME'] = pd.to_datetime(
+                data['DATE_TIME'].str.strip(),
+                format='%Y.%m.%d %H:%M:%S',
+                errors='coerce'
+            )
+            invalid_rows = data['DATE_TIME'].isna().sum()
+            if invalid_rows > 0:
+                print(f"Warning: Found {invalid_rows} rows with invalid DATE_TIME values. Dropping them.")
+                data = data.dropna(subset=['DATE_TIME'])
+            data.set_index('DATE_TIME', inplace=True)
 
-        elif dataset_type == 'vix' and 'date' in data.columns:
-            data['date'] = pd.to_datetime(data['date'], errors='coerce', format='%Y-%m-%d')
+        # Parse 'date' for SP500 and VIX datasets
+        elif 'date' in data.columns:
+            data['date'] = pd.to_datetime(data['date'], errors='coerce')
+            invalid_rows = data['date'].isna().sum()
+            if invalid_rows > 0:
+                print(f"Warning: Found {invalid_rows} rows with invalid date values. Dropping them.")
+                data = data.dropna(subset=['date'])
+            data.set_index('date', inplace=True)
 
-        # Drop rows with invalid dates
-        if dataset_type in ['sp500', 'vix']:
-            date_column = 'Date' if 'Date' in data.columns else 'date'
-            data.dropna(subset=[date_column], inplace=True)
+        # Parse economic calendar with positional encoding
+        elif dataset_type == 'economic_calendar':
+            data.columns = [
+                'event_date', 'event_time', 'country', 'volatility', 'description',
+                'evaluation', 'data_format', 'actual', 'forecast', 'previous'
+            ]
+            data['datetime'] = pd.to_datetime(
+                data['event_date'] + ' ' + data['event_time'], format='%Y/%m/%d %H:%M:%S', errors='coerce'
+            )
+            invalid_rows = data['datetime'].isna().sum()
+            if invalid_rows > 0:
+                print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
+                data = data.dropna(subset=['datetime'])
+            data.set_index('datetime', inplace=True)
 
-        # Set the date column as the index
-        if dataset_type in ['sp500', 'vix']:
-            data.set_index(date_column, inplace=True)
+        # Convert numeric columns
+        for col in data.columns:
+            if data[col].dtype == 'object':
+                data[col] = pd.to_numeric(data[col], errors='coerce')
 
-        # Print debug information
         print(f"Loaded data columns: {list(data.columns)}")
         print(f"First 5 rows of data:\n{data.head()}")
 
     except Exception as e:
-        print(f"An error occurred while loading the CSV for {dataset_type}: {e}")
+        print(f"An error occurred while loading the CSV: {e}")
         raise
 
     return data
