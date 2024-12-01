@@ -577,51 +577,42 @@ class Plugin:
 
         Parameters:
         - forex_files (list): List of file paths for Forex rate datasets.
-        - hourly_data (pd.DataFrame): Hourly dataset.
+        - hourly_data (pd.DataFrame): Hourly dataset with a DatetimeIndex.
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Processed Forex features containing only CLOSE prices.
+        - dict: Processed Forex features, with each key corresponding to a Forex dataset's CLOSE values.
         """
         print("Processing multiple Forex datasets...")
 
         # Ensure hourly_data index is a DatetimeIndex
         if not isinstance(hourly_data.index, pd.DatetimeIndex):
-            hourly_data.index = pd.to_datetime(hourly_data.index, errors='coerce')
-            if hourly_data.index.isna().any():
-                raise ValueError("Hourly data index contains invalid dates after conversion.")
+            raise ValueError("Hourly data must have a valid DatetimeIndex.")
 
         forex_features = {}
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
-
+            
             # Load the Forex data
             forex_data = load_additional_csv(file_path, dataset_type='forex_15m', config=config)
-
-            # Ensure 'CLOSE' column exists
+            
+            # Ensure the 'CLOSE' column exists
             if 'CLOSE' not in forex_data.columns:
-                raise KeyError(f"The Forex data from {file_path} must contain a 'CLOSE' column.")
+                raise KeyError(f"The 'CLOSE' column is missing in the Forex dataset: {file_path}")
 
-            print(f"Loaded Forex data columns: {list(forex_data.columns)}")
-            print(f"First 5 rows of data for {file_path}:\n{forex_data.head()}")
-
-            # Resample the CLOSE column to hourly resolution
-            forex_close = forex_data['CLOSE'].resample('1H').mean()
+            # Resample to hourly resolution using forward fill
+            forex_close_hourly = forex_data['CLOSE'].resample('1H').ffill()
 
             # Align with the hourly dataset
-            aligned_forex = forex_close.reindex(hourly_data.index, method='ffill').fillna(0)
+            aligned_forex_close = forex_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
 
-            # Add aligned features to the dictionary
-            feature_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
-            forex_features[feature_name] = aligned_forex
+            # Add processed Forex CLOSE values to the output
+            dataset_name = file_path.split('/')[-1].split('.')[0]  # Extract dataset name from file path
+            forex_features[f"{dataset_name}_CLOSE"] = aligned_forex_close.values
 
-        # Combine features into a DataFrame
-        forex_features_df = pd.DataFrame(forex_features, index=hourly_data.index)
+        print(f"Processed Forex CLOSE features (first 5 rows):\n{pd.DataFrame(forex_features).head()}")
+        return forex_features
 
-        print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features_df.head()}")
-        print(f"Forex features processed successfully. Shape: {forex_features_df.shape}")
-
-        return forex_features_df
 
 
 
