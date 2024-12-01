@@ -605,7 +605,7 @@ class Plugin:
             
             # Load the Forex data
             forex_data = load_csv(file_path, config=config)
-            print(f"Raw DATE_TIME column sample:\n{forex_data['DATE_TIME'].head()}")
+            print(f"Raw DATE_TIME after loadcsv, column sample:\n{forex_data['DATE_TIME'].head()}")
 
             # Ensure the DATE_TIME column is parsed as a datetime
             if 'DATE_TIME' in forex_data.columns:

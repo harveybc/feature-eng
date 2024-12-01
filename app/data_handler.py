@@ -6,56 +6,62 @@ def load_csv(file_path, config=None):
 
     Parameters:
     - file_path (str): Path to the file.
-    - config (dict or None): Configuration for header mappings.
+    - config (dict): Configuration for header mappings.
 
     Returns:
     - pd.DataFrame: Loaded and processed data.
     """
     try:
-        # Default values if config is None
-        header_mappings = {}
-        date_format = None
-        dataset_type = 'default'
+        # Load header mappings from config if available
+        header_mappings = config.get('header_mappings', {}) if config else {}
 
-        # Extract values from config if it's provided
-        if config:
-            header_mappings = config.get('header_mappings', {})
-            date_format = config.get('date_format', None)
-            dataset_type = config.get('dataset_type', 'default')
-
-        # Retrieve column map for the dataset type
+        # Check for dataset type
+        dataset_type = config.get('dataset_type', 'default') if config else 'default'
         column_map = header_mappings.get(dataset_type, {})
 
-        # Load the CSV file with or without a custom date parser
-        if date_format:
-            data = pd.read_csv(
-                file_path, sep=',', parse_dates=[0],
-                date_parser=lambda x: pd.to_datetime(x, format=date_format, errors='coerce')
-            )
-        else:
-            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+        # Load the CSV file
+        data = pd.read_csv(file_path, sep=',', encoding='utf-8', parse_dates=False)
 
-        # Apply column mappings if specified
+        # Apply column mappings
         if column_map:
             data.rename(columns=column_map, inplace=True)
 
-        # Ensure the 'date' column is parsed as datetime
+        # Debug raw data
+        print(f"Raw data loaded from {file_path}:\n{data.head()}")
+        print(f"Data columns: {data.columns}")
+
+        # Ensure DATE_TIME column is parsed correctly for Forex datasets
+        if 'DATE_TIME' in data.columns:
+            data['DATE_TIME'] = data['DATE_TIME'].str.strip()  # Remove spaces
+            data['DATE_TIME'] = pd.to_datetime(
+                data['DATE_TIME'],
+                format='%Y.%m.%d %H:%M:%S',  # Adjust format as needed
+                errors='coerce'  # Handle errors gracefully
+            )
+            invalid_dates = data['DATE_TIME'].isna().sum()
+            if invalid_dates > 0:
+                print(f"Warning: Found {invalid_dates} rows with invalid DATE_TIME values.")
+                data.dropna(subset=['DATE_TIME'], inplace=True)
+            data.set_index('DATE_TIME', inplace=True)
+
+        # Handle other date columns
         if 'date' in data.columns:
             data['date'] = pd.to_datetime(data['date'], errors='coerce')
             data.set_index('date', inplace=True)
 
-        # Convert numeric columns to appropriate types
+        # Convert numeric columns
         for col in data.select_dtypes(include=['object', 'category']).columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
 
-        print(f"Loaded data columns: {list(data.columns)}")
-        print(f"First 5 rows of data:\n{data.head()}")
+        print(f"Processed data columns: {list(data.columns)}")
+        print(f"First 5 rows of processed data:\n{data.head()}")
 
     except Exception as e:
         print(f"An error occurred while loading the CSV: {e}")
         raise
 
     return data
+
 
 
 
