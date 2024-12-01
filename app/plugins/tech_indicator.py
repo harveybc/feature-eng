@@ -247,7 +247,7 @@ class Plugin:
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], config)
+            vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
             additional_features.update(vix_features)
 
             # Get the VIX dataset range
