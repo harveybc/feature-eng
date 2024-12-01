@@ -232,7 +232,8 @@ class Plugin:
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], config)
+            # Pass common_start and common_end here as well
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
             additional_features.update(sp500_features)
 
             # Get the S&P 500 dataset range
