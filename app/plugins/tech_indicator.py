@@ -314,7 +314,7 @@ class Plugin:
         print("Processing economic calendar data...")
 
         # Load the hourly dataset
-        hourly_data = self._load_and_fix_hourly_data(config['input_file'], config)
+        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
 
         # Load the economic calendar dataset
         econ_data = pd.read_csv(
