@@ -1,44 +1,46 @@
 import pandas as pd
 
-def load_csv(file_path, has_headers=True, columns=None, config=None):
+def load_csv(file_path, config=None):
     """
-    Load a CSV file dynamically based on headers and column definitions.
+    Load a CSV file dynamically based on header mappings and configurations.
 
     Parameters:
     - file_path (str): Path to the file.
-    - has_headers (bool): Whether the CSV file includes headers.
-    - columns (list): Column names to assign if headers are missing.
     - config (dict): Configuration for header mappings.
 
     Returns:
     - pd.DataFrame: Loaded and processed data.
     """
     try:
-        # Load the CSV file with or without headers
-        if has_headers:
-            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
-        else:
-            data = pd.read_csv(file_path, sep=',', header=None)
-        
-        # Assign custom column names if provided
-        if columns:
-            data.columns = columns
-        
         # Load header mappings from config if available
-        if config:
-            header_mappings = config.get('header_mappings', {})
-            dataset_type = config.get('dataset_type', 'default')
-            column_map = header_mappings.get(dataset_type, {})
-            if column_map:
-                data.rename(columns=column_map, inplace=True)
-        
-        # Ensure date column is parsed and set as index
-        if 'date' in data.columns or 'DATE_TIME' in data.columns:
-            date_col = 'date' if 'date' in data.columns else 'DATE_TIME'
-            data[date_col] = pd.to_datetime(data[date_col], errors='coerce')
-            data.set_index(date_col, inplace=True)
+        header_mappings = config.get('header_mappings', {}) if config else {}
 
-        # Convert numeric columns
+        # Check for dataset type
+        dataset_type = config.get('dataset_type', 'default') if config else 'default'
+        column_map = header_mappings.get(dataset_type, {})
+
+        # Get the date format from the config if specified
+        date_format = config.get('date_format', None)
+
+        # Load the CSV file with or without a custom date parser
+        if date_format:
+            data = pd.read_csv(
+                file_path, sep=',', parse_dates=[0],
+                date_parser=lambda x: pd.to_datetime(x, format=date_format, errors='coerce')
+            )
+        else:
+            data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+
+        # Apply column mappings if specified
+        if column_map:
+            data.rename(columns=column_map, inplace=True)
+
+        # Ensure the 'date' column is parsed as datetime
+        if 'date' in data.columns:
+            data['date'] = pd.to_datetime(data['date'], errors='coerce')
+            data.set_index('date', inplace=True)
+
+        # Convert numeric columns to appropriate types
         for col in data.select_dtypes(include=['object', 'category']).columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')
 
@@ -50,6 +52,7 @@ def load_csv(file_path, has_headers=True, columns=None, config=None):
         raise
 
     return data
+
 
 
 
