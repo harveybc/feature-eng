@@ -247,67 +247,61 @@ class Plugin:
         return additional_features_df
 
 
-    def process_high_frequency_data(self, high_freq_file, hourly_data, config):
+    def process_high_frequency_data(self, high_freq_data_path, hourly_data, config=None):
         """
-        Processes high-frequency data (e.g., 15-minute EUR/USD dataset) and aligns it with the hourly dataset.
+        Processes high-frequency data (e.g., EUR/USD at 15-minute intervals) 
+        and generates features for the hourly dataset.
 
         Parameters:
-        - high_freq_file (str): Path to the high-frequency dataset.
-        - hourly_data (pd.DataFrame): Hourly dataset.
+        - high_freq_data_path (str): Path to the high-frequency dataset.
+        - hourly_data (pd.DataFrame): Hourly dataset for alignment.
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Processed high-frequency features with CLOSE values from 15-min and 30-min periodicities.
+        - pd.DataFrame: Aligned high-frequency features with the hourly dataset.
         """
-        print(f"Processing high-frequency dataset: {high_freq_file}")
+        print(f"Processing high-frequency dataset: {high_freq_data_path}")
 
-        # Load the high-frequency data
-        high_freq_data = load_additional_csv(
-            file_path=high_freq_file,
-            dataset_type='forex_15m',
-            config=config
-        )
+        # Load the high-frequency dataset
+        high_freq_data = load_additional_csv(high_freq_data_path, dataset_type='forex_15m', config=config)
 
-        # Ensure the 'CLOSE' column exists
-        if 'CLOSE' not in high_freq_data.columns:
-            raise KeyError("The high-frequency dataset must contain a 'CLOSE' column.")
+        # Debug: Print the first few rows of the loaded dataset
+        print("Loaded high-frequency data (first 5 rows):")
+        print(high_freq_data.head())
 
-        # Resample the data to 30-minute periodicity
+        # Extract the CLOSE column
+        high_freq_data = high_freq_data[['CLOSE']]
+        print("Extracted CLOSE column (first 5 rows):")
+        print(high_freq_data.head())
+
+        # Generate 15-minute and 30-minute resampled datasets
+        high_freq_15m = high_freq_data['CLOSE'].resample('15T').mean()
         high_freq_30m = high_freq_data['CLOSE'].resample('30T').mean()
 
-        # Initialize a dictionary to hold the features
+        # Debug: Print resampled data
+        print("Resampled 15-minute data (first 5 rows):")
+        print(high_freq_15m.head())
+        print("Resampled 30-minute data (first 5 rows):")
+        print(high_freq_30m.head())
+
+        # Initialize the feature dictionary
         high_freq_features = {}
 
-        # Process each hourly tick in the hourly dataset
-        for timestamp in hourly_data.index:
-            # Get the last 8 CLOSE values at 15-minute periodicity
-            window_15m = high_freq_data.loc[:timestamp].tail(8)['CLOSE']
+        # Create features for the last 8 ticks for both 15m and 30m periodicities
+        for i in range(1, 9):
+            high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index, method='ffill').fillna(0)
+            high_freq_features[f'CLOSE_30m_tick_{i}'] = high_freq_30m.shift(i).reindex(hourly_data.index, method='ffill').fillna(0)
 
-            # Get the last 8 CLOSE values at 30-minute periodicity
-            window_30m = high_freq_30m.loc[:timestamp].tail(8)
-
-            # Add 15-minute periodicity features
-            for tick in range(8):
-                feature_name = f"CLOSE_15m_tick_{tick + 1}"
-                high_freq_features.setdefault(feature_name, []).append(
-                    window_15m.iloc[tick] if tick < len(window_15m) else 0
-                )
-
-            # Add 30-minute periodicity features
-            for tick in range(8):
-                feature_name = f"CLOSE_30m_tick_{tick + 1}"
-                high_freq_features.setdefault(feature_name, []).append(
-                    window_30m.iloc[tick] if tick < len(window_30m) else 0
-                )
-
-        # Convert the features dictionary into a DataFrame
+        # Convert the feature dictionary to a DataFrame
         high_freq_features_df = pd.DataFrame(high_freq_features, index=hourly_data.index)
 
-        # Print a preview of the processed data for verification
-        print(f"Processed high-frequency features (first 5 rows):\n{high_freq_features_df.head()}")
+        # Debug: Print processed features
+        print("Processed high-frequency features (first 5 rows):")
+        print(high_freq_features_df.head())
 
         print(f"High-frequency features processed successfully. Shape: {high_freq_features_df.shape}")
         return high_freq_features_df
+
 
 
 
