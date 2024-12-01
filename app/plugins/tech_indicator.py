@@ -406,26 +406,44 @@ class Plugin:
         print("Economic calendar data preprocessing complete.")
         return econ_data
 
-
-    def _generate_training_signals(self, hourly_data, short_term_window):
+    def _generate_training_signals(self, hourly_data, config):
         """
-        Generate training signals for short-term trend and volatility.
+        Generate training signals for trend and volatility.
 
         Parameters:
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - short_term_window (int): Short-term window size for training signals.
+        - hourly_data (pd.DataFrame): The hourly dataset.
+        - config (dict): Configuration dictionary.
 
         Returns:
-        - np.ndarray: Training signals (trend and volatility) for each hourly tick.
+        - tuple: (trend_signal, volatility_signal)
         """
-        print(f"Generating training signals with short-term window size: {short_term_window}")
+        print("Generating training signals...")
+        
+        # Extract the short-term window size from the configuration
+        short_term_window = config['calendar_window_size'] // 10
+        print(f"Short-term window size for training signals: {short_term_window}")
 
-        trend_signal = hourly_data['close'].ewm(span=short_term_window).mean().diff().fillna(0).values
-        volatility_signal = hourly_data['close'].rolling(window=short_term_window).std().fillna(0).values
+        # Calculate the EMA for trend signal and difference for trend variation
+        trend_signal = (
+            hourly_data['close']
+            .ewm(span=short_term_window)
+            .mean()
+            .diff()
+            .fillna(0)
+            .values
+        )
 
-        training_signals = np.column_stack([trend_signal, volatility_signal])
-        print(f"Training signals generated. Shape: {training_signals.shape}")
-        return training_signals
+        # Calculate short-term standard deviation as a volatility signal
+        volatility_signal = (
+            hourly_data['close']
+            .rolling(window=short_term_window)
+            .std()
+            .fillna(0)
+            .values
+        )
+
+        print("Training signals generated.")
+        return trend_signal, volatility_signal
 
 
 
