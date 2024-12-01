@@ -157,6 +157,43 @@ def load_sp500_csv(file_path):
     return data
 
 
+def load_and_fix_hourly_data(file_path, config=None):
+    """
+    Load the hourly dataset using load_csv and fix the 'datetime' column.
+
+    Parameters:
+    - file_path (str): Path to the hourly data file.
+    - config (dict): Configuration dictionary.
+
+    Returns:
+    - pd.DataFrame: Hourly dataset with valid DatetimeIndex.
+    """
+    try:
+        # Load data using the existing load_csv function
+        data = load_csv(file_path, config)
+
+        # Ensure the 'datetime' column exists and is correctly parsed
+        if 'datetime' in data.columns:
+            data['datetime'] = pd.to_datetime(data['datetime'], format='%m/%d/%Y %H:%M', errors='coerce')
+            invalid_dates = data['datetime'].isna().sum()
+            if invalid_dates > 0:
+                print(f"Warning: Found {invalid_dates} rows with invalid datetime values. Dropping them.")
+                data = data.dropna(subset=['datetime'])
+            data.set_index('datetime', inplace=True)
+        else:
+            raise ValueError("The 'datetime' column is missing in the hourly dataset.")
+
+        # Debugging message for loaded hourly data
+        print(f"Hourly data loaded and fixed successfully. Index range: {data.index.min()} to {data.index.max()}")
+        print(f"First 5 rows of hourly data:\n{data.head()}")
+
+    except Exception as e:
+        print(f"An error occurred while loading or fixing the hourly data: {e}")
+        raise
+
+    return data
+
+
 
 def write_csv(file_path, data, include_date=True, headers=True):
     """
