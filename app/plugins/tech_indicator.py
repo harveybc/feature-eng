@@ -249,10 +249,10 @@ class Plugin:
 
     def process_high_frequency_data(self, hf_data_path, hourly_data, config):
         """
-        Processes high-frequency data (e.g., 15m and 30m tick data) and aligns it with hourly data.
+        Processes high-frequency EUR/USD data (e.g., 15m and 30m tick data) and aligns it with hourly data.
 
         Parameters:
-        - hf_data_path (str): Path to the high-frequency dataset.
+        - hf_data_path (str): Path to the high-frequency EUR/USD dataset.
         - hourly_data (pd.DataFrame): Hourly dataset.
         - config (dict): Configuration settings.
 
@@ -266,7 +266,7 @@ class Plugin:
 
         # Ensure 'CLOSE' column exists
         if 'CLOSE' not in high_freq_data.columns:
-            raise KeyError(f"The high-frequency data must contain a 'CLOSE' column, but found {high_freq_data.columns}")
+            raise KeyError(f"The high-frequency EUR/USD data must contain a 'CLOSE' column, but found {high_freq_data.columns}")
 
         print(f"Loaded high-frequency data columns: {list(high_freq_data.columns)}")
         print(f"First 5 rows of high-frequency data:\n{high_freq_data.head()}")
@@ -291,7 +291,6 @@ class Plugin:
         print(f"High-frequency features processed successfully. Shape: {high_freq_features.shape}")
 
         return high_freq_features
-
 
 
 
