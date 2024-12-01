@@ -157,41 +157,50 @@ def load_sp500_csv(file_path):
     return data
 
 
-def load_and_fix_hourly_data(file_path, config=None):
+def load_and_fix_hourly_data(file_path, config):
     """
-    Load the hourly dataset using load_csv and fix the 'datetime' column.
+    Loads the hourly dataset and ensures the 'datetime' column is properly parsed and set as the index.
 
     Parameters:
-    - file_path (str): Path to the hourly data file.
-    - config (dict): Configuration dictionary.
+    - file_path (str): Path to the hourly dataset.
+    - config (dict): Configuration settings.
 
     Returns:
-    - pd.DataFrame: Hourly dataset with valid DatetimeIndex.
+    - pd.DataFrame: Hourly dataset with a DatetimeIndex.
     """
     try:
-        # Load data using the existing load_csv function
-        data = load_csv(file_path, config)
+        print(f"Loading hourly dataset from: {file_path}")
 
-        # Ensure the 'datetime' column exists and is correctly parsed
-        if 'datetime' in data.columns:
-            data['datetime'] = pd.to_datetime(data['datetime'], format='%m/%d/%Y %H:%M', errors='coerce')
-            invalid_dates = data['datetime'].isna().sum()
-            if invalid_dates > 0:
-                print(f"Warning: Found {invalid_dates} rows with invalid datetime values. Dropping them.")
-                data = data.dropna(subset=['datetime'])
-            data.set_index('datetime', inplace=True)
-        else:
-            raise ValueError("The 'datetime' column is missing in the hourly dataset.")
+        # Load header mappings from config
+        header_mappings = config.get('header_mappings', {})
+        hourly_mapping = header_mappings.get('forex_15m', {})
 
-        # Debugging message for loaded hourly data
-        print(f"Hourly data loaded and fixed successfully. Index range: {data.index.min()} to {data.index.max()}")
-        print(f"First 5 rows of hourly data:\n{data.head()}")
+        # Load the CSV file
+        data = pd.read_csv(file_path, sep=',', parse_dates=[0], encoding='utf-8', dayfirst=True)
+
+        # Check if datetime column exists
+        datetime_col = hourly_mapping.get('datetime', 'datetime')
+        if datetime_col not in data.columns:
+            raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the hourly dataset.")
+
+        # Parse and set datetime index
+        data[datetime_col] = pd.to_datetime(data[datetime_col], errors='coerce')
+        invalid_rows = data[datetime_col].isna().sum()
+        if invalid_rows > 0:
+            print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
+            data.dropna(subset=[datetime_col], inplace=True)
+        data.set_index(datetime_col, inplace=True)
+
+        # Validate index
+        if not isinstance(data.index, pd.DatetimeIndex):
+            raise ValueError("The index of the hourly dataset is not a DatetimeIndex.")
+
+        print(f"Hourly dataset successfully loaded. Index range: {data.index.min()} to {data.index.max()}")
+        return data
 
     except Exception as e:
         print(f"An error occurred while loading or fixing the hourly data: {e}")
         raise
-
-    return data
 
 
 
