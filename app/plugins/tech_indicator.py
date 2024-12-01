@@ -217,6 +217,7 @@ class Plugin:
             sp500_features = self.process_sp500_data(config['sp500_dataset'], data, config=config)
             additional_features.update(sp500_features.to_dict(orient="list"))
 
+            
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
