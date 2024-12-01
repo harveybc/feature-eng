@@ -234,16 +234,15 @@ class Plugin:
             print("Processing S&P 500 data...")
             sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
             
-            # If sp500_features is a dictionary, extract the relevant DataFrame or Series
-            if isinstance(sp500_features, dict):
-                sp500_features = sp500_features.get('Close')  # Assuming 'Close' is the relevant column
-            
-            additional_features.update(sp500_features)
+            if sp500_features is not None:
+                additional_features.update(sp500_features)
 
-            # Get the S&P 500 dataset range
-            sp500_start = sp500_features.index.min()
-            sp500_end = sp500_features.index.max()
-            dataset_ranges.append((sp500_start, sp500_end))
+                # Get the S&P 500 dataset range
+                sp500_start = sp500_features.index.min()
+                sp500_end = sp500_features.index.max()
+                dataset_ranges.append((sp500_start, sp500_end))
+            else:
+                print("Warning: S&P 500 data is empty or could not be processed.")
 
         # Process VIX Data
         if config.get('vix_dataset'):
@@ -1022,7 +1021,7 @@ class Plugin:
         - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
-        - dict: Aligned S&P 500 features.
+        - dict: Aligned S&P 500 features or None if processing fails.
         """
         print("Processing S&P 500 data...")
 
@@ -1074,10 +1073,15 @@ class Plugin:
         # Apply common start and end date range filter
         aligned_sp500 = aligned_sp500[(aligned_sp500.index >= common_start) & (aligned_sp500.index <= common_end)]
 
+        if aligned_sp500.empty:
+            print("Warning: The aligned S&P 500 data is empty after applying the date filter.")
+            return None
+
         print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
-        # Return as a dictionary
-        return {'sp500_close': aligned_sp500.values}
+        # Return as a dictionary with 'sp500_close' as a Series
+        return {'sp500_close': aligned_sp500}
+
 
 
 
