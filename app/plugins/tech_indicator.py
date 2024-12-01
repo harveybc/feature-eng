@@ -300,58 +300,67 @@ class Plugin:
 
     def process_economic_calendar(self, econ_calendar_path, config):
         """
-        Process the economic calendar dataset and use a Conv1D model to predict trend and volatility.
+        Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
 
         Returns:
-        - pd.DataFrame: A DataFrame containing predicted trend and volatility for each tick.
+        - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
         """
+        from tqdm import tqdm
+
         print("Processing economic calendar data...")
 
-        # Load hourly data
-        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+        # Load the hourly dataset
+        hourly_data = self._load_and_fix_hourly_data(config['input_file'], config)
 
-        # Load economic calendar
+        # Load the economic calendar dataset
         econ_data = pd.read_csv(
             econ_calendar_path,
             header=None,
             names=[
                 'event_date', 'event_time', 'country', 'volatility',
-                'description', 'evaluation', 'data_format', 'actual',
-                'forecast', 'previous'
+                'description', 'evaluation', 'data_format',
+                'actual', 'forecast', 'previous'
             ],
             parse_dates={'datetime': ['event_date', 'event_time']},
-            dayfirst=True
+            dayfirst=True,
         )
+
+        # Drop invalid datetime rows
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
 
-        # Clean and preprocess economic calendar
+        # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
+        print("Economic calendar data preprocessing complete.")
+
+        # Get sliding window size
+        window_size = config['calendar_window_size']
 
         # Generate sliding window features
-        window_size = config['calendar_window_size']
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
-
-        # Generate training signals
-        short_term_window = max(1, window_size // 10)
-        training_signals = self._generate_training_signals(hourly_data, short_term_window)
+        print("Sliding window features generated.")
 
         # Predict trend and volatility
-        predictions = self._predict_trend_and_volatility_with_conv1d(econ_features, training_signals, window_size)
+        predicted_trend, predicted_volatility = self._predict_trend_and_volatility_with_conv1d(econ_features, window_size)
+        print("Trend and volatility predictions complete.")
 
-        # Align with hourly data
-        output_df = pd.DataFrame(
-            predictions, 
-            columns=['predicted_trend', 'predicted_volatility'], 
-            index=hourly_data.index
-        )
-        print("Economic calendar processing complete.")
-        return output_df
+        # Align the predictions with the hourly data
+        aligned_trend = pd.Series(predicted_trend, index=hourly_data.index, name="Predicted_Trend")
+        aligned_volatility = pd.Series(predicted_volatility, index=hourly_data.index, name="Predicted_Volatility")
+
+        # Combine hourly data with predictions for verification
+        verification_df = pd.concat([hourly_data['close'], aligned_trend, aligned_volatility], axis=1)
+        print("Verification of alignment between hourly data and predictions (first 10 rows):")
+        print(verification_df.head(10))
+
+        # Return the DataFrame with predicted trend and volatility
+        return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
     def _preprocess_economic_calendar_data(self, econ_data):
         """
