@@ -991,13 +991,15 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, config):
+    def process_sp500_data(self, sp500_data_path, config, common_start, common_end):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
 
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - dict: Aligned S&P 500 features.
@@ -1049,6 +1051,9 @@ class Plugin:
         # Align with the hourly dataset
         aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
+        # Apply common start and end date range filter
+        aligned_sp500 = aligned_sp500[(aligned_sp500.index >= common_start) & (aligned_sp500.index <= common_end)]
+
         print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
         # Return as a dictionary
@@ -1056,13 +1061,16 @@ class Plugin:
 
 
 
-    def process_vix_data(self, vix_data_path, config):
+
+    def process_vix_data(self, vix_data_path, config, common_start, common_end):
         """
         Processes VIX data and aligns it with the hourly dataset.
 
         Parameters:
         - vix_data_path (str): Path to the VIX dataset.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - dict: Aligned VIX features.
@@ -1087,6 +1095,9 @@ class Plugin:
         aligned_vix = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
         print("Aligned VIX CLOSE data (first 5 rows):")
         print(aligned_vix.head())
+
+        # Apply common start and end date range filter
+        aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
 
         return {'vix_close': aligned_vix.values}
 
