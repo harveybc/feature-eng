@@ -1,7 +1,7 @@
 import pandas_ta as ta
 import pandas as pd
 import numpy as np
-from app.data_handler import load_csv, write_csv, load_additional_csv
+from app.data_handler import load_csv, write_csv, load_additional_csv,load_sp500_csv
 from app.positional_encoding import generate_positional_encoding
 
 class Plugin:
