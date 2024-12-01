@@ -706,7 +706,7 @@ class Plugin:
         sp500_data = load_sp500_csv(sp500_data_path)
 
         # Resample to hourly resolution
-        sp500_data = sp500_data.resample('1H').ffill()
+        sp500_data = sp500_data.resample('1h').ffill()
 
         # Align with the hourly dataset
         aligned_sp500 = sp500_data.reindex(hourly_data.index, method='ffill').fillna(0)
@@ -742,7 +742,7 @@ class Plugin:
             raise ValueError(f"VIX data from {vix_data_path} does not have a valid DatetimeIndex.")
 
         # Resample to hourly resolution
-        vix_resampled = vix_data.resample('1H').ffill()
+        vix_resampled = vix_data.resample('1h').ffill()
 
         # Align with the hourly dataset
         aligned_vix = vix_resampled.reindex(hourly_data.index, method='ffill').fillna(method='bfill')
