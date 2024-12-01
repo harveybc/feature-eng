@@ -232,6 +232,7 @@ class Plugin:
             )
             additional_features.update(high_freq_features.to_dict(orient="list"))
 
+
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
@@ -307,6 +308,7 @@ class Plugin:
 
         print(f"High-frequency features processed successfully. Shape: {high_freq_features_df.shape}")
         return high_freq_features_df
+
 
 
     def process_economic_calendar(self, econ_data_path, hourly_data, config):
