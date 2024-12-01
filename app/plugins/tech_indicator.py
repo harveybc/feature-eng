@@ -338,49 +338,95 @@ class Plugin:
         return high_freq_features
 
 
-    def process_economic_calendar(self, econ_data_path, hourly_data, config):
+    def process_economic_calendar(self, economic_calendar_path, config):
         """
-        Processes economic calendar data into a time-series aligned with hourly data.
+        Processes the economic calendar data, aligns it with the hourly dataset, 
+        and generates features based on event details.
 
         Parameters:
-        - econ_data_path (str): Path to the economic calendar CSV file.
-        - hourly_data (pd.DataFrame): Hourly dataset.
+        - economic_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Processed economic calendar features aligned to hourly data.
+        - pd.DataFrame: Economic calendar features aligned with the hourly dataset.
         """
         print("Processing economic calendar data...")
 
-        econ_columns = [
-            'Event date', 'Event time', 'Country', 'Volatility',
-            'Description', 'Evaluation', 'Data format',
-            'Actual', 'Forecast', 'Previous'
-        ]
+        # Step 1: Load the hourly dataset
+        hourly_data = load_csv(config['input_file'], config=config)
 
-        # Load the economic calendar data
-        econ_data = load_csv(
-            econ_data_path,
-            has_headers=False,  # Economic calendar has no headers
-            columns=econ_columns
-        )
+        # Ensure the timestamp column is named 'datetime'
+        if 'DATE_TIME' in hourly_data.columns:
+            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
 
-        # Combine event date and time into a single datetime column
+        # Ensure the timestamp column exists
+        if 'datetime' not in hourly_data.columns:
+            raise ValueError("Hourly dataset must contain a 'datetime' column.")
+
+        # Parse the 'datetime' column and set as index
+        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
+        hourly_data.dropna(subset=['datetime'], inplace=True)
+        hourly_data.set_index('datetime', inplace=True)
+
+        # Ensure hourly data has a valid DatetimeIndex
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            raise ValueError("Hourly data must have a valid DatetimeIndex.")
+
+        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
+        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
+
+        # Step 2: Load the economic calendar dataset
+        econ_data = load_csv(economic_calendar_path, config=config)
+
+        # Ensure the required columns are present
+        required_columns = ['event_date', 'event_time', 'country', 'volatility', 'actual', 'forecast', 'previous']
+        missing_columns = [col for col in required_columns if col not in econ_data.columns]
+        if missing_columns:
+            raise ValueError(f"Missing required columns in economic calendar data: {missing_columns}")
+
+        # Parse event datetime
         econ_data['datetime'] = pd.to_datetime(
-            econ_data['Event date'] + ' ' + econ_data['Event time'],
-            format='%Y/%m/%d %H:%M:%S',
-            errors='coerce'
+            econ_data['event_date'] + ' ' + econ_data['event_time'],
+            format='%Y/%m/%d %H:%M:%S', errors='coerce'
         )
+        econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
-        # Process and align the economic calendar data
-        aligned_econ = self.events_to_hourly_timeseries(
-            econ_data, hourly_data.index, config['window_size'], config['temporal_decay']
-        )
+        # Ensure economic calendar data has a valid DatetimeIndex
+        if not isinstance(econ_data.index, pd.DatetimeIndex):
+            raise ValueError("Economic calendar data must have a valid DatetimeIndex.")
 
-        print("Economic calendar processed successfully.")
-        return pd.DataFrame(aligned_econ, index=hourly_data.index)
+        print(f"Loaded economic calendar data (first 5 rows):\n{econ_data.head()}")
+        print(f"Economic calendar data range: {econ_data.index.min()} to {econ_data.index.max()}")
 
+        # Step 3: Filter relevant events based on config
+        if config.get('filter_by_volatility', False):
+            econ_data = econ_data[econ_data['volatility'].isin(['Moderate', 'High'])]
+
+        if 'relevant_countries' in config:
+            econ_data = econ_data[econ_data['country'].isin(config['relevant_countries'])]
+
+        print(f"Filtered economic calendar data (first 5 rows):\n{econ_data.head()}")
+
+        # Step 4: Align economic calendar data with the hourly dataset
+        aligned_calendar = econ_data.reindex(hourly_data.index, method='ffill').fillna(0)
+
+        # Step 5: Generate sliding window features
+        window_size = config.get('calendar_window_size', 24)
+        features = {}
+        for i in range(1, window_size + 1):
+            features[f'event_volatility_{i}'] = aligned_calendar['volatility'].shift(i).fillna(0).values
+            features[f'event_actual_{i}'] = aligned_calendar['actual'].shift(i).fillna(0).values
+            features[f'event_forecast_{i}'] = aligned_calendar['forecast'].shift(i).fillna(0).values
+            features[f'event_previous_{i}'] = aligned_calendar['previous'].shift(i).fillna(0).values
+
+        # Convert to DataFrame and align with hourly data
+        econ_calendar_features = pd.DataFrame(features, index=hourly_data.index)
+
+        print(f"Processed economic calendar features (first 5 rows):\n{econ_calendar_features.head()}")
+        print(f"Economic calendar features processed successfully. Shape: {econ_calendar_features.shape}")
+
+        return econ_calendar_features
 
     
 
