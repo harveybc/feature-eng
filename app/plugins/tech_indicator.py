@@ -859,60 +859,39 @@ class Plugin:
         - config (dict): Configuration settings.
 
         Returns:
-        - pd.DataFrame: Aligned VIX CLOSE data with the hourly dataset.
+        - dict: Aligned VIX features.
         """
         print("Processing VIX data...")
 
-        # Step 1: Load the hourly dataset from config['input_file']
-        hourly_data = load_csv(config['input_file'], config=config)
+        # Load the VIX data
+        vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
+        
+        # Check for the 'date' column
+        if 'date' not in vix_data.columns:
+            raise ValueError("The VIX dataset must contain a 'date' column.")
+        
+        # Ensure the index is correctly set to 'date' and parsed as datetime
+        if not isinstance(vix_data.index, pd.DatetimeIndex):
+            vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
+            invalid_dates = vix_data['date'].isna().sum()
+            if invalid_dates > 0:
+                print(f"Warning: Found {invalid_dates} rows with invalid date values. Dropping them.")
+                vix_data.dropna(subset=['date'], inplace=True)
+            vix_data.set_index('date', inplace=True)
 
-        # Ensure the timestamp column is named 'datetime'
-        if 'DATE_TIME' in hourly_data.columns:
-            hourly_data.rename(columns={'DATE_TIME': 'datetime'}, inplace=True)
+        # Extract the 'CLOSE' column and resample to hourly resolution
+        vix_close = vix_data['CLOSE'].resample('1H').ffill()
 
-        # Ensure the timestamp column exists
-        if 'datetime' not in hourly_data.columns:
-            raise ValueError("Hourly dataset must contain a 'datetime' column.")
-
-        # Parse the 'datetime' column and set as index
-        hourly_data['datetime'] = pd.to_datetime(hourly_data['datetime'], errors='coerce')
-        hourly_data.dropna(subset=['datetime'], inplace=True)
-        hourly_data.set_index('datetime', inplace=True)
-
-        # Ensure hourly data has a valid DatetimeIndex
-        if not isinstance(hourly_data.index, pd.DatetimeIndex):
-            raise ValueError("Hourly data must have a valid DatetimeIndex.")
-
+        # Align with the hourly dataset
+        hourly_data = self.load_and_fix_hourly_data(config['input_file'], config)
         print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
-        # Step 2: Load the VIX dataset
-        vix_data = load_csv(vix_data_path, config=config)
+        aligned_vix = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
+        print("Aligned VIX CLOSE data (first 5 rows):")
+        print(aligned_vix.head())
 
-        # Ensure the timestamp column is named 'date'
-        if 'date' in vix_data.columns:
-            vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
-            vix_data.dropna(subset=['date'], inplace=True)
-            vix_data.set_index('date', inplace=True)
-        else:
-            raise ValueError("The VIX dataset must contain a 'date' column.")
-
-        print(f"Loaded VIX data (first 5 rows):\n{vix_data.head()}")
-        print(f"VIX data index (first 5): {vix_data.index[:5]}")
-
-        # Ensure the VIX dataset has a valid DatetimeIndex
-        if not isinstance(vix_data.index, pd.DatetimeIndex):
-            raise ValueError("VIX data must have a valid DatetimeIndex.")
-
-        # Resample the CLOSE column to hourly frequency
-        vix_close_hourly = vix_data['close'].resample('1H').ffill()
-        print(f"Resampled VIX CLOSE data (first 5 rows):\n{vix_close_hourly.head()}")
-
-        # Align with the hourly dataset
-        aligned_vix = vix_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
-        print(f"Aligned VIX CLOSE data (first 5 rows):\n{aligned_vix.head()}")
-
-        return aligned_vix
+        return {'vix_close': aligned_vix.values}
 
 
 
