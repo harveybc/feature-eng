@@ -605,13 +605,16 @@ class Plugin:
             
             # Load the Forex data
             forex_data = load_csv(file_path, config=config)
-            
+            print(f"Raw DATE_TIME column sample:\n{forex_data['DATE_TIME'].head()}")
+
             # Ensure the DATE_TIME column is parsed as a datetime
             if 'DATE_TIME' in forex_data.columns:
+                forex_data['DATE_TIME'] = forex_data['DATE_TIME'].str.strip()  # Strip leading/trailing spaces
                 forex_data['DATE_TIME'] = pd.to_datetime(
                     forex_data['DATE_TIME'],
                     format='%Y.%m.%d %H:%M:%S',
-                    errors='coerce'
+                    errors='coerce',  # Gracefully handle invalid formats
+                    infer_datetime_format=True  # Allow pandas to infer format if possible
                 )
                 # Log and drop rows with NaT in DATE_TIME
                 invalid_dates = forex_data['DATE_TIME'].isna().sum()
@@ -619,6 +622,7 @@ class Plugin:
                     print(f"Warning: Dropping {invalid_dates} rows with invalid DATE_TIME values.")
                     forex_data.dropna(subset=['DATE_TIME'], inplace=True)
                 forex_data.set_index('DATE_TIME', inplace=True)
+
 
             # Verify that the index is a DatetimeIndex
             if not isinstance(forex_data.index, pd.DatetimeIndex):
