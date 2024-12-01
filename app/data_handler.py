@@ -6,21 +6,25 @@ def load_csv(file_path, config=None):
 
     Parameters:
     - file_path (str): Path to the file.
-    - config (dict): Configuration for header mappings.
+    - config (dict or None): Configuration for header mappings.
 
     Returns:
     - pd.DataFrame: Loaded and processed data.
     """
     try:
-        # Load header mappings from config if available
-        header_mappings = config.get('header_mappings', {}) if config else {}
+        # Default values if config is None
+        header_mappings = {}
+        date_format = None
+        dataset_type = 'default'
 
-        # Check for dataset type
-        dataset_type = config.get('dataset_type', 'default') if config else 'default'
+        # Extract values from config if it's provided
+        if config:
+            header_mappings = config.get('header_mappings', {})
+            date_format = config.get('date_format', None)
+            dataset_type = config.get('dataset_type', 'default')
+
+        # Retrieve column map for the dataset type
         column_map = header_mappings.get(dataset_type, {})
-
-        # Get the date format from the config if specified
-        date_format = config.get('date_format', None)
 
         # Load the CSV file with or without a custom date parser
         if date_format:
@@ -52,6 +56,7 @@ def load_csv(file_path, config=None):
         raise
 
     return data
+
 
 
 
