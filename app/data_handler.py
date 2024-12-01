@@ -206,6 +206,54 @@ def load_and_fix_hourly_data(file_path, config):
         print(f"An error occurred while loading or fixing the hourly data: {e}")
         raise
 
+def load_high_frequency_data(file_path, config):
+    """
+    Load and process the high-frequency dataset.
+
+    Parameters:
+    - file_path (str): Path to the high-frequency dataset.
+    - config (dict): Configuration settings.
+
+    Returns:
+    - pd.DataFrame: Processed high-frequency data with a valid DatetimeIndex.
+    """
+    try:
+        print(f"Loading high-frequency dataset: {file_path}")
+
+        # Load header mappings from config
+        header_mappings = config.get('header_mappings', {})
+        high_freq_mapping = header_mappings.get('forex_15m', {})
+        datetime_col = high_freq_mapping.get('datetime', 'DATE_TIME')  # Default to 'DATE_TIME'
+
+        # Load the CSV file
+        data = pd.read_csv(file_path, sep=',', encoding='utf-8')
+
+        # Ensure datetime column exists
+        if datetime_col not in data.columns:
+            raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the high-frequency dataset.")
+
+        # Parse and set datetime index
+        data[datetime_col] = pd.to_datetime(data[datetime_col], format='%Y-%m-%d %H:%M:%S', errors='coerce')
+        invalid_rows = data[datetime_col].isna().sum()
+        if invalid_rows > 0:
+            print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
+            data.dropna(subset=[datetime_col], inplace=True)
+        data.set_index(datetime_col, inplace=True)
+
+        # Validate index
+        if not isinstance(data.index, pd.DatetimeIndex):
+            raise ValueError("The index of the high-frequency dataset is not a DatetimeIndex.")
+
+        # Drop unnecessary columns if needed
+        drop_columns = ['volume', 'BC-BO']  # Adjust based on the dataset
+        data = data.drop(columns=[col for col in drop_columns if col in data.columns], errors='ignore')
+
+        print(f"High-frequency dataset successfully loaded. Index range: {data.index.min()} to {data.index.max()}")
+        return data
+
+    except Exception as e:
+        print(f"An error occurred while loading the high-frequency dataset: {e}")
+        raise
 
 
 

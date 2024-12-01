@@ -1,7 +1,7 @@
 import pandas_ta as ta
 import pandas as pd
 import numpy as np
-from app.data_handler import load_csv, write_csv, load_additional_csv,load_sp500_csv, load_and_fix_hourly_data
+from app.data_handler import load_csv, write_csv, load_additional_csv,load_sp500_csv, load_and_fix_hourly_data, load_high_frequency_data
 from app.positional_encoding import generate_positional_encoding
 
 class Plugin:
@@ -284,7 +284,8 @@ class Plugin:
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Step 2: Load the high-frequency dataset
-        high_freq_data = load_csv(high_freq_data_path, config=config)
+        high_freq_data = load_high_frequency_data(config['high_freq_dataset'], config)
+
 
         # Ensure the timestamp column is named 'DATE_TIME'
         if 'DATE_TIME' not in high_freq_data.columns:
