@@ -1,7 +1,7 @@
 import pandas_ta as ta
 import pandas as pd
 import numpy as np
-from app.data_handler import load_csv, write_csv, load_additional_csv,load_sp500_csv
+from app.data_handler import load_csv, write_csv, load_additional_csv,load_sp500_csv, load_and_fix_hourly_data
 from app.positional_encoding import generate_positional_encoding
 
 class Plugin:
@@ -872,7 +872,7 @@ class Plugin:
         vix_close = vix_data['close'].resample('1H').ffill()
 
         # Align with the hourly dataset
-        hourly_data = self.load_and_fix_hourly_data(config['input_file'], config)
+        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
         print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
