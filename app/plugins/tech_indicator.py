@@ -331,6 +331,14 @@ class Plugin:
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
 
+        # Convert 'actual' and 'forecast' to numeric, coerce errors to NaN
+        econ_data['actual'] = pd.to_numeric(econ_data['actual'], errors='coerce')
+        econ_data['forecast'] = pd.to_numeric(econ_data['forecast'], errors='coerce')
+
+        # Drop rows with NaN in critical columns
+        econ_data.dropna(subset=['actual', 'forecast'], inplace=True)
+        print(f"Economic calendar data after cleaning has {len(econ_data)} events.")
+
         # Generate derived features
         econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
         econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
