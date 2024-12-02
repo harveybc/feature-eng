@@ -166,12 +166,17 @@ def process_data(data, plugin, config):
 
     # Debugging: Ensure additional_features is non-empty
     if additional_features.empty:
+        print("Additional features dataset is empty after processing.")
+        print("Debugging additional features:")
+        print(f"Additional features index: {additional_features.index}")
+        print(f"Additional features columns: {additional_features.columns}")
         raise ValueError("Additional features dataset is empty!")
 
     print(f"Additional features shape before alignment: {additional_features.shape}")
 
     # Align additional features to processed_data
-    additional_features = additional_features.reindex(processed_data.index)
+    print(f"Aligning additional features to processed_data...")
+    additional_features = additional_features.reindex(processed_data.index, fill_value=0)
 
     # Debugging: Verify alignment
     if not additional_features.index.equals(processed_data.index):
