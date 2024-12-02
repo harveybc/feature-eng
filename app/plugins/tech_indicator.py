@@ -197,69 +197,123 @@ class Plugin:
         return indicator_df
 
 
-
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, sub-periodicities, S&P 500, VIX, and Forex pairs).
-
+        
         Parameters:
         - data (pd.DataFrame): Full dataset (hourly resolution).
         - config (dict): Configuration settings.
-
+        
         Returns:
         - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
         additional_features = {}
 
+        # Step 1: Calculate the common date range across all datasets
+        common_start = pd.Timestamp(data.index.min())  # Ensure this is a Timestamp
+        common_end = pd.Timestamp(data.index.max())    # Ensure this is a Timestamp
+
+        # Collect dataset ranges
+        dataset_ranges = []
+
         # Process Forex Datasets
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
-            forex_features = self.process_forex_data(config['forex_datasets'], config=config)
-            additional_features.update(forex_features)
+            forex_features = self.process_forex_data(config['forex_datasets'], config=config, common_start=common_start, common_end=common_end)
+            # Update additional_features correctly
+            additional_features.update(forex_features.to_dict(orient='series'))
+
+            # Get the Forex datasets range
+            forex_start = forex_features.index.min()
+            forex_end = forex_features.index.max()
+            dataset_ranges.append((forex_start, forex_end))
 
         # Process S&P 500 Data
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], config)
-            additional_features.update(sp500_features)  # No .to_dict()
+            sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
+            if sp500_features is not None:
+                additional_features.update(sp500_features.to_dict(orient='series'))
+
+                # Get the S&P 500 dataset range
+                sp500_start = sp500_features.index.min()
+                sp500_end = sp500_features.index.max()
+                dataset_ranges.append((sp500_start, sp500_end))
+            else:
+                print("Warning: S&P 500 data is empty or could not be processed.")
 
         # Process VIX Data
         if config.get('vix_dataset'):
             print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], config)
-            additional_features.update(vix_features)
+            vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
+            additional_features.update(vix_features.to_dict(orient='series'))
+
+            # Get the VIX dataset range
+            vix_start = vix_features.index.min()
+            vix_end = vix_features.index.max()
+            dataset_ranges.append((vix_start, vix_end))
 
         # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
             print("Processing high-frequency EUR/USD dataset...")
-            high_freq_features = self.process_high_frequency_data(
-                config['high_freq_dataset'], config
-            )
-            additional_features.update(high_freq_features)
+            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config, common_start=common_start, common_end=common_end)
+            additional_features.update(high_freq_features.to_dict(orient='series'))
+
+            # Get the high-frequency dataset range
+            high_freq_start = high_freq_features.index.min()
+            high_freq_end = high_freq_features.index.max()
+            dataset_ranges.append((high_freq_start, high_freq_end))
 
         # Process Economic Calendar Data
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
-            econ_calendar = self.process_economic_calendar(
-                config['economic_calendar'], config
-            )
-            additional_features.update(econ_calendar)
+            econ_calendar = self.process_economic_calendar(config['economic_calendar'], config, common_start=common_start, common_end=common_end)
+            additional_features.update(econ_calendar.to_dict(orient='series'))
 
-        # Combine into a DataFrame
+            # Get the economic calendar dataset range
+            econ_start = econ_calendar.index.min()
+            econ_end = econ_calendar.index.max()
+            dataset_ranges.append((econ_start, econ_end))
+
+        # Step 2: Find the common valid range
+        for start, end in dataset_ranges:
+            common_start = max(common_start, start)  # Start from the maximum start time
+            common_end = min(common_end, end)  # End at the minimum end time
+
+        # Step 3: Align all datasets to the common date range
+        for key, dataset in additional_features.items():
+            print(f"Processing key: {key}")
+            if not hasattr(dataset, 'index'):
+                print(f"Dataset with key '{key}' does not have an 'index' attribute. Skipping.")
+                continue
+            if not isinstance(dataset.index, pd.DatetimeIndex):
+                print(f"Dataset with key '{key}' does not have a DatetimeIndex. Converting.")
+                dataset.index = pd.to_datetime(dataset.index)
+
+            # Apply the date range filter
+            additional_features[key] = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+
+        # Step 4: Combine into a DataFrame
         additional_features_df = pd.DataFrame(additional_features)
         print(f"Additional features processed: {additional_features_df.columns}")
+
         return additional_features_df
 
 
 
-    def process_high_frequency_data(self, high_freq_data_path, config):
+
+
+    def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
         Processes the high-frequency dataset and aligns it with the hourly dataset.
 
         Parameters:
         - high_freq_data_path (str): Path to the high-frequency dataset.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: Aligned high-frequency features.
@@ -292,66 +346,110 @@ class Plugin:
             high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
             high_freq_features[f'CLOSE_30m_tick_{i}'] = high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
 
+        # Apply common start and end date range filter
+        high_freq_features = high_freq_features[(high_freq_features.index >= common_start) & (high_freq_features.index <= common_end)]
+
         # Debug: Print processed features
         print("Processed high-frequency features (first 5 rows):")
         print(high_freq_features.head())
 
         return high_freq_features
 
-    def process_economic_calendar(self, econ_calendar_path, config):
+    def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
-        Process the economic calendar dataset and use a Conv1D model to predict trend and volatility.
+        Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
+        - common_start (str or pd.Timestamp): Common start date for alignment.
+        - common_end (str or pd.Timestamp): Common end date for alignment.
 
         Returns:
-        - pd.DataFrame: A DataFrame containing predicted trend and volatility for each tick.
+        - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
         """
+        from tqdm import tqdm
+
         print("Processing economic calendar data...")
 
-        # Load hourly data
+        # Load the hourly dataset
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
 
-        # Load economic calendar
+        # Load the economic calendar dataset
         econ_data = pd.read_csv(
             econ_calendar_path,
             header=None,
             names=[
                 'event_date', 'event_time', 'country', 'volatility',
-                'description', 'evaluation', 'data_format', 'actual',
-                'forecast', 'previous'
+                'description', 'evaluation', 'data_format',
+                'actual', 'forecast', 'previous'
             ],
             parse_dates={'datetime': ['event_date', 'event_time']},
-            dayfirst=True
+            dayfirst=True,
         )
+
+        # Drop invalid datetime rows
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
 
-        # Clean and preprocess economic calendar
+        # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
+        print("Economic calendar data preprocessing complete.")
+
+        # Adjust the economic calendar to the common date range
+        econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
+
+        # Get sliding window size
+        window_size = config['calendar_window_size']
 
         # Generate sliding window features
-        window_size = config['calendar_window_size']
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
+        print(f"Sliding window feature generation complete. Shape: {econ_features.shape}")
 
-        # Generate training signals
-        short_term_window = max(1, window_size // 10)
-        training_signals = self._generate_training_signals(hourly_data, short_term_window)
+        # Generate training signals for trend and volatility
+        trend_signal, volatility_signal = self._generate_training_signals(hourly_data, config)
+        print("Training signals for trend and volatility generated.")
 
-        # Predict trend and volatility
-        predictions = self._predict_trend_and_volatility_with_conv1d(econ_features, training_signals, window_size)
-
-        # Align with hourly data
-        output_df = pd.DataFrame(
-            predictions, 
-            columns=['predicted_trend', 'predicted_volatility'], 
-            index=hourly_data.index
+        # Train and predict trend and volatility using Conv1D
+        predictions = self._predict_trend_and_volatility_with_conv1d(
+            econ_features=econ_features,
+            training_signals={'trend': trend_signal, 'volatility': volatility_signal},
+            window_size=window_size
         )
-        print("Economic calendar processing complete.")
-        return output_df
+
+        # Unpack predictions
+        predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
+        print(f"Predictions generated. Predictions shape: {predictions.shape}")
+
+        # Trim predictions by sliding window size
+        predicted_trend = predicted_trend[window_size:]
+        predicted_volatility = predicted_volatility[window_size:]
+
+        # Adjust the aligned index
+        adjusted_index = hourly_data.index[window_size:]
+
+        # Debugging
+        print(f"Predicted trend length: {len(predicted_trend)}")
+        print(f"Predicted volatility length: {len(predicted_volatility)}")
+        print(f"Adjusted index length: {len(adjusted_index)}")
+        print(f"Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
+
+        # Ensure lengths match
+        if len(predicted_trend) != len(adjusted_index):
+            raise ValueError(
+                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
+                f"vs. Aligned index ({len(adjusted_index)})"
+            )
+
+        # Align the predictions with the adjusted index
+        aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
+        aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
+
+        # Return the DataFrame with predicted trend and volatility
+        return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
+
 
     def _preprocess_economic_calendar_data(self, econ_data):
         """
@@ -390,26 +488,44 @@ class Plugin:
         print("Economic calendar data preprocessing complete.")
         return econ_data
 
-
-    def _generate_training_signals(self, hourly_data, short_term_window):
+    def _generate_training_signals(self, hourly_data, config):
         """
-        Generate training signals for short-term trend and volatility.
+        Generate training signals for trend and volatility.
 
         Parameters:
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - short_term_window (int): Short-term window size for training signals.
+        - hourly_data (pd.DataFrame): The hourly dataset.
+        - config (dict): Configuration dictionary.
 
         Returns:
-        - np.ndarray: Training signals (trend and volatility) for each hourly tick.
+        - tuple: (trend_signal, volatility_signal)
         """
-        print(f"Generating training signals with short-term window size: {short_term_window}")
+        print("Generating training signals...")
+        
+        # Extract the short-term window size from the configuration
+        short_term_window = config['calendar_window_size'] // 10
+        print(f"Short-term window size for training signals: {short_term_window}")
 
-        trend_signal = hourly_data['close'].ewm(span=short_term_window).mean().diff().fillna(0).values
-        volatility_signal = hourly_data['close'].rolling(window=short_term_window).std().fillna(0).values
+        # Calculate the EMA for trend signal and difference for trend variation
+        trend_signal = (
+            hourly_data['close']
+            .ewm(span=short_term_window)
+            .mean()
+            .diff()
+            .fillna(0)
+            .values
+        )
 
-        training_signals = np.column_stack([trend_signal, volatility_signal])
-        print(f"Training signals generated. Shape: {training_signals.shape}")
-        return training_signals
+        # Calculate short-term standard deviation as a volatility signal
+        volatility_signal = (
+            hourly_data['close']
+            .rolling(window=short_term_window)
+            .std()
+            .fillna(0)
+            .values
+        )
+
+        print("Training signals generated.")
+        return trend_signal, volatility_signal
 
 
 
@@ -462,30 +578,33 @@ class Plugin:
 
         Parameters:
         - econ_features (np.ndarray): Features generated from the sliding window.
-        - training_signals (dict): Dictionary with 'volatility' and 'trend' signals for training.
+        - training_signals (dict): Dictionary with 'trend' and 'volatility' signals for training.
         - window_size (int): Size of the sliding window.
 
         Returns:
         - np.ndarray: Predictions for trend and volatility for each hourly tick.
         """
         from keras.models import Sequential
-        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, ReLU, Dropout
+        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
         from keras.optimizers import Adam
         from sklearn.model_selection import train_test_split
 
         print("Training Conv1D model for trend and volatility predictions...")
 
+        # Prepare target variables
+        y = np.stack([training_signals['trend'], training_signals['volatility']], axis=1)
+
         # Split data into train and test
         X_train, X_test, y_train, y_test = train_test_split(
             econ_features, 
-            training_signals, 
+            y, 
             test_size=0.2, 
             random_state=42
         )
 
         # Build Conv1D model
         model = Sequential([
-            Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, 8)),
+            Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
             BatchNormalization(),
             Conv1D(64, kernel_size=3, activation='relu'),
             BatchNormalization(),
@@ -501,7 +620,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=20, 
+            epochs=10, 
             batch_size=32, 
             verbose=1
         )
@@ -512,6 +631,7 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
 
 
     
@@ -771,13 +891,15 @@ class Plugin:
         return transformed_data
 
 
-    def process_forex_data(self, forex_files, config):
+    def process_forex_data(self, forex_files, config, common_start, common_end):
         """
         Processes and aligns multiple Forex rate datasets with the hourly dataset.
 
         Parameters:
         - forex_files (list): List of file paths for Forex rate datasets.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: Processed Forex CLOSE features aligned with the hourly dataset.
@@ -834,6 +956,9 @@ class Plugin:
             # Add the aligned data to the output DataFrame
             column_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
             forex_features[column_name] = aligned_forex.values
+
+        # Apply common start and end date range filter
+        forex_features = forex_features[(forex_features.index >= common_start) & (forex_features.index <= common_end)]
 
         print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features.head()}")
         return forex_features
@@ -905,16 +1030,18 @@ class Plugin:
         return sub_periodicity_features
 
 
-    def process_sp500_data(self, sp500_data_path, config):
+    def process_sp500_data(self, sp500_data_path, config, common_start, common_end):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
-
+        
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - config (dict): Configuration settings.
-
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
+        
         Returns:
-        - dict: Aligned S&P 500 features.
+        - dict: Aligned S&P 500 features or None if processing fails.
         """
         print("Processing S&P 500 data...")
 
@@ -938,7 +1065,6 @@ class Plugin:
         if not isinstance(hourly_data.index, pd.DatetimeIndex):
             raise ValueError("Hourly data must have a valid DatetimeIndex.")
 
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the S&P 500 dataset
@@ -954,32 +1080,46 @@ class Plugin:
         if not isinstance(sp500_data.index, pd.DatetimeIndex):
             raise ValueError("S&P 500 data must have a valid DatetimeIndex.")
 
-        print(f"Loaded S&P 500 data columns: {list(sp500_data.columns)}")
-        print(f"First 5 rows of S&P 500 data:\n{sp500_data.head()}")
+        print(f"S&P 500 data range: {sp500_data.index.min()} to {sp500_data.index.max()}")
 
         # Resample the S&P 500 data to hourly frequency
         sp500_close = sp500_data['Close'].resample('1H').ffill()
 
+        print(f"S&P 500 resampled range: {sp500_close.index.min()} to {sp500_close.index.max()}")
+
         # Align with the hourly dataset
         aligned_sp500 = sp500_close.reindex(hourly_data.index, method='ffill').fillna(0)
 
+        print(f"Aligned S&P 500 range before filtering: {aligned_sp500.index.min()} to {aligned_sp500.index.max()}")
+
+        # Apply common start and end date range filter
+        aligned_sp500 = aligned_sp500[(aligned_sp500.index >= common_start) & (aligned_sp500.index <= common_end)]
+
+        if aligned_sp500.empty:
+            print("Warning: The aligned S&P 500 data is empty after applying the date filter.")
+            return None
+
         print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
-        # Return as a dictionary
-        return {'sp500_close': aligned_sp500.values}
+        # Return as a dictionary with 'sp500_close' as a Series
+        return {'sp500_close': aligned_sp500}
 
 
 
-    def process_vix_data(self, vix_data_path, config):
+
+
+    def process_vix_data(self, vix_data_path, config, common_start, common_end):
         """
         Processes VIX data and aligns it with the hourly dataset.
 
         Parameters:
         - vix_data_path (str): Path to the VIX dataset.
         - config (dict): Configuration settings.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
-        - dict: Aligned VIX features.
+        - pd.DataFrame: Aligned VIX features.
         """
         print("Processing VIX data...")
 
@@ -1002,8 +1142,11 @@ class Plugin:
         print("Aligned VIX CLOSE data (first 5 rows):")
         print(aligned_vix.head())
 
-        return {'vix_close': aligned_vix.values}
+        # Apply common start and end date range filter
+        aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
 
+        # Return the aligned VIX features as a DataFrame
+        return pd.DataFrame({'vix_close': aligned_vix})
 
 
 
