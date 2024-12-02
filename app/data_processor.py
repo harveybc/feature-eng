@@ -154,50 +154,36 @@ def process_data(data, plugin, config):
 
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
-
-    # Debugging: Ensure processed_data is non-empty
-    if processed_data.empty:
-        raise ValueError("Processed technical indicators dataset is empty!")
-
     print(f"Processed technical indicators shape: {processed_data.shape}")
+    print(f"Processed technical indicators preview:\n{processed_data.head()}")
+    print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
+
+    # Analyze variability and normality for technical indicators
+    transformed_data = analyze_variability_and_normality(processed_data, config)
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
+    print(f"Additional features shape: {additional_features.shape}")
+    print(f"Additional features preview:\n{additional_features.head()}")
+    print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
 
-    # Debugging: Ensure additional_features is non-empty
-    if additional_features.empty:
-        print("Additional features dataset is empty after processing.")
-        print("Debugging additional features:")
-        print(f"Additional features index: {additional_features.index}")
-        print(f"Additional features columns: {additional_features.columns}")
-        raise ValueError("Additional features dataset is empty!")
-
-    print(f"Additional features shape before alignment: {additional_features.shape}")
-
-    # Align additional features to processed_data
-    print(f"Aligning additional features to processed_data...")
-    additional_features = additional_features.reindex(processed_data.index, fill_value=0)
-
-    # Debugging: Verify alignment
-    if not additional_features.index.equals(processed_data.index):
-        raise ValueError(
-            "Alignment mismatch between processed_data and additional_features. "
-            f"processed_data index: {processed_data.index}, "
-            f"additional_features index: {additional_features.index}"
-        )
-
-    print("Additional features aligned with processed_data.")
+    # Check index alignment between processed_data and additional_features
+    if not processed_data.index.equals(additional_features.index):
+        print("Index mismatch detected between processed_data and additional_features.")
+        print(f"processed_data index: {processed_data.index.min()} to {processed_data.index.max()}")
+        print(f"additional_features index: {additional_features.index.min()} to {additional_features.index.max()}")
 
     # Combine processed technical indicators with additional features
-    final_data = pd.concat([processed_data, additional_features], axis=1)
-
-    # Debugging: Verify the combined dataset
+    final_data = pd.concat([transformed_data, additional_features], axis=1)
     print(f"Final combined dataset shape: {final_data.shape}")
     print(f"Final combined dataset preview:\n{final_data.head()}")
+    print(f"Final combined dataset index range: {final_data.index.min()} to {final_data.index.max()}")
 
-    # Generate positional encoding for the final dataset
+    # After combining processed_data and additional_features
     num_positions = len(final_data)
     num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
+
+    # Generate positional encoding for the final dataset
     positional_encoding = generate_positional_encoding(num_positions, num_features)
 
     # Add positional encoding to the final dataset
@@ -208,8 +194,10 @@ def process_data(data, plugin, config):
     final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
 
     print(f"Final dataset shape with positional encoding: {final_data.shape}")
+    print(f"Final dataset preview with positional encoding:\n{final_data.head()}")
 
     return final_data
+
 
 
 
