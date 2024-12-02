@@ -347,13 +347,15 @@ class Plugin:
 
         return high_freq_features
 
-    def process_economic_calendar(self, econ_calendar_path, config):
+    def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
         Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
+        - common_start (str or pd.Timestamp): The common start date for alignment.
+        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
@@ -384,6 +386,9 @@ class Plugin:
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
         print("Economic calendar data preprocessing complete.")
+
+        # Apply the common date range filter
+        econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
 
         # Get sliding window size
         window_size = config['calendar_window_size']
