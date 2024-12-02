@@ -1099,7 +1099,7 @@ class Plugin:
         - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
-        - dict: Aligned VIX features.
+        - pd.DataFrame: Aligned VIX features.
         """
         print("Processing VIX data...")
 
@@ -1125,7 +1125,8 @@ class Plugin:
         # Apply common start and end date range filter
         aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
 
-        return {'vix_close': aligned_vix.values}
+        # Return the aligned VIX features as a DataFrame
+        return pd.DataFrame({'vix_close': aligned_vix})
 
 
 
