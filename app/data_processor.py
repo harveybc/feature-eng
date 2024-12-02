@@ -162,7 +162,8 @@ def process_data(data, plugin, config):
     print(f"Transformed technical indicators shape: {transformed_data.shape}")
     print(f"Transformed technical indicators index type: {transformed_data.index.dtype}")
 
-    # Ensure transformed_data index is DatetimeIndex
+    # Ensure transformed_data index matches the original data index
+    print(f"Original data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
     transformed_data.index = data.index
     print(f"Transformed technical indicators index after alignment: {transformed_data.index.dtype}")
 
@@ -170,10 +171,13 @@ def process_data(data, plugin, config):
     additional_features = plugin.process_additional_datasets(data, config)
     print(f"Additional features shape before alignment: {additional_features.shape}")
     print(f"Additional features index type: {additional_features.index.dtype}")
+    print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
 
-    # Align additional_features with processed_data index
+    # Align additional_features with transformed_data index
     additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
     print(f"Additional features shape after alignment: {additional_features.shape}")
+    print(f"Additional features index type after alignment: {additional_features.index.dtype}")
+    print(f"Additional features index range after alignment: {additional_features.index.min()} to {additional_features.index.max()}")
 
     # Combine processed technical indicators with additional features
     final_data = pd.concat([transformed_data, additional_features], axis=1)
