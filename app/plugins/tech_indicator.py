@@ -354,8 +354,8 @@ class Plugin:
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
-        - common_start (pd.Timestamp): The common start date for alignment.
-        - common_end (pd.Timestamp): The common end date for alignment.
+        - common_start (str or pd.Timestamp): Common start date for alignment.
+        - common_end (str or pd.Timestamp): Common end date for alignment.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
@@ -376,31 +376,21 @@ class Plugin:
                 'description', 'evaluation', 'data_format',
                 'actual', 'forecast', 'previous'
             ],
-            parse_dates=[['event_date', 'event_time']],
+            parse_dates={'datetime': ['event_date', 'event_time']},
             dayfirst=True,
         )
 
-        # Rename combined datetime column
-        econ_data.rename(columns={'event_date_event_time': 'datetime'}, inplace=True)
-
         # Drop invalid datetime rows
         econ_data.dropna(subset=['datetime'], inplace=True)
-
-        # Ensure datetime index
-        econ_data['datetime'] = pd.to_datetime(econ_data['datetime'], errors='coerce')
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
-
-        # Ensure index is datetime before filtering
-        if not isinstance(econ_data.index, pd.DatetimeIndex):
-            raise ValueError("The economic calendar dataset index must be a DatetimeIndex.")
-
-        # Filter data to the common date range
-        econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
 
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
         print("Economic calendar data preprocessing complete.")
+
+        # Adjust the economic calendar to the common date range
+        econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
 
         # Get sliding window size
         window_size = config['calendar_window_size']
@@ -415,8 +405,8 @@ class Plugin:
 
         # Train and predict trend and volatility using Conv1D
         predictions = self._predict_trend_and_volatility_with_conv1d(
-            econ_features=econ_features, 
-            training_signals={'trend': trend_signal, 'volatility': volatility_signal}, 
+            econ_features=econ_features,
+            training_signals={'trend': trend_signal, 'volatility': volatility_signal},
             window_size=window_size
         )
 
@@ -424,32 +414,20 @@ class Plugin:
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print("Trend and volatility predictions complete.")
 
-        # Adjust for the sliding window size
-        prediction_start_index = window_size - 1
-        aligned_index = hourly_data.index[prediction_start_index:prediction_start_index + len(predicted_trend)]
-
-        # Validate alignment
-        if len(predicted_trend) != len(aligned_index):
+        # Adjust the aligned index by skipping the first `window_size` rows
+        adjusted_index = hourly_data.index[window_size:]
+        if len(predicted_trend) != len(adjusted_index):
             raise ValueError(
-                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) vs. Aligned index ({len(aligned_index)})"
+                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
+                f"vs. Aligned index ({len(adjusted_index)})"
             )
 
-        # Create aligned Series for trend and volatility
-        aligned_trend = pd.Series(predicted_trend, index=aligned_index, name="Predicted_Trend")
-        aligned_volatility = pd.Series(predicted_volatility, index=aligned_index, name="Predicted_Volatility")
+        # Align the predictions with the adjusted index
+        aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
+        aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
-        # Combine predictions into a DataFrame
-        predictions_df = pd.DataFrame({'Predicted_Trend': aligned_trend, 'Predicted_Volatility': aligned_volatility})
-
-        # Reindex to match the full hourly data, filling NaNs where predictions are not available
-        predictions_df = predictions_df.reindex(hourly_data.index)
-
-        # Apply common start and end date range filter
-        predictions_df = predictions_df[(predictions_df.index >= common_start) & (predictions_df.index <= common_end)]
-
-        print("Economic calendar predictions aligned successfully.")
-        return predictions_df
-
+        # Return the DataFrame with predicted trend and volatility
+        return pd.concat([aligned_trend, aligned_volatility], axis=1)
 
 
 
