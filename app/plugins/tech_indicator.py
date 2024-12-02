@@ -347,21 +347,17 @@ class Plugin:
 
         return high_freq_features
 
-    def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
+    def process_economic_calendar(self, econ_calendar_path, config):
         """
         Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
 
         Parameters:
         - econ_calendar_path (str): Path to the economic calendar dataset.
         - config (dict): Configuration dictionary.
-        - common_start (str or pd.Timestamp): The common start date for alignment.
-        - common_end (str or pd.Timestamp): The common end date for alignment.
 
         Returns:
         - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
         """
-        from tqdm import tqdm
-
         print("Processing economic calendar data...")
 
         # Load the hourly dataset
@@ -401,10 +397,9 @@ class Plugin:
         print("Training signals for trend and volatility generated.")
 
         # Train and predict trend and volatility using Conv1D
-        # Corrected call to _predict_trend_and_volatility_with_conv1d
         predictions = self._predict_trend_and_volatility_with_conv1d(
-            econ_features=econ_features, 
-            training_signals={'trend': trend_signal, 'volatility': volatility_signal}, 
+            econ_features=econ_features,
+            training_signals={'trend': trend_signal, 'volatility': volatility_signal},
             window_size=window_size
         )
 
@@ -414,21 +409,22 @@ class Plugin:
         print("Trend and volatility predictions complete.")
 
         # Align the predictions with the hourly data
-        aligned_trend = pd.Series(predicted_trend, index=hourly_data.index, name="Predicted_Trend")
-        aligned_volatility = pd.Series(predicted_volatility, index=hourly_data.index, name="Predicted_Volatility")
+        offset = window_size - 1
+        aligned_index = hourly_data.index[offset:]
+        aligned_trend = pd.Series(predicted_trend, index=aligned_index, name="Predicted_Trend")
+        aligned_volatility = pd.Series(predicted_volatility, index=aligned_index, name="Predicted_Volatility")
 
-        # Apply common start and end date range filter
-        aligned_trend = aligned_trend[(aligned_trend.index >= common_start) & (aligned_trend.index <= common_end)]
-        aligned_volatility = aligned_volatility[(aligned_volatility.index >= common_start) & (aligned_volatility.index <= common_end)]
+        # Combine predictions into a DataFrame
+        predictions_df = pd.DataFrame({'Predicted_Trend': aligned_trend, 'Predicted_Volatility': aligned_volatility})
 
-        # Combine hourly data with predictions for verification
-        verification_df = pd.concat([hourly_data['close'], aligned_trend, aligned_volatility], axis=1)
+        # Reindex to match the full hourly data, filling NaNs where predictions are not available
+        predictions_df = predictions_df.reindex(hourly_data.index)
+
         print("Verification of alignment between hourly data and predictions (first 10 rows):")
-        print(verification_df.head(200))
+        print(pd.concat([hourly_data['close'], predictions_df], axis=1).head(10))
 
         # Return the DataFrame with predicted trend and volatility
-        return pd.concat([aligned_trend, aligned_volatility], axis=1)
-
+        return predictions_df
 
 
 
