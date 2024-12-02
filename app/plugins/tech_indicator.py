@@ -376,14 +376,24 @@ class Plugin:
                 'description', 'evaluation', 'data_format',
                 'actual', 'forecast', 'previous'
             ],
-            parse_dates={'datetime': ['event_date', 'event_time']},
+            parse_dates=[['event_date', 'event_time']],
             dayfirst=True,
         )
 
+        # Rename combined datetime column
+        econ_data.rename(columns={'event_date_event_time': 'datetime'}, inplace=True)
+
         # Drop invalid datetime rows
         econ_data.dropna(subset=['datetime'], inplace=True)
+
+        # Ensure datetime index
+        econ_data['datetime'] = pd.to_datetime(econ_data['datetime'], errors='coerce')
         econ_data.set_index('datetime', inplace=True)
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
+
+        # Ensure index is datetime before filtering
+        if not isinstance(econ_data.index, pd.DatetimeIndex):
+            raise ValueError("The economic calendar dataset index must be a DatetimeIndex.")
 
         # Filter data to the common date range
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
@@ -438,6 +448,7 @@ class Plugin:
 
         print("Economic calendar predictions aligned successfully.")
         return predictions_df
+
 
 
 
