@@ -117,71 +117,94 @@ def analyze_variability_and_normality(data, config):
 
 
 
-def process_data(data, plugin, config):
-    """
-    Processes the data using the specified plugin and handles additional features
-    from high-frequency data, S&P, VIX, and the economic calendar.
-    """
-    print("Processing data using plugin...")
+    def process_data(data, plugin, config):
+        """
+        Processes the data using the specified plugin and handles additional features
+        from high-frequency data, S&P, VIX, and the economic calendar.
+        """
+        print("Processing data using plugin...")
 
-    # Keep the date column separate
-    if 'date' in data.columns:
-        date_column = data[['date']]  # Ensure it's a DataFrame
-    else:
-        # Convert the index to a DataFrame
-        date_column = data.index.to_frame(index=False)
-        date_column.columns = ['date']  # Name the column
+        # Keep the date column separate
+        if 'date' in data.columns:
+            date_column = data[['date']]  # Ensure it's a DataFrame
+        else:
+            # Convert the index to a DataFrame
+            date_column = data.index.to_frame(index=False)
+            date_column.columns = ['date']  # Name the column
 
-    # Debugging: Show the data columns before processing
-    print(f"Data columns before processing: {list(data.columns)}")
+        # Debugging: Show the data columns before processing
+        print(f"Data columns before processing: {list(data.columns)}")
 
-    # Dynamically map the dataset headers based on the configuration
-    header_mappings = config.get('header_mappings', {})
-    dataset_type = config.get('dataset_type', 'default')  # Default dataset type
-    dataset_headers = header_mappings.get(dataset_type, {})
+        # Dynamically map the dataset headers based on the configuration
+        header_mappings = config.get('header_mappings', {})
+        dataset_type = config.get('dataset_type', 'default')  # Default dataset type
+        dataset_headers = header_mappings.get(dataset_type, {})
 
-    # Map and verify OHLC columns
-    ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
+        # Map and verify OHLC columns
+        ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
 
-    # Verify if the required OHLC columns are present
-    missing_columns = [col for col in ohlc_columns if col not in data.columns]
-    if missing_columns:
-        raise KeyError(f"Missing expected OHLC columns: {missing_columns}. Available columns: {list(data.columns)}")
+        # Verify if the required OHLC columns are present
+        missing_columns = [col for col in ohlc_columns if col not in data.columns]
+        if missing_columns:
+            raise KeyError(f"Missing expected OHLC columns: {missing_columns}. Available columns: {list(data.columns)}")
 
-    # Filter the numeric OHLC columns
-    numeric_data = data[ohlc_columns]
-    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
+        # Filter the numeric OHLC columns
+        numeric_data = data[ohlc_columns]
+        numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
 
-    # Process technical indicators
-    processed_data = plugin.process(numeric_data)
+        # Process technical indicators
+        processed_data = plugin.process(numeric_data)
 
-    # Analyze variability and normality for technical indicators
-    transformed_data = analyze_variability_and_normality(processed_data, config)
+        # Debugging: Ensure processed_data is non-empty
+        if processed_data.empty:
+            raise ValueError("Processed technical indicators dataset is empty!")
 
-    # Process additional datasets
-    additional_features = plugin.process_additional_datasets(data, config)
+        print(f"Processed technical indicators shape: {processed_data.shape}")
 
-    # Combine processed technical indicators with additional features
-    final_data = pd.concat([transformed_data, additional_features], axis=1)
+        # Process additional datasets
+        additional_features = plugin.process_additional_datasets(data, config)
 
-    # After combining processed_data and additional_features
-    num_positions = len(final_data)
-    num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
+        # Debugging: Ensure additional_features is non-empty
+        if additional_features.empty:
+            raise ValueError("Additional features dataset is empty!")
 
-    # Generate positional encoding for the final dataset
-    positional_encoding = generate_positional_encoding(num_positions, num_features)
+        print(f"Additional features shape before alignment: {additional_features.shape}")
 
-    # Add positional encoding to the final dataset
-    positional_encoding_df = pd.DataFrame(
-        positional_encoding,
-        columns=[f'pos_enc_{i}' for i in range(num_features)]
-    )
-    final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
+        # Align additional features to processed_data
+        additional_features = additional_features.reindex(processed_data.index)
 
-    print(f"Final dataset shape with positional encoding: {final_data.shape}")
+        # Debugging: Verify alignment
+        if not additional_features.index.equals(processed_data.index):
+            raise ValueError(
+                "Alignment mismatch between processed_data and additional_features. "
+                f"processed_data index: {processed_data.index}, "
+                f"additional_features index: {additional_features.index}"
+            )
 
-    return final_data
+        print("Additional features aligned with processed_data.")
 
+        # Combine processed technical indicators with additional features
+        final_data = pd.concat([processed_data, additional_features], axis=1)
+
+        # Debugging: Verify the combined dataset
+        print(f"Final combined dataset shape: {final_data.shape}")
+        print(f"Final combined dataset preview:\n{final_data.head()}")
+
+        # Generate positional encoding for the final dataset
+        num_positions = len(final_data)
+        num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
+        positional_encoding = generate_positional_encoding(num_positions, num_features)
+
+        # Add positional encoding to the final dataset
+        positional_encoding_df = pd.DataFrame(
+            positional_encoding,
+            columns=[f'pos_enc_{i}' for i in range(num_features)]
+        )
+        final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
+
+        print(f"Final dataset shape with positional encoding: {final_data.shape}")
+
+        return final_data
 
 
 
