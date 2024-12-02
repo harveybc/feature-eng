@@ -424,7 +424,7 @@ class Plugin:
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print("Trend and volatility predictions complete.")
 
-        # Align the predictions with the hourly data
+        # Adjust for the sliding window size
         offset = window_size - 1  # Ensure the offset matches the sliding window reduction
         aligned_index = hourly_data.index[offset:offset + len(predicted_trend)]  # Adjust for the number of predictions
 
