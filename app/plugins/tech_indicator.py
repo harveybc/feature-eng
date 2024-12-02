@@ -248,7 +248,8 @@ class Plugin:
         if config.get('vix_dataset'):
             print("Processing VIX data...")
             vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(vix_features)
+            additional_features.update(vix_features.to_dict(orient='list'))
+
 
             # Get the VIX dataset range
             vix_start = vix_features.index.min()
