@@ -155,16 +155,32 @@ def process_data(data, plugin, config):
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
 
+    # Debugging: Check technical indicators
+    print(f"Processed technical indicators preview:\n{processed_data.head()}")
+    print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
+
     # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
 
+    # Debugging: Check additional features before alignment
+    print(f"Additional features shape before alignment: {additional_features.shape}")
+    print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
+    print(f"Additional features preview:\n{additional_features.head()}")
+
+    # Align additional_features with processed_data index
+    additional_features = additional_features.reindex(processed_data.index, method='ffill').fillna(0)
+
     # Combine processed technical indicators with additional features
     final_data = pd.concat([transformed_data, additional_features], axis=1)
 
-    # After combining processed_data and additional_features
+    # Debugging: Check final combined dataset
+    print(f"Final combined dataset shape: {final_data.shape}")
+    print(f"Final combined dataset preview:\n{final_data.head()}")
+
+    # Add positional encoding
     num_positions = len(final_data)
     num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
 
@@ -179,9 +195,7 @@ def process_data(data, plugin, config):
     final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
 
     print(f"Final dataset shape with positional encoding: {final_data.shape}")
-
     return final_data
-
 
 
 def run_feature_engineering_pipeline(config, plugin):
