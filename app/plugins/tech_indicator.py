@@ -219,46 +219,45 @@ class Plugin:
         # Collect dataset ranges
         dataset_ranges = []
 
-        # Step 2: Process each dataset
+        # Helper function to process each dataset
         def process_dataset(dataset_func, dataset_key):
             """
             Helper function to process each dataset and align it.
             """
             print(f"Processing {dataset_key}...")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
-            if dataset is not None:
+            if dataset is not None and not dataset.empty:
                 print(f"{dataset_key} original index range: {dataset.index.min()} to {dataset.index.max()}")
+                if not isinstance(dataset.index, pd.DatetimeIndex):
+                    print(f"Converting {dataset_key} index to DatetimeIndex.")
+                    dataset.index = pd.to_datetime(dataset.index, errors='coerce')
                 dataset_ranges.append((dataset.index.min(), dataset.index.max()))
                 return dataset
             else:
                 print(f"{dataset_key} is empty or could not be processed.")
                 return None
 
-        # Process Forex datasets
+        # Step 2: Process each dataset
         if config.get('forex_datasets'):
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None:
                 additional_features.update(forex_features.to_dict(orient='series'))
 
-        # Process S&P 500 dataset
         if config.get('sp500_dataset'):
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None:
                 additional_features.update(sp500_features.to_dict(orient='series'))
 
-        # Process VIX dataset
         if config.get('vix_dataset'):
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
             if vix_features is not None:
                 additional_features.update(vix_features.to_dict(orient='series'))
 
-        # Process high-frequency EUR/USD dataset
         if config.get('high_freq_dataset'):
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
             if high_freq_features is not None:
                 additional_features.update(high_freq_features.to_dict(orient='series'))
 
-        # Process economic calendar dataset
         if config.get('economic_calendar'):
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None:
@@ -266,29 +265,29 @@ class Plugin:
 
         # Step 3: Adjust the common date range dynamically
         if dataset_ranges:
-            common_start = max([start for start, end in dataset_ranges])
-            common_end = min([end for start, end in dataset_ranges])
+            valid_ranges = [(start, end) for start, end in dataset_ranges if pd.notna(start) and pd.notna(end)]
+            if valid_ranges:
+                common_start = max([start for start, end in valid_ranges])
+                common_end = min([end for start, end in valid_ranges])
+            else:
+                common_start, common_end = None, None
         print(f"Adjusted common_start: {common_start}, common_end: {common_end}")
 
         # Step 4: Align all datasets to the common date range
         aligned_features = {}
         for key, dataset in additional_features.items():
             print(f"Aligning {key}...")
-            if not hasattr(dataset, 'index'):
-                print(f"Dataset with key '{key}' does not have an 'index' attribute. Skipping.")
-                continue
-            if not isinstance(dataset.index, pd.DatetimeIndex):
-                print(f"Dataset with key '{key}' does not have a DatetimeIndex. Converting.")
-                dataset.index = pd.to_datetime(dataset.index)
-
-            # Apply the date range filter
-            aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
-            aligned_features[key] = aligned_dataset
+            if dataset is not None and not dataset.empty:
+                aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+                print(f"{key} aligned index range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                aligned_features[key] = aligned_dataset
+            else:
+                print(f"{key} is empty after processing.")
 
         # Step 5: Combine into a DataFrame
         additional_features_df = pd.DataFrame(aligned_features)
-        print(f"Additional features processed: {additional_features_df.columns}")
         print(f"Final additional_features_df index range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+        print(f"Additional features dataset columns: {additional_features_df.columns}")
 
         return additional_features_df
 
