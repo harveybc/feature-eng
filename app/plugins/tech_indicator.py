@@ -431,9 +431,10 @@ class Plugin:
         # Validation to catch alignment errors
         if len(predicted_trend) != len(aligned_index):
             raise ValueError(
-                f"Length mismatch: Predicted values ({len(predicted_trend)}) vs. Aligned index ({len(aligned_index)})"
+                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) vs. Aligned index ({len(aligned_index)})"
             )
 
+        # Create aligned Series for trend and volatility
         aligned_trend = pd.Series(predicted_trend, index=aligned_index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=aligned_index, name="Predicted_Volatility")
 
