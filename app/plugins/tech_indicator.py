@@ -258,7 +258,7 @@ class Plugin:
         # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
             print("Processing high-frequency EUR/USD dataset...")
-            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config)
+            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config, common_start=common_start, common_end=common_end)
             additional_features.update(high_freq_features.to_dict(orient='series'))
 
             # Get the high-frequency dataset range
