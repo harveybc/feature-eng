@@ -117,82 +117,82 @@ def analyze_variability_and_normality(data, config):
 
 
 
-    def process_data(data, plugin, config):
-        """
-        Processes the data using the specified plugin and handles additional features
-        from high-frequency data, S&P, VIX, and the economic calendar.
-        """
-        print("Processing data using plugin...")
+def process_data(data, plugin, config):
+    """
+    Processes the data using the specified plugin and handles additional features
+    from high-frequency data, S&P, VIX, and the economic calendar.
+    """
+    print("Processing data using plugin...")
 
-        # Keep the date column separate
-        if 'date' in data.columns:
-            date_column = data[['date']]  # Ensure it's a DataFrame
-        else:
-            # Convert the index to a DataFrame
-            date_column = data.index.to_frame(index=False)
-            date_column.columns = ['date']  # Name the column
+    # Keep the date column separate
+    if 'date' in data.columns:
+        date_column = data[['date']]  # Ensure it's a DataFrame
+    else:
+        # Convert the index to a DataFrame
+        date_column = data.index.to_frame(index=False)
+        date_column.columns = ['date']  # Name the column
 
-        # Debugging: Show the data columns before processing
-        print(f"Data columns before processing: {list(data.columns)}")
+    # Debugging: Show the data columns before processing
+    print(f"Data columns before processing: {list(data.columns)}")
 
-        # Dynamically map the dataset headers based on the configuration
-        header_mappings = config.get('header_mappings', {})
-        dataset_type = config.get('dataset_type', 'default')  # Default dataset type
-        dataset_headers = header_mappings.get(dataset_type, {})
+    # Dynamically map the dataset headers based on the configuration
+    header_mappings = config.get('header_mappings', {})
+    dataset_type = config.get('dataset_type', 'default')  # Default dataset type
+    dataset_headers = header_mappings.get(dataset_type, {})
 
-        # Map and verify OHLC columns
-        ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
+    # Map and verify OHLC columns
+    ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
 
-        # Verify if the required OHLC columns are present
-        missing_columns = [col for col in ohlc_columns if col not in data.columns]
-        if missing_columns:
-            raise KeyError(f"Missing expected OHLC columns: {missing_columns}. Available columns: {list(data.columns)}")
+    # Verify if the required OHLC columns are present
+    missing_columns = [col for col in ohlc_columns if col not in data.columns]
+    if missing_columns:
+        raise KeyError(f"Missing expected OHLC columns: {missing_columns}. Available columns: {list(data.columns)}")
 
-        # Filter the numeric OHLC columns
-        numeric_data = data[ohlc_columns]
-        numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
+    # Filter the numeric OHLC columns
+    numeric_data = data[ohlc_columns]
+    numeric_data = numeric_data.apply(pd.to_numeric, errors='coerce').fillna(0)
 
-        # Process technical indicators
-        processed_data = plugin.process(numeric_data)
-        print(f"Processed technical indicators shape: {processed_data.shape}")
-        print(f"Processed technical indicators preview:\n{processed_data.head()}")
-        print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
+    # Process technical indicators
+    processed_data = plugin.process(numeric_data)
+    print(f"Processed technical indicators shape: {processed_data.shape}")
+    print(f"Processed technical indicators preview:\n{processed_data.head()}")
+    print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
 
-        # Align processed_data to match the time-based index
-        hourly_data = plugin.load_hourly_data(config)  # Load hourly data for alignment
-        processed_data.index = hourly_data.index  # Align processed_data to time-based index
-        print(f"Aligned technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
+    # Align processed_data to match the time-based index
+    hourly_data = plugin.load_hourly_data(config)  # Load hourly data for alignment
+    processed_data.index = hourly_data.index  # Align processed_data to time-based index
+    print(f"Aligned technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
 
-        # Process additional datasets
-        additional_features = plugin.process_additional_datasets(data, config)
-        print(f"Additional features shape: {additional_features.shape}")
-        print(f"Additional features preview:\n{additional_features.head()}")
-        print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
+    # Process additional datasets
+    additional_features = plugin.process_additional_datasets(data, config)
+    print(f"Additional features shape: {additional_features.shape}")
+    print(f"Additional features preview:\n{additional_features.head()}")
+    print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
 
-        # Combine processed technical indicators with additional features
-        final_data = pd.concat([processed_data, additional_features], axis=1)
-        print(f"Final combined dataset shape: {final_data.shape}")
-        print(f"Final combined dataset preview:\n{final_data.head()}")
-        print(f"Final combined dataset index range: {final_data.index.min()} to {final_data.index.max()}")
+    # Combine processed technical indicators with additional features
+    final_data = pd.concat([processed_data, additional_features], axis=1)
+    print(f"Final combined dataset shape: {final_data.shape}")
+    print(f"Final combined dataset preview:\n{final_data.head()}")
+    print(f"Final combined dataset index range: {final_data.index.min()} to {final_data.index.max()}")
 
-        # After combining processed_data and additional_features
-        num_positions = len(final_data)
-        num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
+    # After combining processed_data and additional_features
+    num_positions = len(final_data)
+    num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
 
-        # Generate positional encoding for the final dataset
-        positional_encoding = generate_positional_encoding(num_positions, num_features)
+    # Generate positional encoding for the final dataset
+    positional_encoding = generate_positional_encoding(num_positions, num_features)
 
-        # Add positional encoding to the final dataset
-        positional_encoding_df = pd.DataFrame(
-            positional_encoding,
-            columns=[f'pos_enc_{i}' for i in range(num_features)]
-        )
-        final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
+    # Add positional encoding to the final dataset
+    positional_encoding_df = pd.DataFrame(
+        positional_encoding,
+        columns=[f'pos_enc_{i}' for i in range(num_features)]
+    )
+    final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
 
-        print(f"Final dataset shape with positional encoding: {final_data.shape}")
-        print(f"Final dataset preview with positional encoding:\n{final_data.head()}")
+    print(f"Final dataset shape with positional encoding: {final_data.shape}")
+    print(f"Final dataset preview with positional encoding:\n{final_data.head()}")
 
-        return final_data
+    return final_data
 
 
 
