@@ -116,6 +116,7 @@ def analyze_variability_and_normality(data, config):
 
 
 
+
 def process_data(data, plugin, config):
     """
     Processes the data using the specified plugin and handles additional features
@@ -153,34 +154,15 @@ def process_data(data, plugin, config):
 
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
-    print(f"Processed technical indicators shape: {processed_data.shape}")
-    print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
-    print(f"Processed technical indicators preview:\n{processed_data.head()}")
 
-    # Ensure processed_data has the same datetime index as the original data
-    processed_data.index = data.index
-    print(f"Processed_data index set to match the original data index.")
-    print(f"Processed_data index range: {processed_data.index.min()} to {processed_data.index.max()}")
+    # Analyze variability and normality for technical indicators
+    transformed_data = analyze_variability_and_normality(processed_data, config)
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
-    print(f"Additional features shape before alignment: {additional_features.shape}")
-    print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
-    print(f"Additional features preview:\n{additional_features.head()}")
-
-    # Align additional_features with processed_data
-    if not additional_features.index.equals(processed_data.index):
-        print("Aligning additional_features with processed_data index...")
-        additional_features = additional_features.reindex(processed_data.index, method='ffill').fillna(0)
-        print(f"Additional features shape after alignment: {additional_features.shape}")
-        print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
-        print(f"Additional features preview after alignment:\n{additional_features.head()}")
 
     # Combine processed technical indicators with additional features
-    final_data = pd.concat([processed_data, additional_features], axis=1)
-    print(f"Final combined dataset shape: {final_data.shape}")
-    print(f"Final combined dataset preview:\n{final_data.head()}")
-    print(f"Final combined dataset index range: {final_data.index.min()} to {final_data.index.max()}")
+    final_data = pd.concat([transformed_data, additional_features], axis=1)
 
     # After combining processed_data and additional_features
     num_positions = len(final_data)
@@ -197,7 +179,6 @@ def process_data(data, plugin, config):
     final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
 
     print(f"Final dataset shape with positional encoding: {final_data.shape}")
-    print(f"Final dataset preview with positional encoding:\n{final_data.head()}")
 
     return final_data
 
