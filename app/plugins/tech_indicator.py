@@ -1088,45 +1088,44 @@ class Plugin:
 
 
 
-    def process_vix_data(self, vix_data_path, config, common_start, common_end):
-        """
-        Processes VIX data and aligns it with the hourly dataset.
+def process_vix_data(self, vix_data_path, config, common_start, common_end):
+    """
+    Processes VIX data and aligns it with the hourly dataset.
 
-        Parameters:
-        - vix_data_path (str): Path to the VIX dataset.
-        - config (dict): Configuration settings.
-        - common_start (str or pd.Timestamp): The common start date for alignment.
-        - common_end (str or pd.Timestamp): The common end date for alignment.
+    Parameters:
+    - vix_data_path (str): Path to the VIX dataset.
+    - config (dict): Configuration settings.
+    - common_start (str or pd.Timestamp): The common start date for alignment.
+    - common_end (str or pd.Timestamp): The common end date for alignment.
 
-        Returns:
-        - dict: Aligned VIX features.
-        """
-        print("Processing VIX data...")
+    Returns:
+    - dict: Aligned VIX features.
+    """
+    print("Processing VIX data...")
 
-        # Load the VIX data
-        vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
+    # Load the VIX data
+    vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
 
-        # Ensure the index is correctly set to datetime
-        if not isinstance(vix_data.index, pd.DatetimeIndex):
-            raise ValueError("The VIX dataset must have a DatetimeIndex as its index.")
+    # Ensure the index is correctly set to datetime
+    if not isinstance(vix_data.index, pd.DatetimeIndex):
+        raise ValueError("The VIX dataset must have a DatetimeIndex as its index.")
 
-        # Extract the 'close' column and resample to hourly resolution
-        vix_close = vix_data['close'].resample('1H').ffill()
+    # Extract the 'close' column and resample to hourly resolution
+    vix_close = vix_data['close'].resample('1H').ffill()
 
-        # Align with the hourly dataset
-        hourly_data = load_and_fix_hourly_data(config['input_file'], config)
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
-        print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
+    # Align with the hourly dataset
+    hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+    print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
+    print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
-        aligned_vix = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
-        print("Aligned VIX CLOSE data (first 5 rows):")
-        print(aligned_vix.head())
+    aligned_vix = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
+    print("Aligned VIX CLOSE data (first 5 rows):")
+    print(aligned_vix.head())
 
-        # Apply common start and end date range filter
-        aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
+    # Apply common start and end date range filter
+    aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
 
-        return {'vix_close': aligned_vix.values}
-
+    return {'vix_close': aligned_vix.values}
 
 
 
