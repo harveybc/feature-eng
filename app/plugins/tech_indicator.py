@@ -425,10 +425,10 @@ class Plugin:
         print("Trend and volatility predictions complete.")
 
         # Adjust for the sliding window size
-        offset = window_size - 1  # Ensure the offset matches the sliding window reduction
-        aligned_index = hourly_data.index[offset:offset + len(predicted_trend)]  # Adjust for the number of predictions
+        prediction_start_index = window_size - 1
+        aligned_index = hourly_data.index[prediction_start_index:prediction_start_index + len(predicted_trend)]
 
-        # Validation to catch alignment errors
+        # Validate alignment
         if len(predicted_trend) != len(aligned_index):
             raise ValueError(
                 f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) vs. Aligned index ({len(aligned_index)})"
