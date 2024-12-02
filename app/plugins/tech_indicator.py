@@ -222,8 +222,9 @@ class Plugin:
         if config.get('forex_datasets'):
             print("Processing Forex datasets...")
             forex_features = self.process_forex_data(config['forex_datasets'], config=config, common_start=common_start, common_end=common_end)
-            additional_features.update(forex_features)
-            
+            # Update additional_features correctly
+            additional_features.update(forex_features.to_dict(orient='series'))
+
             # Get the Forex datasets range
             forex_start = forex_features.index.min()
             forex_end = forex_features.index.max()
@@ -233,9 +234,8 @@ class Plugin:
         if config.get('sp500_dataset'):
             print("Processing S&P 500 data...")
             sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
-            
             if sp500_features is not None:
-                additional_features.update(sp500_features)
+                additional_features.update(sp500_features.to_dict(orient='series'))
 
                 # Get the S&P 500 dataset range
                 sp500_start = sp500_features.index.min()
@@ -248,8 +248,7 @@ class Plugin:
         if config.get('vix_dataset'):
             print("Processing VIX data...")
             vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(vix_features.to_dict(orient='list'))
-
+            additional_features.update(vix_features.to_dict(orient='series'))
 
             # Get the VIX dataset range
             vix_start = vix_features.index.min()
@@ -259,8 +258,8 @@ class Plugin:
         # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
             print("Processing high-frequency EUR/USD dataset...")
-            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(high_freq_features)
+            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config)
+            additional_features.update(high_freq_features.to_dict(orient='series'))
 
             # Get the high-frequency dataset range
             high_freq_start = high_freq_features.index.min()
@@ -271,7 +270,7 @@ class Plugin:
         if config.get('economic_calendar'):
             print("Processing economic calendar data...")
             econ_calendar = self.process_economic_calendar(config['economic_calendar'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(econ_calendar)
+            additional_features.update(econ_calendar.to_dict(orient='series'))
 
             # Get the economic calendar dataset range
             econ_start = econ_calendar.index.min()
@@ -285,6 +284,15 @@ class Plugin:
 
         # Step 3: Align all datasets to the common date range
         for key, dataset in additional_features.items():
+            print(f"Processing key: {key}")
+            if not hasattr(dataset, 'index'):
+                print(f"Dataset with key '{key}' does not have an 'index' attribute. Skipping.")
+                continue
+            if not isinstance(dataset.index, pd.DatetimeIndex):
+                print(f"Dataset with key '{key}' does not have a DatetimeIndex. Converting.")
+                dataset.index = pd.to_datetime(dataset.index)
+
+            # Apply the date range filter
             additional_features[key] = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
 
         # Step 4: Combine into a DataFrame
