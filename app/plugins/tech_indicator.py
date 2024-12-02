@@ -416,6 +416,8 @@ class Plugin:
 
         # Adjust the aligned index by skipping the first `window_size` rows
         adjusted_index = hourly_data.index[window_size:]
+
+        # Validate the lengths of predictions and adjusted index
         if len(predicted_trend) != len(adjusted_index):
             raise ValueError(
                 f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
@@ -426,8 +428,15 @@ class Plugin:
         aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
-        # Return the DataFrame with predicted trend and volatility
-        return pd.concat([aligned_trend, aligned_volatility], axis=1)
+        # Ensure the final DataFrame aligns with the predictions
+        result = pd.concat([aligned_trend, aligned_volatility], axis=1)
+
+        # Verify alignment and range consistency
+        if len(result) != len(adjusted_index):
+            raise ValueError("Final alignment of predictions failed; length mismatch detected.")
+
+        print("Final predictions aligned successfully.")
+        return result
 
 
 
