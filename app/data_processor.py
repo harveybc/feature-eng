@@ -155,14 +155,21 @@ def process_data(data, plugin, config):
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
     print(f"Processed technical indicators shape: {processed_data.shape}")
+    print(f"Processed technical indicators index type: {processed_data.index.dtype}")
 
     # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
     print(f"Transformed technical indicators shape: {transformed_data.shape}")
+    print(f"Transformed technical indicators index type: {transformed_data.index.dtype}")
+
+    # Ensure transformed_data index is DatetimeIndex
+    transformed_data.index = data.index
+    print(f"Transformed technical indicators index after alignment: {transformed_data.index.dtype}")
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
     print(f"Additional features shape before alignment: {additional_features.shape}")
+    print(f"Additional features index type: {additional_features.index.dtype}")
 
     # Align additional_features with processed_data index
     additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
