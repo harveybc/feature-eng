@@ -116,7 +116,6 @@ def analyze_variability_and_normality(data, config):
 
 
 
-
 def process_data(data, plugin, config):
     """
     Processes the data using the specified plugin and handles additional features
@@ -158,6 +157,11 @@ def process_data(data, plugin, config):
     print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
     print(f"Processed technical indicators preview:\n{processed_data.head()}")
 
+    # Ensure processed_data has the same datetime index as the original data
+    processed_data.index = data.index
+    print(f"Processed_data index set to match the original data index.")
+    print(f"Processed_data index range: {processed_data.index.min()} to {processed_data.index.max()}")
+
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
     print(f"Additional features shape before alignment: {additional_features.shape}")
@@ -196,7 +200,6 @@ def process_data(data, plugin, config):
     print(f"Final dataset preview with positional encoding:\n{final_data.head()}")
 
     return final_data
-
 
 
 
