@@ -155,19 +155,22 @@ def process_data(data, plugin, config):
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
     print(f"Processed technical indicators shape: {processed_data.shape}")
-    print(f"Processed technical indicators preview:\n{processed_data.head()}")
     print(f"Processed technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
-
-    # Align processed_data to match the time-based index
-    hourly_data = plugin.load_hourly_data(config)  # Load hourly data for alignment
-    processed_data.index = hourly_data.index  # Align processed_data to time-based index
-    print(f"Aligned technical indicators index range: {processed_data.index.min()} to {processed_data.index.max()}")
+    print(f"Processed technical indicators preview:\n{processed_data.head()}")
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
-    print(f"Additional features shape: {additional_features.shape}")
-    print(f"Additional features preview:\n{additional_features.head()}")
+    print(f"Additional features shape before alignment: {additional_features.shape}")
     print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
+    print(f"Additional features preview:\n{additional_features.head()}")
+
+    # Align additional_features with processed_data
+    if not additional_features.index.equals(processed_data.index):
+        print("Aligning additional_features with processed_data index...")
+        additional_features = additional_features.reindex(processed_data.index, method='ffill').fillna(0)
+        print(f"Additional features shape after alignment: {additional_features.shape}")
+        print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
+        print(f"Additional features preview after alignment:\n{additional_features.head()}")
 
     # Combine processed technical indicators with additional features
     final_data = pd.concat([processed_data, additional_features], axis=1)
