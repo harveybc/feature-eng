@@ -620,7 +620,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=10, 
+            epochs=5, 
             batch_size=32, 
             verbose=1
         )
