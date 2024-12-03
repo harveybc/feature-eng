@@ -94,11 +94,18 @@ class Plugin:
 
         # Debug: Show initial data columns before any processing
         print(f"Initial data columns before any processing: {data.columns}")
+        print(f"Number of rows in data: {data.shape[0]}")
+
+        # Ensure the datetime column is preserved if it exists
+        if 'datetime' in data.columns:
+            datetime_column = data[['datetime']]
+            print(f"[DEBUG] Datetime column found with shape: {datetime_column.shape}")
+        else:
+            print("[DEBUG] No datetime column found; ensure alignment downstream.")
+            datetime_column = None
 
         # Adjust the OHLC order of the columns
         data = self.adjust_ohlc(data)
-
-        # Debug: Show the columns after adjustment
         print(f"Data columns after OHLC adjustment: {data.columns}")
 
         # Initialize a dictionary to hold all technical indicators
@@ -187,12 +194,14 @@ class Plugin:
                 if roc is not None:
                     technical_indicators['ROC'] = roc
                     print(f"ROC calculated with shape: {roc.shape}")
-
+        
         # Create a DataFrame from the calculated technical indicators
-        indicator_df = pd.DataFrame(technical_indicators)
+        indicator_df = pd.DataFrame(technical_indicators, index=data.index)
 
         # Debug: Show the calculated technical indicators
-        print(f"Calculated technical indicators: {indicator_df.columns}")
+        print(f"Calculated technical indicators columns: {indicator_df.columns}")
+        print(f"Calculated technical indicators shape: {indicator_df.shape}")
+        print(f"Calculated technical indicators index type: {indicator_df.index.dtype}, range: {indicator_df.index.min()} to {indicator_df.index.max()}")
 
         return indicator_df
 
@@ -214,92 +223,97 @@ class Plugin:
         # Step 1: Calculate the common date range across all datasets
         common_start = pd.Timestamp(data.index.min())  # Ensure this is a Timestamp
         common_end = pd.Timestamp(data.index.max())    # Ensure this is a Timestamp
+        print(f"Initial common_start: {common_start}, common_end: {common_end}")
 
         # Collect dataset ranges
         dataset_ranges = []
 
-        # Process Forex Datasets
+        # Helper function to process each dataset
+        def process_dataset(dataset_func, dataset_key):
+            """
+            Helper function to process each dataset and align it.
+            """
+            print(f"Processing {dataset_key}...")
+            dataset = dataset_func(config[dataset_key], config, common_start, common_end)
+            if dataset is not None and not dataset.empty:
+                print(f"{dataset_key} original index range: {dataset.index.min()} to {dataset.index.max()}")
+                if not isinstance(dataset.index, pd.DatetimeIndex):
+                    print(f"Converting {dataset_key} index to DatetimeIndex.")
+                    dataset.index = pd.to_datetime(dataset.index, errors='coerce')
+                    print(f"{dataset_key} index after conversion: {dataset.index.dtype}, range: {dataset.index.min()} to {dataset.index.max()}")
+                dataset_ranges.append((dataset.index.min(), dataset.index.max()))
+                return dataset
+            else:
+                print(f"{dataset_key} is empty or could not be processed.")
+                return None
+
+        # Step 2: Process each dataset
         if config.get('forex_datasets'):
-            print("Processing Forex datasets...")
-            forex_features = self.process_forex_data(config['forex_datasets'], config=config, common_start=common_start, common_end=common_end)
-            # Update additional_features correctly
-            additional_features.update(forex_features.to_dict(orient='series'))
+            forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
+            if forex_features is not None:
+                additional_features.update(forex_features.to_dict(orient='series'))
+                print(f"Forex features added: {forex_features.shape[1]} columns.")
 
-            # Get the Forex datasets range
-            forex_start = forex_features.index.min()
-            forex_end = forex_features.index.max()
-            dataset_ranges.append((forex_start, forex_end))
-
-        # Process S&P 500 Data
         if config.get('sp500_dataset'):
-            print("Processing S&P 500 data...")
-            sp500_features = self.process_sp500_data(config['sp500_dataset'], config, common_start=common_start, common_end=common_end)
+            sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None:
                 additional_features.update(sp500_features.to_dict(orient='series'))
+                print(f"S&P 500 features added: {sp500_features.shape[1]} columns.")
 
-                # Get the S&P 500 dataset range
-                sp500_start = sp500_features.index.min()
-                sp500_end = sp500_features.index.max()
-                dataset_ranges.append((sp500_start, sp500_end))
-            else:
-                print("Warning: S&P 500 data is empty or could not be processed.")
-
-        # Process VIX Data
         if config.get('vix_dataset'):
-            print("Processing VIX data...")
-            vix_features = self.process_vix_data(config['vix_dataset'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(vix_features.to_dict(orient='series'))
+            vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
+            if vix_features is not None:
+                additional_features.update(vix_features.to_dict(orient='series'))
+                print(f"VIX features added: {vix_features.shape[1]} columns.")
 
-            # Get the VIX dataset range
-            vix_start = vix_features.index.min()
-            vix_end = vix_features.index.max()
-            dataset_ranges.append((vix_start, vix_end))
-
-        # Process High-Frequency EUR/USD Dataset
         if config.get('high_freq_dataset'):
-            print("Processing high-frequency EUR/USD dataset...")
-            high_freq_features = self.process_high_frequency_data(config['high_freq_dataset'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(high_freq_features.to_dict(orient='series'))
+            high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
+            if high_freq_features is not None:
+                additional_features.update(high_freq_features.to_dict(orient='series'))
+                print(f"High-frequency features added: {high_freq_features.shape[1]} columns.")
 
-            # Get the high-frequency dataset range
-            high_freq_start = high_freq_features.index.min()
-            high_freq_end = high_freq_features.index.max()
-            dataset_ranges.append((high_freq_start, high_freq_end))
-
-        # Process Economic Calendar Data
         if config.get('economic_calendar'):
-            print("Processing economic calendar data...")
-            econ_calendar = self.process_economic_calendar(config['economic_calendar'], config, common_start=common_start, common_end=common_end)
-            additional_features.update(econ_calendar.to_dict(orient='series'))
+            econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
+            if econ_calendar is not None:
+                additional_features.update(econ_calendar.to_dict(orient='series'))
+                print(f"Economic calendar features added: {econ_calendar.shape[1]} columns.")
 
-            # Get the economic calendar dataset range
-            econ_start = econ_calendar.index.min()
-            econ_end = econ_calendar.index.max()
-            dataset_ranges.append((econ_start, econ_end))
+        # Step 3: Adjust the common date range dynamically
+        if dataset_ranges:
+            valid_ranges = [(start, end) for start, end in dataset_ranges if pd.notna(start) and pd.notna(end)]
+            if valid_ranges:
+                common_start = max([start for start, end in valid_ranges])
+                common_end = min([end for start, end in valid_ranges])
+                print(f"Updated common_start: {common_start}, common_end: {common_end}")
+            else:
+                common_start, common_end = None, None
+                print("No valid dataset ranges found. common_start and common_end set to None.")
+        else:
+            print("No datasets were processed. common_start and common_end remain unchanged.")
 
-        # Step 2: Find the common valid range
-        for start, end in dataset_ranges:
-            common_start = max(common_start, start)  # Start from the maximum start time
-            common_end = min(common_end, end)  # End at the minimum end time
-
-        # Step 3: Align all datasets to the common date range
+        # Step 4: Align all datasets to the common date range
+        aligned_features = {}
         for key, dataset in additional_features.items():
-            print(f"Processing key: {key}")
-            if not hasattr(dataset, 'index'):
-                print(f"Dataset with key '{key}' does not have an 'index' attribute. Skipping.")
-                continue
-            if not isinstance(dataset.index, pd.DatetimeIndex):
-                print(f"Dataset with key '{key}' does not have a DatetimeIndex. Converting.")
-                dataset.index = pd.to_datetime(dataset.index)
+            print(f"Aligning {key}...")
+            if dataset is not None and not dataset.empty:
+                aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+                print(f"{key} aligned index range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                aligned_features[key] = aligned_dataset
+            else:
+                print(f"{key} is empty after processing.")
 
-            # Apply the date range filter
-            additional_features[key] = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+        # Step 5: Combine into a DataFrame
+        additional_features_df = pd.DataFrame(aligned_features)
 
-        # Step 4: Combine into a DataFrame
-        additional_features_df = pd.DataFrame(additional_features)
-        print(f"Additional features processed: {additional_features_df.columns}")
+        # Debugging index alignment
+        print(f"Final additional_features_df index type: {additional_features_df.index.dtype}, range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+        print(f"Additional features dataset columns: {additional_features_df.columns}")
+        print(f"Additional features dataset shape: {additional_features_df.shape}")
 
         return additional_features_df
+
+
+
 
 
 
@@ -620,7 +634,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=10, 
+            epochs=5, 
             batch_size=32, 
             verbose=1
         )
@@ -1033,15 +1047,15 @@ class Plugin:
     def process_sp500_data(self, sp500_data_path, config, common_start, common_end):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
-        
+
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - config (dict): Configuration settings.
         - common_start (str or pd.Timestamp): The common start date for alignment.
         - common_end (str or pd.Timestamp): The common end date for alignment.
-        
+
         Returns:
-        - dict: Aligned S&P 500 features or None if processing fails.
+        - pd.DataFrame: Aligned S&P 500 features or None if processing fails.
         """
         print("Processing S&P 500 data...")
 
@@ -1101,8 +1115,11 @@ class Plugin:
 
         print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
-        # Return as a dictionary with 'sp500_close' as a Series
-        return {'sp500_close': aligned_sp500}
+        # Convert the aligned Series to a DataFrame
+        aligned_sp500_df = aligned_sp500.to_frame(name='S&P500_Close')
+
+        return aligned_sp500_df
+
 
 
 
