@@ -336,12 +336,26 @@ class Plugin:
 
         # Load and fix the hourly data
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+
+        # Ensure hourly data has a valid DatetimeIndex
+        if not isinstance(hourly_data.index, pd.DatetimeIndex):
+            raise ValueError("Hourly data must have a valid DatetimeIndex.")
+
         print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the high-frequency data
         print(f"Loading high-frequency dataset: {high_freq_data_path}")
         high_freq_data = load_high_frequency_data(high_freq_data_path, config)
+
+        # Ensure high-frequency data has a valid DatetimeIndex
+        if not isinstance(high_freq_data.index, pd.DatetimeIndex):
+            raise ValueError("High-frequency dataset must have a valid DatetimeIndex.")
+
+        # Validate the presence of the 'CLOSE' column
+        if 'CLOSE' not in high_freq_data.columns:
+            raise ValueError("High-frequency dataset must contain a 'CLOSE' column.")
+
         print(f"High-frequency dataset successfully loaded. Index range: {high_freq_data.index.min()} to {high_freq_data.index.max()}")
 
         # Resample high-frequency data to 15m and 30m
@@ -356,18 +370,30 @@ class Plugin:
 
         # Construct high-frequency feature DataFrame aligned with hourly data
         high_freq_features = pd.DataFrame(index=hourly_data.index)
-        for i in range(1, config['sub_periodicity_window_size'] + 1):
-            high_freq_features[f'CLOSE_15m_tick_{i}'] = high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
-            high_freq_features[f'CLOSE_30m_tick_{i}'] = high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
+        try:
+            for i in range(1, config['sub_periodicity_window_size'] + 1):
+                high_freq_features[f'CLOSE_15m_tick_{i}'] = (
+                    high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
+                )
+                high_freq_features[f'CLOSE_30m_tick_{i}'] = (
+                    high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
+                )
+        except Exception as e:
+            print(f"Error during high-frequency feature alignment: {e}")
+            raise
 
         # Apply common start and end date range filter
         high_freq_features = high_freq_features[(high_freq_features.index >= common_start) & (high_freq_features.index <= common_end)]
+
+        if high_freq_features.empty:
+            print("Warning: The processed high-frequency features are empty after applying the date filter.")
 
         # Debug: Print processed features
         print("Processed high-frequency features (first 5 rows):")
         print(high_freq_features.head())
 
         return high_freq_features
+
 
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
@@ -950,32 +976,46 @@ class Plugin:
         for file_path in forex_files:
             print(f"Processing Forex dataset: {file_path}")
 
-            # Load the Forex dataset
-            forex_data = load_additional_csv(file_path, dataset_type='forex_15m', config=config)
-            print(f"Loaded Forex data (first 5 rows):\n{forex_data.head()}")
-            print(f"Forex data index (first 5): {forex_data.index[:5]}")
+            try:
+                # Load the Forex dataset
+                forex_data = load_additional_csv(file_path, dataset_type='forex_15m', config=config)
 
-            # Ensure the Forex dataset has a valid DatetimeIndex
-            if not isinstance(forex_data.index, pd.DatetimeIndex):
-                raise ValueError(f"Forex data from {file_path} does not have a valid DatetimeIndex.")
+                # Ensure the Forex dataset has a valid DatetimeIndex
+                if not isinstance(forex_data.index, pd.DatetimeIndex):
+                    raise ValueError(f"Forex data from {file_path} does not have a valid DatetimeIndex.")
 
-            # Resample the CLOSE column to hourly frequency
-            forex_close_hourly = forex_data['CLOSE'].resample('1H').ffill()
-            print(f"Resampled Forex CLOSE data (first 5 rows):\n{forex_close_hourly.head()}")
+                # Validate the presence of the 'CLOSE' column
+                if 'CLOSE' not in forex_data.columns:
+                    raise ValueError(f"Forex dataset {file_path} does not contain a 'CLOSE' column.")
 
-            # Align with the hourly dataset
-            aligned_forex = forex_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
-            print(f"Aligned Forex CLOSE data (first 5 rows):\n{aligned_forex.head()}")
+                print(f"Loaded Forex data (first 5 rows):\n{forex_data.head()}")
+                print(f"Forex data index (first 5): {forex_data.index[:5]}")
 
-            # Add the aligned data to the output DataFrame
-            column_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
-            forex_features[column_name] = aligned_forex.values
+                # Resample the CLOSE column to hourly frequency
+                forex_close_hourly = forex_data['CLOSE'].resample('1H').ffill()
+                print(f"Resampled Forex CLOSE data (first 5 rows):\n{forex_close_hourly.head()}")
+
+                # Align with the hourly dataset
+                aligned_forex = forex_close_hourly.reindex(hourly_data.index, method='ffill').fillna(0)
+                print(f"Aligned Forex CLOSE data (first 5 rows):\n{aligned_forex.head()}")
+
+                # Add the aligned data to the output DataFrame
+                column_name = f"{file_path.split('/')[-1].split('.')[0]}_CLOSE"
+                forex_features[column_name] = aligned_forex.values
+
+            except Exception as e:
+                print(f"Error processing Forex dataset {file_path}: {e}")
+                continue
 
         # Apply common start and end date range filter
         forex_features = forex_features[(forex_features.index >= common_start) & (forex_features.index <= common_end)]
 
+        if forex_features.empty:
+            print("Warning: The processed Forex features are empty after applying the date filter.")
+
         print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features.head()}")
         return forex_features
+
 
 
     def align_datasets(self, base_data, additional_datasets):
@@ -1143,24 +1183,41 @@ class Plugin:
         # Load the VIX data
         vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
 
-        # Ensure the index is correctly set to datetime
+        # Ensure the 'date' column is parsed and set as the index
+        if 'date' in vix_data.columns:
+            vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
+            vix_data.dropna(subset=['date'], inplace=True)
+            vix_data.set_index('date', inplace=True)
+
+        # Validate that VIX data has a proper DatetimeIndex
         if not isinstance(vix_data.index, pd.DatetimeIndex):
-            raise ValueError("The VIX dataset must have a DatetimeIndex as its index.")
+            raise ValueError("The VIX dataset must have a valid DatetimeIndex as its index.")
+
+        print(f"VIX data range: {vix_data.index.min()} to {vix_data.index.max()}")
 
         # Extract the 'close' column and resample to hourly resolution
+        if 'close' not in vix_data.columns:
+            raise ValueError("The VIX dataset must contain a 'close' column.")
         vix_close = vix_data['close'].resample('1H').ffill()
 
-        # Align with the hourly dataset
+        print(f"Resampled VIX CLOSE data (first 5 rows):\n{vix_close.head()}")
+
+        # Load and validate the hourly data
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
+        # Align with the hourly dataset
         aligned_vix = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
-        print("Aligned VIX CLOSE data (first 5 rows):")
-        print(aligned_vix.head())
+        print(f"Aligned VIX CLOSE data range: {aligned_vix.index.min()} to {aligned_vix.index.max()}")
 
         # Apply common start and end date range filter
         aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
+
+        if aligned_vix.empty:
+            print("Warning: The aligned VIX data is empty after applying the date filter.")
+            return None
+
+        print(f"Aligned VIX CLOSE data (first 5 rows):\n{aligned_vix.head()}")
 
         # Return the aligned VIX features as a DataFrame
         return pd.DataFrame({'vix_close': aligned_vix})
