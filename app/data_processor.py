@@ -154,39 +154,37 @@ def process_data(data, plugin, config):
 
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
-    print(f"Processed technical indicators shape: {processed_data.shape}")
-    print(f"Processed technical indicators index type: {processed_data.index.dtype}")
+
+    # Debug: Log transformed_data index type and range
+    print(f"Processed data index type: {processed_data.index.dtype}, range: {processed_data.index}")
 
     # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
-    print(f"Transformed technical indicators shape: {transformed_data.shape}")
-    print(f"Transformed technical indicators index type before alignment: {transformed_data.index.dtype}")
 
-    # Ensure transformed_data index matches the original data index
-    print(f"Original data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
-    transformed_data.index = data.index
-    print(f"Transformed technical indicators index after alignment: {transformed_data.index.dtype}")
+    # Ensure transformed_data index matches additional_features
+    transformed_data['datetime'] = date_column['date']
+    transformed_data.set_index('datetime', inplace=True)
+
+    # Debug: Log transformed_data index type and range after setting index
+    print(f"Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index.min()} to {transformed_data.index.max()}")
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
-    print(f"Additional features shape before alignment: {additional_features.shape}")
-    print(f"Additional features index type: {additional_features.index.dtype}")
-    print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
 
-    # Align additional_features with transformed_data index
+    # Debug: Log additional_features index type and range before alignment
+    print(f"Additional features index type: {additional_features.index.dtype}, range: {additional_features.index.min()} to {additional_features.index.max()}")
+
+    # Align additional_features with transformed_data
     additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
-    print(f"Additional features shape after alignment: {additional_features.shape}")
-    print(f"Additional features index type after alignment: {additional_features.index.dtype}")
-    print(f"Additional features index range after alignment: {additional_features.index.min()} to {additional_features.index.max()}")
 
     # Combine processed technical indicators with additional features
     final_data = pd.concat([transformed_data, additional_features], axis=1)
-    print(f"Final combined dataset shape before positional encoding: {final_data.shape}")
 
-    # Generate positional encoding for the final dataset
+    # After combining processed_data and additional_features
     num_positions = len(final_data)
     num_features = config.get('positional_encoding_dim', 8)  # Example positional encoding dimension
 
+    # Generate positional encoding for the final dataset
     positional_encoding = generate_positional_encoding(num_positions, num_features)
 
     # Add positional encoding to the final dataset
@@ -199,10 +197,6 @@ def process_data(data, plugin, config):
     print(f"Final dataset shape with positional encoding: {final_data.shape}")
 
     return final_data
-
-
-
-
 
 
 
