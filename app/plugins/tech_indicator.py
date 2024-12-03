@@ -1047,15 +1047,15 @@ class Plugin:
     def process_sp500_data(self, sp500_data_path, config, common_start, common_end):
         """
         Processes S&P 500 data and aligns it with the hourly dataset.
-        
+
         Parameters:
         - sp500_data_path (str): Path to the S&P 500 dataset.
         - config (dict): Configuration settings.
         - common_start (str or pd.Timestamp): The common start date for alignment.
         - common_end (str or pd.Timestamp): The common end date for alignment.
-        
+
         Returns:
-        - dict: Aligned S&P 500 features or None if processing fails.
+        - pd.DataFrame: Aligned S&P 500 features or None if processing fails.
         """
         print("Processing S&P 500 data...")
 
@@ -1115,8 +1115,11 @@ class Plugin:
 
         print(f"Aligned S&P 500 CLOSE data (first 5 rows):\n{aligned_sp500.head()}")
 
-        # Return as a dictionary with 'sp500_close' as a Series
-        return {'sp500_close': aligned_sp500}
+        # Convert the aligned Series to a DataFrame
+        aligned_sp500_df = aligned_sp500.to_frame(name='S&P500_Close')
+
+        return aligned_sp500_df
+
 
 
 
