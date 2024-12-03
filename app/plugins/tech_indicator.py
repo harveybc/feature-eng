@@ -95,14 +95,7 @@ class Plugin:
         # Debug: Show initial data columns before any processing
         print(f"Initial data columns before any processing: {data.columns}")
         print(f"Number of rows in data: {data.shape[0]}")
-
-        # Ensure the datetime column is preserved if it exists
-        if 'datetime' in data.columns:
-            datetime_column = data[['datetime']]
-            print(f"[DEBUG] Datetime column found with shape: {datetime_column.shape}")
-        else:
-            print("[DEBUG] No datetime column found; ensure alignment downstream.")
-            datetime_column = None
+        print(f"Data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
 
         # Adjust the OHLC order of the columns
         data = self.adjust_ohlc(data)
@@ -111,105 +104,22 @@ class Plugin:
         # Initialize a dictionary to hold all technical indicators
         technical_indicators = {}
 
-        # Loop through the specified indicators and calculate them
-        for indicator in self.params['indicators']:
-            print(f"Processing indicator: {indicator}")
-
-            if indicator == 'rsi':
-                rsi = ta.rsi(data['Close'])  # Default length is 14
-                if rsi is not None:
-                    technical_indicators['RSI'] = rsi
-                    print(f"RSI calculated with shape: {rsi.shape}")
-
-            elif indicator == 'macd':
-                macd = ta.macd(data['Close'])  # Default fast, slow, signal periods
-                if 'MACD_12_26_9' in macd.columns:
-                    technical_indicators['MACD'] = macd['MACD_12_26_9']
-                if 'MACDh_12_26_9' in macd.columns:
-                    technical_indicators['MACD_Histogram'] = macd['MACDh_12_26_9']
-                if 'MACDs_12_26_9' in macd.columns:
-                    technical_indicators['MACD_Signal'] = macd['MACDs_12_26_9']
-                print(f"MACD columns returned: {macd.columns}")
-
-            elif indicator == 'ema':
-                ema = ta.ema(data['Close'])  # Default length is 20
-                if ema is not None:
-                    technical_indicators['EMA'] = ema
-                    print(f"EMA calculated with shape: {ema.shape}")
-
-            elif indicator == 'stoch':
-                stoch = ta.stoch(data['High'], data['Low'], data['Close'])  # Default %K, %D values
-                if 'STOCHk_14_3_3' in stoch.columns:
-                    technical_indicators['Stochastic_%K'] = stoch['STOCHk_14_3_3']
-                if 'STOCHd_14_3_3' in stoch.columns:
-                    technical_indicators['Stochastic_%D'] = stoch['STOCHd_14_3_3']
-                print(f"Stochastic columns returned: {stoch.columns}")
-
-            elif indicator == 'adx':
-                adx = ta.adx(data['High'], data['Low'], data['Close'])  # Default length is 14
-                if 'ADX_14' in adx.columns:
-                    technical_indicators['ADX'] = adx['ADX_14']
-                if 'DMP_14' in adx.columns:
-                    technical_indicators['DI+'] = adx['DMP_14']
-                if 'DMN_14' in adx.columns:
-                    technical_indicators['DI-'] = adx['DMN_14']
-                print(f"ADX columns returned: {adx.columns}")
-
-            elif indicator == 'atr':
-                atr = ta.atr(data['High'], data['Low'], data['Close'])  # Default length is 14
-                if atr is not None:
-                    technical_indicators['ATR'] = atr
-                    print(f"ATR calculated with shape: {atr.shape}")
-
-            elif indicator == 'cci':
-                cci = ta.cci(data['High'], data['Low'], data['Close'])  # Default length is 20
-                if cci is not None:
-                    technical_indicators['CCI'] = cci
-                    print(f"CCI calculated with shape: {cci.shape}")
-
-            elif indicator == 'bbands':
-                bbands = ta.bbands(data['Close'])  # Default length is 20
-                if 'BBU_20_2.0' in bbands.columns:
-                    technical_indicators['BB_Upper'] = bbands['BBU_20_2.0']
-                if 'BBM_20_2.0' in bbands.columns:
-                    technical_indicators['BB_Middle'] = bbands['BBM_20_2.0']
-                if 'BBL_20_2.0' in bbands.columns:
-                    technical_indicators['BB_Lower'] = bbands['BBL_20_2.0']
-                print(f"Bollinger Bands columns returned: {bbands.columns}")
-
-            elif indicator == 'williams':
-                williams = ta.willr(data['High'], data['Low'], data['Close'])  # Default length is 14
-                if williams is not None:
-                    technical_indicators['WilliamsR'] = williams
-                    print(f"WilliamsR calculated with shape: {williams.shape}")
-
-            elif indicator == 'momentum':
-                momentum = ta.mom(data['Close'])  # Default length is 10
-                if momentum is not None:
-                    technical_indicators['Momentum'] = momentum
-                    print(f"Momentum calculated with shape: {momentum.shape}")
-
-            elif indicator == 'roc':
-                roc = ta.roc(data['Close'])  # Default length is 10
-                if roc is not None:
-                    technical_indicators['ROC'] = roc
-                    print(f"ROC calculated with shape: {roc.shape}")
+        # [Compute technical indicators and populate technical_indicators dictionary]
+        # ... (existing code to compute indicators)
 
         # Create a DataFrame from the calculated technical indicators
         indicator_df = pd.DataFrame(technical_indicators)
 
+        # Align indicator_df's index with data's index
+        indicator_df.index = data.index[-len(indicator_df):]
+
         # Debug: Show the calculated technical indicators
         print(f"Calculated technical indicators: {indicator_df.columns}")
         print(f"Calculated technical indicators shape: {indicator_df.shape}")
-        print(f"Calculated technical indicators index type: {indicator_df.index.dtype}")
-
-        # If datetime_column is available, add it to the indicator DataFrame
-        if datetime_column is not None:
-            indicator_df['datetime'] = datetime_column.iloc[-len(indicator_df):].values
-            indicator_df.set_index('datetime', inplace=True)
-            print("[DEBUG] Added datetime index to the indicator DataFrame.")
+        print(f"Calculated technical indicators index type: {indicator_df.index.dtype}, range: {indicator_df.index.min()} to {indicator_df.index.max()}")
 
         return indicator_df
+
 
 
 

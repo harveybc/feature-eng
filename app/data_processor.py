@@ -111,8 +111,15 @@ def analyze_variability_and_normality(data, config):
 
     # Convert the transformed columns dictionary back into a DataFrame and return it
     transformed_data = pd.DataFrame(transformed_columns)
+    transformed_data.index = data.index  # Preserve the original index
+
+    print(f"Transformed data shape: {transformed_data.shape}")
+    print(f"Transformed data columns: {transformed_data.columns}")
+    print(f"Transformed data index type: {transformed_data.index.dtype}")
+    print(f"Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
 
     return transformed_data
+
 
 
 
@@ -155,42 +162,26 @@ def process_data(data, plugin, config):
 
     # Process technical indicators
     processed_data = plugin.process(numeric_data)
-    print(f"[DEBUG] Processed technical indicators shape: {processed_data.shape}")
-    print(f"[DEBUG] Processed technical indicators head:\n{processed_data.head()}")
+    print(f"[DEBUG] Processed data index type: {processed_data.index.dtype}")
+    print(f"[DEBUG] Processed data index range: {processed_data.index.min()} to {processed_data.index.max()}")
 
-    # Analyze variability and normality for technical indicators
+    # Analyze variability and normality
     transformed_data = analyze_variability_and_normality(processed_data, config)
-    print(f"[DEBUG] Transformed data shape: {transformed_data.shape}")
-    print(f"[DEBUG] Transformed data head:\n{transformed_data.head()}")
-
-    # Restore datetime index to transformed_data
-    try:
-        transformed_data['datetime'] = date_column['date'].iloc[-len(transformed_data):].values
-        transformed_data.set_index('datetime', inplace=True)
-    except Exception as e:
-        print(f"[ERROR] Failed to set datetime index on transformed_data. Exception: {str(e)}")
-        print(f"[DEBUG] Transformed data shape before index set: {transformed_data.shape}")
-        print(f"[DEBUG] Date column shape: {date_column.shape}")
-        raise e
-
-    print(f"[DEBUG] Transformed data index set to datetime.")
     print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
     print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
-    print(f"[DEBUG] Transformed data head after index set:\n{transformed_data.head()}")
+
+    # The index of transformed_data is already set correctly; no need to set it again.
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
-    print(f"[DEBUG] Additional features shape before alignment: {additional_features.shape}")
     print(f"[DEBUG] Additional features index type: {additional_features.index.dtype}")
     print(f"[DEBUG] Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
-    print(f"[DEBUG] Additional features head before alignment:\n{additional_features.head()}")
 
     # Align additional_features with transformed_data
     try:
         additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
         print(f"[DEBUG] Additional features successfully aligned.")
         print(f"[DEBUG] Additional features shape after alignment: {additional_features.shape}")
-        print(f"[DEBUG] Additional features head after alignment:\n{additional_features.head()}")
     except Exception as e:
         print(f"[ERROR] Failed to align additional features with transformed_data. Exception: {str(e)}")
         print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index}")
@@ -201,7 +192,6 @@ def process_data(data, plugin, config):
     final_data = pd.concat([transformed_data, additional_features], axis=1)
     print(f"[DEBUG] Final data shape after combining: {final_data.shape}")
     print(f"[DEBUG] Final data head:\n{final_data.head()}")
-
     # Add positional encoding
     num_positions = len(final_data)
     num_features = config.get('positional_encoding_dim', 8)
