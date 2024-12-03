@@ -210,14 +210,17 @@ def run_feature_engineering_pipeline(config, plugin):
     print(f"Loading data from {config['input_file']}...")
     data = load_csv(config['input_file'], config=config)
     print(f"Data loaded with shape: {data.shape}")
+    print(f"Data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
 
     # Process the data
     processed_data = process_data(data, plugin, config)
 
     # Save the processed data to the output file if specified
-    if config['output_file']:
-        processed_data.to_csv(config['output_file'], index=False)
+    if config.get('output_file'):
+        processed_data.to_csv(config['output_file'], index=True)  # Ensure index is saved as datetime
         print(f"Processed data saved to {config['output_file']}.")
+    else:
+        print("No output file specified; skipping save.")
 
     # Save final configuration and debug information
     end_time = time.time()
@@ -228,7 +231,10 @@ def run_feature_engineering_pipeline(config, plugin):
     if config.get('save_log'):
         save_debug_info(debug_info, config['save_log'])
         print(f"Debug info saved to {config['save_log']}.")
+    else:
+        print("No log file specified; skipping save of debug info.")
 
-    print(f"Execution time: {execution_time} seconds")
+    print(f"Execution time: {execution_time:.2f} seconds")
+
 
 

@@ -94,11 +94,10 @@ class Plugin:
 
         # Debug: Show initial data columns before any processing
         print(f"Initial data columns before any processing: {data.columns}")
+        print(f"Number of rows in data: {data.shape[0]}")
 
         # Adjust the OHLC order of the columns
         data = self.adjust_ohlc(data)
-
-        # Debug: Show the columns after adjustment
         print(f"Data columns after OHLC adjustment: {data.columns}")
 
         # Initialize a dictionary to hold all technical indicators
@@ -193,8 +192,11 @@ class Plugin:
 
         # Debug: Show the calculated technical indicators
         print(f"Calculated technical indicators: {indicator_df.columns}")
+        print(f"Calculated technical indicators shape: {indicator_df.shape}")
+        print(f"Calculated technical indicators index type: {indicator_df.index.dtype}")
 
         return indicator_df
+
 
 
     def process_additional_datasets(self, data, config):
@@ -231,6 +233,7 @@ class Plugin:
                 if not isinstance(dataset.index, pd.DatetimeIndex):
                     print(f"Converting {dataset_key} index to DatetimeIndex.")
                     dataset.index = pd.to_datetime(dataset.index, errors='coerce')
+                    print(f"{dataset_key} index after conversion: {dataset.index.dtype}, range: {dataset.index.min()} to {dataset.index.max()}")
                 dataset_ranges.append((dataset.index.min(), dataset.index.max()))
                 return dataset
             else:
@@ -242,26 +245,31 @@ class Plugin:
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None:
                 additional_features.update(forex_features.to_dict(orient='series'))
+                print(f"Forex features added: {forex_features.shape[1]} columns.")
 
         if config.get('sp500_dataset'):
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None:
                 additional_features.update(sp500_features.to_dict(orient='series'))
+                print(f"S&P 500 features added: {sp500_features.shape[1]} columns.")
 
         if config.get('vix_dataset'):
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
             if vix_features is not None:
                 additional_features.update(vix_features.to_dict(orient='series'))
+                print(f"VIX features added: {vix_features.shape[1]} columns.")
 
         if config.get('high_freq_dataset'):
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
             if high_freq_features is not None:
                 additional_features.update(high_freq_features.to_dict(orient='series'))
+                print(f"High-frequency features added: {high_freq_features.shape[1]} columns.")
 
         if config.get('economic_calendar'):
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
+                print(f"Economic calendar features added: {econ_calendar.shape[1]} columns.")
 
         # Step 3: Adjust the common date range dynamically
         if dataset_ranges:
@@ -269,9 +277,12 @@ class Plugin:
             if valid_ranges:
                 common_start = max([start for start, end in valid_ranges])
                 common_end = min([end for start, end in valid_ranges])
+                print(f"Updated common_start: {common_start}, common_end: {common_end}")
             else:
                 common_start, common_end = None, None
-        print(f"Adjusted common_start: {common_start}, common_end: {common_end}")
+                print("No valid dataset ranges found. common_start and common_end set to None.")
+        else:
+            print("No datasets were processed. common_start and common_end remain unchanged.")
 
         # Step 4: Align all datasets to the common date range
         aligned_features = {}
@@ -286,10 +297,11 @@ class Plugin:
 
         # Step 5: Combine into a DataFrame
         additional_features_df = pd.DataFrame(aligned_features)
-        print(f"Final additional_features_df index range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+        print(f"Final additional_features_df index type: {additional_features_df.index.dtype}, range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
         print(f"Additional features dataset columns: {additional_features_df.columns}")
 
         return additional_features_df
+
 
 
 
