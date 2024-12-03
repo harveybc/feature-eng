@@ -160,7 +160,7 @@ def process_data(data, plugin, config):
     # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
     print(f"Transformed technical indicators shape: {transformed_data.shape}")
-    print(f"Transformed technical indicators index type: {transformed_data.index.dtype}")
+    print(f"Transformed technical indicators index type before alignment: {transformed_data.index.dtype}")
 
     # Ensure transformed_data index matches the original data index
     print(f"Original data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
@@ -174,7 +174,14 @@ def process_data(data, plugin, config):
     print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
 
     # Align additional_features with transformed_data index
-    additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
+    try:
+        additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
+    except Exception as e:
+        print(f"Error during reindexing: {e}")
+        print(f"Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index}")
+        print(f"Additional features index type: {additional_features.index.dtype}, range: {additional_features.index}")
+        raise
+
     print(f"Additional features shape after alignment: {additional_features.shape}")
     print(f"Additional features index type after alignment: {additional_features.index.dtype}")
     print(f"Additional features index range after alignment: {additional_features.index.min()} to {additional_features.index.max()}")
@@ -199,6 +206,7 @@ def process_data(data, plugin, config):
     print(f"Final dataset shape with positional encoding: {final_data.shape}")
 
     return final_data
+
 
 
 
