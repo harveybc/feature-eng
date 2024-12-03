@@ -96,6 +96,14 @@ class Plugin:
         print(f"Initial data columns before any processing: {data.columns}")
         print(f"Number of rows in data: {data.shape[0]}")
 
+        # Ensure the datetime column is preserved if it exists
+        if 'datetime' in data.columns:
+            datetime_column = data[['datetime']]
+            print(f"[DEBUG] Datetime column found with shape: {datetime_column.shape}")
+        else:
+            print("[DEBUG] No datetime column found; ensure alignment downstream.")
+            datetime_column = None
+
         # Adjust the OHLC order of the columns
         data = self.adjust_ohlc(data)
         print(f"Data columns after OHLC adjustment: {data.columns}")
@@ -194,6 +202,12 @@ class Plugin:
         print(f"Calculated technical indicators: {indicator_df.columns}")
         print(f"Calculated technical indicators shape: {indicator_df.shape}")
         print(f"Calculated technical indicators index type: {indicator_df.index.dtype}")
+
+        # If datetime_column is available, add it to the indicator DataFrame
+        if datetime_column is not None:
+            indicator_df['datetime'] = datetime_column.iloc[-len(indicator_df):].values
+            indicator_df.set_index('datetime', inplace=True)
+            print("[DEBUG] Added datetime index to the indicator DataFrame.")
 
         return indicator_df
 
@@ -297,10 +311,14 @@ class Plugin:
 
         # Step 5: Combine into a DataFrame
         additional_features_df = pd.DataFrame(aligned_features)
+
+        # Debugging index alignment
         print(f"Final additional_features_df index type: {additional_features_df.index.dtype}, range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
         print(f"Additional features dataset columns: {additional_features_df.columns}")
+        print(f"Additional features dataset shape: {additional_features_df.shape}")
 
         return additional_features_df
+
 
 
 
