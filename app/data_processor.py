@@ -174,14 +174,7 @@ def process_data(data, plugin, config):
     print(f"Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
 
     # Align additional_features with transformed_data index
-    try:
-        additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
-    except Exception as e:
-        print(f"Error during reindexing: {e}")
-        print(f"Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index}")
-        print(f"Additional features index type: {additional_features.index.dtype}, range: {additional_features.index}")
-        raise
-
+    additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
     print(f"Additional features shape after alignment: {additional_features.shape}")
     print(f"Additional features index type after alignment: {additional_features.index.dtype}")
     print(f"Additional features index range after alignment: {additional_features.index.min()} to {additional_features.index.max()}")
@@ -206,6 +199,7 @@ def process_data(data, plugin, config):
     print(f"Final dataset shape with positional encoding: {final_data.shape}")
 
     return final_data
+
 
 
 
