@@ -194,14 +194,12 @@ class Plugin:
                 if roc is not None:
                     technical_indicators['ROC'] = roc
                     print(f"ROC calculated with shape: {roc.shape}")
+        
         # Create a DataFrame from the calculated technical indicators
-        indicator_df = pd.DataFrame(technical_indicators)
-
-        # Align indicator_df's index with data's index
-        indicator_df.index = data.index[-len(indicator_df):]
+        indicator_df = pd.DataFrame(technical_indicators, index=data.index)
 
         # Debug: Show the calculated technical indicators
-        print(f"Calculated technical indicators: {indicator_df.columns}")
+        print(f"Calculated technical indicators columns: {indicator_df.columns}")
         print(f"Calculated technical indicators shape: {indicator_df.shape}")
         print(f"Calculated technical indicators index type: {indicator_df.index.dtype}, range: {indicator_df.index.min()} to {indicator_df.index.max()}")
 

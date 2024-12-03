@@ -110,9 +110,7 @@ def analyze_variability_and_normality(data, config):
     plt.show()
 
     # Convert the transformed columns dictionary back into a DataFrame and return it
-    transformed_data = pd.DataFrame(transformed_columns)
-    transformed_data.index = data.index  # Preserve the original index
-
+    transformed_data = pd.DataFrame(transformed_columns, index=data.index)
     print(f"Transformed data shape: {transformed_data.shape}")
     print(f"Transformed data columns: {transformed_data.columns}")
     print(f"Transformed data index type: {transformed_data.index.dtype}")
@@ -136,20 +134,23 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Initial data columns: {list(data.columns)}")
     print(f"[DEBUG] Initial data index type: {data.index.dtype}")
 
-    # Keep the date column separate
-    if 'date' in data.columns:
-        date_column = data[['date']]
+    # Set the datetime index
+    date_column_name = 'DATE_TIME'  # Update as per your actual datetime column name
+    if date_column_name in data.columns:
+        data[date_column_name] = pd.to_datetime(data[date_column_name])
+        data.set_index(date_column_name, inplace=True)
+        print(f"[DEBUG] Set data index to {date_column_name}")
     else:
-        date_column = data.index.to_frame(index=False)
-        date_column.columns = ['date']
-    print(f"[DEBUG] Extracted date column shape: {date_column.shape}")
-    print(f"[DEBUG] Extracted date column head:\n{date_column.head()}")
+        raise KeyError(f"Date column '{date_column_name}' not found in data columns")
+
+    print(f"[DEBUG] Data index type after setting datetime index: {data.index.dtype}")
+    print(f"[DEBUG] Data index range: {data.index.min()} to {data.index.max()}")
 
     # Map and verify OHLC columns
     header_mappings = config.get('header_mappings', {})
     dataset_type = config.get('dataset_type', 'default')
     dataset_headers = header_mappings.get(dataset_type, {})
-    ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
+    ohlc_columns = [dataset_headers.get(k, k).upper() for k in ['open', 'high', 'low', 'close']]
     missing_columns = [col for col in ohlc_columns if col not in data.columns]
     if missing_columns:
         raise KeyError(f"[ERROR] Missing expected OHLC columns: {missing_columns}. Available: {list(data.columns)}")
@@ -169,8 +170,6 @@ def process_data(data, plugin, config):
     transformed_data = analyze_variability_and_normality(processed_data, config)
     print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
     print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
-
-    # The index of transformed_data is already set correctly; no need to set it again.
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
@@ -192,6 +191,7 @@ def process_data(data, plugin, config):
     final_data = pd.concat([transformed_data, additional_features], axis=1)
     print(f"[DEBUG] Final data shape after combining: {final_data.shape}")
     print(f"[DEBUG] Final data head:\n{final_data.head()}")
+
     # Add positional encoding
     num_positions = len(final_data)
     num_features = config.get('positional_encoding_dim', 8)
@@ -202,6 +202,7 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Final dataset head with positional encoding:\n{final_data.head()}")
 
     return final_data
+
 
 
 
