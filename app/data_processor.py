@@ -122,14 +122,14 @@ def process_data(data, plugin, config):
     Processes the data using the specified plugin and handles additional features
     from high-frequency data, S&P, VIX, and the economic calendar.
     """
-    print("Processing data using plugin...")
+    print("[DEBUG] Starting process_data...")
 
-    # Debug: Initial data check
+    # Debug: Initial data overview
     print(f"[DEBUG] Initial data shape: {data.shape}")
     print(f"[DEBUG] Initial data columns: {list(data.columns)}")
     print(f"[DEBUG] Initial data index type: {data.index.dtype}")
 
-    # Extract the date column
+    # Keep the date column separate
     if 'date' in data.columns:
         date_column = data[['date']]
     else:
@@ -145,7 +145,7 @@ def process_data(data, plugin, config):
     ohlc_columns = [dataset_headers.get(k, k) for k in ['open', 'high', 'low', 'close']]
     missing_columns = [col for col in ohlc_columns if col not in data.columns]
     if missing_columns:
-        raise KeyError(f"Missing expected OHLC columns: {missing_columns}. Available: {list(data.columns)}")
+        raise KeyError(f"[ERROR] Missing expected OHLC columns: {missing_columns}. Available: {list(data.columns)}")
     print(f"[DEBUG] Mapped OHLC columns: {ohlc_columns}")
 
     # Filter numeric OHLC columns
@@ -158,26 +158,44 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Processed technical indicators shape: {processed_data.shape}")
     print(f"[DEBUG] Processed technical indicators head:\n{processed_data.head()}")
 
-    # Analyze variability and normality
+    # Analyze variability and normality for technical indicators
     transformed_data = analyze_variability_and_normality(processed_data, config)
     print(f"[DEBUG] Transformed data shape: {transformed_data.shape}")
     print(f"[DEBUG] Transformed data head:\n{transformed_data.head()}")
 
     # Restore datetime index to transformed_data
-    transformed_data['datetime'] = date_column['date'].iloc[-len(transformed_data):].values
-    transformed_data.set_index('datetime', inplace=True)
+    try:
+        transformed_data['datetime'] = date_column['date'].iloc[-len(transformed_data):].values
+        transformed_data.set_index('datetime', inplace=True)
+    except Exception as e:
+        print(f"[ERROR] Failed to set datetime index on transformed_data. Exception: {str(e)}")
+        print(f"[DEBUG] Transformed data shape before index set: {transformed_data.shape}")
+        print(f"[DEBUG] Date column shape: {date_column.shape}")
+        raise e
+
+    print(f"[DEBUG] Transformed data index set to datetime.")
     print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
     print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
+    print(f"[DEBUG] Transformed data head after index set:\n{transformed_data.head()}")
 
     # Process additional datasets
     additional_features = plugin.process_additional_datasets(data, config)
     print(f"[DEBUG] Additional features shape before alignment: {additional_features.shape}")
     print(f"[DEBUG] Additional features index type: {additional_features.index.dtype}")
     print(f"[DEBUG] Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
+    print(f"[DEBUG] Additional features head before alignment:\n{additional_features.head()}")
 
     # Align additional_features with transformed_data
-    additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
-    print(f"[DEBUG] Additional features successfully aligned. Shape: {additional_features.shape}")
+    try:
+        additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
+        print(f"[DEBUG] Additional features successfully aligned.")
+        print(f"[DEBUG] Additional features shape after alignment: {additional_features.shape}")
+        print(f"[DEBUG] Additional features head after alignment:\n{additional_features.head()}")
+    except Exception as e:
+        print(f"[ERROR] Failed to align additional features with transformed_data. Exception: {str(e)}")
+        print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index}")
+        print(f"[DEBUG] Additional features index type: {additional_features.index.dtype}, range: {additional_features.index}")
+        raise e
 
     # Combine processed technical indicators with additional features
     final_data = pd.concat([transformed_data, additional_features], axis=1)
@@ -191,6 +209,7 @@ def process_data(data, plugin, config):
     positional_encoding_df = pd.DataFrame(positional_encoding, columns=[f'pos_enc_{i}' for i in range(num_features)])
     final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
     print(f"[DEBUG] Final dataset shape with positional encoding: {final_data.shape}")
+    print(f"[DEBUG] Final dataset head with positional encoding:\n{final_data.head()}")
 
     return final_data
 
