@@ -1143,24 +1143,41 @@ class Plugin:
         # Load the VIX data
         vix_data = load_additional_csv(vix_data_path, dataset_type='vix', config=config)
 
-        # Ensure the index is correctly set to datetime
+        # Ensure the 'date' column is parsed and set as the index
+        if 'date' in vix_data.columns:
+            vix_data['date'] = pd.to_datetime(vix_data['date'], errors='coerce')
+            vix_data.dropna(subset=['date'], inplace=True)
+            vix_data.set_index('date', inplace=True)
+
+        # Validate that VIX data has a proper DatetimeIndex
         if not isinstance(vix_data.index, pd.DatetimeIndex):
-            raise ValueError("The VIX dataset must have a DatetimeIndex as its index.")
+            raise ValueError("The VIX dataset must have a valid DatetimeIndex as its index.")
+
+        print(f"VIX data range: {vix_data.index.min()} to {vix_data.index.max()}")
 
         # Extract the 'close' column and resample to hourly resolution
+        if 'close' not in vix_data.columns:
+            raise ValueError("The VIX dataset must contain a 'close' column.")
         vix_close = vix_data['close'].resample('1H').ffill()
 
-        # Align with the hourly dataset
+        print(f"Resampled VIX CLOSE data (first 5 rows):\n{vix_close.head()}")
+
+        # Load and validate the hourly data
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
+        # Align with the hourly dataset
         aligned_vix = vix_close.reindex(hourly_data.index, method='ffill').fillna(0)
-        print("Aligned VIX CLOSE data (first 5 rows):")
-        print(aligned_vix.head())
+        print(f"Aligned VIX CLOSE data range: {aligned_vix.index.min()} to {aligned_vix.index.max()}")
 
         # Apply common start and end date range filter
         aligned_vix = aligned_vix[(aligned_vix.index >= common_start) & (aligned_vix.index <= common_end)]
+
+        if aligned_vix.empty:
+            print("Warning: The aligned VIX data is empty after applying the date filter.")
+            return None
+
+        print(f"Aligned VIX CLOSE data (first 5 rows):\n{aligned_vix.head()}")
 
         # Return the aligned VIX features as a DataFrame
         return pd.DataFrame({'vix_close': aligned_vix})
