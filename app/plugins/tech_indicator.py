@@ -415,12 +415,6 @@ class Plugin:
         # Load the hourly dataset
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
 
-        # Ensure hourly data has a valid DatetimeIndex
-        if not isinstance(hourly_data.index, pd.DatetimeIndex):
-            raise ValueError("Hourly dataset must have a valid DatetimeIndex.")
-
-        print(f"Hourly data index range: {hourly_data.index.min()} to {hourly_data.index.max()}")
-
         # Load the economic calendar dataset
         econ_data = pd.read_csv(
             econ_calendar_path,
@@ -437,13 +431,7 @@ class Plugin:
         # Drop invalid datetime rows
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
-
-        # Ensure economic calendar data has a valid DatetimeIndex
-        if not isinstance(econ_data.index, pd.DatetimeIndex):
-            raise ValueError("Economic calendar data must have a valid DatetimeIndex.")
-
         print(f"Economic calendar data loaded with {len(econ_data)} events.")
-        print(f"Economic calendar index range: {econ_data.index.min()} to {econ_data.index.max()}")
 
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
@@ -451,12 +439,6 @@ class Plugin:
 
         # Adjust the economic calendar to the common date range
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
-
-        if econ_data.empty:
-            print("Warning: Economic calendar data is empty after applying the date filter.")
-            return pd.DataFrame(columns=["Predicted_Trend", "Predicted_Volatility"])
-
-        print(f"Economic calendar data range after filtering: {econ_data.index.min()} to {econ_data.index.max()}")
 
         # Get sliding window size
         window_size = config['calendar_window_size']
@@ -506,7 +488,6 @@ class Plugin:
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
-
 
 
 
