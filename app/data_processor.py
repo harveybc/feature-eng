@@ -146,6 +146,9 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Data index type after setting datetime index: {data.index.dtype}")
     print(f"[DEBUG] Data index range: {data.index.min()} to {data.index.max()}")
 
+    # Store the date column for re-insertion later
+    original_date_column = data.index.to_series(name="DATE_TIME")
+
     # Map and verify OHLC columns
     header_mappings = config.get('header_mappings', {})
     dataset_type = config.get('dataset_type', 'default')
@@ -201,7 +204,13 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Final dataset shape with positional encoding: {final_data.shape}")
     print(f"[DEBUG] Final dataset head with positional encoding:\n{final_data.head()}")
 
+    # Add the date column back to the final dataset
+    final_data = pd.concat([original_date_column.reset_index(drop=True), final_data], axis=1)
+    print(f"[DEBUG] Final dataset shape with date column: {final_data.shape}")
+    print(f"[DEBUG] Final dataset head with date column:\n{final_data.head()}")
+
     return final_data
+
 
 
 
