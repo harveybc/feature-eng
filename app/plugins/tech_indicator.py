@@ -398,15 +398,6 @@ class Plugin:
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
         Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
-
-        Parameters:
-        - econ_calendar_path (str): Path to the economic calendar dataset.
-        - config (dict): Configuration dictionary.
-        - common_start (str or pd.Timestamp): Common start date for alignment.
-        - common_end (str or pd.Timestamp): Common end date for alignment.
-
-        Returns:
-        - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
         """
         from tqdm import tqdm
 
@@ -414,6 +405,8 @@ class Plugin:
 
         # Load the hourly dataset
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
+
+        print(f"[DEBUG] Hourly dataset loaded. Index range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the economic calendar dataset
         econ_data = pd.read_csv(
@@ -431,25 +424,37 @@ class Plugin:
         # Drop invalid datetime rows
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
-        print(f"Economic calendar data loaded with {len(econ_data)} events.")
+        print(f"[DEBUG] Economic calendar data loaded. Events: {len(econ_data)}")
+        print(f"[DEBUG] Economic calendar date range: {econ_data.index.min()} to {econ_data.index.max()}")
 
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
-        print("Economic calendar data preprocessing complete.")
+        print(f"[DEBUG] Economic calendar data preprocessing complete.")
 
-        # Adjust the economic calendar to the common date range
+        # Enforce strict date alignment
+        print(f"[DEBUG] Applying common date range: {common_start} to {common_end}")
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
+        hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+
+        print(f"[DEBUG] Economic calendar date range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
+        print(f"[DEBUG] Hourly dataset date range after alignment: {hourly_data.index.min()} to {hourly_data.index.max()}")
+
+        # Check if the datasets are properly aligned
+        if econ_data.empty:
+            raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
+        if hourly_data.empty:
+            raise ValueError("[ERROR] Hourly dataset is empty after alignment.")
 
         # Get sliding window size
         window_size = config['calendar_window_size']
 
         # Generate sliding window features
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
-        print(f"Sliding window feature generation complete. Shape: {econ_features.shape}")
+        print(f"[DEBUG] Sliding window feature generation complete. Shape: {econ_features.shape}")
 
         # Generate training signals for trend and volatility
         trend_signal, volatility_signal = self._generate_training_signals(hourly_data, config)
-        print("Training signals for trend and volatility generated.")
+        print("[DEBUG] Training signals for trend and volatility generated.")
 
         # Train and predict trend and volatility using Conv1D
         predictions = self._predict_trend_and_volatility_with_conv1d(
@@ -460,7 +465,7 @@ class Plugin:
 
         # Unpack predictions
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
-        print(f"Predictions generated. Predictions shape: {predictions.shape}")
+        print(f"[DEBUG] Predictions generated. Shape: {predictions.shape}")
 
         # Trim predictions by sliding window size
         predicted_trend = predicted_trend[window_size:]
@@ -470,15 +475,15 @@ class Plugin:
         adjusted_index = hourly_data.index[window_size:]
 
         # Debugging
-        print(f"Predicted trend length: {len(predicted_trend)}")
-        print(f"Predicted volatility length: {len(predicted_volatility)}")
-        print(f"Adjusted index length: {len(adjusted_index)}")
-        print(f"Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
+        print(f"[DEBUG] Predicted trend length: {len(predicted_trend)}")
+        print(f"[DEBUG] Predicted volatility length: {len(predicted_volatility)}")
+        print(f"[DEBUG] Adjusted index length: {len(adjusted_index)}")
+        print(f"[DEBUG] Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
 
         # Ensure lengths match
         if len(predicted_trend) != len(adjusted_index):
             raise ValueError(
-                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
+                f"[ERROR] Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
                 f"vs. Aligned index ({len(adjusted_index)})"
             )
 
