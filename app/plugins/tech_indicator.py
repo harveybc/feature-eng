@@ -382,16 +382,18 @@ class Plugin:
             dayfirst=True,
         )
 
-        # Debug: Show raw economic calendar data
-        print(f"[DEBUG] Economic calendar data loaded. Events: {len(econ_data)}")
-        print(f"[DEBUG] Raw economic calendar datetime range: {econ_data['datetime'].min()} to {econ_data['datetime'].max()}")
+        print("[DEBUG] Economic calendar loaded successfully.")
+        print(f"[DEBUG] Economic calendar column types: {econ_data.dtypes}")
+        print(f"[DEBUG] Economic calendar datetime column (first 5): {econ_data['datetime'].head()}")
 
         # Drop invalid datetime rows and set index
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
-        # Debug: After cleaning
-        print(f"[DEBUG] Cleaned economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
+        print("[DEBUG] Economic calendar index set successfully.")
+        print(f"[DEBUG] Economic calendar index type: {type(econ_data.index)}")
+        print(f"[DEBUG] Economic calendar index range: {econ_data.index.min()} to {econ_data.index.max()}")
+        print(f"[DEBUG] Economic calendar index dtype: {econ_data.index.dtype}")
 
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
@@ -399,18 +401,22 @@ class Plugin:
         print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
         # Apply the common date range filter
-        print(f"[DEBUG] Applying common date range: {common_start} to {common_end}")
+        print("[DEBUG] Starting alignment process for economic calendar.")
+        print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
+        print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
+        print(f"[DEBUG] Econ data index type before alignment: {type(econ_data.index)}")
+        print(f"[DEBUG] Econ data index range before alignment: {econ_data.index.min()} to {econ_data.index.max()}")
+
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
 
-        # Debug: After alignment
-        print(f"[DEBUG] Economic calendar date range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
+        print(f"[DEBUG] Econ data rows after alignment: {len(econ_data)}")
+        print(f"[DEBUG] Econ data index range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
         if econ_data.empty:
+            print("[ERROR] Alignment resulted in an empty dataset.")
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
 
-        # Get sliding window size
-        window_size = config['calendar_window_size']
-
         # Generate sliding window features
+        window_size = config['calendar_window_size']
         econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
         print(f"[DEBUG] Sliding window feature generation complete. Shape: {econ_features.shape}")
 
@@ -455,7 +461,6 @@ class Plugin:
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
-
 
 
     def _preprocess_economic_calendar_data(self, econ_data):
