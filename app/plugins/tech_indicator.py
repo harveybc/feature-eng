@@ -379,22 +379,29 @@ class Plugin:
                 'description', 'evaluation', 'data_format',
                 'actual', 'forecast', 'previous'
             ],
-            parse_dates={'datetime': ['event_date', 'event_time']},
+            dtype={'event_date': str, 'event_time': str},
             dayfirst=True,
         )
 
         print("[DEBUG] Economic calendar loaded successfully.")
         print(f"[DEBUG] Economic calendar column types: {econ_data.dtypes}")
+
+        # Combine 'event_date' and 'event_time' into a single datetime column
+        econ_data['datetime'] = pd.to_datetime(
+            econ_data['event_date'].str.strip() + ' ' + econ_data['event_time'].str.strip(),
+            errors='coerce',
+            format='%Y/%m/%d %H:%M:%S'
+        )
+
         print(f"[DEBUG] Economic calendar datetime column (first 5): {econ_data['datetime'].head()}")
 
-        # Drop invalid datetime rows and set index
+        # Drop rows with invalid datetime and set the index
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
 
         print("[DEBUG] Economic calendar index set successfully.")
         print(f"[DEBUG] Economic calendar index type: {type(econ_data.index)}")
         print(f"[DEBUG] Economic calendar index range: {econ_data.index.min()} to {econ_data.index.max()}")
-        print(f"[DEBUG] Economic calendar index dtype: {econ_data.index.dtype}")
 
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
@@ -405,8 +412,6 @@ class Plugin:
         print("[DEBUG] Starting alignment process for economic calendar.")
         print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
         print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
-        print(f"[DEBUG] Econ data index type before alignment: {type(econ_data.index)}")
-        print(f"[DEBUG] Econ data index range before alignment: {econ_data.index.min()} to {econ_data.index.max()}")
 
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
 
@@ -462,6 +467,7 @@ class Plugin:
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
     def _preprocess_economic_calendar_data(self, econ_data):
