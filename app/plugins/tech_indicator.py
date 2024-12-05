@@ -209,45 +209,94 @@ class Plugin:
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, sub-periodicities, S&P 500, VIX, and Forex pairs).
+        
+        Parameters:
+        - data (pd.DataFrame): Full dataset (hourly resolution).
+        - config (dict): Configuration settings.
+        
+        Returns:
+        - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
-        additional_features = {}
+
+        # Step 1: Extract initial common range from the main data
+        common_start = pd.Timestamp(data.index.min())
+        common_end = pd.Timestamp(data.index.max())
+        print(f"[DEBUG] Initial common range from main dataset: {common_start} to {common_end}")
+
+        # Step 2: Collect ranges for debugging
         dataset_ranges = []
 
-        # Helper to process each dataset and update ranges
+        # Helper function to process datasets
         def process_dataset(dataset_func, dataset_key):
-            print(f"Processing {dataset_key}...")
+            """
+            Helper function to process each dataset and align it.
+            """
+            print(f"[DEBUG] Processing {dataset_key}...")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
             if dataset is not None and not dataset.empty:
-                print(f"{dataset_key} range: {dataset.index.min()} to {dataset.index.max()}")
+                print(f"[DEBUG] {dataset_key} loaded successfully.")
+                print(f"[DEBUG] {dataset_key} original range: {dataset.index.min()} to {dataset.index.max()}")
                 dataset_ranges.append((dataset.index.min(), dataset.index.max()))
                 return dataset
-            return None
+            else:
+                print(f"[DEBUG] {dataset_key} is empty or could not be processed.")
+                return None
 
-        # Initial common date range
-        common_start, common_end = data.index.min(), data.index.max()
+        # Step 3: Process datasets
+        additional_features = {}
+        if config.get('forex_datasets'):
+            forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
+            if forex_features is not None:
+                additional_features.update(forex_features.to_dict(orient='series'))
+
+        if config.get('sp500_dataset'):
+            sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
+            if sp500_features is not None:
+                additional_features.update(sp500_features.to_dict(orient='series'))
+
+        if config.get('vix_dataset'):
+            vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
+            if vix_features is not None:
+                additional_features.update(vix_features.to_dict(orient='series'))
+
+        if config.get('high_freq_dataset'):
+            high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
+            if high_freq_features is not None:
+                additional_features.update(high_freq_features.to_dict(orient='series'))
 
         if config.get('economic_calendar'):
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
-                print(f"Economic calendar features added: {econ_calendar.shape[1]} columns.")
 
-        # Adjust common range based on dataset ranges
+        # Step 4: Calculate the new common range
         if dataset_ranges:
-            common_start = max([r[0] for r in dataset_ranges])
-            common_end = min([r[1] for r in dataset_ranges])
-            print(f"[DEBUG] Updated common date range: {common_start} to {common_end}")
-        else:
-            print("[ERROR] No valid dataset ranges found. Skipping alignment.")
+            valid_ranges = [(start, end) for start, end in dataset_ranges if pd.notna(start) and pd.notna(end)]
+            if valid_ranges:
+                common_start = max([start for start, _ in valid_ranges])
+                common_end = min([end for _, end in valid_ranges])
+                print(f"[DEBUG] Updated common range: {common_start} to {common_end}")
+            else:
+                raise ValueError("No valid ranges found in datasets. Check the input data.")
 
-        # Filter additional features to the common date range
-        aligned_features = {
-            key: dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
-            for key, dataset in additional_features.items()
-        }
+        # Step 5: Align all datasets to the common range
+        aligned_features = {}
+        for key, dataset in additional_features.items():
+            if dataset is not None and not dataset.empty:
+                aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+                print(f"[DEBUG] {key} aligned range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                aligned_features[key] = aligned_dataset
+            else:
+                print(f"[DEBUG] {key} is empty after alignment.")
 
-        return pd.DataFrame(aligned_features)
+        # Step 6: Combine aligned datasets
+        additional_features_df = pd.DataFrame(aligned_features)
+        print(f"[DEBUG] Final additional features range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+        print(f"[DEBUG] Final additional features shape: {additional_features_df.shape}")
+
+        return additional_features_df
+
 
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
