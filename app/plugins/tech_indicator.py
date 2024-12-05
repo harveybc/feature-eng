@@ -209,68 +209,23 @@ class Plugin:
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, sub-periodicities, S&P 500, VIX, and Forex pairs).
-        
-        Parameters:
-        - data (pd.DataFrame): Full dataset (hourly resolution).
-        - config (dict): Configuration settings.
-        
-        Returns:
-        - pd.DataFrame: Additional features DataFrame.
         """
         print("Processing additional datasets...")
         additional_features = {}
-
-        # Step 1: Calculate the common date range across all datasets
-        common_start = pd.Timestamp(data.index.min())  # Ensure this is a Timestamp
-        common_end = pd.Timestamp(data.index.max())    # Ensure this is a Timestamp
-        print(f"Initial common_start: {common_start}, common_end: {common_end}")
-
-        # Collect dataset ranges
         dataset_ranges = []
 
-        # Helper function to process each dataset
+        # Helper to process each dataset and update ranges
         def process_dataset(dataset_func, dataset_key):
-            """
-            Helper function to process each dataset and align it.
-            """
             print(f"Processing {dataset_key}...")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
             if dataset is not None and not dataset.empty:
-                print(f"{dataset_key} original index range: {dataset.index.min()} to {dataset.index.max()}")
-                if not isinstance(dataset.index, pd.DatetimeIndex):
-                    print(f"Converting {dataset_key} index to DatetimeIndex.")
-                    dataset.index = pd.to_datetime(dataset.index, errors='coerce')
-                    print(f"{dataset_key} index after conversion: {dataset.index.dtype}, range: {dataset.index.min()} to {dataset.index.max()}")
+                print(f"{dataset_key} range: {dataset.index.min()} to {dataset.index.max()}")
                 dataset_ranges.append((dataset.index.min(), dataset.index.max()))
                 return dataset
-            else:
-                print(f"{dataset_key} is empty or could not be processed.")
-                return None
+            return None
 
-        # Step 2: Process each dataset
-        if config.get('forex_datasets'):
-            forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
-            if forex_features is not None:
-                additional_features.update(forex_features.to_dict(orient='series'))
-                print(f"Forex features added: {forex_features.shape[1]} columns.")
-
-        if config.get('sp500_dataset'):
-            sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
-            if sp500_features is not None:
-                additional_features.update(sp500_features.to_dict(orient='series'))
-                print(f"S&P 500 features added: {sp500_features.shape[1]} columns.")
-
-        if config.get('vix_dataset'):
-            vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
-            if vix_features is not None:
-                additional_features.update(vix_features.to_dict(orient='series'))
-                print(f"VIX features added: {vix_features.shape[1]} columns.")
-
-        if config.get('high_freq_dataset'):
-            high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
-            if high_freq_features is not None:
-                additional_features.update(high_freq_features.to_dict(orient='series'))
-                print(f"High-frequency features added: {high_freq_features.shape[1]} columns.")
+        # Initial common date range
+        common_start, common_end = data.index.min(), data.index.max()
 
         if config.get('economic_calendar'):
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
@@ -278,46 +233,21 @@ class Plugin:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
                 print(f"Economic calendar features added: {econ_calendar.shape[1]} columns.")
 
-        # Step 3: Adjust the common date range dynamically
+        # Adjust common range based on dataset ranges
         if dataset_ranges:
-            valid_ranges = [(start, end) for start, end in dataset_ranges if pd.notna(start) and pd.notna(end)]
-            if valid_ranges:
-                common_start = max([start for start, end in valid_ranges])
-                common_end = min([end for start, end in valid_ranges])
-                print(f"Updated common_start: {common_start}, common_end: {common_end}")
-            else:
-                common_start, common_end = None, None
-                print("No valid dataset ranges found. common_start and common_end set to None.")
+            common_start = max([r[0] for r in dataset_ranges])
+            common_end = min([r[1] for r in dataset_ranges])
+            print(f"[DEBUG] Updated common date range: {common_start} to {common_end}")
         else:
-            print("No datasets were processed. common_start and common_end remain unchanged.")
+            print("[ERROR] No valid dataset ranges found. Skipping alignment.")
 
-        # Step 4: Align all datasets to the common date range
-        aligned_features = {}
-        for key, dataset in additional_features.items():
-            print(f"Aligning {key}...")
-            if dataset is not None and not dataset.empty:
-                aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
-                print(f"{key} aligned index range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
-                aligned_features[key] = aligned_dataset
-            else:
-                print(f"{key} is empty after processing.")
+        # Filter additional features to the common date range
+        aligned_features = {
+            key: dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+            for key, dataset in additional_features.items()
+        }
 
-        # Step 5: Combine into a DataFrame
-        additional_features_df = pd.DataFrame(aligned_features)
-
-        # Debugging index alignment
-        print(f"Final additional_features_df index type: {additional_features_df.index.dtype}, range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
-        print(f"Additional features dataset columns: {additional_features_df.columns}")
-        print(f"Additional features dataset shape: {additional_features_df.shape}")
-
-        return additional_features_df
-
-
-
-
-
-
-
+        return pd.DataFrame(aligned_features)
 
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """

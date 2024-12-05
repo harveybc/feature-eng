@@ -142,9 +142,6 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Data index type after setting datetime index: {data.index.dtype}")
     print(f"[DEBUG] Data index range: {data.index.min()} to {data.index.max()}")
 
-    # Store the date column for re-insertion later
-    original_date_column = data.index.to_series(name="DATE_TIME")
-
     # Map and verify OHLC columns
     header_mappings = config.get('header_mappings', {})
     dataset_type = config.get('dataset_type', 'default')
@@ -191,21 +188,14 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Final data shape after combining: {final_data.shape}")
     print(f"[DEBUG] Final data head:\n{final_data.head()}")
 
-    # Add positional encoding
-    num_positions = len(final_data)
-    num_features = config.get('positional_encoding_dim', 8)
-    positional_encoding = generate_positional_encoding(num_positions, num_features)
-    positional_encoding_df = pd.DataFrame(positional_encoding, columns=[f'pos_enc_{i}' for i in range(num_features)])
-    final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
-    print(f"[DEBUG] Final dataset shape with positional encoding: {final_data.shape}")
-    print(f"[DEBUG] Final dataset head with positional encoding:\n{final_data.head()}")
-
-    # Add the date column back to the final dataset
-    final_data = pd.concat([original_date_column.reset_index(drop=True), final_data], axis=1)
-    print(f"[DEBUG] Final dataset shape with date column: {final_data.shape}")
-    print(f"[DEBUG] Final dataset head with date column:\n{final_data.head()}")
+    # Ensure the datetime column is preserved in the final output
+    final_data.reset_index(inplace=True)
+    if 'datetime' not in final_data.columns:
+        final_data.rename(columns={'index': 'datetime'}, inplace=True)
+    print(f"[DEBUG] Final dataset with datetime column restored:\n{final_data.head()}")
 
     return final_data
+
 
 
 def run_feature_engineering_pipeline(config, plugin):
