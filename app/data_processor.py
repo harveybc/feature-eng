@@ -118,10 +118,6 @@ def analyze_variability_and_normality(data, config):
 
     return transformed_data
 
-
-
-
-
 def process_data(data, plugin, config):
     """
     Processes the data using the specified plugin and handles additional features
@@ -210,10 +206,6 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Final dataset head with date column:\n{final_data.head()}")
 
     return final_data
-
-
-
-
 
 
 def run_feature_engineering_pipeline(config, plugin):
