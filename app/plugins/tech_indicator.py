@@ -386,14 +386,23 @@ class Plugin:
         print("[DEBUG] Economic calendar loaded successfully.")
         print(f"[DEBUG] Economic calendar column types: {econ_data.dtypes}")
 
+        # Strip whitespace and handle missing values
+        econ_data['event_date'] = econ_data['event_date'].str.strip()
+        econ_data['event_time'] = econ_data['event_time'].str.strip()
+
+        # Replace missing times with a default (e.g., '00:00:00')
+        econ_data['event_time'] = econ_data['event_time'].fillna('00:00:00')
+
         # Combine 'event_date' and 'event_time' into a single datetime column
         econ_data['datetime'] = pd.to_datetime(
-            econ_data['event_date'].str.strip() + ' ' + econ_data['event_time'].str.strip(),
+            econ_data['event_date'] + ' ' + econ_data['event_time'],
             errors='coerce',
             format='%Y/%m/%d %H:%M:%S'
         )
 
-        print(f"[DEBUG] Economic calendar datetime column (first 5): {econ_data['datetime'].head()}")
+        # Debugging: Check parsing success
+        print("[DEBUG] Combined datetime column (first 5):")
+        print(econ_data['datetime'].head())
 
         # Drop rows with invalid datetime and set the index
         econ_data.dropna(subset=['datetime'], inplace=True)
@@ -467,6 +476,7 @@ class Plugin:
 
         # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
 
