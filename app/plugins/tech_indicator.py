@@ -272,6 +272,7 @@ class Plugin:
         return additional_features_df
 
 
+
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
         Processes the high-frequency dataset and aligns it with the hourly dataset.
