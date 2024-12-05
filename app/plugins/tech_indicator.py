@@ -478,8 +478,6 @@ class Plugin:
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
 
 
-
-
     def _preprocess_economic_calendar_data(self, econ_data):
         """
         Preprocess the economic calendar data: clean and generate derived features.
