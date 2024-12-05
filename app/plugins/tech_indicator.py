@@ -377,6 +377,15 @@ class Plugin:
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
         Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
+
+        Parameters:
+        - econ_calendar_path (str): Path to the economic calendar dataset.
+        - config (dict): Configuration dictionary.
+        - common_start (str or pd.Timestamp): Common start date for alignment.
+        - common_end (str or pd.Timestamp): Common end date for alignment.
+
+        Returns:
+        - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
         """
         from tqdm import tqdm
 
@@ -384,7 +393,6 @@ class Plugin:
 
         # Load the hourly dataset
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
-
         print(f"[DEBUG] Hourly dataset loaded. Index range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the economic calendar dataset
@@ -400,29 +408,30 @@ class Plugin:
             dayfirst=True,
         )
 
-        # Drop invalid datetime rows
+        # Debug: Show raw economic calendar data
+        print(f"[DEBUG] Economic calendar data loaded. Events: {len(econ_data)}")
+        print(f"[DEBUG] Raw economic calendar datetime range: {econ_data['datetime'].min()} to {econ_data['datetime'].max()}")
+
+        # Drop invalid datetime rows and set index
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
-        print(f"[DEBUG] Economic calendar data loaded. Events: {len(econ_data)}")
-        print(f"[DEBUG] Economic calendar date range: {econ_data.index.min()} to {econ_data.index.max()}")
+
+        # Debug: After cleaning
+        print(f"[DEBUG] Cleaned economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
         # Preprocess the economic calendar dataset
         econ_data = self._preprocess_economic_calendar_data(econ_data)
-        print(f"[DEBUG] Economic calendar data preprocessing complete.")
+        print("[DEBUG] Economic calendar data preprocessing complete.")
+        print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
-        # Enforce strict date alignment
+        # Apply the common date range filter
         print(f"[DEBUG] Applying common date range: {common_start} to {common_end}")
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
-        hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
 
+        # Debug: After alignment
         print(f"[DEBUG] Economic calendar date range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
-        print(f"[DEBUG] Hourly dataset date range after alignment: {hourly_data.index.min()} to {hourly_data.index.max()}")
-
-        # Check if the datasets are properly aligned
         if econ_data.empty:
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
-        if hourly_data.empty:
-            raise ValueError("[ERROR] Hourly dataset is empty after alignment.")
 
         # Get sliding window size
         window_size = config['calendar_window_size']
@@ -444,7 +453,7 @@ class Plugin:
 
         # Unpack predictions
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
-        print(f"[DEBUG] Predictions generated. Shape: {predictions.shape}")
+        print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
 
         # Trim predictions by sliding window size
         predicted_trend = predicted_trend[window_size:]
@@ -462,7 +471,7 @@ class Plugin:
         # Ensure lengths match
         if len(predicted_trend) != len(adjusted_index):
             raise ValueError(
-                f"[ERROR] Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
+                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
                 f"vs. Aligned index ({len(adjusted_index)})"
             )
 
