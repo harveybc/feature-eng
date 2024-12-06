@@ -680,7 +680,7 @@ class Plugin:
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
 
-    def _filter_duplicate_events(events):
+    def _filter_duplicate_events(self, events):
         """
         Given a DataFrame 'events' for the same timestamp,
         select one event according to the rules:
