@@ -210,7 +210,7 @@ class Plugin:
         print("[DEBUG] Starting process_additional_datasets...")
         common_start = pd.Timestamp(data.index.min())
         common_end = pd.Timestamp(data.index.max())
-        print(f"[DEBUG] Initial common range from main dataset: {common_start} to {common_end}")
+        print(f"[DEBUG] Initial common range: {common_start} to {common_end}")
         print("[DEBUG] Main dataset first 5 rows:")
         print(data.head())
 
@@ -218,29 +218,28 @@ class Plugin:
             print(f"[DEBUG] Dataset: {dataset_key}")
             if dataset is not None and not dataset.empty:
                 print(f"    [DEBUG] {dataset_key} original range: {dataset.index.min()} to {dataset.index.max()}")
-                print(f"    [DEBUG] {dataset_key} shape: {dataset.shape}, columns: {list(dataset.columns)}")
+                print(f"    [DEBUG] {dataset_key} shape: {dataset.shape}")
                 print(f"    [DEBUG] {dataset_key} first 5 rows:\n{dataset.head()}")
             else:
-                print(f"[ERROR] Dataset {dataset_key} is empty or invalid.")
+                print(f"[ERROR] {dataset_key} is empty or invalid.")
 
         def process_dataset(dataset_func, dataset_key):
             nonlocal common_start, common_end
-            print(f"[DEBUG] Processing {dataset_key}...")
-            print(f"[DEBUG] Current common range before {dataset_key}: {common_start} to {common_end}")
-
+            print(f"[DEBUG] Processing {dataset_key} with current range {common_start} to {common_end}")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
             log_dataset_range(dataset_key, dataset)
 
             if dataset is not None and not dataset.empty:
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
                 if aligned_dataset.empty:
-                    print("[ERROR] After alignment, dataset is empty.")
+                    print(f"[ERROR] After alignment, {dataset_key} dataset is empty. Check the alignment logic.")
                 else:
-                    print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                    print(f"[DEBUG] {dataset_key} after alignment: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                    # Update common_start and common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
                     common_start = max(common_start, aligned_dataset.index.min())
                     common_end = min(common_end, aligned_dataset.index.max())
-                    print(f"[DEBUG] Updated common range after {dataset_key}: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
+                    print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
                 return aligned_dataset
             else:
                 print(f"[DEBUG] {dataset_key} is empty or no data returned, skipping alignment update.")
@@ -248,6 +247,7 @@ class Plugin:
 
         additional_features = {}
 
+        # Process datasets in the order that economic_calendar is processed last to update common_start accordingly
         if config.get('forex_datasets'):
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None and not forex_features.empty:
@@ -273,14 +273,12 @@ class Plugin:
             if econ_calendar is not None and not econ_calendar.empty:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
 
-        print("[DEBUG] After processing all datasets:")
-        print(f"[DEBUG] final_common_start: {common_start}, final_common_end: {common_end}")
-
+        print("[DEBUG] After all datasets processed:")
+        print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
         additional_features_df = pd.DataFrame(additional_features)
         if not additional_features_df.empty:
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
-        print(f"[DEBUG] additional_features_df shape after final trim: {additional_features_df.shape}")
-
+        print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
 
 
@@ -586,31 +584,52 @@ class Plugin:
         cat_cols = ['country_encoded', 'description_encoded']
         all_cols = numeric_cols + cat_cols
 
-        # Force econ_data to match exactly hourly_data's index
-        econ_data = econ_data.reindex(hourly_data.index, fill_value=-1)
+        # Determine the actual date range of econ_data
+        econ_start = econ_data.index.min()
+        econ_end = econ_data.index.max()
+        print("[DEBUG] In _generate_sliding_window_features:")
+        print(f"[DEBUG] econ_start: {econ_start}, econ_end: {econ_end}")
 
-        N = len(econ_data)
+        # Slice hourly_data to the economic calendar's date range
+        hourly_data_sliced = hourly_data[(hourly_data.index >= econ_start) & (hourly_data.index <= econ_end)]
+        print(f"[DEBUG] hourly_data_sliced range: {hourly_data_sliced.index.min()} to {hourly_data_sliced.index.max()} (len={len(hourly_data_sliced)})")
+
+        # Reindex econ_data to match exactly the sliced hourly_data's index
+        econ_data_aligned = econ_data.reindex(hourly_data_sliced.index, fill_value=-1)
+        print(f"[DEBUG] econ_data_aligned range: {econ_data_aligned.index.min()} to {econ_data_aligned.index.max()} (len={len(econ_data_aligned)})")
+        print(f"[DEBUG] hourly_data_sliced range: {hourly_data_sliced.index.min()} to {hourly_data_sliced.index.max()} (len={len(hourly_data_sliced)})")
+
+        # Verify alignment
+        if len(econ_data_aligned) != len(hourly_data_sliced):
+            print("[ERROR] Length mismatch after alignment:")
+            print(f"[DEBUG] econ_data_aligned length: {len(econ_data_aligned)}, hourly_data_sliced length: {len(hourly_data_sliced)}")
+            print("[DEBUG] econ_data_aligned first 5 rows:", econ_data_aligned.head())
+            print("[DEBUG] hourly_data_sliced first 5 rows:", hourly_data_sliced.head())
+            raise ValueError("econ_data and hourly_data_sliced must have the same number of rows and alignment.")
+
+        # Proceed to generate sliding windows
+        econ_array = econ_data_aligned[all_cols].to_numpy()
+        N = econ_array.shape[0]
         M = len(all_cols)
 
-        print("[DEBUG] In _generate_sliding_window_features after forcing exact hourly_data index on econ_data:")
-        print(f"[DEBUG] econ_data range: {econ_data.index.min()} to {econ_data.index.max()}, length={N}")
-        print(f"[DEBUG] hourly_data range: {hourly_data.index.min()} to {hourly_data.index.max()}, length={len(hourly_data)}")
-
-        if N != len(hourly_data):
-            print("[ERROR] Length mismatch even after reindexing econ_data to hourly_data's index.")
-            print("[DEBUG] econ_data first 5 rows:\n", econ_data.head())
-            print("[DEBUG] hourly_data first 5 rows:\n", hourly_data.head())
-            raise ValueError("econ_data and hourly_data must have the same number of rows and alignment.")
+        print(f"[DEBUG] econ_array shape: {econ_array.shape}")
+        print(f"[DEBUG] window_size: {window_size}")
 
         if N < window_size:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        econ_array = econ_data[all_cols].to_numpy()
+        windows = sliding_window_view(econ_array, (window_size, M))
+        print(f"[DEBUG] windows shape after sliding_window_view: {windows.shape}")
 
-        # Only slide along the time axis (axis=0) to get a 3D output: (N - window_size + 1, window_size, M)
-        windows = sliding_window_view(econ_array, window_size, axis=0)
-        # windows shape is now (N - window_size + 1, window_size, M)
+        # Expected windows shape: (N - window_size + 1, window_size, M)
+        expected_windows = N - window_size + 1
+        actual_windows = windows.shape[0]
+        print(f"[DEBUG] Expected number of windows: {expected_windows}, Actual number of windows: {actual_windows}")
+
+        if actual_windows != expected_windows:
+            print("[ERROR] Number of generated windows does not match expected count.")
+            raise ValueError("Mismatch in the number of sliding windows generated.")
 
         numeric_data = windows[..., :5]
         cat_data = windows[..., 5:7]
@@ -619,19 +638,28 @@ class Plugin:
         event_mask = (~no_event).astype(np.float32)[..., np.newaxis]
 
         features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)
+        print(f"[DEBUG] features shape before padding: {features.shape}")
 
-        pad_size = window_size - 1
-        if pad_size > 0:
+        # Ensure that features have the same number of windows as hourly_data_sliced
+        if actual_windows < expected_windows:
+            pad_size = expected_windows - actual_windows
             pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
-            print("[DEBUG] Adding pad block to match number of windows with hourly_data rows.")
-            print(f"[DEBUG] pad_block shape: {pad_block.shape}, features shape: {features.shape}")
+            print(f"[DEBUG] Adding pad block to match number of windows with expected_windows: {pad_size} pads")
+            print(f"[DEBUG] pad_block shape: {pad_block.shape}, features shape before padding: {features.shape}")
+            if pad_block.shape[1] != features.shape[1]:
+                print("[ERROR] pad_block window_size dimension doesn't match features window_size dimension.")
+                raise ValueError("Padding block and features window dimension mismatch.")
             features = np.concatenate([pad_block, features], axis=0)
+            print(f"[DEBUG] features shape after padding: {features.shape}")
+        elif actual_windows > expected_windows:
+            print("[WARNING] More windows generated than expected. Trimming excess windows.")
+            features = features[:expected_windows]
+            print(f"[DEBUG] features shape after trimming: {features.shape}")
 
-        print("[DEBUG] Sliding window feature generation complete.")
-        print(f"[DEBUG] Features shape: {features.shape}")
-        print("[DEBUG] First window event_mask:\n", features[0, :, -1] if features.shape[0] > 0 else "No features")
-
+        print(f"[DEBUG] Sliding window feature generation complete. Final features shape: {features.shape}")
+        print("[DEBUG] First window event_mask values:", features[0, :, -1] if features.shape[0] > 0 else "No features")
         return features
+
     
 
 

@@ -150,23 +150,32 @@ def process_data(data, plugin, config):
     print(numeric_data.head())
 
     processed_data = plugin.process(numeric_data)
-    print(f"[DEBUG] Processed data index range: {processed_data.index.min()} to {processed_data.index.max()} (len={len(processed_data)})")
+    print(f"[DEBUG] After plugin.process, data range: {processed_data.index.min()} to {processed_data.index.max()} (len={len(processed_data)})")
 
     transformed_data = analyze_variability_and_normality(processed_data, config)
-    print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
+    print(f"[DEBUG] After analyze_variability_and_normality, data range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
 
+    # Process additional datasets
     additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
     print("[DEBUG] After process_additional_datasets:")
     print(f"[DEBUG] final_common_start: {final_common_start}, final_common_end: {final_common_end}")
-    print(f"[DEBUG] Additional features shape: {additional_features_df.shape}")
+    print(f"[DEBUG] additional_features_df shape: {additional_features_df.shape}")
 
+    # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
+    print("[DEBUG] After re-slicing transformed_data and additional_features_df:")
+    print(f"[DEBUG] transformed_data range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
+    print(f"[DEBUG] additional_features_df range: {additional_features_df.index.min()} to {additional_features_df.index.max()} (len={len(additional_features_df)})")
 
-    additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(0)
-    print("[DEBUG] After aligning additional_features with transformed_data:")
-    print(f"[DEBUG] transformed_data: {len(transformed_data)} rows, range {transformed_data.index.min()} to {transformed_data.index.max()}")
-    print(f"[DEBUG] additional_features_df: {len(additional_features_df)} rows, range {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+    try:
+        additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(-1)
+        print("[DEBUG] Successfully aligned additional features with transformed_data.")
+    except Exception as e:
+        print("[ERROR] Failed to align additional features with transformed_data.")
+        print("[DEBUG] transformed_data first 5 rows:", transformed_data.head())
+        print("[DEBUG] additional_features_df first 5 rows:", additional_features_df.head())
+        raise e
 
     final_data = pd.concat([transformed_data, additional_features_df], axis=1)
     print("[DEBUG] Final combined data shape:", final_data.shape)
