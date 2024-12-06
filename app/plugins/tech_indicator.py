@@ -654,7 +654,7 @@ class Plugin:
         for timestamp in tqdm(hourly_data.index, desc="Processing Windows", unit="window"):
             window_start = timestamp - pd.Timedelta(hours=window_size)
             # Create the expected_index of window_size hours ending at 'timestamp'
-            expected_index = pd.date_range(end=timestamp, periods=window_size, freq='H')
+            expected_index = pd.date_range(end=timestamp, periods=window_size, freq='h')
 
             # Use reindex instead of loc to avoid KeyErrors, fill missing with -1
             window_data = econ_data.reindex(expected_index, fill_value=-1)
