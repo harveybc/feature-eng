@@ -283,6 +283,7 @@ class Plugin:
         return additional_features_df, common_start, common_end
 
 
+
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
         Processes the high-frequency dataset and aligns it with the hourly dataset.
@@ -620,10 +621,10 @@ class Plugin:
             raise ValueError("Not enough data points to form even one full window.")
 
         # Correct sliding_window_view usage
-        windows = sliding_window_view(econ_array, window_shape=(window_size, M))
-        print(f"[DEBUG] windows shape after sliding_window_view: {windows.shape}")
+        windows = sliding_window_view(econ_array, window_shape=window_size, axis=0)
+        print(f"[DEBUG] windows shape after sliding_window_view: {windows.shape}")  # Expected: (N - window_size +1, window_size, M)
 
-        # Expected windows shape: (N - window_size + 1, window_size, M)
+        # Verify window shape
         expected_windows = N - window_size + 1
         actual_windows = windows.shape[0]
         print(f"[DEBUG] Expected number of windows: {expected_windows}, Actual number of windows: {actual_windows}")
@@ -631,12 +632,6 @@ class Plugin:
         if actual_windows != expected_windows:
             print("[ERROR] Number of generated windows does not match expected count.")
             raise ValueError("Mismatch in the number of sliding windows generated.")
-
-        # Reshape windows to (windows.shape[0], window_size, M)
-        # Remove the extra dimension if present
-        if len(windows.shape) == 4 and windows.shape[1] == 1:
-            windows = windows.reshape(windows.shape[0], windows.shape[2], windows.shape[3])
-            print(f"[DEBUG] Reshaped windows shape: {windows.shape}")
 
         numeric_data = windows[..., :5]
         cat_data = windows[..., 5:7]
@@ -647,12 +642,7 @@ class Plugin:
         features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)
         print(f"[DEBUG] features shape before padding: {features.shape}")
 
-        # Calculate the number of windows that need to match the original hourly_data_sliced length
-        expected_windows = len(hourly_data_sliced) - window_size + 1
-        actual_windows = features.shape[0]
-        print(f"[DEBUG] Expected number of windows: {expected_windows}, Actual number of windows: {actual_windows}")
-
-        # If actual_windows < expected_windows, pad accordingly
+        # Ensure that features have the same number of windows as hourly_data_sliced
         if actual_windows < expected_windows:
             pad_size = expected_windows - actual_windows
             pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
