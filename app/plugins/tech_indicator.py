@@ -413,8 +413,11 @@ class Plugin:
 
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
-        Process the economic calendar dataset, align to the final overlapping range, resample hourly,
-        and fill missing hours with a sentinel value (-1) to indicate no event.
+        Process the economic calendar dataset, align to the final overlapping range, and handle duplicates by
+        selecting a single event per timestamp using the specified priority:
+        1. Event with highest volatility.
+        2. If tie, event from USA.
+        3. If still tie, random pick.
         """
         from tqdm import tqdm
 
@@ -454,6 +457,20 @@ class Plugin:
         print("[DEBUG] Economic calendar data preprocessing complete.")
         print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
+        # Handle duplicates by selecting one event per timestamp
+        # Group by index and apply _filter_duplicate_events to each group
+        econ_data = econ_data.groupby(econ_data.index).apply(lambda grp: _filter_duplicate_events(grp)).reset_index(drop=True)
+        # Now we need to set the index back to datetime if lost
+        # We must have a datetime column after reset_index
+        if 'datetime' in econ_data.columns:
+            econ_data.set_index('datetime', inplace=True)
+        else:
+            raise ValueError("After filtering duplicates, 'datetime' column not found. Ensure it exists.")
+
+        print("[DEBUG] After filtering duplicates, only one event per timestamp remains.")
+        print(f"[DEBUG] econ_data index range after filtering: {econ_data.index.min()} to {econ_data.index.max()}")
+        print(f"[DEBUG] econ_data shape: {econ_data.shape}")
+
         print("[DEBUG] Starting alignment process for economic calendar.")
         print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
         print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
@@ -477,11 +494,11 @@ class Plugin:
 
         # Generate sliding window features
         window_size = config['calendar_window_size']
-        econ_features = self._generate_sliding_window_features(econ_data, hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)], window_size)
+        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+        econ_features = self._generate_sliding_window_features(econ_data, final_hourly_data, window_size)
         print(f"[DEBUG] Sliding window feature generation complete. Shape: {econ_features.shape}")
 
         # Generate training signals for trend and volatility
-        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
         trend_signal, volatility_signal = self._generate_training_signals(final_hourly_data, config)
         print("[DEBUG] Training signals for trend and volatility generated.")
 
@@ -513,6 +530,7 @@ class Plugin:
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
     def _preprocess_economic_calendar_data(self, econ_data):
@@ -655,7 +673,36 @@ class Plugin:
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
 
+    def _filter_duplicate_events(events):
+        """
+        Given a DataFrame 'events' that all share the same timestamp,
+        apply the selection rule:
+        1. Pick the event with highest volatility.
+        2. If tie in volatility, pick from USA if available.
+        3. If still tie, pick one randomly.
+        """
 
+        # Sort by volatility descending
+        events_sorted = events.sort_values(by='volatility', ascending=False)
+        
+        # Highest volatility value
+        max_vol = events_sorted['volatility'].iloc[0]
+        top_events = events_sorted[events_sorted['volatility'] == max_vol]
+
+        if len(top_events) == 1:
+            # Only one top event, take it
+            return top_events.iloc[0]
+
+        # If tie in volatility, prefer USA
+        usa_events = top_events[top_events['country'].str.upper() == 'USA']
+        if len(usa_events) == 1:
+            return usa_events.iloc[0]
+        elif len(usa_events) > 1:
+            # Multiple from USA, pick one randomly
+            return usa_events.sample(1).iloc[0]
+
+        # If no USA or multiple equally good candidates, pick one randomly
+        return top_events.sample(1).iloc[0]
 
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
