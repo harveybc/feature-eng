@@ -247,7 +247,13 @@ class Plugin:
 
         additional_features = {}
 
-        # Process datasets in the order that economic_calendar is processed last to update common_start accordingly
+        # Process economic_calendar first to set the correct common_start
+        if config.get('economic_calendar'):
+            econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
+            if econ_calendar is not None and not econ_calendar.empty:
+                additional_features.update(econ_calendar.to_dict(orient='series'))
+
+        # Process other datasets after economic_calendar to maintain the updated common_start and common_end
         if config.get('forex_datasets'):
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None and not forex_features.empty:
@@ -268,11 +274,6 @@ class Plugin:
             if high_freq_features is not None and not high_freq_features.empty:
                 additional_features.update(high_freq_features.to_dict(orient='series'))
 
-        if config.get('economic_calendar'):
-            econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
-            if econ_calendar is not None and not econ_calendar.empty:
-                additional_features.update(econ_calendar.to_dict(orient='series'))
-
         print("[DEBUG] After all datasets processed:")
         print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
         additional_features_df = pd.DataFrame(additional_features)
@@ -280,7 +281,6 @@ class Plugin:
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
-
 
 
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
@@ -619,7 +619,8 @@ class Plugin:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        windows = sliding_window_view(econ_array, (window_size, M))
+        # Correct sliding_window_view usage
+        windows = sliding_window_view(econ_array, window_shape=(window_size, M))
         print(f"[DEBUG] windows shape after sliding_window_view: {windows.shape}")
 
         # Expected windows shape: (N - window_size + 1, window_size, M)
@@ -631,6 +632,12 @@ class Plugin:
             print("[ERROR] Number of generated windows does not match expected count.")
             raise ValueError("Mismatch in the number of sliding windows generated.")
 
+        # Reshape windows to (windows.shape[0], window_size, M)
+        # Remove the extra dimension if present
+        if len(windows.shape) == 4 and windows.shape[1] == 1:
+            windows = windows.reshape(windows.shape[0], windows.shape[2], windows.shape[3])
+            print(f"[DEBUG] Reshaped windows shape: {windows.shape}")
+
         numeric_data = windows[..., :5]
         cat_data = windows[..., 5:7]
 
@@ -640,7 +647,12 @@ class Plugin:
         features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)
         print(f"[DEBUG] features shape before padding: {features.shape}")
 
-        # Ensure that features have the same number of windows as hourly_data_sliced
+        # Calculate the number of windows that need to match the original hourly_data_sliced length
+        expected_windows = len(hourly_data_sliced) - window_size + 1
+        actual_windows = features.shape[0]
+        print(f"[DEBUG] Expected number of windows: {expected_windows}, Actual number of windows: {actual_windows}")
+
+        # If actual_windows < expected_windows, pad accordingly
         if actual_windows < expected_windows:
             pad_size = expected_windows - actual_windows
             pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
@@ -659,6 +671,7 @@ class Plugin:
         print(f"[DEBUG] Sliding window feature generation complete. Final features shape: {features.shape}")
         print("[DEBUG] First window event_mask values:", features[0, :, -1] if features.shape[0] > 0 else "No features")
         return features
+
 
     
 
