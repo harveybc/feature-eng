@@ -207,14 +207,7 @@ class Plugin:
 
 
     def process_additional_datasets(self, data, config):
-        """
-        Processes additional datasets (e.g., economic calendar, Forex, S&P 500, VIX) and aligns them to the main dataset.
-        Returns additional_features_df, common_start, common_end with extensive debug logs.
-        """
-
         print("[DEBUG] Starting process_additional_datasets...")
-
-        # Initial common range from the main dataset
         common_start = pd.Timestamp(data.index.min())
         common_end = pd.Timestamp(data.index.max())
         print(f"[DEBUG] Initial common range from main dataset: {common_start} to {common_end}")
@@ -247,7 +240,7 @@ class Plugin:
                     print(f"[DEBUG] {dataset_key} aligned shape: {aligned_dataset.shape}, columns: {list(aligned_dataset.columns)}")
                     print(f"[DEBUG] {dataset_key} aligned first 5 rows:\n{aligned_dataset.head()}")
                 else:
-                    print(f"[ERROR] {dataset_key} is empty after alignment, no overlapping dates.")
+                    print(f"[ERROR] {dataset_key} is empty after alignment.")
 
                 if not aligned_dataset.empty:
                     old_common_start, old_common_end = common_start, common_end
@@ -262,7 +255,6 @@ class Plugin:
 
         additional_features = {}
 
-        # forex_datasets
         if config.get('forex_datasets'):
             print("[DEBUG] forex_datasets key found in config, processing...")
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
@@ -273,7 +265,6 @@ class Plugin:
             else:
                 print("[DEBUG] forex_datasets produced no features or empty dataset, no merge performed.")
 
-        # sp500_dataset
         if config.get('sp500_dataset'):
             print("[DEBUG] sp500_dataset key found in config, processing...")
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
@@ -284,7 +275,6 @@ class Plugin:
             else:
                 print("[DEBUG] sp500_dataset produced no features or empty dataset, no merge performed.")
 
-        # vix_dataset
         if config.get('vix_dataset'):
             print("[DEBUG] vix_dataset key found in config, processing...")
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
@@ -295,7 +285,6 @@ class Plugin:
             else:
                 print("[DEBUG] vix_dataset produced no features or empty dataset, no merge performed.")
 
-        # high_freq_dataset
         if config.get('high_freq_dataset'):
             print("[DEBUG] high_freq_dataset key found in config, processing...")
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
@@ -306,7 +295,6 @@ class Plugin:
             else:
                 print("[DEBUG] high_freq_dataset produced no features or empty dataset, no merge performed.")
 
-        # economic_calendar
         if config.get('economic_calendar'):
             print("[DEBUG] economic_calendar key found in config, processing...")
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
@@ -325,13 +313,19 @@ class Plugin:
             print("[DEBUG] Combined additional features first 5 rows:")
             print(additional_features_df.head())
         else:
-            print("[DEBUG] Combined additional features DataFrame is empty, no overlapping data from all datasets.")
+            print("[DEBUG] Combined additional features DataFrame is empty.")
+
+        # After all datasets processed and aligned, recalculate final_common_start and final_common_end
+        # based on the final econ_calendar or main dataset alignment if needed
+        # Ensure final_common_start and final_common_end match the actually used final alignment
+        # For simplicity, we keep them as is if they are correct after all processing.
 
         print("[DEBUG] Final common date range after processing all datasets:")
         print(f"[DEBUG] common_start: {common_start}, common_end: {common_end}")
 
         print("[DEBUG] process_additional_datasets completed.")
         return additional_features_df, common_start, common_end
+
 
 
 
@@ -605,6 +599,31 @@ class Plugin:
 
         print("Training signals generated.")
         return trend_signal, volatility_signal
+
+
+    def _filter_duplicate_events(self, events):
+        events_sorted = events.sort_values(by='volatility', ascending=False)
+        max_vol = events_sorted['volatility'].iloc[0]
+        top_events = events_sorted[events_sorted['volatility'] == max_vol]
+
+        chosen = None
+        if len(top_events) == 1:
+            chosen = top_events.iloc[0]
+        else:
+            usa_events = top_events[top_events['country'].str.upper() == 'USA']
+            if len(usa_events) == 1:
+                chosen = usa_events.iloc[0]
+            elif len(usa_events) > 1:
+                chosen = usa_events.sample(1).iloc[0]
+            else:
+                chosen = top_events.sample(1).iloc[0]
+
+        timestamp = events.index[0]
+        chosen_df = pd.DataFrame([chosen])
+        chosen_df['datetime'] = timestamp
+        return chosen_df
+
+
 
 
     def _filter_duplicate_events(self, events):
