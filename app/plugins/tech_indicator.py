@@ -234,10 +234,9 @@ class Plugin:
             if dataset is not None and not dataset.empty:
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
                 if aligned_dataset.empty:
-                    print("[ERROR] After alignment, dataset is empty. Check logic.")
+                    print("[ERROR] After alignment, dataset is empty.")
                 else:
                     print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
-                    # Update common_start/common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
                     common_start = max(common_start, aligned_dataset.index.min())
                     common_end = min(common_end, aligned_dataset.index.max())
@@ -280,8 +279,8 @@ class Plugin:
         additional_features_df = pd.DataFrame(additional_features)
         if not additional_features_df.empty:
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
-
         print(f"[DEBUG] additional_features_df shape after final trim: {additional_features_df.shape}")
+
         return additional_features_df, common_start, common_end
 
 
@@ -588,7 +587,6 @@ class Plugin:
         all_cols = numeric_cols + cat_cols
 
         # Force econ_data to match exactly hourly_data's index
-        # This ensures exact alignment and no extra rows
         econ_data = econ_data.reindex(hourly_data.index, fill_value=-1)
 
         N = len(econ_data)
@@ -599,17 +597,21 @@ class Plugin:
         print(f"[DEBUG] hourly_data range: {hourly_data.index.min()} to {hourly_data.index.max()}, length={len(hourly_data)}")
 
         if N != len(hourly_data):
-            print("[ERROR] Even after forcing econ_data to hourly_data's index, length mismatch occurs.")
-            print("[DEBUG] econ_data first 5 rows:", econ_data.head())
-            print("[DEBUG] hourly_data first 5 rows:", hourly_data.head())
+            print("[ERROR] Length mismatch even after reindexing econ_data to hourly_data's index.")
+            print("[DEBUG] econ_data first 5 rows:\n", econ_data.head())
+            print("[DEBUG] hourly_data first 5 rows:\n", hourly_data.head())
             raise ValueError("econ_data and hourly_data must have the same number of rows and alignment.")
 
         if N < window_size:
-            print("[ERROR] Not enough data points for a full window.")
+            print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
         econ_array = econ_data[all_cols].to_numpy()
-        windows = sliding_window_view(econ_array, (window_size, M))
+
+        # Only slide along the time axis (axis=0) to get a 3D output: (N - window_size + 1, window_size, M)
+        windows = sliding_window_view(econ_array, window_size, axis=0)
+        # windows shape is now (N - window_size + 1, window_size, M)
+
         numeric_data = windows[..., :5]
         cat_data = windows[..., 5:7]
 
@@ -621,11 +623,13 @@ class Plugin:
         pad_size = window_size - 1
         if pad_size > 0:
             pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
+            print("[DEBUG] Adding pad block to match number of windows with hourly_data rows.")
+            print(f"[DEBUG] pad_block shape: {pad_block.shape}, features shape: {features.shape}")
             features = np.concatenate([pad_block, features], axis=0)
 
         print("[DEBUG] Sliding window feature generation complete.")
         print(f"[DEBUG] Features shape: {features.shape}")
-        print("[DEBUG] First window event_mask:\n", features[0, :, -1] if features.shape[0]>0 else "No features")
+        print("[DEBUG] First window event_mask:\n", features[0, :, -1] if features.shape[0] > 0 else "No features")
 
         return features
     

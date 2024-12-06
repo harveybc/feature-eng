@@ -156,18 +156,17 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
 
     additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
-    print(f"[DEBUG] Additional features final range: {final_common_start} to {final_common_end}")
+    print("[DEBUG] After process_additional_datasets:")
+    print(f"[DEBUG] final_common_start: {final_common_start}, final_common_end: {final_common_end}")
     print(f"[DEBUG] Additional features shape: {additional_features_df.shape}")
 
-    # Re-slice transformed_data and additional_features_df
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
 
-    # Align additional_features to transformed_data
     additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(0)
-    print("[DEBUG] After final alignment of additional features:")
-    print(f"[DEBUG] transformed_data len={len(transformed_data)} range: {transformed_data.index.min()} to {transformed_data.index.max()}")
-    print(f"[DEBUG] additional_features_df len={len(additional_features_df)} range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+    print("[DEBUG] After aligning additional_features with transformed_data:")
+    print(f"[DEBUG] transformed_data: {len(transformed_data)} rows, range {transformed_data.index.min()} to {transformed_data.index.max()}")
+    print(f"[DEBUG] additional_features_df: {len(additional_features_df)} rows, range {additional_features_df.index.min()} to {additional_features_df.index.max()}")
 
     final_data = pd.concat([transformed_data, additional_features_df], axis=1)
     print("[DEBUG] Final combined data shape:", final_data.shape)
@@ -177,7 +176,7 @@ def process_data(data, plugin, config):
     final_data.reset_index(inplace=True)
     if 'datetime' not in final_data.columns:
         final_data.rename(columns={'index': 'datetime'}, inplace=True)
-    print("[DEBUG] Final dataset with datetime column restored first 5 rows:")
+    print("[DEBUG] Final dataset with datetime column restored, first 5 rows:")
     print(final_data.head())
 
     return final_data
