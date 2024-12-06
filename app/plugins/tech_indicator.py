@@ -621,6 +621,7 @@ class Plugin:
             raise ValueError("Not enough data points to form even one full window.")
 
         # Correct sliding_window_view usage
+        # Generate windows of shape (number_of_windows, window_size, num_features)
         windows = sliding_window_view(econ_array, window_shape=window_size, axis=0)
         print(f"[DEBUG] windows shape after sliding_window_view: {windows.shape}")  # Expected: (N - window_size +1, window_size, M)
 
@@ -633,14 +634,17 @@ class Plugin:
             print("[ERROR] Number of generated windows does not match expected count.")
             raise ValueError("Mismatch in the number of sliding windows generated.")
 
-        numeric_data = windows[..., :5]
-        cat_data = windows[..., 5:7]
+        # Extract numeric and categorical data
+        numeric_data = windows[..., :5]  # Shape: (number_of_windows, window_size, 5)
+        cat_data = windows[..., 5:7]      # Shape: (number_of_windows, window_size, 2)
 
-        no_event = (numeric_data == -1).all(axis=-1)
-        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]
+        # Generate event mask
+        no_event = (numeric_data == -1).all(axis=-1)  # Shape: (number_of_windows, window_size)
+        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]  # Shape: (number_of_windows, window_size, 1)
 
-        features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)
-        print(f"[DEBUG] features shape before padding: {features.shape}")
+        # Concatenate features
+        features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)  # Shape: (number_of_windows, window_size, 8)
+        print(f"[DEBUG] features shape before padding: {features.shape}")  # Expected: (number_of_windows, window_size, 8)
 
         # Ensure that features have the same number of windows as hourly_data_sliced
         if actual_windows < expected_windows:
