@@ -209,74 +209,133 @@ class Plugin:
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, Forex, S&P 500, VIX) and aligns them to the main dataset.
+        This version includes extensive debug messages for each dataset processed.
         """
-        print("[DEBUG] Processing additional datasets...")
+
+        print("[DEBUG] Starting process_additional_datasets...")
 
         # Initial common range from the main dataset
         common_start = pd.Timestamp(data.index.min())
         common_end = pd.Timestamp(data.index.max())
         print(f"[DEBUG] Initial common range from main dataset: {common_start} to {common_end}")
+        print(f"[DEBUG] Main dataset shape: {data.shape}, columns: {list(data.columns)}, index type: {data.index.dtype}")
+        print("[DEBUG] Main dataset first 5 rows:")
+        print(data.head())
 
-        # Helper function to log ranges
+        # Helper function to log dataset details before alignment
         def log_dataset_range(dataset_key, dataset):
             print(f"[DEBUG] Dataset: {dataset_key}")
             if dataset is not None and not dataset.empty:
-                print(f"    Original range: {dataset.index.min()} to {dataset.index.max()}")
+                print(f"    [DEBUG] {dataset_key} original range: {dataset.index.min()} to {dataset.index.max()}")
+                print(f"    [DEBUG] {dataset_key} shape: {dataset.shape}, columns: {list(dataset.columns)}")
+                print(f"    [DEBUG] {dataset_key} first 5 rows:\n{dataset.head()}")
             else:
                 print(f"[ERROR] Dataset {dataset_key} is empty or invalid.")
 
-        # Helper function to process each dataset
+        # Helper function to process each dataset and print extensive debug logs
         def process_dataset(dataset_func, dataset_key):
-            nonlocal common_start, common_end  # To allow updating common_start/common_end here
+            nonlocal common_start, common_end
             print(f"[DEBUG] Processing {dataset_key}...")
+            print(f"[DEBUG] Current common range before {dataset_key}: {common_start} to {common_end}")
+
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
             log_dataset_range(dataset_key, dataset)
+
             if dataset is not None and not dataset.empty:
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
-                print(f"    After alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
-                if aligned_dataset.empty:
-                    print(f"[ERROR] {dataset_key} is empty after alignment.")
+
+                # Log after alignment
+                if not aligned_dataset.empty:
+                    print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                    print(f"[DEBUG] {dataset_key} aligned shape: {aligned_dataset.shape}, columns: {list(aligned_dataset.columns)}")
+                    print(f"[DEBUG] {dataset_key} aligned first 5 rows:\n{aligned_dataset.head()}")
                 else:
-                    # Update the common range based on the newly aligned dataset
+                    print(f"[ERROR] {dataset_key} is empty after alignment, no overlapping dates.")
+
+                # If aligned dataset is not empty, update the common range
+                if not aligned_dataset.empty:
                     old_common_start, old_common_end = common_start, common_end
                     common_start = max(common_start, aligned_dataset.index.min())
                     common_end = min(common_end, aligned_dataset.index.max())
-                    print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
+                    print(f"[DEBUG] Updated common range after processing {dataset_key}: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
+
                 return aligned_dataset
+            else:
+                print(f"[DEBUG] No data returned or dataset empty for {dataset_key}, skipping alignment and updates.")
             return None
 
-        # Process datasets
+        # Container for all additional features
         additional_features = {}
+
+        # Process forex_datasets
         if config.get('forex_datasets'):
+            print("[DEBUG] forex_datasets key found in config, processing...")
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
-            if forex_features is not None:
+            if forex_features is not None and not forex_features.empty:
+                print("[DEBUG] Merging forex_datasets features into additional_features.")
+                print(f"[DEBUG] forex_datasets features shape: {forex_features.shape}, first 5 rows:\n{forex_features.head()}")
                 additional_features.update(forex_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] forex_datasets produced no features or empty dataset, no merge performed.")
 
+        # Process sp500_dataset
         if config.get('sp500_dataset'):
+            print("[DEBUG] sp500_dataset key found in config, processing...")
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
-            if sp500_features is not None:
+            if sp500_features is not None and not sp500_features.empty:
+                print("[DEBUG] Merging sp500_dataset features into additional_features.")
+                print(f"[DEBUG] sp500_dataset features shape: {sp500_features.shape}, first 5 rows:\n{sp500_features.head()}")
                 additional_features.update(sp500_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] sp500_dataset produced no features or empty dataset, no merge performed.")
 
+        # Process vix_dataset
         if config.get('vix_dataset'):
+            print("[DEBUG] vix_dataset key found in config, processing...")
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
-            if vix_features is not None:
+            if vix_features is not None and not vix_features.empty:
+                print("[DEBUG] Merging vix_dataset features into additional_features.")
+                print(f"[DEBUG] vix_dataset features shape: {vix_features.shape}, first 5 rows:\n{vix_features.head()}")
                 additional_features.update(vix_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] vix_dataset produced no features or empty dataset, no merge performed.")
 
+        # Process high_freq_dataset
         if config.get('high_freq_dataset'):
+            print("[DEBUG] high_freq_dataset key found in config, processing...")
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
-            if high_freq_features is not None:
+            if high_freq_features is not None and not high_freq_features.empty:
+                print("[DEBUG] Merging high_freq_dataset features into additional_features.")
+                print(f"[DEBUG] high_freq_dataset features shape: {high_freq_features.shape}, first 5 rows:\n{high_freq_features.head()}")
                 additional_features.update(high_freq_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] high_freq_dataset produced no features or empty dataset, no merge performed.")
 
+        # Process economic_calendar
         if config.get('economic_calendar'):
+            print("[DEBUG] economic_calendar key found in config, processing...")
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
-            if econ_calendar is not None:
+            if econ_calendar is not None and not econ_calendar.empty:
+                print("[DEBUG] Merging economic_calendar features into additional_features.")
+                print(f"[DEBUG] economic_calendar features shape: {econ_calendar.shape}, first 5 rows:\n{econ_calendar.head()}")
                 additional_features.update(econ_calendar.to_dict(orient='series'))
+            else:
+                print("[DEBUG] economic_calendar produced no features or empty dataset, no merge performed.")
 
-        # Combine datasets
+        # Combine datasets into a single DataFrame
+        print("[DEBUG] Combining all additional features into DataFrame...")
         additional_features_df = pd.DataFrame(additional_features)
-        print(f"[DEBUG] Combined additional features shape: {additional_features_df.shape}")
-        print(f"[DEBUG] Combined additional features range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+        print(f"[DEBUG] Combined additional features DataFrame shape: {additional_features_df.shape}")
+        if not additional_features_df.empty:
+            print(f"[DEBUG] Combined additional features index range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+            print("[DEBUG] Combined additional features first 5 rows:")
+            print(additional_features_df.head())
+        else:
+            print("[DEBUG] Combined additional features DataFrame is empty, no overlapping data from all datasets.")
+
+        print("[DEBUG] process_additional_datasets completed.")
         return additional_features_df
+
 
 
 
