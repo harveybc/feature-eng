@@ -463,7 +463,7 @@ class Plugin:
         print("[DEBUG] Filtering duplicates...")
         filtered_rows = []
         for timestamp, group in tqdm(grouped, desc="Filtering duplicates", unit="group", total=unique_timestamps):
-            filtered = _filter_duplicate_events(group)
+            filtered = self._filter_duplicate_events(group)
             filtered_rows.append(filtered)
 
         # Concatenate all filtered single-row DataFrames
