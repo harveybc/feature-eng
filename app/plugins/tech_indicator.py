@@ -211,7 +211,6 @@ class Plugin:
         common_start = pd.Timestamp(data.index.min())
         common_end = pd.Timestamp(data.index.max())
         print(f"[DEBUG] Initial common range from main dataset: {common_start} to {common_end}")
-        print(f"[DEBUG] Main dataset shape: {data.shape}, columns: {list(data.columns)}, index type: {data.index.dtype}")
         print("[DEBUG] Main dataset first 5 rows:")
         print(data.head())
 
@@ -234,91 +233,56 @@ class Plugin:
 
             if dataset is not None and not dataset.empty:
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
-                if not aligned_dataset.empty:
-                    print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
-                    print(f"[DEBUG] {dataset_key} aligned shape: {aligned_dataset.shape}, columns: {list(aligned_dataset.columns)}")
-                    print(f"[DEBUG] {dataset_key} aligned first 5 rows:\n{aligned_dataset.head()}")
+                if aligned_dataset.empty:
+                    print("[ERROR] After alignment, dataset is empty. Check logic.")
                 else:
-                    print(f"[ERROR] {dataset_key} is empty after alignment.")
-
-                if not aligned_dataset.empty:
+                    print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                    # Update common_start/common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
                     common_start = max(common_start, aligned_dataset.index.min())
                     common_end = min(common_end, aligned_dataset.index.max())
-                    print(f"[DEBUG] Updated common range after processing {dataset_key}: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
+                    print(f"[DEBUG] Updated common range after {dataset_key}: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
                 return aligned_dataset
             else:
-                print(f"[DEBUG] No data returned or dataset empty for {dataset_key}, skipping alignment and updates.")
+                print(f"[DEBUG] {dataset_key} is empty or no data returned, skipping alignment update.")
             return None
 
         additional_features = {}
 
         if config.get('forex_datasets'):
-            print("[DEBUG] forex_datasets key found in config, processing...")
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None and not forex_features.empty:
-                print("[DEBUG] Merging forex_datasets features into additional_features.")
-                print(f"[DEBUG] forex_datasets features shape: {forex_features.shape}, first 5 rows:\n{forex_features.head()}")
                 additional_features.update(forex_features.to_dict(orient='series'))
-            else:
-                print("[DEBUG] forex_datasets produced no features or empty dataset, no merge performed.")
 
         if config.get('sp500_dataset'):
-            print("[DEBUG] sp500_dataset key found in config, processing...")
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None and not sp500_features.empty:
-                print("[DEBUG] Merging sp500_dataset features into additional_features.")
-                print(f"[DEBUG] sp500_dataset features shape: {sp500_features.shape}, first 5 rows:\n{sp500_features.head()}")
                 additional_features.update(sp500_features.to_dict(orient='series'))
-            else:
-                print("[DEBUG] sp500_dataset produced no features or empty dataset, no merge performed.")
 
         if config.get('vix_dataset'):
-            print("[DEBUG] vix_dataset key found in config, processing...")
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
             if vix_features is not None and not vix_features.empty:
-                print("[DEBUG] Merging vix_dataset features into additional_features.")
-                print(f"[DEBUG] vix_dataset features shape: {vix_features.shape}, first 5 rows:\n{vix_features.head()}")
                 additional_features.update(vix_features.to_dict(orient='series'))
-            else:
-                print("[DEBUG] vix_dataset produced no features or empty dataset, no merge performed.")
 
         if config.get('high_freq_dataset'):
-            print("[DEBUG] high_freq_dataset key found in config, processing...")
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
             if high_freq_features is not None and not high_freq_features.empty:
-                print("[DEBUG] Merging high_freq_dataset features into additional_features.")
-                print(f"[DEBUG] high_freq_dataset features shape: {high_freq_features.shape}, first 5 rows:\n{high_freq_features.head()}")
                 additional_features.update(high_freq_features.to_dict(orient='series'))
-            else:
-                print("[DEBUG] high_freq_dataset produced no features or empty dataset, no merge performed.")
 
         if config.get('economic_calendar'):
-            print("[DEBUG] economic_calendar key found in config, processing...")
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None and not econ_calendar.empty:
-                print("[DEBUG] Merging economic_calendar features into additional_features.")
-                print(f"[DEBUG] economic_calendar features shape: {econ_calendar.shape}, first 5 rows:\n{econ_calendar.head()}")
                 additional_features.update(econ_calendar.to_dict(orient='series'))
-            else:
-                print("[DEBUG] economic_calendar produced no features or empty dataset, no merge performed.")
 
-        print("[DEBUG] Combining all additional features into DataFrame...")
+        print("[DEBUG] After processing all datasets:")
+        print(f"[DEBUG] final_common_start: {common_start}, final_common_end: {common_end}")
+
         additional_features_df = pd.DataFrame(additional_features)
-        print(f"[DEBUG] Combined additional features DataFrame shape: {additional_features_df.shape}")
         if not additional_features_df.empty:
-            print(f"[DEBUG] Combined additional features index range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
-            print("[DEBUG] Combined additional features first 5 rows:")
-            print(additional_features_df.head())
-        else:
-            print("[DEBUG] Combined additional features DataFrame is empty.")
+            additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
 
-        print("[DEBUG] Final common date range after processing all datasets:")
-        print(f"[DEBUG] common_start: {common_start}, common_end: {common_end}")
-
-        print("[DEBUG] process_additional_datasets completed.")
+        print(f"[DEBUG] additional_features_df shape after final trim: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
-
 
 
 
@@ -599,7 +563,6 @@ class Plugin:
         max_vol = events_sorted['volatility'].iloc[0]
         top_events = events_sorted[events_sorted['volatility'] == max_vol]
 
-        chosen = None
         if len(top_events) == 1:
             chosen = top_events.iloc[0]
         else:
@@ -616,7 +579,6 @@ class Plugin:
         chosen_df['datetime'] = timestamp
         return chosen_df
 
-
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         import numpy as np
         from numpy.lib.stride_tricks import sliding_window_view
@@ -625,23 +587,28 @@ class Plugin:
         cat_cols = ['country_encoded', 'description_encoded']
         all_cols = numeric_cols + cat_cols
 
-        econ_array = econ_data[all_cols].to_numpy()
-        N = econ_array.shape[0]
+        # Force econ_data to match exactly hourly_data's index
+        # This ensures exact alignment and no extra rows
+        econ_data = econ_data.reindex(hourly_data.index, fill_value=-1)
+
+        N = len(econ_data)
         M = len(all_cols)
 
-        print("[DEBUG] In _generate_sliding_window_features:")
-        print(f"[DEBUG] econ_data range: {econ_data.index.min()} to {econ_data.index.max()}")
-        print(f"[DEBUG] hourly_data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
-        print(f"[DEBUG] econ_data length: {N}, hourly_data length: {len(hourly_data)}")
+        print("[DEBUG] In _generate_sliding_window_features after forcing exact hourly_data index on econ_data:")
+        print(f"[DEBUG] econ_data range: {econ_data.index.min()} to {econ_data.index.max()}, length={N}")
+        print(f"[DEBUG] hourly_data range: {hourly_data.index.min()} to {hourly_data.index.max()}, length={len(hourly_data)}")
 
         if N != len(hourly_data):
-            print("[ERROR] Length mismatch between econ_data and hourly_data. Check final alignment steps. Possibly need to re-slice hourly_data to final_common_start/common_end again.")
+            print("[ERROR] Even after forcing econ_data to hourly_data's index, length mismatch occurs.")
+            print("[DEBUG] econ_data first 5 rows:", econ_data.head())
+            print("[DEBUG] hourly_data first 5 rows:", hourly_data.head())
             raise ValueError("econ_data and hourly_data must have the same number of rows and alignment.")
 
         if N < window_size:
-            print("[ERROR] Not enough data points to form a full window. Check final_common_start/common_end.")
+            print("[ERROR] Not enough data points for a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
+        econ_array = econ_data[all_cols].to_numpy()
         windows = sliding_window_view(econ_array, (window_size, M))
         numeric_data = windows[..., :5]
         cat_data = windows[..., 5:7]
@@ -656,11 +623,14 @@ class Plugin:
             pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
             features = np.concatenate([pad_block, features], axis=0)
 
-        print(f"Sliding window feature generation complete. Shape: {features.shape}")
+        print("[DEBUG] Sliding window feature generation complete.")
+        print(f"[DEBUG] Features shape: {features.shape}")
+        print("[DEBUG] First window event_mask:\n", features[0, :, -1] if features.shape[0]>0 else "No features")
+
         return features
     
 
-    
+
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
         Train and use a Conv1D model to predict short-term trend and volatility.
