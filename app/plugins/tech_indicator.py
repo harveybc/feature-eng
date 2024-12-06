@@ -209,7 +209,8 @@ class Plugin:
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, Forex, S&P 500, VIX) and aligns them to the main dataset.
-        This version includes extensive debug messages for each dataset processed.
+        This version includes extensive debug messages for each dataset processed and now returns the final overlapping
+        date range along with the combined additional features DataFrame.
         """
 
         print("[DEBUG] Starting process_additional_datasets...")
@@ -222,7 +223,6 @@ class Plugin:
         print("[DEBUG] Main dataset first 5 rows:")
         print(data.head())
 
-        # Helper function to log dataset details before alignment
         def log_dataset_range(dataset_key, dataset):
             print(f"[DEBUG] Dataset: {dataset_key}")
             if dataset is not None and not dataset.empty:
@@ -232,7 +232,6 @@ class Plugin:
             else:
                 print(f"[ERROR] Dataset {dataset_key} is empty or invalid.")
 
-        # Helper function to process each dataset and print extensive debug logs
         def process_dataset(dataset_func, dataset_key):
             nonlocal common_start, common_end
             print(f"[DEBUG] Processing {dataset_key}...")
@@ -244,7 +243,6 @@ class Plugin:
             if dataset is not None and not dataset.empty:
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
 
-                # Log after alignment
                 if not aligned_dataset.empty:
                     print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
                     print(f"[DEBUG] {dataset_key} aligned shape: {aligned_dataset.shape}, columns: {list(aligned_dataset.columns)}")
@@ -252,7 +250,6 @@ class Plugin:
                 else:
                     print(f"[ERROR] {dataset_key} is empty after alignment, no overlapping dates.")
 
-                # If aligned dataset is not empty, update the common range
                 if not aligned_dataset.empty:
                     old_common_start, old_common_end = common_start, common_end
                     common_start = max(common_start, aligned_dataset.index.min())
@@ -264,7 +261,6 @@ class Plugin:
                 print(f"[DEBUG] No data returned or dataset empty for {dataset_key}, skipping alignment and updates.")
             return None
 
-        # Container for all additional features
         additional_features = {}
 
         # Process forex_datasets
@@ -322,7 +318,6 @@ class Plugin:
             else:
                 print("[DEBUG] economic_calendar produced no features or empty dataset, no merge performed.")
 
-        # Combine datasets into a single DataFrame
         print("[DEBUG] Combining all additional features into DataFrame...")
         additional_features_df = pd.DataFrame(additional_features)
         print(f"[DEBUG] Combined additional features DataFrame shape: {additional_features_df.shape}")
@@ -333,10 +328,13 @@ class Plugin:
         else:
             print("[DEBUG] Combined additional features DataFrame is empty, no overlapping data from all datasets.")
 
+        print("[DEBUG] Final common date range after processing all datasets:")
+        print(f"[DEBUG] common_start: {common_start}, common_end: {common_end}")
+
         print("[DEBUG] process_additional_datasets completed.")
-        return additional_features_df
 
-
+        # Return both the additional_features_df and the final common range
+        return additional_features_df, common_start, common_end
 
 
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
