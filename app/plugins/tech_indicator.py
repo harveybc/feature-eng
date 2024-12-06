@@ -227,6 +227,7 @@ class Plugin:
 
         # Helper function to process each dataset
         def process_dataset(dataset_func, dataset_key):
+            nonlocal common_start, common_end  # To allow updating common_start/common_end here
             print(f"[DEBUG] Processing {dataset_key}...")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
             log_dataset_range(dataset_key, dataset)
@@ -235,6 +236,12 @@ class Plugin:
                 print(f"    After alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
                 if aligned_dataset.empty:
                     print(f"[ERROR] {dataset_key} is empty after alignment.")
+                else:
+                    # Update the common range based on the newly aligned dataset
+                    old_common_start, old_common_end = common_start, common_end
+                    common_start = max(common_start, aligned_dataset.index.min())
+                    common_end = min(common_end, aligned_dataset.index.max())
+                    print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
                 return aligned_dataset
             return None
 
@@ -352,15 +359,6 @@ class Plugin:
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
         Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
-
-        Parameters:
-        - econ_calendar_path (str): Path to the economic calendar dataset.
-        - config (dict): Configuration dictionary.
-        - common_start (str or pd.Timestamp): Common start date for alignment.
-        - common_end (str or pd.Timestamp): Common end date for alignment.
-
-        Returns:
-        - pd.DataFrame: A DataFrame containing the predicted trend and volatility for each hourly tick.
         """
         from tqdm import tqdm
 
@@ -371,8 +369,6 @@ class Plugin:
         print(f"[DEBUG] Hourly dataset loaded. Index range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the economic calendar dataset
-        # Note: We rely on flexible parsing without a strict 'format' parameter.
-        # Also, we do not use 'dayfirst=True' since the format appears to be YYYY/MM/DD.
         econ_data = pd.read_csv(
             econ_calendar_path,
             header=None,
@@ -381,16 +377,16 @@ class Plugin:
                 'description', 'evaluation', 'data_format',
                 'actual', 'forecast', 'previous'
             ],
-            dtype={'event_date': str, 'event_time': str},  # Keep them as strings for manual combination
+            dtype={'event_date': str, 'event_time': str},
         )
 
         print("[DEBUG] Economic calendar loaded successfully.")
         print(f"[DEBUG] Economic calendar column types: {econ_data.dtypes}")
 
-        # Combine 'event_date' and 'event_time' into a single datetime column using flexible parsing
+        # Combine 'event_date' and 'event_time' into a single datetime column
         econ_data['datetime'] = pd.to_datetime(
             econ_data['event_date'].str.strip() + ' ' + econ_data['event_time'].str.strip(),
-            errors='coerce'  # Allow coerced NaT if something is unparseable
+            errors='coerce'
         )
 
         print(f"[DEBUG] Combined datetime column (first 5):\n{econ_data['datetime'].head()}")
@@ -472,68 +468,35 @@ class Plugin:
     def _preprocess_economic_calendar_data(self, econ_data):
         """
         Preprocess the economic calendar data by cleaning and generating derived features.
-
-        Steps:
-        1. Strip leading/trailing spaces from all string columns.
-        2. Normalize volatility values, mapping textual categories to numeric.
-        3. Clean 'forecast', 'actual', and 'previous' by removing non-numeric suffixes (e.g., 'k').
-        4. Convert 'forecast', 'actual', 'volatility', 'previous' to numeric where applicable.
-        5. Drop rows without valid numeric 'forecast' and 'actual'.
-        6. Generate derived features and normalize numeric columns.
-        7. Encode categorical features.
         """
-
         print("Preprocessing economic calendar data...")
 
-        # --------------------------------------------------------------------------
-        # Step 1: Strip all string columns to remove trailing/leading spaces
-        # --------------------------------------------------------------------------
+        # Strip all strings
         str_cols = econ_data.select_dtypes(include=['object']).columns
         for col in str_cols:
             econ_data[col] = econ_data[col].astype(str).str.strip()
 
-        # --------------------------------------------------------------------------
-        # Step 2: Map volatility textual categories to numeric values.
-        # We ensure the mapping is done after stripping and handle cases where 
-        # the category doesn't match exactly (set to NaN if not found).
-        # --------------------------------------------------------------------------
+        # Volatility mapping
         volatility_mapping = {
             'Low Volatility Expected': 1,
             'Moderate Volatility Expected': 2,
             'High Volatility Expected': 3
         }
-
         econ_data['volatility'] = econ_data['volatility'].map(volatility_mapping)
 
-        # --------------------------------------------------------------------------
-        # Step 3: Remove 'k' or 'K' suffixes from 'actual', 'forecast', 'previous'.
-        # Some values like '326.8k' should become '326.8'.
-        # --------------------------------------------------------------------------
+        # Clean forecast/actual/previous
         for col in ['actual', 'forecast', 'previous']:
-            # Replace commas, if any, and remove trailing k or K
-            econ_data[col] = econ_data[col].str.replace(',', '', regex=False)  # remove commas if present
-            econ_data[col] = econ_data[col].str.replace('[kK]$', '', regex=True)  # remove trailing k or K
+            econ_data[col] = econ_data[col].str.replace(',', '', regex=False)
+            econ_data[col] = econ_data[col].str.replace('[kK]$', '', regex=True)
 
-        # --------------------------------------------------------------------------
-        # Step 4: Convert relevant columns to numeric. 'previous' is optional, 
-        # but we still convert it for consistency. We'll not drop rows if 'previous' is NaN.
-        # --------------------------------------------------------------------------
         for col in ['forecast', 'actual', 'volatility', 'previous']:
             econ_data[col] = pd.to_numeric(econ_data[col], errors='coerce')
 
-        # --------------------------------------------------------------------------
-        # Step 5: Drop rows where 'forecast' or 'actual' are NaN (since they must be numeric)
-        # and also drop rows where 'volatility' is NaN (since it's needed for derived features).
-        # --------------------------------------------------------------------------
         econ_data.dropna(subset=['forecast', 'actual', 'volatility'], inplace=True)
 
-        # --------------------------------------------------------------------------
-        # Step 6: Generate derived features
-        # --------------------------------------------------------------------------
         econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
         econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
 
-        # Normalize numerical features
         numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
         for col in numerical_cols:
             col_min = econ_data[col].min()
@@ -543,9 +506,6 @@ class Plugin:
             else:
                 econ_data[col] = 0.0
 
-        # --------------------------------------------------------------------------
-        # Step 7: Encode categorical features
-        # --------------------------------------------------------------------------
         econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
         econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
 
