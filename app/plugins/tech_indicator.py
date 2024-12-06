@@ -246,7 +246,6 @@ class Plugin:
                     common_start = max(common_start, aligned_dataset.index.min())
                     common_end = min(common_end, aligned_dataset.index.max())
                     print(f"[DEBUG] Updated common range after processing {dataset_key}: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
-
                 return aligned_dataset
             else:
                 print(f"[DEBUG] No data returned or dataset empty for {dataset_key}, skipping alignment and updates.")
@@ -314,23 +313,12 @@ class Plugin:
         else:
             print("[DEBUG] Combined additional features DataFrame is empty.")
 
-        # Add more logs here to check final common_start and common_end after all datasets
         print("[DEBUG] Final common date range after processing all datasets:")
         print(f"[DEBUG] common_start: {common_start}, common_end: {common_end}")
 
-        # Extra log to see if common_start < econ_data final start
-        print("[DEBUG] After all datasets processed, checking econ_data final range if needed.")
-        # If economic_calendar (or another dataset) ended up being the limiting factor, update final_common_start/common_end again
-        # If you find econ_data starts after common_start, update it:
-        # This solves the 2005 issue by ensuring we do not use old common_start outside econ_data range
-        # For example:
-        # if 'econ_calendar' was processed last and we know its final range:
-        # new_start = max(common_start, econ_calendar.index.min()) if econ_calendar not empty
-        # new_end = min(common_end, econ_calendar.index.max()) if econ_calendar not empty
-        # Then re-slice additional_features_df if needed.
-
         print("[DEBUG] process_additional_datasets completed.")
         return additional_features_df, common_start, common_end
+
 
 
 
@@ -641,14 +629,13 @@ class Plugin:
         N = econ_array.shape[0]
         M = len(all_cols)
 
-        # Add debug logs
         print("[DEBUG] In _generate_sliding_window_features:")
         print(f"[DEBUG] econ_data range: {econ_data.index.min()} to {econ_data.index.max()}")
         print(f"[DEBUG] hourly_data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
         print(f"[DEBUG] econ_data length: {N}, hourly_data length: {len(hourly_data)}")
 
         if N != len(hourly_data):
-            print("[ERROR] Length mismatch between econ_data and hourly_data. Check final alignment steps.")
+            print("[ERROR] Length mismatch between econ_data and hourly_data. Check final alignment steps. Possibly need to re-slice hourly_data to final_common_start/common_end again.")
             raise ValueError("econ_data and hourly_data must have the same number of rows and alignment.")
 
         if N < window_size:
@@ -670,15 +657,10 @@ class Plugin:
             features = np.concatenate([pad_block, features], axis=0)
 
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
-        # Add final debug lines
-        print("[DEBUG] First 5 windows event_mask checks:")
-        if features.shape[0] > 5:
-            print(features[:5, :, -1])
-        else:
-            print(features[:, :, -1])
-
         return features
+    
 
+    
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
         Train and use a Conv1D model to predict short-term trend and volatility.

@@ -165,7 +165,6 @@ def process_data(data, plugin, config):
 
     print(f"[DEBUG] Final overlapping range determined: {final_common_start} to {final_common_end}")
 
-    # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
 
@@ -187,6 +186,7 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Final dataset with datetime column restored:\n{final_data.head()}")
 
     return final_data
+
 
 
 
