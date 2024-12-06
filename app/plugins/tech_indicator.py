@@ -390,10 +390,11 @@ class Plugin:
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
 
-        # Trim predictions by window_size
-        predicted_trend = predicted_trend[window_size:]
-        predicted_volatility = predicted_volatility[window_size:]
+        # Trim the last prediction to align with labels
+        predicted_trend = predicted_trend[:-1]
+        predicted_volatility = predicted_volatility[:-1]
 
+        # Adjusted index remains the same
         adjusted_index = full_hourly_index[window_size:]
 
         print(f"[DEBUG] Predicted trend length: {len(predicted_trend)}")
@@ -408,6 +409,7 @@ class Plugin:
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
     def _preprocess_economic_calendar_data(self, econ_data):
@@ -539,13 +541,12 @@ class Plugin:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        # Correct sliding_window_view usage
         # Generate windows of shape (number_of_windows, window_size, num_features)
-        windows = sliding_window_view(econ_array, window_shape=window_size, axis=0)
-        print(f"[DEBUG] windows shape after sliding_window_view: {windows.shape}")  # Expected: (N - window_size +1, window_size, M)
+        windows = sliding_window_view(econ_array, window_shape=window_size, axis=0)[:-1]  # Exclude the last window
+        print(f"[DEBUG] windows shape after sliding_window_view and exclusion: {windows.shape}")  # Expected: (N - window_size, window_size, M)
 
         # Verify window shape
-        expected_windows = N - window_size + 1
+        expected_windows = N - window_size
         actual_windows = windows.shape[0]
         print(f"[DEBUG] Expected number of windows: {expected_windows}, Actual number of windows: {actual_windows}")
 
@@ -563,27 +564,12 @@ class Plugin:
 
         # Concatenate features
         features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)  # Shape: (number_of_windows, window_size, 8)
-        print(f"[DEBUG] features shape before padding: {features.shape}")  # Expected: (number_of_windows, window_size, 8)
-
-        # Ensure that features have the same number of windows as hourly_data_sliced
-        if actual_windows < expected_windows:
-            pad_size = expected_windows - actual_windows
-            pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
-            print(f"[DEBUG] Adding pad block to match number of windows with expected_windows: {pad_size} pads")
-            print(f"[DEBUG] pad_block shape: {pad_block.shape}, features shape before padding: {features.shape}")
-            if pad_block.shape[1] != features.shape[1]:
-                print("[ERROR] pad_block window_size dimension doesn't match features window_size dimension.")
-                raise ValueError("Padding block and features window dimension mismatch.")
-            features = np.concatenate([pad_block, features], axis=0)
-            print(f"[DEBUG] features shape after padding: {features.shape}")
-        elif actual_windows > expected_windows:
-            print("[WARNING] More windows generated than expected. Trimming excess windows.")
-            features = features[:expected_windows]
-            print(f"[DEBUG] features shape after trimming: {features.shape}")
+        print(f"[DEBUG] features shape after concatenation: {features.shape}")  # Expected: (number_of_windows, window_size, 8)
 
         print(f"[DEBUG] Sliding window feature generation complete. Final features shape: {features.shape}")
         print("[DEBUG] First window event_mask values:", features[0, :, -1] if features.shape[0] > 0 else "No features")
         return features
+
 
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
@@ -731,31 +717,34 @@ class Plugin:
         return np.array(X), np.array(y_volatility), np.array(y_trend)
 
     def build_conv1d_model(self, input_shape):
-        """
-        Build the Conv1D model for predicting volatility and trend variation.
-
-        Parameters:
-        - input_shape (tuple): Shape of the input data (window_size, num_features).
-
-        Returns:
-        - keras.Model: Compiled Conv1D model.
-        """
         from tensorflow.keras import layers, Model
 
         input_layer = layers.Input(shape=input_shape)
 
         # Conv1D layers
-        x = layers.Conv1D(filters=32, kernel_size=3, activation='relu')(input_layer)
-        x = layers.Conv1D(filters=64, kernel_size=3, activation='relu')(x)
-        x = layers.GlobalMaxPooling1D()(x)
+        x = layers.Conv1D(filters=16, kernel_size=3, activation='relu')(input_layer)      # Filters=16
+        x = layers.BatchNormalization()(x)
 
-        # Outputs
-        volatility_output = layers.Dense(1, name='volatility_output')(x)
-        trend_output = layers.Dense(1, name='trend_output')(x)
+        x = layers.Conv1D(filters=8, kernel_size=3, activation='relu')(x)               # Filters=8
+        x = layers.BatchNormalization()(x)
 
-        # Model
+        # Flatten and Dense layers
+        x = layers.Flatten()(x)
+
+        x = layers.Dense(48, activation='relu')(x)                                      # Units=48
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Dense(24, activation='relu')(x)                                      # Units=24
+        x = layers.BatchNormalization()(x)
+
+        # Output layers
+        volatility_output = layers.Dense(1, name='volatility_output')(x)               # Output for Volatility
+        trend_output = layers.Dense(1, name='trend_output')(x)                         # Output for Trend
+
+        # Model Definition
         model = Model(inputs=input_layer, outputs=[volatility_output, trend_output])
-        print("Conv1D model built successfully.")
+        print("Conv1D model built successfully with Flatten layer and ~50,000 parameters.")
+        model.summary()
         return model
 
 
@@ -843,7 +832,7 @@ class Plugin:
 
         print(f"Processed Forex CLOSE features (first 5 rows):\n{forex_features.head()}")
         return forex_features
-        
+
     
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
