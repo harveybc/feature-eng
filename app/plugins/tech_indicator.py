@@ -459,7 +459,7 @@ class Plugin:
 
         # Handle duplicates by selecting one event per timestamp
         # Group by index and apply _filter_duplicate_events to each group
-        econ_data = econ_data.groupby(econ_data.index).apply(lambda grp: _filter_duplicate_events(grp)).reset_index(drop=True)
+        econ_data = econ_data.groupby(econ_data.index).apply(lambda grp: self._filter_duplicate_events(grp)).reset_index(drop=True)
         # Now we need to set the index back to datetime if lost
         # We must have a datetime column after reset_index
         if 'datetime' in econ_data.columns:
@@ -673,7 +673,7 @@ class Plugin:
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
 
-    def _filter_duplicate_events(events):
+    def _filter_duplicate_events(self, events):
         """
         Given a DataFrame 'events' that all share the same timestamp,
         apply the selection rule:
