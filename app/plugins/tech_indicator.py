@@ -633,8 +633,10 @@ class Plugin:
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         """
         Generate sliding window features for economic calendar data, structured for Conv1D input.
-        econ_data is now guaranteed to have hourly rows for every hour in the final overlapping range,
-        filled with -1 as sentinel where no event occurred.
+        econ_data is guaranteed to have hourly rows for every hour in the final overlapping range,
+        filled with -1 as a sentinel where no event occurred.
+        
+        Change: Now using reindex instead of .loc to avoid KeyErrors if expected_index includes times outside econ_data range.
         """
         print("Generating sliding window features...")
 
@@ -643,33 +645,33 @@ class Plugin:
 
         # Expected econ_data columns: 
         # ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff', 'country_encoded', 'description_encoded']
-        # plus we have 8 channels total: 5 numeric, 2 categorical, 1 event mask
-        # event_mask = 1 if any numeric column != -1, else 0.
-
+        # plus event_date, event_time, etc., but main numeric and categorical columns are known.
+        # We have 8 channels total: 5 numeric, 2 categorical, 1 event mask.
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
-        cat_cols = ['country_encoded', 'description_encoded']
+        cat_cols = ['country_encoded', 'description_encoded']  # As defined previously
+        # The event mask = 1 if any numeric column != -1, else 0.
 
         for timestamp in tqdm(hourly_data.index, desc="Processing Windows", unit="window"):
             window_start = timestamp - pd.Timedelta(hours=window_size)
-            # Safe slicing: econ_data has a row for every hour in the final range
+            # Create the expected_index of window_size hours ending at 'timestamp'
             expected_index = pd.date_range(end=timestamp, periods=window_size, freq='H')
-            window_data = econ_data.loc[expected_index]
+
+            # Use reindex instead of loc to avoid KeyErrors, fill missing with -1
+            window_data = econ_data.reindex(expected_index, fill_value=-1)
 
             # Initialize window matrix
             window_matrix = np.zeros((window_size, 8))  # 5 numeric + 2 categorical + 1 mask
 
-            # Populate window matrix
             for i, row_time in enumerate(expected_index):
                 row = window_data.loc[row_time]
 
-                # Check if this hour had an event:
-                # If all numeric_cols are -1, no event. Otherwise, event present.
+                # Check event mask
+                # If all numeric_cols are -1, no event
                 if (row[numeric_cols] == -1).all():
                     event_mask = 0
                 else:
                     event_mask = 1
 
-                # Assign columns
                 window_matrix[i, :5] = row[numeric_cols].values
                 window_matrix[i, 5:7] = row[cat_cols].values
                 window_matrix[i, 7] = event_mask
@@ -679,6 +681,7 @@ class Plugin:
         features = np.array(features)
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
+
 
     def _filter_duplicate_events(self, events):
         """
