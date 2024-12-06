@@ -146,47 +146,41 @@ def process_data(data, plugin, config):
 
     numeric_data = data[ohlc_columns].apply(pd.to_numeric, errors='coerce').fillna(0)
     print(f"[DEBUG] Numeric OHLC data shape: {numeric_data.shape}")
-    print(f"[DEBUG] Numeric OHLC data head:\n{numeric_data.head()}")
+    print("[DEBUG] Numeric OHLC data first 5 rows:")
+    print(numeric_data.head())
 
     processed_data = plugin.process(numeric_data)
-    print(f"[DEBUG] Processed data index type: {processed_data.index.dtype}")
-    print(f"[DEBUG] Processed data index range: {processed_data.index.min()} to {processed_data.index.max()}")
+    print(f"[DEBUG] Processed data index range: {processed_data.index.min()} to {processed_data.index.max()} (len={len(processed_data)})")
 
     transformed_data = analyze_variability_and_normality(processed_data, config)
-    print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
-    print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
+    print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
 
     additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
-    print(f"[DEBUG] Additional features index type: {additional_features_df.index.dtype}")
-    if not additional_features_df.empty:
-        print(f"[DEBUG] Additional features index range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
-    else:
-        print("[DEBUG] Additional features DataFrame is empty.")
+    print(f"[DEBUG] Additional features final range: {final_common_start} to {final_common_end}")
+    print(f"[DEBUG] Additional features shape: {additional_features_df.shape}")
 
-    print(f"[DEBUG] Final overlapping range determined: {final_common_start} to {final_common_end}")
-
+    # Re-slice transformed_data and additional_features_df
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
 
-    try:
-        additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(0)
-        print("[DEBUG] Additional features successfully aligned.")
-        print(f"[DEBUG] Additional features shape after alignment: {additional_features_df.shape}")
-    except Exception as e:
-        print(f"[ERROR] Failed to align additional features with transformed_data. Exception: {str(e)}")
-        raise e
+    # Align additional_features to transformed_data
+    additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(0)
+    print("[DEBUG] After final alignment of additional features:")
+    print(f"[DEBUG] transformed_data len={len(transformed_data)} range: {transformed_data.index.min()} to {transformed_data.index.max()}")
+    print(f"[DEBUG] additional_features_df len={len(additional_features_df)} range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
 
     final_data = pd.concat([transformed_data, additional_features_df], axis=1)
-    print(f"[DEBUG] Final data shape after combining: {final_data.shape}")
-    print(f"[DEBUG] Final data head:\n{final_data.head()}")
+    print("[DEBUG] Final combined data shape:", final_data.shape)
+    print("[DEBUG] Final combined data first 5 rows:")
+    print(final_data.head())
 
     final_data.reset_index(inplace=True)
     if 'datetime' not in final_data.columns:
         final_data.rename(columns={'index': 'datetime'}, inplace=True)
-    print(f"[DEBUG] Final dataset with datetime column restored:\n{final_data.head()}")
+    print("[DEBUG] Final dataset with datetime column restored first 5 rows:")
+    print(final_data.head())
 
     return final_data
-
 
 
 
