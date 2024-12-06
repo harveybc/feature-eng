@@ -209,8 +209,7 @@ class Plugin:
     def process_additional_datasets(self, data, config):
         """
         Processes additional datasets (e.g., economic calendar, Forex, S&P 500, VIX) and aligns them to the main dataset.
-        This version includes extensive debug messages for each dataset processed and now returns the final overlapping
-        date range along with the combined additional features DataFrame.
+        Returns additional_features_df, common_start, common_end with extensive debug logs.
         """
 
         print("[DEBUG] Starting process_additional_datasets...")
@@ -263,7 +262,7 @@ class Plugin:
 
         additional_features = {}
 
-        # Process forex_datasets
+        # forex_datasets
         if config.get('forex_datasets'):
             print("[DEBUG] forex_datasets key found in config, processing...")
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
@@ -274,7 +273,7 @@ class Plugin:
             else:
                 print("[DEBUG] forex_datasets produced no features or empty dataset, no merge performed.")
 
-        # Process sp500_dataset
+        # sp500_dataset
         if config.get('sp500_dataset'):
             print("[DEBUG] sp500_dataset key found in config, processing...")
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
@@ -285,7 +284,7 @@ class Plugin:
             else:
                 print("[DEBUG] sp500_dataset produced no features or empty dataset, no merge performed.")
 
-        # Process vix_dataset
+        # vix_dataset
         if config.get('vix_dataset'):
             print("[DEBUG] vix_dataset key found in config, processing...")
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
@@ -296,7 +295,7 @@ class Plugin:
             else:
                 print("[DEBUG] vix_dataset produced no features or empty dataset, no merge performed.")
 
-        # Process high_freq_dataset
+        # high_freq_dataset
         if config.get('high_freq_dataset'):
             print("[DEBUG] high_freq_dataset key found in config, processing...")
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
@@ -307,7 +306,7 @@ class Plugin:
             else:
                 print("[DEBUG] high_freq_dataset produced no features or empty dataset, no merge performed.")
 
-        # Process economic_calendar
+        # economic_calendar
         if config.get('economic_calendar'):
             print("[DEBUG] economic_calendar key found in config, processing...")
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
@@ -332,9 +331,8 @@ class Plugin:
         print(f"[DEBUG] common_start: {common_start}, common_end: {common_end}")
 
         print("[DEBUG] process_additional_datasets completed.")
-
-        # Return both the additional_features_df and the final common range
         return additional_features_df, common_start, common_end
+
 
 
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
@@ -415,13 +413,14 @@ class Plugin:
 
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
         """
-        Process the economic calendar dataset and predict trend and volatility using a Conv1D model.
+        Process the economic calendar dataset, align to the final overlapping range, resample hourly,
+        and fill missing hours with a sentinel value (-1) to indicate no event.
         """
         from tqdm import tqdm
 
         print("Processing economic calendar data...")
 
-        # Load the hourly dataset
+        # Load the hourly dataset (main hourly_data)
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
         print(f"[DEBUG] Hourly dataset loaded. Index range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
@@ -429,96 +428,90 @@ class Plugin:
         econ_data = pd.read_csv(
             econ_calendar_path,
             header=None,
-            names=[
-                'event_date', 'event_time', 'country', 'volatility',
+            names=['event_date', 'event_time', 'country', 'volatility',
                 'description', 'evaluation', 'data_format',
-                'actual', 'forecast', 'previous'
-            ],
+                'actual', 'forecast', 'previous'],
             dtype={'event_date': str, 'event_time': str},
         )
 
         print("[DEBUG] Economic calendar loaded successfully.")
         print(f"[DEBUG] Economic calendar column types: {econ_data.dtypes}")
 
-        # Combine 'event_date' and 'event_time' into a single datetime column
+        # Combine 'event_date' and 'event_time'
         econ_data['datetime'] = pd.to_datetime(
             econ_data['event_date'].str.strip() + ' ' + econ_data['event_time'].str.strip(),
             errors='coerce'
         )
-
         print(f"[DEBUG] Combined datetime column (first 5):\n{econ_data['datetime'].head()}")
 
-        # Drop rows with invalid datetime and set the index
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
-
         print("[DEBUG] Economic calendar index set successfully.")
-        print(f"[DEBUG] Economic calendar index type: {type(econ_data.index)}")
         print(f"[DEBUG] Economic calendar index range: {econ_data.index.min()} to {econ_data.index.max()}")
 
-        # Preprocess the economic calendar dataset
+        # Preprocess econ_data
         econ_data = self._preprocess_economic_calendar_data(econ_data)
         print("[DEBUG] Economic calendar data preprocessing complete.")
         print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
-        # Apply the common date range filter
         print("[DEBUG] Starting alignment process for economic calendar.")
         print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
         print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
 
+        # Align econ_data to final range
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
-
         print(f"[DEBUG] Econ data rows after alignment: {len(econ_data)}")
-        print(f"[DEBUG] Econ data index range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
-        if econ_data.empty:
+        if not econ_data.empty:
+            print(f"[DEBUG] Econ data index range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
+        else:
             print("[ERROR] Alignment resulted in an empty dataset.")
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
 
+        # Resample econ_data hourly. Fill missing with sentinel (-1)
+        full_hourly_index = pd.date_range(start=common_start, end=common_end, freq='H')
+        econ_data = econ_data.reindex(full_hourly_index)
+        econ_data.fillna(-1, inplace=True)  # Use -1 as sentinel for no-event hours
+
+        print(f"[DEBUG] Econ data resampled to hourly frequency, shape: {econ_data.shape}, range: {econ_data.index.min()} to {econ_data.index.max()}")
+        print("[DEBUG] First 5 rows after resampling and filling missing events:\n", econ_data.head())
+
         # Generate sliding window features
         window_size = config['calendar_window_size']
-        econ_features = self._generate_sliding_window_features(econ_data, hourly_data, window_size)
+        econ_features = self._generate_sliding_window_features(econ_data, hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)], window_size)
         print(f"[DEBUG] Sliding window feature generation complete. Shape: {econ_features.shape}")
 
         # Generate training signals for trend and volatility
-        trend_signal, volatility_signal = self._generate_training_signals(hourly_data, config)
+        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+        trend_signal, volatility_signal = self._generate_training_signals(final_hourly_data, config)
         print("[DEBUG] Training signals for trend and volatility generated.")
 
-        # Train and predict trend and volatility using Conv1D
+        # Train and predict
         predictions = self._predict_trend_and_volatility_with_conv1d(
             econ_features=econ_features,
             training_signals={'trend': trend_signal, 'volatility': volatility_signal},
             window_size=window_size
         )
 
-        # Unpack predictions
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
 
-        # Trim predictions by sliding window size
+        # Trim predictions by window_size
         predicted_trend = predicted_trend[window_size:]
         predicted_volatility = predicted_volatility[window_size:]
 
-        # Adjust the aligned index
-        adjusted_index = hourly_data.index[window_size:]
+        adjusted_index = full_hourly_index[window_size:]
 
-        # Debugging
         print(f"[DEBUG] Predicted trend length: {len(predicted_trend)}")
         print(f"[DEBUG] Predicted volatility length: {len(predicted_volatility)}")
         print(f"[DEBUG] Adjusted index length: {len(adjusted_index)}")
         print(f"[DEBUG] Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
 
-        # Ensure lengths match
         if len(predicted_trend) != len(adjusted_index):
-            raise ValueError(
-                f"Length mismatch after window adjustment: Predicted values ({len(predicted_trend)}) "
-                f"vs. Aligned index ({len(adjusted_index)})"
-            )
+            raise ValueError("Length mismatch after window adjustment.")
 
-        # Align the predictions with the adjusted index
         aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
-        # Return the DataFrame with predicted trend and volatility
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
 
 
@@ -615,44 +608,53 @@ class Plugin:
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         """
         Generate sliding window features for economic calendar data, structured for Conv1D input.
-
-        Parameters:
-        - econ_data (pd.DataFrame): Cleaned economic calendar data.
-        - hourly_data (pd.DataFrame): Hourly dataset.
-        - window_size (int): Size of the sliding window.
-
-        Returns:
-        - np.ndarray: Features in sliding window format.
+        econ_data is now guaranteed to have hourly rows for every hour in the final overlapping range,
+        filled with -1 as sentinel where no event occurred.
         """
         print("Generating sliding window features...")
 
         features = []
-        for timestamp in tqdm(hourly_data.index, desc="Processing Windows", unit="window"):
-            # Define the window range
-            window_start = timestamp - pd.Timedelta(hours=window_size)
-            window_data = econ_data.loc[window_start:timestamp]
+        from tqdm import tqdm
 
-            # Initialize window matrix with padding
-            window_matrix = np.zeros((window_size, 8))  # 5 numerical + 2 categorical + 1 event mask
-            padding_row = np.zeros(8)  # Represents no-event padding: all zeros
+        # Expected econ_data columns: 
+        # ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff', 'country_encoded', 'description_encoded']
+        # plus we have 8 channels total: 5 numeric, 2 categorical, 1 event mask
+        # event_mask = 1 if any numeric column != -1, else 0.
+
+        numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
+        cat_cols = ['country_encoded', 'description_encoded']
+
+        for timestamp in tqdm(hourly_data.index, desc="Processing Windows", unit="window"):
+            window_start = timestamp - pd.Timedelta(hours=window_size)
+            # Safe slicing: econ_data has a row for every hour in the final range
+            expected_index = pd.date_range(end=timestamp, periods=window_size, freq='H')
+            window_data = econ_data.loc[expected_index]
+
+            # Initialize window matrix
+            window_matrix = np.zeros((window_size, 8))  # 5 numeric + 2 categorical + 1 mask
 
             # Populate window matrix
-            for i, (event_time, event_row) in enumerate(window_data.iterrows()):
-                relative_index = (event_time - window_start) // pd.Timedelta(hours=1)
-                if 0 <= relative_index < window_size:
-                    window_matrix[relative_index, :5] = event_row[
-                        ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
-                    ].values
-                    window_matrix[relative_index, 5:7] = event_row[
-                        ['country_encoded', 'description_encoded']
-                    ].values
-                    window_matrix[relative_index, 7] = 1  # Event mask
+            for i, row_time in enumerate(expected_index):
+                row = window_data.loc[row_time]
+
+                # Check if this hour had an event:
+                # If all numeric_cols are -1, no event. Otherwise, event present.
+                if (row[numeric_cols] == -1).all():
+                    event_mask = 0
+                else:
+                    event_mask = 1
+
+                # Assign columns
+                window_matrix[i, :5] = row[numeric_cols].values
+                window_matrix[i, 5:7] = row[cat_cols].values
+                window_matrix[i, 7] = event_mask
 
             features.append(window_matrix)
 
         features = np.array(features)
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
+
 
 
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):

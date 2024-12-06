@@ -167,7 +167,7 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
     print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
 
-    # Process additional datasets and get final common range
+    # Process additional datasets and get final overlapping range
     additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
     print(f"[DEBUG] Additional features index type: {additional_features_df.index.dtype}")
     if not additional_features_df.empty:
@@ -175,24 +175,21 @@ def process_data(data, plugin, config):
     else:
         print("[DEBUG] Additional features DataFrame is empty.")
 
-    # Now that we have the final overlapping date range (final_common_start, final_common_end),
-    # we must ensure that transformed_data and additional_features_df are restricted to this range
-    # to avoid any KeyError when generating sliding windows or further processing.
+    print(f"[DEBUG] Final overlapping range determined: {final_common_start} to {final_common_end}")
 
-    print(f"[DEBUG] Final common overlapping range: {final_common_start} to {final_common_end}")
+    # Restrict transformed_data and additional_features_df to the final overlapping range
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
 
-    print("[DEBUG] Aligning additional features with transformed_data on final overlapping range.")
+    # Align additional_features with transformed_data
     try:
-        # Reindex additional_features to transformed_data index if needed
+        # Since we will zero-fill or sentinel-fill in the econ calendar step,
+        # here we just ensure proper alignment.
         additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(0)
-        print(f"[DEBUG] Additional features successfully aligned.")
+        print("[DEBUG] Additional features successfully aligned.")
         print(f"[DEBUG] Additional features shape after alignment: {additional_features_df.shape}")
     except Exception as e:
         print(f"[ERROR] Failed to align additional features with transformed_data. Exception: {str(e)}")
-        print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index}")
-        print(f"[DEBUG] Additional features index type: {additional_features_df.index.dtype}, range: {additional_features_df.index}")
         raise e
 
     # Combine processed technical indicators with additional features
@@ -207,8 +204,6 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Final dataset with datetime column restored:\n{final_data.head()}")
 
     return final_data
-
-
 
 
 def run_feature_engineering_pipeline(config, plugin):
