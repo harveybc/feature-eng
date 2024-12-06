@@ -471,26 +471,31 @@ class Plugin:
 
     def _preprocess_economic_calendar_data(self, econ_data):
         """
-        Preprocess the economic calendar data by cleaning, converting categories to numeric values,
-        and generating derived features.
+        Preprocess the economic calendar data by cleaning and generating derived features.
 
-        Steps performed:
-        1. Map volatility text values to numeric codes:
-        - "Low Volatility Expected" -> 1
-        - "Moderate Volatility Expected" -> 2
-        - "High Volatility Expected" -> 3
-        2. Filter out rows that don't have both 'forecast' and 'actual' as numeric values.
-        3. Convert 'forecast', 'actual', and 'volatility' to numeric and drop rows where conversion fails.
-        4. Generate derived features based on these numeric values.
-        5. Normalize the numeric columns and encode categorical features.
+        Steps:
+        1. Strip leading/trailing spaces from all string columns.
+        2. Normalize volatility values, mapping textual categories to numeric.
+        3. Clean 'forecast', 'actual', and 'previous' by removing non-numeric suffixes (e.g., 'k').
+        4. Convert 'forecast', 'actual', 'volatility', 'previous' to numeric where applicable.
+        5. Drop rows without valid numeric 'forecast' and 'actual'.
+        6. Generate derived features and normalize numeric columns.
+        7. Encode categorical features.
         """
 
         print("Preprocessing economic calendar data...")
 
         # --------------------------------------------------------------------------
-        # Step 1: Map volatility textual categories to numeric codes.
-        # Detectamos las categorías de volatilidad y las convertimos a números.
-        # Esto se hace antes de convertir a numérico, ya que actualmente es texto.
+        # Step 1: Strip all string columns to remove trailing/leading spaces
+        # --------------------------------------------------------------------------
+        str_cols = econ_data.select_dtypes(include=['object']).columns
+        for col in str_cols:
+            econ_data[col] = econ_data[col].astype(str).str.strip()
+
+        # --------------------------------------------------------------------------
+        # Step 2: Map volatility textual categories to numeric values.
+        # We ensure the mapping is done after stripping and handle cases where 
+        # the category doesn't match exactly (set to NaN if not found).
         # --------------------------------------------------------------------------
         volatility_mapping = {
             'Low Volatility Expected': 1,
@@ -498,61 +503,55 @@ class Plugin:
             'High Volatility Expected': 3
         }
 
-        # Filtra sólo las filas con valores de volatilidad esperados
-        # Si hay otras cadenas diferentes, se convierten a NaN.
         econ_data['volatility'] = econ_data['volatility'].map(volatility_mapping)
 
         # --------------------------------------------------------------------------
-        # Step 2: Antes de convertir forecast y actual a numéricos, filtramos las filas
-        # que no tienen valor numérico. Como aún no hemos hecho to_numeric, verificamos si
-        # forecast y actual son strings que se pueden convertir. Si no lo son,
-        # las convertiremos y luego dropearemos.
-        # Primero intetamos la conversión, si falla (NaN), luego filtramos.
+        # Step 3: Remove 'k' or 'K' suffixes from 'actual', 'forecast', 'previous'.
+        # Some values like '326.8k' should become '326.8'.
         # --------------------------------------------------------------------------
-        econ_data['forecast'] = pd.to_numeric(econ_data['forecast'], errors='coerce')
-        econ_data['actual'] = pd.to_numeric(econ_data['actual'], errors='coerce')
-
-        # Eliminamos filas donde forecast o actual no sean numéricos (NaN)
-        econ_data.dropna(subset=['forecast', 'actual'], inplace=True)
-
-        # Ya tenemos forecast y actual numéricos y filtrados. Volatility ya está mapeada.
-        # Ahora descartamos filas con volatility NaN, si las hubiese.
-        econ_data.dropna(subset=['volatility'], inplace=True)
+        for col in ['actual', 'forecast', 'previous']:
+            # Replace commas, if any, and remove trailing k or K
+            econ_data[col] = econ_data[col].str.replace(',', '', regex=False)  # remove commas if present
+            econ_data[col] = econ_data[col].str.replace('[kK]$', '', regex=True)  # remove trailing k or K
 
         # --------------------------------------------------------------------------
-        # Step 3: Ahora las tres columnas clave ('forecast', 'actual', 'volatility')
-        # son numéricas. Ya no es necesario otro to_numeric para ellas.
+        # Step 4: Convert relevant columns to numeric. 'previous' is optional, 
+        # but we still convert it for consistency. We'll not drop rows if 'previous' is NaN.
         # --------------------------------------------------------------------------
+        for col in ['forecast', 'actual', 'volatility', 'previous']:
+            econ_data[col] = pd.to_numeric(econ_data[col], errors='coerce')
 
         # --------------------------------------------------------------------------
-        # Step 4: Generar las características derivadas
+        # Step 5: Drop rows where 'forecast' or 'actual' are NaN (since they must be numeric)
+        # and also drop rows where 'volatility' is NaN (since it's needed for derived features).
+        # --------------------------------------------------------------------------
+        econ_data.dropna(subset=['forecast', 'actual', 'volatility'], inplace=True)
+
+        # --------------------------------------------------------------------------
+        # Step 6: Generate derived features
         # --------------------------------------------------------------------------
         econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
         econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
 
-        # --------------------------------------------------------------------------
-        # Step 5: Normalizar las características numéricas
-        # Normalizamos solo las columnas numéricas relevantes.
-        # --------------------------------------------------------------------------
+        # Normalize numerical features
         numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
-        # Evitamos la división por cero (si max == min)
         for col in numerical_cols:
             col_min = econ_data[col].min()
             col_max = econ_data[col].max()
             if col_max != col_min:
                 econ_data[col] = (econ_data[col] - col_min) / (col_max - col_min)
             else:
-                # Si el rango es cero, ponemos todo a cero para esa columna
                 econ_data[col] = 0.0
 
         # --------------------------------------------------------------------------
-        # Step 6: Codificar las características categóricas
+        # Step 7: Encode categorical features
         # --------------------------------------------------------------------------
         econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
         econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
 
         print("Economic calendar data preprocessing complete.")
         return econ_data
+
 
 
     def _generate_training_signals(self, hourly_data, config):
