@@ -541,17 +541,11 @@ class Plugin:
 
 
     def _preprocess_economic_calendar_data(self, econ_data):
-        """
-        Preprocess the economic calendar data by cleaning and generating derived features.
-        """
         print("Preprocessing economic calendar data...")
-
-        # Strip all strings
         str_cols = econ_data.select_dtypes(include=['object']).columns
         for col in str_cols:
             econ_data[col] = econ_data[col].astype(str).str.strip()
 
-        # Volatility mapping
         volatility_mapping = {
             'Low Volatility Expected': 1,
             'Moderate Volatility Expected': 2,
@@ -559,7 +553,6 @@ class Plugin:
         }
         econ_data['volatility'] = econ_data['volatility'].map(volatility_mapping)
 
-        # Clean forecast/actual/previous
         for col in ['actual', 'forecast', 'previous']:
             econ_data[col] = econ_data[col].str.replace(',', '', regex=False)
             econ_data[col] = econ_data[col].str.replace('[kK]$', '', regex=True)
@@ -588,25 +581,11 @@ class Plugin:
         return econ_data
 
 
-
     def _generate_training_signals(self, hourly_data, config):
-        """
-        Generate training signals for trend and volatility.
-
-        Parameters:
-        - hourly_data (pd.DataFrame): The hourly dataset.
-        - config (dict): Configuration dictionary.
-
-        Returns:
-        - tuple: (trend_signal, volatility_signal)
-        """
         print("Generating training signals...")
-        
-        # Extract the short-term window size from the configuration
         short_term_window = config['calendar_window_size'] // 10
         print(f"Short-term window size for training signals: {short_term_window}")
 
-        # Calculate the EMA for trend signal and difference for trend variation
         trend_signal = (
             hourly_data['close']
             .ewm(span=short_term_window)
@@ -616,7 +595,6 @@ class Plugin:
             .values
         )
 
-        # Calculate short-term standard deviation as a volatility signal
         volatility_signal = (
             hourly_data['close']
             .rolling(window=short_term_window)
@@ -629,29 +607,154 @@ class Plugin:
         return trend_signal, volatility_signal
 
 
+    def _filter_duplicate_events(self, events):
+        events_sorted = events.sort_values(by='volatility', ascending=False)
+        max_vol = events_sorted['volatility'].iloc[0]
+        top_events = events_sorted[events_sorted['volatility'] == max_vol]
+
+        chosen = None
+        if len(top_events) == 1:
+            chosen = top_events.iloc[0]
+        else:
+            usa_events = top_events[top_events['country'].str.upper() == 'USA']
+            if len(usa_events) == 1:
+                chosen = usa_events.iloc[0]
+            elif len(usa_events) > 1:
+                chosen = usa_events.sample(1).iloc[0]
+            else:
+                chosen = top_events.sample(1).iloc[0]
+
+        timestamp = events.index[0]
+        chosen_df = pd.DataFrame([chosen])
+        chosen_df['datetime'] = timestamp
+        return chosen_df
+
+
+    def process_additional_datasets(self, data, config):
+        print("[DEBUG] Starting process_additional_datasets...")
+        common_start = pd.Timestamp(data.index.min())
+        common_end = pd.Timestamp(data.index.max())
+        print(f"[DEBUG] Initial common range from main dataset: {common_start} to {common_end}")
+        print(f"[DEBUG] Main dataset shape: {data.shape}, columns: {list(data.columns)}, index type: {data.index.dtype}")
+        print("[DEBUG] Main dataset first 5 rows:")
+        print(data.head())
+
+        def log_dataset_range(dataset_key, dataset):
+            print(f"[DEBUG] Dataset: {dataset_key}")
+            if dataset is not None and not dataset.empty:
+                print(f"    [DEBUG] {dataset_key} original range: {dataset.index.min()} to {dataset.index.max()}")
+                print(f"    [DEBUG] {dataset_key} shape: {dataset.shape}, columns: {list(dataset.columns)}")
+                print(f"    [DEBUG] {dataset_key} first 5 rows:\n{dataset.head()}")
+            else:
+                print(f"[ERROR] Dataset {dataset_key} is empty or invalid.")
+
+        def process_dataset(dataset_func, dataset_key):
+            nonlocal common_start, common_end
+            print(f"[DEBUG] Processing {dataset_key}...")
+            print(f"[DEBUG] Current common range before {dataset_key}: {common_start} to {common_end}")
+
+            dataset = dataset_func(config[dataset_key], config, common_start, common_end)
+            log_dataset_range(dataset_key, dataset)
+
+            if dataset is not None and not dataset.empty:
+                aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
+
+                if not aligned_dataset.empty:
+                    print(f"[DEBUG] {dataset_key} after alignment range: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
+                    print(f"[DEBUG] {dataset_key} aligned shape: {aligned_dataset.shape}, columns: {list(aligned_dataset.columns)}")
+                    print(f"[DEBUG] {dataset_key} aligned first 5 rows:\n{aligned_dataset.head()}")
+                else:
+                    print(f"[ERROR] {dataset_key} is empty after alignment.")
+
+                if not aligned_dataset.empty:
+                    old_common_start, old_common_end = common_start, common_end
+                    common_start = max(common_start, aligned_dataset.index.min())
+                    common_end = min(common_end, aligned_dataset.index.max())
+                    print(f"[DEBUG] Updated common range after processing {dataset_key}: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
+
+                return aligned_dataset
+            else:
+                print(f"[DEBUG] No data returned or dataset empty for {dataset_key}, skipping alignment and updates.")
+            return None
+
+        additional_features = {}
+
+        if config.get('forex_datasets'):
+            print("[DEBUG] forex_datasets key found in config, processing...")
+            forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
+            if forex_features is not None and not forex_features.empty:
+                print("[DEBUG] Merging forex_datasets features into additional_features.")
+                print(f"[DEBUG] forex_datasets features shape: {forex_features.shape}, first 5 rows:\n{forex_features.head()}")
+                additional_features.update(forex_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] forex_datasets produced no features or empty dataset, no merge performed.")
+
+        if config.get('sp500_dataset'):
+            print("[DEBUG] sp500_dataset key found in config, processing...")
+            sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
+            if sp500_features is not None and not sp500_features.empty:
+                print("[DEBUG] Merging sp500_dataset features into additional_features.")
+                print(f"[DEBUG] sp500_dataset features shape: {sp500_features.shape}, first 5 rows:\n{sp500_features.head()}")
+                additional_features.update(sp500_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] sp500_dataset produced no features or empty dataset, no merge performed.")
+
+        if config.get('vix_dataset'):
+            print("[DEBUG] vix_dataset key found in config, processing...")
+            vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
+            if vix_features is not None and not vix_features.empty:
+                print("[DEBUG] Merging vix_dataset features into additional_features.")
+                print(f"[DEBUG] vix_dataset features shape: {vix_features.shape}, first 5 rows:\n{vix_features.head()}")
+                additional_features.update(vix_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] vix_dataset produced no features or empty dataset, no merge performed.")
+
+        if config.get('high_freq_dataset'):
+            print("[DEBUG] high_freq_dataset key found in config, processing...")
+            high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
+            if high_freq_features is not None and not high_freq_features.empty:
+                print("[DEBUG] Merging high_freq_dataset features into additional_features.")
+                print(f"[DEBUG] high_freq_dataset features shape: {high_freq_features.shape}, first 5 rows:\n{high_freq_features.head()}")
+                additional_features.update(high_freq_features.to_dict(orient='series'))
+            else:
+                print("[DEBUG] high_freq_dataset produced no features or empty dataset, no merge performed.")
+
+        if config.get('economic_calendar'):
+            print("[DEBUG] economic_calendar key found in config, processing...")
+            econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
+            if econ_calendar is not None and not econ_calendar.empty:
+                print("[DEBUG] Merging economic_calendar features into additional_features.")
+                print(f"[DEBUG] economic_calendar features shape: {econ_calendar.shape}, first 5 rows:\n{econ_calendar.head()}")
+                additional_features.update(econ_calendar.to_dict(orient='series'))
+            else:
+                print("[DEBUG] economic_calendar produced no features or empty dataset, no merge performed.")
+
+        print("[DEBUG] Combining all additional features into DataFrame...")
+        additional_features_df = pd.DataFrame(additional_features)
+        print(f"[DEBUG] Combined additional features DataFrame shape: {additional_features_df.shape}")
+        if not additional_features_df.empty:
+            print(f"[DEBUG] Combined additional features index range: {additional_features_df.index.min()} to {additional_features_df.index.max()}")
+            print("[DEBUG] Combined additional features first 5 rows:")
+            print(additional_features_df.head())
+        else:
+            print("[DEBUG] Combined additional features DataFrame is empty.")
+
+        print("[DEBUG] Final common date range after processing all datasets:")
+        print(f"[DEBUG] common_start: {common_start}, common_end: {common_end}")
+
+        print("[DEBUG] process_additional_datasets completed.")
+        return additional_features_df, common_start, common_end
+
 
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
-        """
-        Generate sliding window features for economic calendar data, structured for Conv1D input.
-        Data is fully aligned and hourly, with -1 as sentinel for no-event hours.
-        Uses vectorization and optional parallelization for speed.
-
-        Returns a NumPy array of shape (N, window_size, 8), where N = len(hourly_data).
-        Channels: 5 numeric, 2 categorical, 1 event mask.
-        """
-
         import numpy as np
-        from joblib import Parallel, delayed
         from numpy.lib.stride_tricks import sliding_window_view
 
-        # Columns definition (ensure these columns exist in econ_data):
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
         cat_cols = ['country_encoded', 'description_encoded']
         all_cols = numeric_cols + cat_cols
 
-        # Convert econ_data and hourly_data to arrays
-        # Ensure econ_data and hourly_data share the same length and order
-        econ_array = econ_data[all_cols].to_numpy()  # shape: (N, len(all_cols))
+        econ_array = econ_data[all_cols].to_numpy()
         N = econ_array.shape[0]
         M = len(all_cols)
 
@@ -661,93 +764,22 @@ class Plugin:
         if N < window_size:
             raise ValueError("Not enough data points to form even one full window.")
 
-        # Create sliding windows over the entire dataset
-        # Result shape: (N - window_size + 1, window_size, M)
         windows = sliding_window_view(econ_array, (window_size, M))
+        numeric_data = windows[..., :5]
+        cat_data = windows[..., 5:7]
 
-        # Extract numeric and categorical parts
-        # windows shape: (N - window_size + 1, window_size, M)
-        numeric_data = windows[..., :5]  # numeric columns
-        cat_data = windows[..., 5:7]     # categorical columns
+        no_event = (numeric_data == -1).all(axis=-1)
+        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]
 
-        # Compute event_mask vectorized:
-        # event_mask = 1 if any numeric column != -1 else 0
-        # Check if all numeric are -1:
-        no_event = (numeric_data == -1).all(axis=-1)  # shape: (N - window_size + 1, window_size)
-        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]  # add last dim for mask
-
-        # Combine into final features array (N - window_size + 1, window_size, 8)
         features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)
 
-        # If we need exactly N windows (one per timestamp in hourly_data), we can pad the top (window_size-1) entries
-        # with -1 to match length. Here we produce only (N - window_size + 1) windows.
-        # If the requirement is one window per timestamp, including the first hours, we must pad:
-        # Pad at the start for the first window_size-1 timestamps
         pad_size = window_size - 1
         if pad_size > 0:
             pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
-            # event_mask in these padded rows can remain 0 since all is -1 anyway
-            # concatenate pad before features so we get exactly N rows
             features = np.concatenate([pad_block, features], axis=0)
-
-        # Now features shape = (N, window_size, 8), exactly one window per row in hourly_data
-
-        # Parallelization if needed:
-        # If further heavy computations on each window is required, we can parallelize that step.
-        # For demonstration, let's assume no further heavy computation is needed. If needed:
-        #
-        # chunk_size = 10000
-        # num_chunks = (features.shape[0] + chunk_size - 1) // chunk_size
-        #
-        # def process_chunk(chunk):
-        #     # Additional computations on chunk if needed
-        #     return chunk
-        #
-        # chunks = [features[i*chunk_size:(i+1)*chunk_size] for i in range(num_chunks)]
-        # results = Parallel(n_jobs=-1, backend='multiprocessing')(delayed(process_chunk)(c) for c in chunks)
-        # features = np.concatenate(results, axis=0)
 
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
-
-
-    def _filter_duplicate_events(self, events):
-        """
-        Given a DataFrame 'events' for the same timestamp,
-        select one event according to the rules:
-        1. Event with highest volatility
-        2. If tie, event from USA
-        3. If still tie, pick one randomly
-
-        Returns a single-row DataFrame containing that chosen event.
-        """
-        # Sort by volatility descending
-        events_sorted = events.sort_values(by='volatility', ascending=False)
-        max_vol = events_sorted['volatility'].iloc[0]
-        top_events = events_sorted[events_sorted['volatility'] == max_vol]
-
-        chosen = None
-        if len(top_events) == 1:
-            chosen = top_events.iloc[0]
-        else:
-            # Tie in volatility
-            usa_events = top_events[top_events['country'].str.upper() == 'USA']
-            if len(usa_events) == 1:
-                chosen = usa_events.iloc[0]
-            elif len(usa_events) > 1:
-                # Multiple USA events, pick randomly
-                chosen = usa_events.sample(1).iloc[0]
-            else:
-                # No USA events or multiple top candidates still, pick randomly
-                chosen = top_events.sample(1).iloc[0]
-
-        # 'chosen' is a Series, convert to DataFrame with one row
-        # Also ensure 'datetime' column is present. The 'chosen' series index is numeric or column names.
-        # We must get the datetime from the events DataFrame index.
-        timestamp = events.index[0]  # All events share the same timestamp
-        chosen_df = pd.DataFrame([chosen])
-        chosen_df['datetime'] = timestamp
-        return chosen_df
 
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """

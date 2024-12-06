@@ -119,19 +119,12 @@ def analyze_variability_and_normality(data, config):
     return transformed_data
 
 def process_data(data, plugin, config):
-    """
-    Processes the data using the specified plugin and handles additional features
-    from high-frequency data, S&P, VIX, and the economic calendar.
-    """
     print("[DEBUG] Starting process_data...")
-
-    # Debug: Initial data overview
     print(f"[DEBUG] Initial data shape: {data.shape}")
     print(f"[DEBUG] Initial data columns: {list(data.columns)}")
     print(f"[DEBUG] Initial data index type: {data.index.dtype}")
 
-    # Set the datetime index
-    date_column_name = 'DATE_TIME'  # Update as per your actual datetime column name
+    date_column_name = 'DATE_TIME'
     if date_column_name in data.columns:
         data[date_column_name] = pd.to_datetime(data[date_column_name])
         data.set_index(date_column_name, inplace=True)
@@ -142,7 +135,6 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Data index type after setting datetime index: {data.index.dtype}")
     print(f"[DEBUG] Data index range: {data.index.min()} to {data.index.max()}")
 
-    # Map and verify OHLC columns
     header_mappings = config.get('header_mappings', {})
     dataset_type = config.get('dataset_type', 'default')
     dataset_headers = header_mappings.get(dataset_type, {})
@@ -152,22 +144,18 @@ def process_data(data, plugin, config):
         raise KeyError(f"[ERROR] Missing expected OHLC columns: {missing_columns}. Available: {list(data.columns)}")
     print(f"[DEBUG] Mapped OHLC columns: {ohlc_columns}")
 
-    # Filter numeric OHLC columns
     numeric_data = data[ohlc_columns].apply(pd.to_numeric, errors='coerce').fillna(0)
     print(f"[DEBUG] Numeric OHLC data shape: {numeric_data.shape}")
     print(f"[DEBUG] Numeric OHLC data head:\n{numeric_data.head()}")
 
-    # Process technical indicators
     processed_data = plugin.process(numeric_data)
     print(f"[DEBUG] Processed data index type: {processed_data.index.dtype}")
     print(f"[DEBUG] Processed data index range: {processed_data.index.min()} to {processed_data.index.max()}")
 
-    # Analyze variability and normality
     transformed_data = analyze_variability_and_normality(processed_data, config)
     print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
     print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
 
-    # Process additional datasets and get final overlapping range
     additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
     print(f"[DEBUG] Additional features index type: {additional_features_df.index.dtype}")
     if not additional_features_df.empty:
@@ -177,14 +165,10 @@ def process_data(data, plugin, config):
 
     print(f"[DEBUG] Final overlapping range determined: {final_common_start} to {final_common_end}")
 
-    # Restrict transformed_data and additional_features_df to the final overlapping range
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
 
-    # Align additional_features with transformed_data
     try:
-        # Since we will zero-fill or sentinel-fill in the econ calendar step,
-        # here we just ensure proper alignment.
         additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(0)
         print("[DEBUG] Additional features successfully aligned.")
         print(f"[DEBUG] Additional features shape after alignment: {additional_features_df.shape}")
@@ -192,12 +176,10 @@ def process_data(data, plugin, config):
         print(f"[ERROR] Failed to align additional features with transformed_data. Exception: {str(e)}")
         raise e
 
-    # Combine processed technical indicators with additional features
     final_data = pd.concat([transformed_data, additional_features_df], axis=1)
     print(f"[DEBUG] Final data shape after combining: {final_data.shape}")
     print(f"[DEBUG] Final data head:\n{final_data.head()}")
 
-    # Ensure the datetime column is preserved in the final output
     final_data.reset_index(inplace=True)
     if 'datetime' not in final_data.columns:
         final_data.rename(columns={'index': 'datetime'}, inplace=True)
