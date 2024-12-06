@@ -633,52 +633,80 @@ class Plugin:
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         """
         Generate sliding window features for economic calendar data, structured for Conv1D input.
-        econ_data is guaranteed to have hourly rows for every hour in the final overlapping range,
-        filled with -1 as a sentinel where no event occurred.
-        
-        Change: Now using reindex instead of .loc to avoid KeyErrors if expected_index includes times outside econ_data range.
+        Data is fully aligned and hourly, with -1 as sentinel for no-event hours.
+        Uses vectorization and optional parallelization for speed.
+
+        Returns a NumPy array of shape (N, window_size, 8), where N = len(hourly_data).
+        Channels: 5 numeric, 2 categorical, 1 event mask.
         """
-        print("Generating sliding window features...")
 
-        features = []
-        from tqdm import tqdm
+        import numpy as np
+        from joblib import Parallel, delayed
+        from numpy.lib.stride_tricks import sliding_window_view
 
-        # Expected econ_data columns: 
-        # ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff', 'country_encoded', 'description_encoded']
-        # plus event_date, event_time, etc., but main numeric and categorical columns are known.
-        # We have 8 channels total: 5 numeric, 2 categorical, 1 event mask.
+        # Columns definition (ensure these columns exist in econ_data):
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
-        cat_cols = ['country_encoded', 'description_encoded']  # As defined previously
-        # The event mask = 1 if any numeric column != -1, else 0.
+        cat_cols = ['country_encoded', 'description_encoded']
+        all_cols = numeric_cols + cat_cols
 
-        for timestamp in tqdm(hourly_data.index, desc="Processing Windows", unit="window"):
-            window_start = timestamp - pd.Timedelta(hours=window_size)
-            # Create the expected_index of window_size hours ending at 'timestamp'
-            expected_index = pd.date_range(end=timestamp, periods=window_size, freq='h')
+        # Convert econ_data and hourly_data to arrays
+        # Ensure econ_data and hourly_data share the same length and order
+        econ_array = econ_data[all_cols].to_numpy()  # shape: (N, len(all_cols))
+        N = econ_array.shape[0]
+        M = len(all_cols)
 
-            # Use reindex instead of loc to avoid KeyErrors, fill missing with -1
-            window_data = econ_data.reindex(expected_index, fill_value=-1)
+        if N != len(hourly_data):
+            raise ValueError("econ_data and hourly_data must have the same number of rows and alignment.")
 
-            # Initialize window matrix
-            window_matrix = np.zeros((window_size, 8))  # 5 numeric + 2 categorical + 1 mask
+        if N < window_size:
+            raise ValueError("Not enough data points to form even one full window.")
 
-            for i, row_time in enumerate(expected_index):
-                row = window_data.loc[row_time]
+        # Create sliding windows over the entire dataset
+        # Result shape: (N - window_size + 1, window_size, M)
+        windows = sliding_window_view(econ_array, (window_size, M))
 
-                # Check event mask
-                # If all numeric_cols are -1, no event
-                if (row[numeric_cols] == -1).all():
-                    event_mask = 0
-                else:
-                    event_mask = 1
+        # Extract numeric and categorical parts
+        # windows shape: (N - window_size + 1, window_size, M)
+        numeric_data = windows[..., :5]  # numeric columns
+        cat_data = windows[..., 5:7]     # categorical columns
 
-                window_matrix[i, :5] = row[numeric_cols].values
-                window_matrix[i, 5:7] = row[cat_cols].values
-                window_matrix[i, 7] = event_mask
+        # Compute event_mask vectorized:
+        # event_mask = 1 if any numeric column != -1 else 0
+        # Check if all numeric are -1:
+        no_event = (numeric_data == -1).all(axis=-1)  # shape: (N - window_size + 1, window_size)
+        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]  # add last dim for mask
 
-            features.append(window_matrix)
+        # Combine into final features array (N - window_size + 1, window_size, 8)
+        features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)
 
-        features = np.array(features)
+        # If we need exactly N windows (one per timestamp in hourly_data), we can pad the top (window_size-1) entries
+        # with -1 to match length. Here we produce only (N - window_size + 1) windows.
+        # If the requirement is one window per timestamp, including the first hours, we must pad:
+        # Pad at the start for the first window_size-1 timestamps
+        pad_size = window_size - 1
+        if pad_size > 0:
+            pad_block = np.full((pad_size, window_size, 8), -1.0, dtype=features.dtype)
+            # event_mask in these padded rows can remain 0 since all is -1 anyway
+            # concatenate pad before features so we get exactly N rows
+            features = np.concatenate([pad_block, features], axis=0)
+
+        # Now features shape = (N, window_size, 8), exactly one window per row in hourly_data
+
+        # Parallelization if needed:
+        # If further heavy computations on each window is required, we can parallelize that step.
+        # For demonstration, let's assume no further heavy computation is needed. If needed:
+        #
+        # chunk_size = 10000
+        # num_chunks = (features.shape[0] + chunk_size - 1) // chunk_size
+        #
+        # def process_chunk(chunk):
+        #     # Additional computations on chunk if needed
+        #     return chunk
+        #
+        # chunks = [features[i*chunk_size:(i+1)*chunk_size] for i in range(num_chunks)]
+        # results = Parallel(n_jobs=-1, backend='multiprocessing')(delayed(process_chunk)(c) for c in chunks)
+        # features = np.concatenate(results, axis=0)
+
         print(f"Sliding window feature generation complete. Shape: {features.shape}")
         return features
 
