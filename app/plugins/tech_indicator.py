@@ -363,7 +363,8 @@ class Plugin:
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
 
         # Resample econ_data hourly. Fill missing with sentinel (-1)
-        full_hourly_index = pd.date_range(start=common_start, end=common_end, freq='H')
+        # Replace 'H' with 'h' to avoid FutureWarning
+        full_hourly_index = pd.date_range(start=common_start, end=common_end, freq='h')
         econ_data = econ_data.reindex(full_hourly_index)
         econ_data.fillna(-1, inplace=True)  # Use -1 as sentinel for no-event hours
 
@@ -380,6 +381,16 @@ class Plugin:
         trend_signal, volatility_signal = self._generate_training_signals(final_hourly_data, config)
         print("[DEBUG] Training signals for trend and volatility generated.")
 
+        # Slice the training signals to match the number of sliding windows
+        trend_signal = trend_signal[window_size:]
+        volatility_signal = volatility_signal[window_size:]
+        print(f"[DEBUG] Sliced trend_signal shape: {trend_signal.shape}")
+        print(f"[DEBUG] Sliced volatility_signal shape: {volatility_signal.shape}")
+
+        # Confirm that features and labels have the same number of samples
+        if econ_features.shape[0] != len(trend_signal) or econ_features.shape[0] != len(volatility_signal):
+            raise ValueError("Features and training signals have different number of samples.")
+
         # Train and predict
         predictions = self._predict_trend_and_volatility_with_conv1d(
             econ_features=econ_features,
@@ -390,15 +401,12 @@ class Plugin:
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
 
-        # Trim the last prediction to align with labels
-        predicted_trend = predicted_trend[:-1]
-        predicted_volatility = predicted_volatility[:-1]
+        # Remove the trimming of predictions
+        # predicted_trend = predicted_trend[:-1]
+        # predicted_volatility = predicted_volatility[:-1]
 
         # Adjusted index remains the same
         adjusted_index = full_hourly_index[window_size:]
-
-        print(f"[DEBUG] Predicted trend length: {len(predicted_trend)}")
-        print(f"[DEBUG] Predicted volatility length: {len(predicted_volatility)}")
         print(f"[DEBUG] Adjusted index length: {len(adjusted_index)}")
         print(f"[DEBUG] Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
 
@@ -409,6 +417,7 @@ class Plugin:
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
 
@@ -500,7 +509,6 @@ class Plugin:
 
     def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
         import numpy as np
-        from numpy.lib.stride_tricks import sliding_window_view
 
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
         cat_cols = ['country_encoded', 'description_encoded']
@@ -529,7 +537,7 @@ class Plugin:
             print("[DEBUG] hourly_data_sliced first 5 rows:", hourly_data_sliced.head())
             raise ValueError("econ_data and hourly_data_sliced must have the same number of rows and alignment.")
 
-        # Proceed to generate sliding windows
+        # Proceed to generate sliding windows manually to ensure correct shape
         econ_array = econ_data_aligned[all_cols].to_numpy()
         N = econ_array.shape[0]
         M = len(all_cols)
@@ -541,34 +549,28 @@ class Plugin:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        # Generate windows of shape (number_of_windows, window_size, num_features)
-        windows = sliding_window_view(econ_array, window_shape=window_size, axis=0)[:-1]  # Exclude the last window
-        print(f"[DEBUG] windows shape after sliding_window_view and exclusion: {windows.shape}")  # Expected: (N - window_size, window_size, M)
-
-        # Verify window shape
-        expected_windows = N - window_size
-        actual_windows = windows.shape[0]
-        print(f"[DEBUG] Expected number of windows: {expected_windows}, Actual number of windows: {actual_windows}")
-
-        if actual_windows != expected_windows:
-            print("[ERROR] Number of generated windows does not match expected count.")
-            raise ValueError("Mismatch in the number of sliding windows generated.")
+        num_windows = N - window_size
+        windows = np.empty((num_windows, window_size, M), dtype=econ_array.dtype)
+        for i in range(num_windows):
+            windows[i] = econ_array[i:i+window_size]
+        print(f"[DEBUG] windows shape after manual sliding window: {windows.shape}")  # Expected: (12308,128,7)
 
         # Extract numeric and categorical data
-        numeric_data = windows[..., :5]  # Shape: (number_of_windows, window_size, 5)
-        cat_data = windows[..., 5:7]      # Shape: (number_of_windows, window_size, 2)
+        numeric_data = windows[..., :5]  # Shape: (12308,128,5)
+        cat_data = windows[..., 5:7]      # Shape: (12308,128,2)
 
         # Generate event mask
-        no_event = (numeric_data == -1).all(axis=-1)  # Shape: (number_of_windows, window_size)
-        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]  # Shape: (number_of_windows, window_size, 1)
+        no_event = (numeric_data == -1).all(axis=-1)  # Shape: (12308,128)
+        event_mask = (~no_event).astype(np.float32)[..., np.newaxis]  # Shape: (12308,128,1)
 
         # Concatenate features
-        features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)  # Shape: (number_of_windows, window_size, 8)
-        print(f"[DEBUG] features shape after concatenation: {features.shape}")  # Expected: (number_of_windows, window_size, 8)
+        features = np.concatenate([numeric_data, cat_data, event_mask], axis=-1)  # Shape: (12308,128,8)
+        print(f"[DEBUG] features shape after concatenation: {features.shape}")  # Expected: (12308,128,8)
 
         print(f"[DEBUG] Sliding window feature generation complete. Final features shape: {features.shape}")
         print("[DEBUG] First window event_mask values:", features[0, :, -1] if features.shape[0] > 0 else "No features")
         return features
+
 
 
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
