@@ -571,6 +571,7 @@ class Plugin:
         return features
 
 
+
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
         Train and use a Conv1D model to predict short-term trend and volatility.
