@@ -118,24 +118,13 @@ def analyze_variability_and_normality(data, config):
 
     return transformed_data
 
-
-
-
-
 def process_data(data, plugin, config):
-    """
-    Processes the data using the specified plugin and handles additional features
-    from high-frequency data, S&P, VIX, and the economic calendar.
-    """
     print("[DEBUG] Starting process_data...")
-
-    # Debug: Initial data overview
     print(f"[DEBUG] Initial data shape: {data.shape}")
     print(f"[DEBUG] Initial data columns: {list(data.columns)}")
     print(f"[DEBUG] Initial data index type: {data.index.dtype}")
 
-    # Set the datetime index
-    date_column_name = 'DATE_TIME'  # Update as per your actual datetime column name
+    date_column_name = 'DATE_TIME'
     if date_column_name in data.columns:
         data[date_column_name] = pd.to_datetime(data[date_column_name])
         data.set_index(date_column_name, inplace=True)
@@ -146,7 +135,6 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Data index type after setting datetime index: {data.index.dtype}")
     print(f"[DEBUG] Data index range: {data.index.min()} to {data.index.max()}")
 
-    # Map and verify OHLC columns
     header_mappings = config.get('header_mappings', {})
     dataset_type = config.get('dataset_type', 'default')
     dataset_headers = header_mappings.get(dataset_type, {})
@@ -156,54 +144,51 @@ def process_data(data, plugin, config):
         raise KeyError(f"[ERROR] Missing expected OHLC columns: {missing_columns}. Available: {list(data.columns)}")
     print(f"[DEBUG] Mapped OHLC columns: {ohlc_columns}")
 
-    # Filter numeric OHLC columns
     numeric_data = data[ohlc_columns].apply(pd.to_numeric, errors='coerce').fillna(0)
     print(f"[DEBUG] Numeric OHLC data shape: {numeric_data.shape}")
-    print(f"[DEBUG] Numeric OHLC data head:\n{numeric_data.head()}")
+    print("[DEBUG] Numeric OHLC data first 5 rows:")
+    print(numeric_data.head())
 
-    # Process technical indicators
     processed_data = plugin.process(numeric_data)
-    print(f"[DEBUG] Processed data index type: {processed_data.index.dtype}")
-    print(f"[DEBUG] Processed data index range: {processed_data.index.min()} to {processed_data.index.max()}")
+    print(f"[DEBUG] After plugin.process, data range: {processed_data.index.min()} to {processed_data.index.max()} (len={len(processed_data)})")
 
-    # Analyze variability and normality
     transformed_data = analyze_variability_and_normality(processed_data, config)
-    print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}")
-    print(f"[DEBUG] Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
+    print(f"[DEBUG] After analyze_variability_and_normality, data range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
 
     # Process additional datasets
-    additional_features = plugin.process_additional_datasets(data, config)
-    print(f"[DEBUG] Additional features index type: {additional_features.index.dtype}")
-    print(f"[DEBUG] Additional features index range: {additional_features.index.min()} to {additional_features.index.max()}")
+    additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
+    print("[DEBUG] After process_additional_datasets:")
+    print(f"[DEBUG] final_common_start: {final_common_start}, final_common_end: {final_common_end}")
+    print(f"[DEBUG] additional_features_df shape: {additional_features_df.shape}")
 
-    # Align additional_features with transformed_data
+    # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
+    transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
+    additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
+    print("[DEBUG] After re-slicing transformed_data and additional_features_df:")
+    print(f"[DEBUG] transformed_data range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
+    print(f"[DEBUG] additional_features_df range: {additional_features_df.index.min()} to {additional_features_df.index.max()} (len={len(additional_features_df)})")
+
     try:
-        additional_features = additional_features.reindex(transformed_data.index, method='ffill').fillna(0)
-        print(f"[DEBUG] Additional features successfully aligned.")
-        print(f"[DEBUG] Additional features shape after alignment: {additional_features.shape}")
+        additional_features_df = additional_features_df.reindex(transformed_data.index, method='ffill').fillna(-1)
+        print("[DEBUG] Successfully aligned additional features with transformed_data.")
     except Exception as e:
-        print(f"[ERROR] Failed to align additional features with transformed_data. Exception: {str(e)}")
-        print(f"[DEBUG] Transformed data index type: {transformed_data.index.dtype}, range: {transformed_data.index}")
-        print(f"[DEBUG] Additional features index type: {additional_features.index.dtype}, range: {additional_features.index}")
+        print("[ERROR] Failed to align additional features with transformed_data.")
+        print("[DEBUG] transformed_data first 5 rows:", transformed_data.head())
+        print("[DEBUG] additional_features_df first 5 rows:", additional_features_df.head())
         raise e
 
-    # Combine processed technical indicators with additional features
-    final_data = pd.concat([transformed_data, additional_features], axis=1)
-    print(f"[DEBUG] Final data shape after combining: {final_data.shape}")
-    print(f"[DEBUG] Final data head:\n{final_data.head()}")
+    final_data = pd.concat([transformed_data, additional_features_df], axis=1)
+    print("[DEBUG] Final combined data shape:", final_data.shape)
+    print("[DEBUG] Final combined data first 5 rows:")
+    print(final_data.head())
 
-    # Add positional encoding
-    num_positions = len(final_data)
-    num_features = config.get('positional_encoding_dim', 8)
-    positional_encoding = generate_positional_encoding(num_positions, num_features)
-    positional_encoding_df = pd.DataFrame(positional_encoding, columns=[f'pos_enc_{i}' for i in range(num_features)])
-    final_data = pd.concat([final_data.reset_index(drop=True), positional_encoding_df.reset_index(drop=True)], axis=1)
-    print(f"[DEBUG] Final dataset shape with positional encoding: {final_data.shape}")
-    print(f"[DEBUG] Final dataset head with positional encoding:\n{final_data.head()}")
+    final_data.reset_index(inplace=True)
+    if 'datetime' not in final_data.columns:
+        final_data.rename(columns={'index': 'datetime'}, inplace=True)
+    print("[DEBUG] Final dataset with datetime column restored, first 5 rows:")
+    print(final_data.head())
 
     return final_data
-
-
 
 
 
