@@ -668,6 +668,7 @@ class Plugin:
 
 
 
+
     
     def train_economic_calendar_model(self, econ_calendar_path, hourly_data_path, config):
         """
