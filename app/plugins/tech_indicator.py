@@ -328,6 +328,18 @@ class Plugin:
         print("[DEBUG] Economic calendar data preprocessing complete.")
         print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
+        # Update common_start to the start of econ_data
+        econ_start = econ_data.index.min()
+        print(f"[DEBUG] Updated common_start to economic calendar start date: {econ_start}")
+
+        # Adjust common_end if necessary
+        econ_end = econ_data.index.max()
+        if common_end > econ_end:
+            common_end = econ_end
+            print(f"[DEBUG] Adjusted common_end to economic calendar end date: {common_end}")
+
+        print("[DEBUG] Starting alignment process for economic calendar.")
+
         # Filter duplicates with a progress meter
         grouped = econ_data.groupby(econ_data.index)
         unique_timestamps = grouped.ngroups
@@ -349,12 +361,8 @@ class Plugin:
         print(f"[DEBUG] econ_data index range after filtering: {econ_data.index.min()} to {econ_data.index.max()}")
         print(f"[DEBUG] econ_data shape: {econ_data.shape}")
 
-        print("[DEBUG] Starting alignment process for economic calendar.")
-        print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
-        print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
-
-        # Align econ_data to the final common range
-        econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
+        # Align econ_data to the updated common range
+        econ_data = econ_data[(econ_data.index >= econ_start) & (econ_data.index <= common_end)]
         print(f"[DEBUG] Econ data rows after alignment: {len(econ_data)}")
         if not econ_data.empty:
             print(f"[DEBUG] Econ data index range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
@@ -362,8 +370,8 @@ class Plugin:
             print("[ERROR] Alignment resulted in an empty dataset.")
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
 
-        # Slice hourly_data to the common range
-        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+        # Slice hourly_data to the updated common range
+        final_hourly_data = hourly_data[(hourly_data.index >= econ_start) & (hourly_data.index <= common_end)]
         print(f"[DEBUG] Final hourly data rows after slicing: {len(final_hourly_data)}")
         if final_hourly_data.empty:
             print("[ERROR] Final hourly data is empty after slicing.")
@@ -431,7 +439,11 @@ class Plugin:
         aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
+        # Save the trained model
+        self._save_trained_model('trained_conv1d_model.h5', self.latest_model)
+
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
 
