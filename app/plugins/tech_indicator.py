@@ -646,7 +646,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=50,  # Increased epochs for better learning
+            epochs=5,  # Increased epochs for better learning
             batch_size=32, 
             verbose=1,
             callbacks=[early_stop, checkpoint]
@@ -708,7 +708,7 @@ class Plugin:
         model.fit(
             X,
             {'volatility_output': y_volatility, 'trend_output': y_trend},
-            epochs=config.get('epochs', 50),
+            epochs=config.get('epochs', 5),
             batch_size=config.get('batch_size', 32),
             validation_split=0.2,
             verbose=1
