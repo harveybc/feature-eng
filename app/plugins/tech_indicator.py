@@ -517,7 +517,6 @@ class Plugin:
         return chosen_df
 
     def _generate_sliding_window_features(self, econ_data_aligned, final_hourly_data, window_size):
-        import numpy as np
 
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
         cat_cols = ['country_encoded', 'description_encoded']
