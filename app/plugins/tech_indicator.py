@@ -413,62 +413,27 @@ class Plugin:
         )
         print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
 
+        # Assign predictions to trend and volatility
+        predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
+        print(f"[DEBUG] Predicted trend length: {len(predicted_trend)}")
+        print(f"[DEBUG] Predicted volatility length: {len(predicted_volatility)}")
+
         # Adjusted index corresponds to the end of each sliding window
         adjusted_index = final_hourly_data.index[window_size:]
         print(f"[DEBUG] Adjusted index length: {len(adjusted_index)}")
         print(f"[DEBUG] Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
 
+        # Ensure that the number of predictions matches the adjusted index
         if len(predicted_trend) != len(adjusted_index):
             raise ValueError("Length mismatch after window adjustment.")
 
+        # Create aligned Series
         aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
 
 
-
-
-
-    def _preprocess_economic_calendar_data(self, econ_data):
-        print("Preprocessing economic calendar data...")
-        str_cols = econ_data.select_dtypes(include=['object']).columns
-        for col in str_cols:
-            econ_data[col] = econ_data[col].astype(str).str.strip()
-
-        volatility_mapping = {
-            'Low Volatility Expected': 1,
-            'Moderate Volatility Expected': 2,
-            'High Volatility Expected': 3
-        }
-        econ_data['volatility'] = econ_data['volatility'].map(volatility_mapping)
-
-        for col in ['actual', 'forecast', 'previous']:
-            econ_data[col] = econ_data[col].str.replace(',', '', regex=False)
-            econ_data[col] = econ_data[col].str.replace('[kK]$', '', regex=True)
-
-        for col in ['forecast', 'actual', 'volatility', 'previous']:
-            econ_data[col] = pd.to_numeric(econ_data[col], errors='coerce')
-
-        econ_data.dropna(subset=['forecast', 'actual', 'volatility'], inplace=True)
-
-        econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
-        econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
-
-        numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
-        for col in numerical_cols:
-            col_min = econ_data[col].min()
-            col_max = econ_data[col].max()
-            if col_max != col_min:
-                econ_data[col] = (econ_data[col] - col_min) / (col_max - col_min)
-            else:
-                econ_data[col] = 0.0
-
-        econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
-        econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
-
-        print("Economic calendar data preprocessing complete.")
-        return econ_data
 
     def _generate_training_signals(self, hourly_data, config):
         print("Generating training signals...")
@@ -517,6 +482,7 @@ class Plugin:
         return chosen_df
 
     def _generate_sliding_window_features(self, econ_data_aligned, final_hourly_data, window_size):
+        import numpy as np
 
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
         cat_cols = ['country_encoded', 'description_encoded']
@@ -534,7 +500,7 @@ class Plugin:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        num_windows = N - window_size
+        num_windows = N - window_size  # Each window slides by one hour
         windows = np.empty((num_windows, window_size, M), dtype=econ_array.dtype)
 
         for i in range(num_windows):
@@ -630,6 +596,8 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
+
 
 
     
