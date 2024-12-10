@@ -597,6 +597,7 @@ class Plugin:
         from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
         from keras.optimizers import Adam
         from sklearn.model_selection import train_test_split
+        from keras.callbacks import EarlyStopping, ModelCheckpoint
 
         print("Training Conv1D model for trend and volatility predictions...")
 
@@ -621,6 +622,10 @@ class Plugin:
         print(f"[DEBUG] X_train shape: {X_train.shape}, X_test shape: {X_test.shape}")
         print(f"[DEBUG] y_train shape: {y_train.shape}, y_test shape: {y_test.shape}")
 
+        # Define callbacks
+        early_stop = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+        checkpoint = ModelCheckpoint('best_conv1d_model.h5', monitor='val_loss', save_best_only=True)
+
         # Build Conv1D model
         model = Sequential([
             Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
@@ -635,22 +640,32 @@ class Plugin:
         model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
         print("[DEBUG] Conv1D model compiled successfully.")
 
-        # Train the model
+        # Train the model with callbacks
         history = model.fit(
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=5, 
+            epochs=50,  # Increased epochs for better learning
             batch_size=32, 
-            verbose=1
+            verbose=1,
+            callbacks=[early_stop, checkpoint]
         )
 
         print("Conv1D model training complete.")
+
+        # Load the best model
+        model.load_weights('best_conv1d_model.h5')
+        print("[DEBUG] Loaded the best model weights from checkpoint.")
+
+        # Save the trained model
+        self.latest_model = model  # Store the latest model for saving
+        # Alternatively, return the model if needed elsewhere
 
         # Predict on all data
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
 
 
     
