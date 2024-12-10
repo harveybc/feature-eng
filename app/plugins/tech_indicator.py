@@ -391,19 +391,18 @@ class Plugin:
         if econ_features.shape[0] != len(trend_signal) or econ_features.shape[0] != len(volatility_signal):
             raise ValueError("Features and training signals have different number of samples.")
 
+        # Prepare target variables
+        y = np.stack([trend_signal, volatility_signal], axis=1)
+
         # Train and predict
         predictions = self._predict_trend_and_volatility_with_conv1d(
             econ_features=econ_features,
-            training_signals={'trend': trend_signal, 'volatility': volatility_signal},
+            training_signals=y,  # Pass the sliced and stacked y directly
             window_size=window_size
         )
 
         predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
-
-        # Remove the trimming of predictions
-        # predicted_trend = predicted_trend[:-1]
-        # predicted_volatility = predicted_volatility[:-1]
 
         # Adjusted index remains the same
         adjusted_index = full_hourly_index[window_size:]
@@ -417,6 +416,7 @@ class Plugin:
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
 
 
 
@@ -579,7 +579,7 @@ class Plugin:
 
         Parameters:
         - econ_features (np.ndarray): Features generated from the sliding window.
-        - training_signals (dict): Dictionary with 'trend' and 'volatility' signals for training.
+        - training_signals (np.ndarray): Numpy array with shape (samples, 2) containing 'trend' and 'volatility' signals.
         - window_size (int): Size of the sliding window.
 
         Returns:
@@ -593,7 +593,14 @@ class Plugin:
         print("Training Conv1D model for trend and volatility predictions...")
 
         # Prepare target variables
-        y = np.stack([training_signals['trend'], training_signals['volatility']], axis=1)
+        y = training_signals  # Already sliced and stacked in process_economic_calendar
+
+        # Verify that y has the same number of samples as econ_features
+        if len(y) != econ_features.shape[0]:
+            raise ValueError(f"Number of labels ({len(y)}) does not match number of features ({econ_features.shape[0]}).")
+
+        print(f"[DEBUG] econ_features shape: {econ_features.shape}")
+        print(f"[DEBUG] y shape: {y.shape}")
 
         # Split data into train and test
         X_train, X_test, y_train, y_test = train_test_split(
@@ -602,6 +609,9 @@ class Plugin:
             test_size=0.2, 
             random_state=42
         )
+
+        print(f"[DEBUG] X_train shape: {X_train.shape}, X_test shape: {X_test.shape}")
+        print(f"[DEBUG] y_train shape: {y_train.shape}, y_test shape: {y_test.shape}")
 
         # Build Conv1D model
         model = Sequential([
@@ -615,6 +625,7 @@ class Plugin:
             Dense(2, activation='linear')  # Two outputs: trend and volatility
         ])
         model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
+        print("[DEBUG] Conv1D model compiled successfully.")
 
         # Train the model
         history = model.fit(
@@ -632,6 +643,7 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
     
     def train_economic_calendar_model(self, econ_calendar_path, hourly_data_path, config):
         """
