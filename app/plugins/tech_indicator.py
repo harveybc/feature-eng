@@ -554,7 +554,7 @@ class Plugin:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        num_windows = N - window_size  # Each window slides by one hour
+        num_windows = N - window_size
         windows = np.empty((num_windows, window_size, M), dtype=econ_array.dtype)
 
         for i in range(num_windows):
@@ -577,6 +577,7 @@ class Plugin:
         print(f"[DEBUG] Sliding window feature generation complete. Final features shape: {features.shape}")
         print("[DEBUG] First window event_mask values:", features[0, :, -1] if features.shape[0] > 0 else "No features")
         return features
+
 
 
 
@@ -1185,3 +1186,15 @@ class Plugin:
     def add_debug_info(self, debug_info):
         plugin_debug_info = self.get_debug_info()
         debug_info.update(plugin_debug_info)
+        
+    def _save_trained_model(self, filepath, model):
+        """
+        Save the trained Conv1D model to a file.
+
+        Parameters:
+        - filepath (str): Path to save the model.
+        - model (keras.Model): Trained Keras model.
+        """
+        model.save(filepath)
+        print(f"[DEBUG] Trained model saved at {filepath}")
+
