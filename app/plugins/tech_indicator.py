@@ -288,7 +288,7 @@ class Plugin:
         Process the economic calendar dataset:
         - Load and preprocess data
         - Filter duplicates using priority rules
-        - Align and resample to hourly
+        - Align and resample to hourly based on existing hourly data (excluding weekends)
         - Fill missing hours with sentinel (-1)
         """
         print("Processing economic calendar data...")
@@ -308,15 +308,16 @@ class Plugin:
         )
 
         print("[DEBUG] Economic calendar loaded successfully.")
-        print(f"[DEBUG] Economic calendar column types: {econ_data.dtypes}")
+        print(f"[DEBUG] Economic calendar column types:\n{econ_data.dtypes}")
 
-        # Combine 'event_date' and 'event_time'
+        # Combine 'event_date' and 'event_time' into 'datetime'
         econ_data['datetime'] = pd.to_datetime(
             econ_data['event_date'].str.strip() + ' ' + econ_data['event_time'].str.strip(),
             errors='coerce'
         )
         print(f"[DEBUG] Combined datetime column (first 5):\n{econ_data['datetime'].head()}")
 
+        # Drop rows with invalid datetime and set as index
         econ_data.dropna(subset=['datetime'], inplace=True)
         econ_data.set_index('datetime', inplace=True)
         print("[DEBUG] Economic calendar index set successfully.")
@@ -324,12 +325,10 @@ class Plugin:
 
         # Preprocess econ_data
         econ_data = self._preprocess_economic_calendar_data(econ_data)
-        print("Economic calendar data preprocessing complete.")
         print("[DEBUG] Economic calendar data preprocessing complete.")
         print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
         # Filter duplicates with a progress meter
-        # Group by index (unique timestamps)
         grouped = econ_data.groupby(econ_data.index)
         unique_timestamps = grouped.ngroups
         print("[DEBUG] Filtering duplicates...")
@@ -341,6 +340,7 @@ class Plugin:
         # Concatenate all filtered single-row DataFrames
         econ_data = pd.concat(filtered_rows, ignore_index=True)
 
+        # Ensure 'datetime' column exists before setting index
         if 'datetime' not in econ_data.columns:
             raise ValueError("After filtering duplicates, 'datetime' column not found. Ensure it exists.")
 
@@ -353,7 +353,7 @@ class Plugin:
         print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
         print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
 
-        # Align econ_data to final range
+        # Align econ_data to the final common range
         econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
         print(f"[DEBUG] Econ data rows after alignment: {len(econ_data)}")
         if not econ_data.empty:
@@ -362,19 +362,29 @@ class Plugin:
             print("[ERROR] Alignment resulted in an empty dataset.")
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
 
-        # Resample econ_data hourly. Fill missing with sentinel (-1)
-        # Replace 'H' with 'h' to avoid FutureWarning
-        full_hourly_index = pd.date_range(start=common_start, end=common_end, freq='h')
-        econ_data = econ_data.reindex(full_hourly_index)
-        econ_data.fillna(-1, inplace=True)  # Use -1 as sentinel for no-event hours
+        # Slice hourly_data to the common range
+        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+        print(f"[DEBUG] Final hourly data rows after slicing: {len(final_hourly_data)}")
+        if final_hourly_data.empty:
+            print("[ERROR] Final hourly data is empty after slicing.")
+            raise ValueError("[ERROR] Hourly data is empty after slicing to the common range.")
 
-        print(f"[DEBUG] Econ data resampled to hourly frequency, shape: {econ_data.shape}, range: {econ_data.index.min()} to {econ_data.index.max()}")
-        print("[DEBUG] First 5 rows after resampling and filling missing events:\n", econ_data.head())
+        # Reindex econ_data to match the existing hourly_data indices (excluding weekends)
+        econ_data_aligned = econ_data.reindex(final_hourly_data.index, fill_value=-1)
+        print(f"[DEBUG] econ_data_aligned range: {econ_data_aligned.index.min()} to {econ_data_aligned.index.max()} (len={len(econ_data_aligned)})")
+        print(f"[DEBUG] final_hourly_data range: {final_hourly_data.index.min()} to {final_hourly_data.index.max()} (len={len(final_hourly_data)})")
+
+        # Verify alignment
+        if len(econ_data_aligned) != len(final_hourly_data):
+            print("[ERROR] Length mismatch after alignment:")
+            print(f"[DEBUG] econ_data_aligned length: {len(econ_data_aligned)}, final_hourly_data length: {len(final_hourly_data)}")
+            print("[DEBUG] econ_data_aligned first 5 rows:\n", econ_data_aligned.head())
+            print("[DEBUG] final_hourly_data first 5 rows:\n", final_hourly_data.head())
+            raise ValueError("econ_data_aligned and final_hourly_data must have the same number of rows and alignment.")
 
         # Generate sliding window features
         window_size = config['calendar_window_size']
-        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
-        econ_features = self._generate_sliding_window_features(econ_data, final_hourly_data, window_size)
+        econ_features = self._generate_sliding_window_features(econ_data_aligned, final_hourly_data, window_size)
         print(f"[DEBUG] Sliding window feature generation complete. Shape: {econ_features.shape}")
 
         # Generate training signals for trend and volatility
@@ -382,6 +392,7 @@ class Plugin:
         print("[DEBUG] Training signals for trend and volatility generated.")
 
         # Slice the training signals to match the number of sliding windows
+        # Each window predicts the trend and volatility at the end of the window
         trend_signal = trend_signal[window_size:]
         volatility_signal = volatility_signal[window_size:]
         print(f"[DEBUG] Sliced trend_signal shape: {trend_signal.shape}")
@@ -400,12 +411,10 @@ class Plugin:
             training_signals=y,  # Pass the sliced and stacked y directly
             window_size=window_size
         )
-
-        predicted_trend, predicted_volatility = predictions[:, 0], predictions[:, 1]
         print(f"[DEBUG] Predictions generated. Predictions shape: {predictions.shape}")
 
-        # Adjusted index remains the same
-        adjusted_index = full_hourly_index[window_size:]
+        # Adjusted index corresponds to the end of each sliding window
+        adjusted_index = final_hourly_data.index[window_size:]
         print(f"[DEBUG] Adjusted index length: {len(adjusted_index)}")
         print(f"[DEBUG] Adjusted index datetime range: {adjusted_index.min()} to {adjusted_index.max()}")
 
@@ -507,37 +516,14 @@ class Plugin:
         chosen_df['datetime'] = timestamp
         return chosen_df
 
-    def _generate_sliding_window_features(self, econ_data, hourly_data, window_size):
+    def _generate_sliding_window_features(self, econ_data_aligned, final_hourly_data, window_size):
         import numpy as np
 
         numeric_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
         cat_cols = ['country_encoded', 'description_encoded']
         all_cols = numeric_cols + cat_cols
 
-        # Determine the actual date range of econ_data
-        econ_start = econ_data.index.min()
-        econ_end = econ_data.index.max()
-        print("[DEBUG] In _generate_sliding_window_features:")
-        print(f"[DEBUG] econ_start: {econ_start}, econ_end: {econ_end}")
-
-        # Slice hourly_data to the economic calendar's date range
-        hourly_data_sliced = hourly_data[(hourly_data.index >= econ_start) & (hourly_data.index <= econ_end)]
-        print(f"[DEBUG] hourly_data_sliced range: {hourly_data_sliced.index.min()} to {hourly_data_sliced.index.max()} (len={len(hourly_data_sliced)})")
-
-        # Reindex econ_data to match exactly the sliced hourly_data's index
-        econ_data_aligned = econ_data.reindex(hourly_data_sliced.index, fill_value=-1)
-        print(f"[DEBUG] econ_data_aligned range: {econ_data_aligned.index.min()} to {econ_data_aligned.index.max()} (len={len(econ_data_aligned)})")
-        print(f"[DEBUG] hourly_data_sliced range: {hourly_data_sliced.index.min()} to {hourly_data_sliced.index.max()} (len={len(hourly_data_sliced)})")
-
-        # Verify alignment
-        if len(econ_data_aligned) != len(hourly_data_sliced):
-            print("[ERROR] Length mismatch after alignment:")
-            print(f"[DEBUG] econ_data_aligned length: {len(econ_data_aligned)}, hourly_data_sliced length: {len(hourly_data_sliced)}")
-            print("[DEBUG] econ_data_aligned first 5 rows:", econ_data_aligned.head())
-            print("[DEBUG] hourly_data_sliced first 5 rows:", hourly_data_sliced.head())
-            raise ValueError("econ_data and hourly_data_sliced must have the same number of rows and alignment.")
-
-        # Proceed to generate sliding windows manually to ensure correct shape
+        # Convert econ_data_aligned to numpy array
         econ_array = econ_data_aligned[all_cols].to_numpy()
         N = econ_array.shape[0]
         M = len(all_cols)
@@ -551,8 +537,10 @@ class Plugin:
 
         num_windows = N - window_size
         windows = np.empty((num_windows, window_size, M), dtype=econ_array.dtype)
+
         for i in range(num_windows):
             windows[i] = econ_array[i:i+window_size]
+
         print(f"[DEBUG] windows shape after manual sliding window: {windows.shape}")  # Expected: (12308,128,7)
 
         # Extract numeric and categorical data
@@ -643,6 +631,7 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
 
     
     def train_economic_calendar_model(self, econ_calendar_path, hourly_data_path, config):
