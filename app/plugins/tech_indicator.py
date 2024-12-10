@@ -435,6 +435,48 @@ class Plugin:
 
 
 
+
+
+    def _preprocess_economic_calendar_data(self, econ_data):
+        print("Preprocessing economic calendar data...")
+        str_cols = econ_data.select_dtypes(include=['object']).columns
+        for col in str_cols:
+            econ_data[col] = econ_data[col].astype(str).str.strip()
+
+        volatility_mapping = {
+            'Low Volatility Expected': 1,
+            'Moderate Volatility Expected': 2,
+            'High Volatility Expected': 3
+        }
+        econ_data['volatility'] = econ_data['volatility'].map(volatility_mapping)
+
+        for col in ['actual', 'forecast', 'previous']:
+            econ_data[col] = econ_data[col].str.replace(',', '', regex=False)
+            econ_data[col] = econ_data[col].str.replace('[kK]$', '', regex=True)
+
+        for col in ['forecast', 'actual', 'volatility', 'previous']:
+            econ_data[col] = pd.to_numeric(econ_data[col], errors='coerce')
+
+        econ_data.dropna(subset=['forecast', 'actual', 'volatility'], inplace=True)
+
+        econ_data['forecast_diff'] = econ_data['actual'] - econ_data['forecast']
+        econ_data['volatility_weighted_diff'] = econ_data['forecast_diff'] * econ_data['volatility']
+
+        numerical_cols = ['forecast', 'actual', 'volatility', 'forecast_diff', 'volatility_weighted_diff']
+        for col in numerical_cols:
+            col_min = econ_data[col].min()
+            col_max = econ_data[col].max()
+            if col_max != col_min:
+                econ_data[col] = (econ_data[col] - col_min) / (col_max - col_min)
+            else:
+                econ_data[col] = 0.0
+
+        econ_data['country_encoded'] = econ_data['country'].astype('category').cat.codes
+        econ_data['description_encoded'] = econ_data['description'].astype('category').cat.codes
+
+        print("Economic calendar data preprocessing complete.")
+        return econ_data
+
     def _generate_training_signals(self, hourly_data, config):
         print("Generating training signals...")
         short_term_window = config['calendar_window_size'] // 10
@@ -526,6 +568,7 @@ class Plugin:
 
 
 
+
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
         Train and use a Conv1D model to predict short-term trend and volatility.
@@ -596,8 +639,6 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
-
-
 
 
     
