@@ -328,6 +328,18 @@ class Plugin:
         print("[DEBUG] Economic calendar data preprocessing complete.")
         print(f"[DEBUG] Processed economic calendar datetime range: {econ_data.index.min()} to {econ_data.index.max()}")
 
+        # Update common_start to the start of econ_data
+        econ_start = econ_data.index.min()
+        print(f"[DEBUG] Updated common_start to economic calendar start date: {econ_start}")
+
+        # Adjust common_end if necessary
+        econ_end = econ_data.index.max()
+        if common_end > econ_end:
+            common_end = econ_end
+            print(f"[DEBUG] Adjusted common_end to economic calendar end date: {common_end}")
+
+        print("[DEBUG] Starting alignment process for economic calendar.")
+
         # Filter duplicates with a progress meter
         grouped = econ_data.groupby(econ_data.index)
         unique_timestamps = grouped.ngroups
@@ -349,12 +361,8 @@ class Plugin:
         print(f"[DEBUG] econ_data index range after filtering: {econ_data.index.min()} to {econ_data.index.max()}")
         print(f"[DEBUG] econ_data shape: {econ_data.shape}")
 
-        print("[DEBUG] Starting alignment process for economic calendar.")
-        print(f"[DEBUG] Common start: {common_start} ({type(common_start)})")
-        print(f"[DEBUG] Common end: {common_end} ({type(common_end)})")
-
-        # Align econ_data to the final common range
-        econ_data = econ_data[(econ_data.index >= common_start) & (econ_data.index <= common_end)]
+        # Align econ_data to the updated common range
+        econ_data = econ_data[(econ_data.index >= econ_start) & (econ_data.index <= common_end)]
         print(f"[DEBUG] Econ data rows after alignment: {len(econ_data)}")
         if not econ_data.empty:
             print(f"[DEBUG] Econ data index range after alignment: {econ_data.index.min()} to {econ_data.index.max()}")
@@ -362,8 +370,8 @@ class Plugin:
             print("[ERROR] Alignment resulted in an empty dataset.")
             raise ValueError("[ERROR] Economic calendar dataset is empty after alignment.")
 
-        # Slice hourly_data to the common range
-        final_hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+        # Slice hourly_data to the updated common range
+        final_hourly_data = hourly_data[(hourly_data.index >= econ_start) & (hourly_data.index <= common_end)]
         print(f"[DEBUG] Final hourly data rows after slicing: {len(final_hourly_data)}")
         if final_hourly_data.empty:
             print("[ERROR] Final hourly data is empty after slicing.")
@@ -431,7 +439,12 @@ class Plugin:
         aligned_trend = pd.Series(predicted_trend, index=adjusted_index, name="Predicted_Trend")
         aligned_volatility = pd.Series(predicted_volatility, index=adjusted_index, name="Predicted_Volatility")
 
+        # Save the trained model
+        self._save_trained_model('trained_conv1d_model.h5', self.latest_model)
+
         return pd.concat([aligned_trend, aligned_volatility], axis=1)
+
+
 
 
 
@@ -478,50 +491,105 @@ class Plugin:
         return econ_data
 
     def _generate_training_signals(self, hourly_data, config):
+        """
+        Generate training signals for trend and volatility.
+
+        Parameters:
+        - hourly_data (pd.DataFrame): Hourly dataset with 'close' prices.
+        - config (dict): Configuration dictionary.
+
+        Returns:
+        - trend_signal (np.ndarray): Target trend variation values.
+        - volatility_signal (np.ndarray): Target volatility values.
+        """
         print("Generating training signals...")
+        
+        # Define short-term window size
         short_term_window = config['calendar_window_size'] // 10
         print(f"[DEBUG] Short-term window size for training signals: {short_term_window}")
 
-        trend_signal = (
-            hourly_data['close']
-            .ewm(span=short_term_window)
-            .mean()
-            .diff()
-            .fillna(0)
-            .values
-        )
+        # Calculate trend variation: relative change in EMA
+        ema = hourly_data['close'].ewm(span=short_term_window, adjust=False).mean()
+        trend_variation = ema.diff().fillna(0).values
 
-        volatility_signal = (
-            hourly_data['close']
-            .rolling(window=short_term_window)
-            .std()
-            .fillna(0)
-            .values
-        )
+        # Calculate volatility: rolling standard deviation
+        volatility = hourly_data['close'].rolling(window=short_term_window).std().fillna(0).values
+
+        print("[DEBUG] Raw trend_variation and volatility calculated.")
+
+        # Outlier Detection and Imputation for Training Signals
+        from sklearn.impute import SimpleImputer
+        from sklearn.preprocessing import MinMaxScaler
+        import joblib
+        import numpy as np
+
+        # Reshape for imputation
+        trend_variation = trend_variation.reshape(-1, 1)
+        volatility = volatility.reshape(-1, 1)
+
+        # Initialize imputers
+        imputer_trend = SimpleImputer(strategy='median')
+        imputer_volatility = SimpleImputer(strategy='median')
+
+        # Fit imputers and transform the data
+        trend_variation_imputed = imputer_trend.fit_transform(trend_variation)
+        volatility_imputed = imputer_volatility.fit_transform(volatility)
+
+        # Save imputers for deployment
+        joblib.dump(imputer_trend, 'imputer_trend_signals.pkl')
+        joblib.dump(imputer_volatility, 'imputer_volatility_signals.pkl')
+        print("[DEBUG] Imputers for trend and volatility signals saved as 'imputer_trend_signals.pkl' and 'imputer_volatility_signals.pkl'.")
+
+        # Initialize scalers
+        scaler_trend = MinMaxScaler()
+        scaler_volatility = MinMaxScaler()
+
+        # Fit scalers and transform the data
+        trend_variation_scaled = scaler_trend.fit_transform(trend_variation_imputed)
+        volatility_scaled = scaler_volatility.fit_transform(volatility_imputed)
+
+        # Save scalers for deployment
+        joblib.dump(scaler_trend, 'scaler_trend_signals.pkl')
+        joblib.dump(scaler_volatility, 'scaler_volatility_signals.pkl')
+        print("[DEBUG] Scalers for trend and volatility signals saved as 'scaler_trend_signals.pkl' and 'scaler_volatility_signals.pkl'.")
+
+        # Optionally, remove or cap extreme outliers if necessary
+        # For example, capping trend variation to a certain range
+        trend_variation_scaled = np.clip(trend_variation_scaled, 0, 1)
+        volatility_scaled = np.clip(volatility_scaled, 0, 1)
+
+        # Flatten the arrays
+        trend_signal = trend_variation_scaled.flatten()
+        volatility_signal = volatility_scaled.flatten()
+
+        print("[DEBUG] Training signals after imputation and scaling:")
+        print(f"Trend signal stats:\n{pd.Series(trend_signal).describe()}")
+        print(f"Volatility signal stats:\n{pd.Series(volatility_signal).describe()}")
+
         print("Training signals generated.")
         return trend_signal, volatility_signal
 
-
     def _filter_duplicate_events(self, events):
-        events_sorted = events.sort_values(by='volatility', ascending=False)
-        max_vol = events_sorted['volatility'].iloc[0]
-        top_events = events_sorted[events_sorted['volatility'] == max_vol]
+            events_sorted = events.sort_values(by='volatility', ascending=False)
+            max_vol = events_sorted['volatility'].iloc[0]
+            top_events = events_sorted[events_sorted['volatility'] == max_vol]
 
-        if len(top_events) == 1:
-            chosen = top_events.iloc[0]
-        else:
-            usa_events = top_events[top_events['country'].str.upper() == 'USA']
-            if len(usa_events) == 1:
-                chosen = usa_events.iloc[0]
-            elif len(usa_events) > 1:
-                chosen = usa_events.sample(1).iloc[0]
+            if len(top_events) == 1:
+                chosen = top_events.iloc[0]
             else:
-                chosen = top_events.sample(1).iloc[0]
+                usa_events = top_events[top_events['country'].str.upper() == 'USA']
+                if len(usa_events) == 1:
+                    chosen = usa_events.iloc[0]
+                elif len(usa_events) > 1:
+                    chosen = usa_events.sample(1).iloc[0]
+                else:
+                    chosen = top_events.sample(1).iloc[0]
 
-        timestamp = events.index[0]
-        chosen_df = pd.DataFrame([chosen])
-        chosen_df['datetime'] = timestamp
-        return chosen_df
+            timestamp = events.index[0]
+            chosen_df = pd.DataFrame([chosen])
+            chosen_df['datetime'] = timestamp
+            return chosen_df
+
 
     def _generate_sliding_window_features(self, econ_data_aligned, final_hourly_data, window_size):
         import numpy as np
@@ -542,7 +610,7 @@ class Plugin:
             print("[ERROR] Not enough data points to form a full window.")
             raise ValueError("Not enough data points to form even one full window.")
 
-        num_windows = N - window_size  # Each window slides by one hour
+        num_windows = N - window_size
         windows = np.empty((num_windows, window_size, M), dtype=econ_array.dtype)
 
         for i in range(num_windows):
@@ -568,7 +636,6 @@ class Plugin:
 
 
 
-
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
         Train and use a Conv1D model to predict short-term trend and volatility.
@@ -585,11 +652,16 @@ class Plugin:
         from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
         from keras.optimizers import Adam
         from sklearn.model_selection import train_test_split
+        from keras.callbacks import EarlyStopping, ModelCheckpoint
+        from sklearn.preprocessing import MinMaxScaler
+        from sklearn.impute import SimpleImputer
+        import numpy as np
+        import joblib
 
         print("Training Conv1D model for trend and volatility predictions...")
 
         # Prepare target variables
-        y = training_signals  # Already sliced and stacked in process_economic_calendar
+        y = training_signals  # Shape: (samples, 2)
 
         # Verify that y has the same number of samples as econ_features
         if len(y) != econ_features.shape[0]:
@@ -598,10 +670,44 @@ class Plugin:
         print(f"[DEBUG] econ_features shape: {econ_features.shape}")
         print(f"[DEBUG] y shape: {y.shape}")
 
+        # Outlier Detection and Imputation for Training Signals
+        # Initialize imputers
+        imputer_trend = SimpleImputer(strategy='median')
+        imputer_volatility = SimpleImputer(strategy='median')
+
+        # Separate the signals
+        y_trend = y[:, 0].reshape(-1, 1)
+        y_volatility = y[:, 1].reshape(-1, 1)
+
+        # Fit imputers and transform the data
+        y_trend_imputed = imputer_trend.fit_transform(y_trend)
+        y_volatility_imputed = imputer_volatility.fit_transform(y_volatility)
+
+        # Save imputers for deployment
+        joblib.dump(imputer_trend, 'imputer_trend.pkl')
+        joblib.dump(imputer_volatility, 'imputer_volatility.pkl')
+        print("[DEBUG] Imputers for trend and volatility saved as 'imputer_trend.pkl' and 'imputer_volatility.pkl'.")
+
+        # Initialize scalers
+        scaler_trend = MinMaxScaler()
+        scaler_volatility = MinMaxScaler()
+
+        # Fit scalers and transform the data
+        y_trend_scaled = scaler_trend.fit_transform(y_trend_imputed)
+        y_volatility_scaled = scaler_volatility.fit_transform(y_volatility_imputed)
+
+        # Save scalers for deployment
+        joblib.dump(scaler_trend, 'scaler_trend.pkl')
+        joblib.dump(scaler_volatility, 'scaler_volatility.pkl')
+        print("[DEBUG] Scalers for trend and volatility saved as 'scaler_trend.pkl' and 'scaler_volatility.pkl'.")
+
+        # Combine the scaled signals
+        y_scaled = np.hstack((y_trend_scaled, y_volatility_scaled))
+
         # Split data into train and test
         X_train, X_test, y_train, y_test = train_test_split(
             econ_features, 
-            y, 
+            y_scaled, 
             test_size=0.2, 
             random_state=42
         )
@@ -609,156 +715,62 @@ class Plugin:
         print(f"[DEBUG] X_train shape: {X_train.shape}, X_test shape: {X_test.shape}")
         print(f"[DEBUG] y_train shape: {y_train.shape}, y_test shape: {y_test.shape}")
 
+        # Define callbacks
+        early_stop = EarlyStopping(monitor='val_loss', patience=2, restore_best_weights=True)
+        checkpoint = ModelCheckpoint('best_conv1d_model.h5', monitor='val_loss', save_best_only=True, verbose=1)
+
         # Build Conv1D model
         model = Sequential([
-            Conv1D(32, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
+            Conv1D(64, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
             BatchNormalization(),
-            Conv1D(64, kernel_size=3, activation='relu'),
+            Conv1D(32, kernel_size=3, activation='relu'),
             BatchNormalization(),
-            Dropout(0.3),
+            # Dropout(0.3),  # Uncomment if regularization is needed
             Flatten(),
-            Dense(64, activation='relu'),
+            Dense(16, activation='relu'),
             Dense(2, activation='linear')  # Two outputs: trend and volatility
         ])
         model.compile(optimizer=Adam(learning_rate=0.001), loss='mse', metrics=['mae'])
         print("[DEBUG] Conv1D model compiled successfully.")
 
-        # Train the model
+        # Train the model with callbacks
         history = model.fit(
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=5, 
+            epochs=5,  # Keeping epochs at 5 as per your requirement
             batch_size=32, 
-            verbose=1
+            verbose=1,
+            callbacks=[early_stop, checkpoint]
         )
 
         print("Conv1D model training complete.")
 
+        # Load the best model
+        model.load_weights('best_conv1d_model.h5')
+        print("[DEBUG] Loaded the best model weights from checkpoint.")
+
+        # Save the trained model for deployment
+        self.latest_model = model  # Store the latest model for saving
+        model.save('trained_conv1d_model.h5')
+        print("[DEBUG] Trained Conv1D model saved to 'trained_conv1d_model.h5'.")
+
         # Predict on all data
-        predictions = model.predict(econ_features)
-        print(f"Predictions shape: {predictions.shape}")
-        return predictions
+        predictions_scaled = model.predict(econ_features)
+        print(f"Predictions shape: {predictions_scaled.shape}")
+
+        # Load scalers for inverse transformation
+        scaler_trend_loaded = joblib.load('scaler_trend.pkl')
+        scaler_volatility_loaded = joblib.load('scaler_volatility.pkl')
+
+        # Inverse transform the predictions to original scale
+        predictions_trend = scaler_trend_loaded.inverse_transform(predictions_scaled[:, 0].reshape(-1, 1)).flatten()
+        predictions_volatility = scaler_volatility_loaded.inverse_transform(predictions_scaled[:, 1].reshape(-1, 1)).flatten()
+
+        return np.vstack((predictions_trend, predictions_volatility)).T
 
 
     
-    def train_economic_calendar_model(self, econ_calendar_path, hourly_data_path, config):
-        """
-        Train the Conv1D model for predicting short-term volatility and trend variation.
-
-        Parameters:
-        - econ_calendar_path (str): Path to the economic calendar dataset.
-        - hourly_data_path (str): Path to the hourly dataset for calculating targets.
-        - config (dict): Configuration dictionary.
-
-        Returns:
-        - keras.Model: Trained Conv1D model.
-        """
-        print("Training economic calendar Conv1D model...")
-        
-        # Load and preprocess the economic calendar data
-        econ_calendar_data = self.load_economic_calendar(econ_calendar_path, config)
-        hourly_data = load_and_fix_hourly_data(hourly_data_path, config)
-        
-        # Generate sliding window data
-        window_size = config['calendar_window_size']
-        X, y_volatility, y_trend = self.generate_training_data(econ_calendar_data, hourly_data, window_size, config)
-
-        # Build the Conv1D model
-        input_shape = X.shape[1:]  # (window_size, num_features)
-        model = self.build_conv1d_model(input_shape)
-
-        # Compile the model
-        model.compile(
-            optimizer='adam',
-            loss={'volatility_output': 'mse', 'trend_output': 'mse'},
-            metrics={'volatility_output': 'mae', 'trend_output': 'mae'}
-        )
-        
-        # Train the model
-        model.fit(
-            X,
-            {'volatility_output': y_volatility, 'trend_output': y_trend},
-            epochs=config.get('epochs', 50),
-            batch_size=config.get('batch_size', 32),
-            validation_split=0.2,
-            verbose=1
-        )
-        print("Model training completed.")
-        return model
-
-    def generate_training_data(self, econ_calendar_data, hourly_data, window_size, config):
-        """
-        Generate training data for Conv1D model using economic calendar and hourly data.
-
-        Parameters:
-        - econ_calendar_data (pd.DataFrame): Processed economic calendar data.
-        - hourly_data (pd.DataFrame): Hourly dataset with close prices.
-        - window_size (int): Number of ticks in the sliding window.
-        - config (dict): Configuration dictionary.
-
-        Returns:
-        - X (np.ndarray): Input features for the Conv1D model.
-        - y_volatility (np.ndarray): Target volatility values.
-        - y_trend (np.ndarray): Target trend variation values.
-        """
-        print("Generating training data for economic calendar model...")
-        
-        event_features = econ_calendar_data.values  # Event data as array
-        prices = hourly_data['close'].values  # Close prices
-        ema = hourly_data['close'].ewm(span=window_size).mean().values  # EMA for trend calculation
-
-        X, y_volatility, y_trend = [], [], []
-        
-        for i in range(window_size, len(hourly_data)):
-            # Input features from economic calendar events in the window
-            X_window = event_features[i - window_size:i]
-            
-            # Target: Volatility in the short-term window
-            price_window = prices[i - window_size:i]
-            volatility = price_window.max() - price_window.min()
-            
-            # Target: Trend variation (relative change in EMA)
-            trend_variation = (ema[i] - ema[i - window_size]) / ema[i - window_size]
-            
-            X.append(X_window)
-            y_volatility.append(volatility)
-            y_trend.append(trend_variation)
-        
-        return np.array(X), np.array(y_volatility), np.array(y_trend)
-
-    def build_conv1d_model(self, input_shape):
-        from tensorflow.keras import layers, Model
-
-        input_layer = layers.Input(shape=input_shape)
-
-        # Conv1D layers
-        x = layers.Conv1D(filters=16, kernel_size=3, activation='relu')(input_layer)      # Filters=16
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Conv1D(filters=8, kernel_size=3, activation='relu')(x)               # Filters=8
-        x = layers.BatchNormalization()(x)
-
-        # Flatten and Dense layers
-        x = layers.Flatten()(x)
-
-        x = layers.Dense(48, activation='relu')(x)                                      # Units=48
-        x = layers.BatchNormalization()(x)
-
-        x = layers.Dense(24, activation='relu')(x)                                      # Units=24
-        x = layers.BatchNormalization()(x)
-
-        # Output layers
-        volatility_output = layers.Dense(1, name='volatility_output')(x)               # Output for Volatility
-        trend_output = layers.Dense(1, name='trend_output')(x)                         # Output for Trend
-
-        # Model Definition
-        model = Model(inputs=input_layer, outputs=[volatility_output, trend_output])
-        print("Conv1D model built successfully with Flatten layer and ~50,000 parameters.")
-        model.summary()
-        return model
-
-
     def process_forex_data(self, forex_files, config, common_start, common_end):
         """
         Processes and aligns multiple Forex rate datasets with the hourly dataset.
@@ -1157,3 +1169,16 @@ class Plugin:
     def add_debug_info(self, debug_info):
         plugin_debug_info = self.get_debug_info()
         debug_info.update(plugin_debug_info)
+        
+    def _save_trained_model(self, filepath, model):
+        """
+        Save the trained Conv1D model to a file.
+
+        Parameters:
+        - filepath (str): Path to save the model.
+        - model (keras.Model): Trained Keras model.
+        """
+        model.save(filepath)
+        print(f"[DEBUG] Trained model saved at {filepath}")
+
+
