@@ -645,7 +645,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=50,  # Increased epochs for better learning
+            epochs=5,  # Increased epochs for better learning
             batch_size=32, 
             verbose=1,
             callbacks=[early_stop, checkpoint]
