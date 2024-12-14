@@ -508,15 +508,14 @@ class Plugin:
         short_term_window = config['calendar_window_size'] // 10
         print(f"[DEBUG] Short-term window size for training signals: {short_term_window}")
 
-        # Calculate trend variation: relative change in EMA
-        ema = hourly_data['close'].ewm(span=short_term_window, adjust=False).mean()
-        trend_variation = ema.diff().fillna(0).values
+        # Calculate trend: moving average over the previous window
+        trend_signal = hourly_data['close'].rolling(window=short_term_window).mean().fillna(method='bfill').values
 
-        # Calculate volatility: rolling standard deviation
-        volatility = hourly_data['close'].rolling(window=short_term_window).std().fillna(0).values
+        # Calculate volatility: rolling standard deviation over the previous window
+        volatility_signal = hourly_data['close'].rolling(window=short_term_window).std().fillna(method='bfill').values
 
-        print("[DEBUG] Raw trend_variation and volatility calculated.")
-
+        print("[DEBUG] Raw trend and volatility signals calculated.")
+        
         # Outlier Detection and Imputation for Training Signals
         from sklearn.impute import SimpleImputer
         from sklearn.preprocessing import MinMaxScaler
@@ -524,16 +523,16 @@ class Plugin:
         import numpy as np
 
         # Reshape for imputation
-        trend_variation = trend_variation.reshape(-1, 1)
-        volatility = volatility.reshape(-1, 1)
+        trend_signal = trend_signal.reshape(-1, 1)
+        volatility_signal = volatility_signal.reshape(-1, 1)
 
-        # Initialize imputers
+        # Initialize imputers with a rolling window strategy
         imputer_trend = SimpleImputer(strategy='median')
         imputer_volatility = SimpleImputer(strategy='median')
 
         # Fit imputers and transform the data
-        trend_variation_imputed = imputer_trend.fit_transform(trend_variation)
-        volatility_imputed = imputer_volatility.fit_transform(volatility)
+        trend_signal_imputed = imputer_trend.fit_transform(trend_signal)
+        volatility_signal_imputed = imputer_volatility.fit_transform(volatility_signal)
 
         # Save imputers for deployment
         joblib.dump(imputer_trend, 'imputer_trend_signals.pkl')
@@ -545,22 +544,20 @@ class Plugin:
         scaler_volatility = MinMaxScaler()
 
         # Fit scalers and transform the data
-        trend_variation_scaled = scaler_trend.fit_transform(trend_variation_imputed)
-        volatility_scaled = scaler_volatility.fit_transform(volatility_imputed)
+        trend_signal_scaled = scaler_trend.fit_transform(trend_signal_imputed)
+        volatility_signal_scaled = scaler_volatility.fit_transform(volatility_signal_imputed)
 
         # Save scalers for deployment
         joblib.dump(scaler_trend, 'scaler_trend_signals.pkl')
         joblib.dump(scaler_volatility, 'scaler_volatility_signals.pkl')
         print("[DEBUG] Scalers for trend and volatility signals saved as 'scaler_trend_signals.pkl' and 'scaler_volatility_signals.pkl'.")
 
-        # Optionally, remove or cap extreme outliers if necessary
-        # For example, capping trend variation to a certain range
-        trend_variation_scaled = np.clip(trend_variation_scaled, 0, 1)
-        volatility_scaled = np.clip(volatility_scaled, 0, 1)
+        # Optionally, cap the scaled signals to handle residual outliers
+        # Since MinMaxScaler scales to [0,1], additional capping is not necessary
 
         # Flatten the arrays
-        trend_signal = trend_variation_scaled.flatten()
-        volatility_signal = volatility_scaled.flatten()
+        trend_signal = trend_signal_scaled.flatten()
+        volatility_signal = volatility_signal_scaled.flatten()
 
         print("[DEBUG] Training signals after imputation and scaling:")
         print(f"Trend signal stats:\n{pd.Series(trend_signal).describe()}")
@@ -568,6 +565,7 @@ class Plugin:
 
         print("Training signals generated.")
         return trend_signal, volatility_signal
+
 
     def _filter_duplicate_events(self, events):
             events_sorted = events.sort_values(by='volatility', ascending=False)
