@@ -449,6 +449,7 @@ class Plugin:
 
 
 
+
     def _preprocess_economic_calendar_data(self, econ_data):
         print("Preprocessing economic calendar data...")
         str_cols = econ_data.select_dtypes(include=['object']).columns
@@ -580,8 +581,6 @@ class Plugin:
 
 
 
-
-
     def _predict_trend_and_volatility_with_conv1d(self, econ_features, training_signals, window_size):
         """
         Train and use a Conv1D model to predict short-term trend and volatility.
@@ -646,7 +645,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=5,  # Increased epochs for better learning
+            epochs=50,  # Increased epochs for better learning
             batch_size=32, 
             verbose=1,
             callbacks=[early_stop, checkpoint]
@@ -666,6 +665,7 @@ class Plugin:
         predictions = model.predict(econ_features)
         print(f"Predictions shape: {predictions.shape}")
         return predictions
+
 
 
 
@@ -1197,4 +1197,5 @@ class Plugin:
         """
         model.save(filepath)
         print(f"[DEBUG] Trained model saved at {filepath}")
+
 
