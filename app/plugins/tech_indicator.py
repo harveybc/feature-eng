@@ -768,6 +768,7 @@ class Plugin:
         return np.vstack((predictions_trend, predictions_volatility)).T
 
 
+
     
     def process_forex_data(self, forex_files, config, common_start, common_end):
         """
