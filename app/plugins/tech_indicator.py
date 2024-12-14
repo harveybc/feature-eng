@@ -569,6 +569,27 @@ class Plugin:
         print("Training signals generated.")
         return trend_signal, volatility_signal
 
+    def _filter_duplicate_events(self, events):
+            events_sorted = events.sort_values(by='volatility', ascending=False)
+            max_vol = events_sorted['volatility'].iloc[0]
+            top_events = events_sorted[events_sorted['volatility'] == max_vol]
+
+            if len(top_events) == 1:
+                chosen = top_events.iloc[0]
+            else:
+                usa_events = top_events[top_events['country'].str.upper() == 'USA']
+                if len(usa_events) == 1:
+                    chosen = usa_events.iloc[0]
+                elif len(usa_events) > 1:
+                    chosen = usa_events.sample(1).iloc[0]
+                else:
+                    chosen = top_events.sample(1).iloc[0]
+
+            timestamp = events.index[0]
+            chosen_df = pd.DataFrame([chosen])
+            chosen_df['datetime'] = timestamp
+            return chosen_df
+
 
     def _generate_sliding_window_features(self, econ_data_aligned, final_hourly_data, window_size):
         import numpy as np
