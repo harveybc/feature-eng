@@ -1056,29 +1056,20 @@ class Plugin:
         print(high_freq_30m.head())
 
         # Trim hourly_data to the updated common_end before reindexing
-        # to avoid zero-filling beyond actual_end.
         hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
 
         # Construct high-frequency feature DataFrame
         high_freq_features = pd.DataFrame(index=hourly_data.index)
         try:
             for i in range(1, config['sub_periodicity_window_size'] + 1):
-                # Shift and reindex to hourly. We do NOT fill with zeros yet.
+                # Shift and reindex to hourly
                 close_15m_shifted = high_freq_15m.shift(i).reindex(hourly_data.index)
                 close_30m_shifted = high_freq_30m.shift(i).reindex(hourly_data.index)
 
-                # If we truly need to fill missing data, fill only within the known data range.
-                # Beyond actual_end, data should remain NaN and later trimmed if needed.
-                # Here, we only fill NaN that might be due to initial shifts, not beyond actual_end.
-                # To be safe, fill only within actual known data range:
-                close_15m_shifted = close_15m_shifted.where(close_15m_shifted.index <= actual_end)
-                close_30m_shifted = close_30m_shifted.where(close_30m_shifted.index <= actual_end)
+                # Fill missing data within known data range
+                close_15m_shifted = close_15m_shifted.where(close_15m_shifted.index <= actual_end).fillna(method='ffill').fillna(method='bfill')
+                close_30m_shifted = close_30m_shifted.where(close_30m_shifted.index <= actual_end).fillna(method='ffill').fillna(method='bfill')
 
-                # If we must fill missing due to shift, do minimal forward/back fill inside actual data range:
-                close_15m_shifted = close_15m_shifted.fillna(method='ffill').fillna(method='bfill')
-                close_30m_shifted = close_30m_shifted.fillna(method='ffill').fillna(method='bfill')
-
-                # If any timestamp is beyond actual_end, those remain NaN and we will drop them after this block.
                 high_freq_features[f'CLOSE_15m_tick_{i}'] = close_15m_shifted
                 high_freq_features[f'CLOSE_30m_tick_{i}'] = close_30m_shifted
 
@@ -1089,11 +1080,19 @@ class Plugin:
         # Drop rows beyond actual_end to ensure no zero or NaN padding.
         high_freq_features = high_freq_features[high_freq_features.index <= actual_end]
 
-        # Apply final common_start/common_end filter after adjusting:
+        # Apply final common_start/common_end filter
         high_freq_features = high_freq_features[(high_freq_features.index >= common_start) & (high_freq_features.index <= common_end)]
 
         if high_freq_features.empty:
             print("Warning: The processed high-frequency features are empty after applying the date filter.")
+
+        # Reorder columns: Place consecutive 15m ticks first, followed by 30m ticks
+        print("[DEBUG] Reordering columns to place 15m ticks first, followed by 30m ticks...")
+        ordered_columns = (
+            [col for col in high_freq_features.columns if '15m_tick' in col] +
+            [col for col in high_freq_features.columns if '30m_tick' in col]
+        )
+        high_freq_features = high_freq_features[ordered_columns]
 
         print("Processed high-frequency features (first 5 rows):")
         print(high_freq_features.head())
