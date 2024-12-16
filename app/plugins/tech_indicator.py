@@ -581,7 +581,7 @@ class Plugin:
         print("Generating training signals...")
         
         # Define short-term window size
-        short_term_window = config['calendar_window_size'] // 5
+        short_term_window = config['calendar_window_size'] // config['calendar_window_size_divisor']
         print(f"[DEBUG] Short-term window size for training signals: {short_term_window}")
 
         # Calculate trend: moving average over the previous window
