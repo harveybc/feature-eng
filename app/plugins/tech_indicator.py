@@ -13,6 +13,17 @@ from tqdm import tqdm  # For progress indication
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
+import joblib
+from sklearn import SimpleImputer
+from keras.models import Sequential
+from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
+from keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import SimpleImputer
+import numpy as np
+import joblib
 
 
 class Plugin:
@@ -496,7 +507,7 @@ class Plugin:
 
     def _generate_training_signals(self, hourly_data, config):
         """
-        Generate training signals for trend and volatility.
+        Generate training signals for trend and volatility with enhanced outlier handling.
 
         Parameters:
         - hourly_data (pd.DataFrame): Hourly dataset with 'close' prices.
@@ -520,17 +531,36 @@ class Plugin:
 
         print("[DEBUG] Raw trend and volatility signals calculated.")
         
-        # Outlier Detection and Imputation for Training Signals
-        from sklearn.impute import SimpleImputer
-        from sklearn.preprocessing import MinMaxScaler
-        import joblib
+        # Outlier Detection and Capping for Training Signals
         import numpy as np
+        import pandas as pd
+
+        # Convert to DataFrame for easier manipulation
+        df_signals = pd.DataFrame({
+            'trend_signal': trend_signal,
+            'volatility_signal': volatility_signal
+        })
+
+        # Define a function to cap outliers based on IQR
+        def cap_outliers(series):
+            Q1 = series.quantile(0.25)
+            Q3 = series.quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            return series.clip(lower=lower_bound, upper=upper_bound)
+
+        # Apply capping
+        df_signals['trend_signal'] = cap_outliers(df_signals['trend_signal'])
+        df_signals['volatility_signal'] = cap_outliers(df_signals['volatility_signal'])
+
+        print("[DEBUG] Outliers capped using IQR method.")
 
         # Reshape for imputation
-        trend_signal = trend_signal.reshape(-1, 1)
-        volatility_signal = volatility_signal.reshape(-1, 1)
+        trend_signal = df_signals['trend_signal'].values.reshape(-1, 1)
+        volatility_signal = df_signals['volatility_signal'].values.reshape(-1, 1)
 
-        # Initialize imputers with a rolling window strategy
+        # Initialize imputers
         imputer_trend = SimpleImputer(strategy='median')
         imputer_volatility = SimpleImputer(strategy='median')
 
@@ -556,19 +586,17 @@ class Plugin:
         joblib.dump(scaler_volatility, 'scaler_volatility_signals.pkl')
         print("[DEBUG] Scalers for trend and volatility signals saved as 'scaler_trend_signals.pkl' and 'scaler_volatility_signals.pkl'.")
 
-        # Optionally, cap the scaled signals to handle residual outliers
-        # Since MinMaxScaler scales to [0,1], additional capping is not necessary
-
         # Flatten the arrays
         trend_signal = trend_signal_scaled.flatten()
         volatility_signal = volatility_signal_scaled.flatten()
 
-        print("[DEBUG] Training signals after imputation and scaling:")
+        print("[DEBUG] Training signals after capping, imputation, and scaling:")
         print(f"Trend signal stats:\n{pd.Series(trend_signal).describe()}")
         print(f"Volatility signal stats:\n{pd.Series(volatility_signal).describe()}")
 
         print("Training signals generated.")
         return trend_signal, volatility_signal
+
 
 
     def plot_signals(training_trend, training_volatility, predicted_trend, predicted_volatility, index):
@@ -709,15 +737,6 @@ class Plugin:
         Returns:
         - np.ndarray: Predictions for trend and volatility for each hourly tick.
         """
-        from keras.models import Sequential
-        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
-        from keras.optimizers import Adam
-        from sklearn.model_selection import train_test_split
-        from keras.callbacks import EarlyStopping, ModelCheckpoint
-        from sklearn.preprocessing import MinMaxScaler
-        from sklearn.impute import SimpleImputer
-        import numpy as np
-        import joblib
 
         print("Training Conv1D model for trend and volatility predictions...")
 
