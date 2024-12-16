@@ -190,7 +190,7 @@ def process_data(data, plugin, config):
     print("[DEBUG] Final combined data first 5 rows:")
     print(final_data.head())
 
-    # Reset the index for the final dataset and ensure no unnamed column is saved
+    # Reset the index for the final dataset
     final_data.reset_index(inplace=True)
     final_data.rename(columns={'index': 'DATE_TIME'}, inplace=True)
     print("[DEBUG] Final dataset with DATE_TIME column restored, first 5 rows:")
@@ -200,12 +200,15 @@ def process_data(data, plugin, config):
     final_data.to_csv('indicators_output.csv', index=False)
     print("[DEBUG] Saved final dataset to 'indicators_output.csv'.")
 
-    # Forcefully remove any unnamed columns from the saved file
+    # Remove the unnamed index column by force
     clean_output = pd.read_csv('indicators_output.csv')
-    clean_output.to_csv('indicators_output.csv', index=False)
-    print("[DEBUG] Removed unnamed column from 'indicators_output.csv'.")
+    if 'Unnamed: 0' in clean_output.columns:
+        clean_output.drop(columns=['Unnamed: 0'], inplace=True)
+        clean_output.to_csv('indicators_output.csv', index=False)
+        print("[DEBUG] Removed unnamed column from 'indicators_output.csv'.")
 
     return final_data
+
 
 
 
