@@ -13,8 +13,6 @@ from tqdm import tqdm  # For progress indication
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import pandas as pd
-import joblib
-from sklearn import SimpleImputer
 from keras.models import Sequential
 from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
 from keras.optimizers import Adam
