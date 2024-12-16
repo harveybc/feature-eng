@@ -236,7 +236,7 @@ class Plugin:
             else:
                 print(f"[ERROR] {dataset_key} is empty or invalid.")
 
-        def process_dataset(dataset_func, dataset_key):
+        def process_and_save_dataset(dataset_func, dataset_key, output_filename):
             nonlocal common_start, common_end
             print(f"[DEBUG] Processing {dataset_key} with current range {common_start} to {common_end}")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
@@ -247,12 +247,15 @@ class Plugin:
                 if aligned_dataset.empty:
                     print(f"[ERROR] After alignment, {dataset_key} dataset is empty. Check the alignment logic.")
                 else:
-                    print(f"[DEBUG] {dataset_key} after alignment: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
                     # Update common_start and common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
                     common_start = max(common_start, aligned_dataset.index.min())
                     common_end = min(common_end, aligned_dataset.index.max())
                     print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
+
+                    # Save the aligned dataset to CSV
+                    aligned_dataset.reset_index().rename(columns={'index': 'datetime'}).to_csv(output_filename, index=False)
+                    print(f"[DEBUG] Saved {dataset_key} dataset to {output_filename}")
                 return aligned_dataset
             else:
                 print(f"[DEBUG] {dataset_key} is empty or no data returned, skipping alignment update.")
@@ -260,38 +263,67 @@ class Plugin:
 
         additional_features = {}
 
-        # Process economic_calendar first to set the correct common_start
+        # Process and save economic calendar
         if config.get('economic_calendar'):
-            econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
+            econ_calendar = process_and_save_dataset(
+                self.process_economic_calendar,
+                'economic_calendar',
+                'economic_calendar_aligned.csv'
+            )
             if econ_calendar is not None and not econ_calendar.empty:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
 
-        # Process other datasets after economic_calendar to maintain the updated common_start and common_end
+        # Process and save Forex datasets
         if config.get('forex_datasets'):
-            forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
+            forex_features = process_and_save_dataset(
+                self.process_forex_data,
+                'forex_datasets',
+                'forex_datasets_aligned.csv'
+            )
             if forex_features is not None and not forex_features.empty:
                 additional_features.update(forex_features.to_dict(orient='series'))
 
+        # Process and save SP500 dataset
         if config.get('sp500_dataset'):
-            sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
+            sp500_features = process_and_save_dataset(
+                self.process_sp500_data,
+                'sp500_dataset',
+                'sp500_aligned.csv'
+            )
             if sp500_features is not None and not sp500_features.empty:
                 additional_features.update(sp500_features.to_dict(orient='series'))
 
+        # Process and save VIX dataset
         if config.get('vix_dataset'):
-            vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
+            vix_features = process_and_save_dataset(
+                self.process_vix_data,
+                'vix_dataset',
+                'vix_aligned.csv'
+            )
             if vix_features is not None and not vix_features.empty:
                 additional_features.update(vix_features.to_dict(orient='series'))
 
+        # Process and save high-frequency dataset
         if config.get('high_freq_dataset'):
-            high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
+            high_freq_features = process_and_save_dataset(
+                self.process_high_frequency_data,
+                'high_freq_dataset',
+                'high_freq_aligned.csv'
+            )
             if high_freq_features is not None and not high_freq_features.empty:
                 additional_features.update(high_freq_features.to_dict(orient='series'))
 
         print("[DEBUG] After all datasets processed:")
         print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
         additional_features_df = pd.DataFrame(additional_features)
+
         if not additional_features_df.empty:
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
+
+            # Save the final merged dataset
+            additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
+            print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
+
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
 
