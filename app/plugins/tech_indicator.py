@@ -848,7 +848,9 @@ class Plugin:
 
         # Build Conv1D model
         model = Sequential([
-            Conv1D(64, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
+            Conv1D(128, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
+            BatchNormalization(),
+            Conv1D(64, kernel_size=3, activation='relu'),
             BatchNormalization(),
             Conv1D(32, kernel_size=3, activation='relu'),
             BatchNormalization(),
