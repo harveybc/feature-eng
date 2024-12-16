@@ -154,22 +154,20 @@ def process_data(data, plugin, config):
     processed_data = plugin.process(numeric_data)
     print(f"[DEBUG] After plugin.process, data range: {processed_data.index.min()} to {processed_data.index.max()} (len={len(processed_data)})")
 
-    # Save the processed technical indicators dataset trimmed to the valid date range
-    processed_data_trimmed = processed_data.copy()  # To preserve original processed_data if needed
-    processed_data_trimmed = processed_data_trimmed[(processed_data_trimmed.index >= processed_data.index.min()) &
-                                                    (processed_data_trimmed.index <= processed_data.index.max())]
-    processed_data_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('technical_indicators_aligned.csv', index=False)
-    print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
-
     # Analyze variability and normality
     transformed_data = analyze_variability_and_normality(processed_data, config)
     print(f"[DEBUG] After analyze_variability_and_normality, data range: {transformed_data.index.min()} to {transformed_data.index.max()} (len={len(transformed_data)})")
 
-    # Process additional datasets
+    # Process additional datasets and determine the final valid date range
     additional_features_df, final_common_start, final_common_end = plugin.process_additional_datasets(data, config)
     print("[DEBUG] After process_additional_datasets:")
     print(f"[DEBUG] final_common_start: {final_common_start}, final_common_end: {final_common_end}")
     print(f"[DEBUG] additional_features_df shape: {additional_features_df.shape}")
+
+    # Trim and save the technical indicators dataset to the final valid date range
+    processed_data_trimmed = processed_data[(processed_data.index >= final_common_start) & (processed_data.index <= final_common_end)]
+    processed_data_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('technical_indicators_aligned.csv', index=False)
+    print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
 
     # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
