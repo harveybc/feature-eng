@@ -166,8 +166,24 @@ def process_data(data, plugin, config):
 
     # Trim and save the technical indicators dataset to the final valid date range
     processed_data_trimmed = processed_data[(processed_data.index >= final_common_start) & (processed_data.index <= final_common_end)]
-    processed_data_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('technical_indicators_aligned.csv', index=False)
+    processed_data_trimmed.reset_index().to_csv('technical_indicators_aligned.csv', index=False)
     print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
+
+    # Load the hourly dataset aligned with the final valid date range
+    hourly_dataset = pd.read_csv('hourly_dataset_aligned.csv')
+    hourly_dataset['datetime'] = pd.to_datetime(hourly_dataset['datetime'])
+    hourly_dataset.set_index('datetime', inplace=True)
+    print("[DEBUG] Loaded hourly dataset aligned with final valid date range.")
+
+    # Merge the hourly dataset into the technical indicators dataset
+    final_indicators_output = pd.merge(
+        processed_data_trimmed, hourly_dataset, left_index=True, right_index=True, how='inner'
+    )
+    print("[DEBUG] Merged technical indicators with hourly dataset.")
+
+    # Save the merged dataset to 'indicators_output.csv'
+    final_indicators_output.reset_index().to_csv('indicators_output.csv', index=False)
+    print("[DEBUG] Saved final indicators output to 'indicators_output.csv'.")
 
     # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
