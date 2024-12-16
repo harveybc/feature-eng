@@ -336,6 +336,11 @@ class Plugin:
         # Also trim and save the main hourly dataset (the 'data' parameter)
         hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)]
         if not hourly_trimmed.empty:
+            # Remove volume column and add BH-BL column
+            if 'volume' in hourly_trimmed.columns:
+                hourly_trimmed.drop(columns=['volume'], inplace=True)
+            hourly_trimmed['BH-BL'] = hourly_trimmed['HIGH'] - hourly_trimmed['LOW']
+
             hourly_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('hourly_dataset_aligned.csv', index=False)
             print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
 
@@ -346,6 +351,7 @@ class Plugin:
 
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
+
 
 
 
