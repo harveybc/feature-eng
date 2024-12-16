@@ -816,6 +816,10 @@ class Plugin:
         model.save('trained_conv1d_model.h5')
         print("[DEBUG] Trained Conv1D model saved to 'trained_conv1d_model.h5'.")
 
+        # Evaluate the model on test data and print MAE
+        loss, mae = model.evaluate(X_test, y_test, verbose=0)
+        print(f"[DEBUG] Model Evaluation - Loss: {loss}, MAE: {mae}")
+
         # Predict on all data
         predictions_scaled = model.predict(econ_features)
         print(f"Predictions shape: {predictions_scaled.shape}")
@@ -829,6 +833,7 @@ class Plugin:
         predictions_volatility = scaler_volatility_loaded.inverse_transform(predictions_scaled[:, 1].reshape(-1, 1)).flatten()
 
         return np.vstack((predictions_trend, predictions_volatility)).T
+
 
 
 
