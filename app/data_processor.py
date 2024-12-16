@@ -200,13 +200,6 @@ def process_data(data, plugin, config):
     final_data.to_csv('indicators_output.csv', index=False)
     print("[DEBUG] Saved final dataset to 'indicators_output.csv'.")
 
-    # Remove the unnamed index column by force
-    clean_output = pd.read_csv('indicators_output.csv')
-    if 'Unnamed: 0' in clean_output.columns:
-        clean_output.drop(columns=['Unnamed: 0'], inplace=True)
-        clean_output.to_csv('indicators_output.csv', index=False)
-        print("[DEBUG] Removed unnamed column from 'indicators_output.csv'.")
-
     return final_data
 
 
@@ -230,7 +223,7 @@ def run_feature_engineering_pipeline(config, plugin):
 
     # Save the processed data to the output file if specified
     if config.get('output_file'):
-        processed_data.to_csv(config['output_file'], index=True)  # Ensure index is saved as datetime
+        processed_data.to_csv(config['output_file'], index=False) 
         print(f"Processed data saved to {config['output_file']}.")
     else:
         print("No output file specified; skipping save.")
