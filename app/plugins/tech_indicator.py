@@ -333,19 +333,18 @@ class Plugin:
         if 'high_freq_dataset' in aligned_datasets:
             save_aligned_dataset('high_freq_dataset', aligned_datasets['high_freq_dataset'], 'high_freq_aligned.csv')
 
-        # Also trim and save the main hourly dataset (the 'data' parameter)
-        hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)]
+         # Trim and save the main hourly dataset (the 'data' parameter)
+        hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)].copy()  # Use .copy() to avoid SettingWithCopyWarning
         if not hourly_trimmed.empty:
             # Remove volume column and add new calculated columns
             if 'volume' in hourly_trimmed.columns:
-                hourly_trimmed.drop(columns=['volume'], inplace=True)
+                hourly_trimmed = hourly_trimmed.drop(columns=['volume'])  # Avoid inplace to ensure a new object
             hourly_trimmed['BH-BL'] = hourly_trimmed['HIGH'] - hourly_trimmed['LOW']
             hourly_trimmed['BH-BO'] = hourly_trimmed['HIGH'] - hourly_trimmed['OPEN']
             hourly_trimmed['BO-BL'] = hourly_trimmed['OPEN'] - hourly_trimmed['LOW']
 
             hourly_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('hourly_dataset_aligned.csv', index=False)
             print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
-
         # Save the final merged dataset
         if not additional_features_df.empty:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
