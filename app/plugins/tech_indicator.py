@@ -227,6 +227,9 @@ class Plugin:
         print("[DEBUG] Main dataset first 5 rows:")
         print(data.head())
 
+        # Dictionary to store aligned datasets before final trimming
+        aligned_datasets = {}
+
         def log_dataset_range(dataset_key, dataset):
             print(f"[DEBUG] Dataset: {dataset_key}")
             if dataset is not None and not dataset.empty:
@@ -243,57 +246,103 @@ class Plugin:
             log_dataset_range(dataset_key, dataset)
 
             if dataset is not None and not dataset.empty:
+                # Initial alignment based on current common_start and common_end
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
                 if aligned_dataset.empty:
                     print(f"[ERROR] After alignment, {dataset_key} dataset is empty. Check the alignment logic.")
+                    return None
                 else:
-                    print(f"[DEBUG] {dataset_key} after alignment: {aligned_dataset.index.min()} to {aligned_dataset.index.max()}")
                     # Update common_start and common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
-                    common_start = max(common_start, aligned_dataset.index.min())
-                    common_end = min(common_end, aligned_dataset.index.max())
-                    print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {common_start} to {common_end}")
-                return aligned_dataset
+                    new_common_start = max(common_start, aligned_dataset.index.min())
+                    new_common_end = min(common_end, aligned_dataset.index.max())
+                    print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {new_common_start} to {new_common_end}")
+
+                    # Assign updated range
+                    common_start, common_end = new_common_start, new_common_end
+
+                    # Re-align with updated common_start and common_end if changed
+                    aligned_dataset = aligned_dataset[(aligned_dataset.index >= common_start) & (aligned_dataset.index <= common_end)]
+
+                    return aligned_dataset
             else:
                 print(f"[DEBUG] {dataset_key} is empty or no data returned, skipping alignment update.")
             return None
 
         additional_features = {}
 
-        # Process economic_calendar first to set the correct common_start
+        # Process datasets without saving first; just determine final common range and store results
+        econ_calendar = None
         if config.get('economic_calendar'):
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None and not econ_calendar.empty:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
+                aligned_datasets['economic_calendar'] = econ_calendar
 
-        # Process other datasets after economic_calendar to maintain the updated common_start and common_end
+        forex_features = None
         if config.get('forex_datasets'):
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None and not forex_features.empty:
                 additional_features.update(forex_features.to_dict(orient='series'))
+                aligned_datasets['forex_datasets'] = forex_features
 
+        sp500_features = None
         if config.get('sp500_dataset'):
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None and not sp500_features.empty:
                 additional_features.update(sp500_features.to_dict(orient='series'))
+                aligned_datasets['sp500_dataset'] = sp500_features
 
+        vix_features = None
         if config.get('vix_dataset'):
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
             if vix_features is not None and not vix_features.empty:
                 additional_features.update(vix_features.to_dict(orient='series'))
+                aligned_datasets['vix_dataset'] = vix_features
 
+        high_freq_features = None
         if config.get('high_freq_dataset'):
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
             if high_freq_features is not None and not high_freq_features.empty:
                 additional_features.update(high_freq_features.to_dict(orient='series'))
+                aligned_datasets['high_freq_dataset'] = high_freq_features
 
         print("[DEBUG] After all datasets processed:")
         print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
+
         additional_features_df = pd.DataFrame(additional_features)
         if not additional_features_df.empty:
+            # Final trimming with final common_start and common_end
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
+
+        # Now re-trim and re-save each aligned dataset to ensure they match the final common range
+        def save_aligned_dataset(name, df, filename):
+            if df is not None and not df.empty:
+                trimmed = df[(df.index >= common_start) & (df.index <= common_end)]
+                trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv(filename, index=False)
+                print(f"[DEBUG] Re-saved {name} dataset to {filename} with final range {common_start} to {common_end}")
+
+        # Re-save each dataset with final common range
+        if 'economic_calendar' in aligned_datasets:
+            save_aligned_dataset('economic_calendar', aligned_datasets['economic_calendar'], 'economic_calendar_aligned.csv')
+        if 'forex_datasets' in aligned_datasets:
+            save_aligned_dataset('forex_datasets', aligned_datasets['forex_datasets'], 'forex_datasets_aligned.csv')
+        if 'sp500_dataset' in aligned_datasets:
+            save_aligned_dataset('sp500_dataset', aligned_datasets['sp500_dataset'], 'sp500_aligned.csv')
+        if 'vix_dataset' in aligned_datasets:
+            save_aligned_dataset('vix_dataset', aligned_datasets['vix_dataset'], 'vix_aligned.csv')
+        if 'high_freq_dataset' in aligned_datasets:
+            save_aligned_dataset('high_freq_dataset', aligned_datasets['high_freq_dataset'], 'high_freq_aligned.csv')
+
+        # Save the final merged dataset
+        if not additional_features_df.empty:
+            additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
+            print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
+
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
+
+
 
 
     def process_economic_calendar(self, econ_calendar_path, config, common_start, common_end):
@@ -799,7 +848,9 @@ class Plugin:
 
         # Build Conv1D model
         model = Sequential([
-            Conv1D(64, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
+            Conv1D(128, kernel_size=3, activation='relu', input_shape=(window_size, econ_features.shape[2])),
+            BatchNormalization(),
+            Conv1D(64, kernel_size=3, activation='relu'),
             BatchNormalization(),
             Conv1D(32, kernel_size=3, activation='relu'),
             BatchNormalization(),
@@ -816,7 +867,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=5,  # Keeping epochs at 5 as per your requirement
+            epochs=25,  # Keeping epochs at 5 as per your requirement
             batch_size=32, 
             verbose=1,
             callbacks=[early_stop, checkpoint]
@@ -944,17 +995,11 @@ class Plugin:
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
         Processes the high-frequency dataset and aligns it with the hourly dataset.
-
-        Parameters:
-        - high_freq_data_path (str): Path to the high-frequency dataset.
-        - config (dict): Configuration settings.
-        - common_start (str or pd.Timestamp): The common start date for alignment.
-        - common_end (str or pd.Timestamp): The common end date for alignment.
-
-        Returns:
-        - pd.DataFrame: Aligned high-frequency features.
+        Ensures that common_end is updated to reflect the actual last available timestamp
+        from the high-frequency data before padding with zeros.
         """
-        print(f"Processing high-frequency EUR/USD dataset...")
+
+        print("Processing high-frequency EUR/USD dataset...")
 
         # Load and fix the hourly data
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
@@ -963,7 +1008,6 @@ class Plugin:
         if not isinstance(hourly_data.index, pd.DatetimeIndex):
             raise ValueError("Hourly data must have a valid DatetimeIndex.")
 
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the high-frequency data
@@ -974,47 +1018,74 @@ class Plugin:
         if not isinstance(high_freq_data.index, pd.DatetimeIndex):
             raise ValueError("High-frequency dataset must have a valid DatetimeIndex.")
 
-        # Validate the presence of the 'CLOSE' column
+        # Validate the presence of 'CLOSE'
         if 'CLOSE' not in high_freq_data.columns:
             raise ValueError("High-frequency dataset must contain a 'CLOSE' column.")
 
         print(f"High-frequency dataset successfully loaded. Index range: {high_freq_data.index.min()} to {high_freq_data.index.max()}")
 
+        # Determine actual last timestamp of 15-min data
+        actual_end = high_freq_data.index.max()
+
+        # If actual_end < common_end, we must adjust common_end accordingly
+        if actual_end < common_end:
+            print(f"[DEBUG] High-freq actual end {actual_end} is earlier than current common_end {common_end}. Updating common_end.")
+            common_end = actual_end
+
         # Resample high-frequency data to 15m and 30m
         high_freq_15m = high_freq_data['CLOSE'].resample('15T').ffill()
         high_freq_30m = high_freq_data['CLOSE'].resample('30T').ffill()
 
-        # Debug: Print resampled data summaries
         print("Resampled 15m CLOSE data (first 5 rows):")
         print(high_freq_15m.head())
         print("Resampled 30m CLOSE data (first 5 rows):")
         print(high_freq_30m.head())
 
-        # Construct high-frequency feature DataFrame aligned with hourly data
+        # Trim hourly_data to the updated common_end before reindexing
+        # to avoid zero-filling beyond actual_end.
+        hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+
+        # Construct high-frequency feature DataFrame
         high_freq_features = pd.DataFrame(index=hourly_data.index)
         try:
             for i in range(1, config['sub_periodicity_window_size'] + 1):
-                high_freq_features[f'CLOSE_15m_tick_{i}'] = (
-                    high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
-                )
-                high_freq_features[f'CLOSE_30m_tick_{i}'] = (
-                    high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
-                )
+                # Shift and reindex to hourly. We do NOT fill with zeros yet.
+                close_15m_shifted = high_freq_15m.shift(i).reindex(hourly_data.index)
+                close_30m_shifted = high_freq_30m.shift(i).reindex(hourly_data.index)
+
+                # If we truly need to fill missing data, fill only within the known data range.
+                # Beyond actual_end, data should remain NaN and later trimmed if needed.
+                # Here, we only fill NaN that might be due to initial shifts, not beyond actual_end.
+                # To be safe, fill only within actual known data range:
+                close_15m_shifted = close_15m_shifted.where(close_15m_shifted.index <= actual_end)
+                close_30m_shifted = close_30m_shifted.where(close_30m_shifted.index <= actual_end)
+
+                # If we must fill missing due to shift, do minimal forward/back fill inside actual data range:
+                close_15m_shifted = close_15m_shifted.fillna(method='ffill').fillna(method='bfill')
+                close_30m_shifted = close_30m_shifted.fillna(method='ffill').fillna(method='bfill')
+
+                # If any timestamp is beyond actual_end, those remain NaN and we will drop them after this block.
+                high_freq_features[f'CLOSE_15m_tick_{i}'] = close_15m_shifted
+                high_freq_features[f'CLOSE_30m_tick_{i}'] = close_30m_shifted
+
         except Exception as e:
             print(f"Error during high-frequency feature alignment: {e}")
             raise
 
-        # Apply common start and end date range filter
+        # Drop rows beyond actual_end to ensure no zero or NaN padding.
+        high_freq_features = high_freq_features[high_freq_features.index <= actual_end]
+
+        # Apply final common_start/common_end filter after adjusting:
         high_freq_features = high_freq_features[(high_freq_features.index >= common_start) & (high_freq_features.index <= common_end)]
 
         if high_freq_features.empty:
             print("Warning: The processed high-frequency features are empty after applying the date filter.")
 
-        # Debug: Print processed features
         print("Processed high-frequency features (first 5 rows):")
         print(high_freq_features.head())
 
         return high_freq_features
+
 
 
     def process_sub_periodicities(self, hourly_data, sub_periodicity_data, window_size):
