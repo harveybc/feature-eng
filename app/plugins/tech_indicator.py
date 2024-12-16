@@ -315,7 +315,6 @@ class Plugin:
             # Final trimming with final common_start and common_end
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
 
-        # Now re-trim and re-save each aligned dataset to ensure they match the final common range
         def save_aligned_dataset(name, df, filename):
             if df is not None and not df.empty:
                 trimmed = df[(df.index >= common_start) & (df.index <= common_end)]
@@ -334,6 +333,12 @@ class Plugin:
         if 'high_freq_dataset' in aligned_datasets:
             save_aligned_dataset('high_freq_dataset', aligned_datasets['high_freq_dataset'], 'high_freq_aligned.csv')
 
+        # Also trim and save the main hourly dataset (the 'data' parameter)
+        hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)]
+        if not hourly_trimmed.empty:
+            hourly_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('hourly_dataset_aligned.csv', index=False)
+            print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
+
         # Save the final merged dataset
         if not additional_features_df.empty:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
@@ -341,6 +346,7 @@ class Plugin:
 
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
+
 
 
 
