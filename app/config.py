@@ -92,6 +92,7 @@ DEFAULT_VALUES = {
 
     # Economic calendar settings
     'calendar_window_size': 128,  # Default sliding window for events
+    'calendar_window_size_divisor': 5,  # Divisor of the main window size to calculate the short-term trend and the volatility 
     'temporal_decay': 0.1,  # Decay rate for temporal weighting
     'relevant_countries': ['United States', 'Euro Zone'],  # Filter countries
     'filter_by_volatility': True,  # Only include moderate/high volatility events

@@ -166,7 +166,7 @@ def process_data(data, plugin, config):
 
     # Trim and save the technical indicators dataset to the final valid date range
     processed_data_trimmed = processed_data[(processed_data.index >= final_common_start) & (processed_data.index <= final_common_end)]
-    processed_data_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('technical_indicators_aligned.csv', index=False)
+    processed_data_trimmed.reset_index().rename(columns={processed_data_trimmed.index.name: 'DATE_TIME'}).to_csv('technical_indicators_aligned.csv', index=False)
     print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
 
     # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
@@ -190,13 +190,18 @@ def process_data(data, plugin, config):
     print("[DEBUG] Final combined data first 5 rows:")
     print(final_data.head())
 
+    # Reset the index for the final dataset
     final_data.reset_index(inplace=True)
-    if 'datetime' not in final_data.columns:
-        final_data.rename(columns={'index': 'datetime'}, inplace=True)
-    print("[DEBUG] Final dataset with datetime column restored, first 5 rows:")
+    final_data.rename(columns={'index': 'DATE_TIME'}, inplace=True)
+    print("[DEBUG] Final dataset with DATE_TIME column restored, first 5 rows:")
     print(final_data.head())
 
+    # Save the final combined dataset as indicators_output.csv
+    final_data.to_csv('indicators_output.csv', index=False)
+    print("[DEBUG] Saved final dataset to 'indicators_output.csv'.")
+
     return final_data
+
 
 
 
@@ -218,7 +223,7 @@ def run_feature_engineering_pipeline(config, plugin):
 
     # Save the processed data to the output file if specified
     if config.get('output_file'):
-        processed_data.to_csv(config['output_file'], index=True)  # Ensure index is saved as datetime
+        processed_data.to_csv(config['output_file'], index=False) 
         print(f"Processed data saved to {config['output_file']}.")
     else:
         print("No output file specified; skipping save.")
