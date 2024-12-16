@@ -816,7 +816,7 @@ class Plugin:
             X_train, 
             y_train, 
             validation_data=(X_test, y_test), 
-            epochs=5,  # Keeping epochs at 5 as per your requirement
+            epochs=25,  # Keeping epochs at 5 as per your requirement
             batch_size=32, 
             verbose=1,
             callbacks=[early_stop, checkpoint]
