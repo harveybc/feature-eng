@@ -171,8 +171,8 @@ def process_data(data, plugin, config):
 
     # Load the hourly dataset aligned with the final valid date range
     hourly_dataset = pd.read_csv('hourly_dataset_aligned.csv')
-    hourly_dataset['datetime'] = pd.to_datetime(hourly_dataset['datetime'])
-    hourly_dataset.set_index('datetime', inplace=True)
+    hourly_dataset['DATE_TIME'] = pd.to_datetime(hourly_dataset['DATE_TIME'])
+    hourly_dataset.set_index('DATE_TIME', inplace=True)
     print("[DEBUG] Loaded hourly dataset aligned with final valid date range.")
 
     # Merge the hourly dataset into the technical indicators dataset
