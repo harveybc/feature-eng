@@ -10,6 +10,10 @@ from keras.layers import Conv1D, Dense, GlobalAveragePooling1D, Flatten
 from keras.optimizers import Adam
 import os
 from tqdm import tqdm  # For progress indication
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import pandas as pd
+
 
 class Plugin:
     """
@@ -565,6 +569,65 @@ class Plugin:
 
         print("Training signals generated.")
         return trend_signal, volatility_signal
+
+
+    def plot_signals(training_trend, training_volatility, predicted_trend, predicted_volatility, index):
+        """
+        Plot the training signals and predicted signals for trend and volatility.
+
+        Parameters:
+        - training_trend (np.ndarray): Original training trend signal.
+        - training_volatility (np.ndarray): Original training volatility signal.
+        - predicted_trend (np.ndarray): Predicted trend signal.
+        - predicted_volatility (np.ndarray): Predicted volatility signal.
+        - index (pd.DatetimeIndex): Datetime index corresponding to the signals.
+        """
+        # Ensure that the index matches the length of the signals
+        if not (len(training_trend) == len(predicted_trend) == len(index)):
+            raise ValueError("Length of signals and index do not match.")
+
+        # Create DataFrames for easier plotting
+        df_trend = pd.DataFrame({
+            'Training Trend': training_trend,
+            'Predicted Trend': predicted_trend
+        }, index=index)
+
+        df_volatility = pd.DataFrame({
+            'Training Volatility': training_volatility,
+            'Predicted Volatility': predicted_volatility
+        }, index=index)
+
+        # Define date formatter for x-axis
+        date_fmt = mdates.DateFormatter('%Y-%m-%d %H:%M')
+
+        # Plot Trend Signals
+        plt.figure(figsize=(14, 6))
+        plt.plot(df_trend.index, df_trend['Training Trend'], label='Training Trend', color='blue', alpha=0.6)
+        plt.plot(df_trend.index, df_trend['Predicted Trend'], label='Predicted Trend', color='red', alpha=0.6)
+        plt.xlabel('Datetime')
+        plt.ylabel('Trend')
+        plt.title('Training vs Predicted Trend')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.gca().xaxis.set_major_formatter(date_fmt)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+        # Plot Volatility Signals
+        plt.figure(figsize=(14, 6))
+        plt.plot(df_volatility.index, df_volatility['Training Volatility'], label='Training Volatility', color='green', alpha=0.6)
+        plt.plot(df_volatility.index, df_volatility['Predicted Volatility'], label='Predicted Volatility', color='orange', alpha=0.6)
+        plt.xlabel('Datetime')
+        plt.ylabel('Volatility')
+        plt.title('Training vs Predicted Volatility')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.gca().xaxis.set_major_formatter(date_fmt)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
 
 
     def _filter_duplicate_events(self, events):
