@@ -985,17 +985,11 @@ class Plugin:
     def process_high_frequency_data(self, high_freq_data_path, config, common_start, common_end):
         """
         Processes the high-frequency dataset and aligns it with the hourly dataset.
-
-        Parameters:
-        - high_freq_data_path (str): Path to the high-frequency dataset.
-        - config (dict): Configuration settings.
-        - common_start (str or pd.Timestamp): The common start date for alignment.
-        - common_end (str or pd.Timestamp): The common end date for alignment.
-
-        Returns:
-        - pd.DataFrame: Aligned high-frequency features.
+        Ensures that common_end is updated to reflect the actual last available timestamp
+        from the high-frequency data before padding with zeros.
         """
-        print(f"Processing high-frequency EUR/USD dataset...")
+
+        print("Processing high-frequency EUR/USD dataset...")
 
         # Load and fix the hourly data
         hourly_data = load_and_fix_hourly_data(config['input_file'], config)
@@ -1004,7 +998,6 @@ class Plugin:
         if not isinstance(hourly_data.index, pd.DatetimeIndex):
             raise ValueError("Hourly data must have a valid DatetimeIndex.")
 
-        print(f"Hourly data index (first 5): {hourly_data.index[:5]}")
         print(f"Hourly data range: {hourly_data.index.min()} to {hourly_data.index.max()}")
 
         # Load the high-frequency data
@@ -1015,47 +1008,74 @@ class Plugin:
         if not isinstance(high_freq_data.index, pd.DatetimeIndex):
             raise ValueError("High-frequency dataset must have a valid DatetimeIndex.")
 
-        # Validate the presence of the 'CLOSE' column
+        # Validate the presence of 'CLOSE'
         if 'CLOSE' not in high_freq_data.columns:
             raise ValueError("High-frequency dataset must contain a 'CLOSE' column.")
 
         print(f"High-frequency dataset successfully loaded. Index range: {high_freq_data.index.min()} to {high_freq_data.index.max()}")
 
+        # Determine actual last timestamp of 15-min data
+        actual_end = high_freq_data.index.max()
+
+        # If actual_end < common_end, we must adjust common_end accordingly
+        if actual_end < common_end:
+            print(f"[DEBUG] High-freq actual end {actual_end} is earlier than current common_end {common_end}. Updating common_end.")
+            common_end = actual_end
+
         # Resample high-frequency data to 15m and 30m
         high_freq_15m = high_freq_data['CLOSE'].resample('15T').ffill()
         high_freq_30m = high_freq_data['CLOSE'].resample('30T').ffill()
 
-        # Debug: Print resampled data summaries
         print("Resampled 15m CLOSE data (first 5 rows):")
         print(high_freq_15m.head())
         print("Resampled 30m CLOSE data (first 5 rows):")
         print(high_freq_30m.head())
 
-        # Construct high-frequency feature DataFrame aligned with hourly data
+        # Trim hourly_data to the updated common_end before reindexing
+        # to avoid zero-filling beyond actual_end.
+        hourly_data = hourly_data[(hourly_data.index >= common_start) & (hourly_data.index <= common_end)]
+
+        # Construct high-frequency feature DataFrame
         high_freq_features = pd.DataFrame(index=hourly_data.index)
         try:
             for i in range(1, config['sub_periodicity_window_size'] + 1):
-                high_freq_features[f'CLOSE_15m_tick_{i}'] = (
-                    high_freq_15m.shift(i).reindex(hourly_data.index).fillna(0)
-                )
-                high_freq_features[f'CLOSE_30m_tick_{i}'] = (
-                    high_freq_30m.shift(i).reindex(hourly_data.index).fillna(0)
-                )
+                # Shift and reindex to hourly. We do NOT fill with zeros yet.
+                close_15m_shifted = high_freq_15m.shift(i).reindex(hourly_data.index)
+                close_30m_shifted = high_freq_30m.shift(i).reindex(hourly_data.index)
+
+                # If we truly need to fill missing data, fill only within the known data range.
+                # Beyond actual_end, data should remain NaN and later trimmed if needed.
+                # Here, we only fill NaN that might be due to initial shifts, not beyond actual_end.
+                # To be safe, fill only within actual known data range:
+                close_15m_shifted = close_15m_shifted.where(close_15m_shifted.index <= actual_end)
+                close_30m_shifted = close_30m_shifted.where(close_30m_shifted.index <= actual_end)
+
+                # If we must fill missing due to shift, do minimal forward/back fill inside actual data range:
+                close_15m_shifted = close_15m_shifted.fillna(method='ffill').fillna(method='bfill')
+                close_30m_shifted = close_30m_shifted.fillna(method='ffill').fillna(method='bfill')
+
+                # If any timestamp is beyond actual_end, those remain NaN and we will drop them after this block.
+                high_freq_features[f'CLOSE_15m_tick_{i}'] = close_15m_shifted
+                high_freq_features[f'CLOSE_30m_tick_{i}'] = close_30m_shifted
+
         except Exception as e:
             print(f"Error during high-frequency feature alignment: {e}")
             raise
 
-        # Apply common start and end date range filter
+        # Drop rows beyond actual_end to ensure no zero or NaN padding.
+        high_freq_features = high_freq_features[high_freq_features.index <= actual_end]
+
+        # Apply final common_start/common_end filter after adjusting:
         high_freq_features = high_freq_features[(high_freq_features.index >= common_start) & (high_freq_features.index <= common_end)]
 
         if high_freq_features.empty:
             print("Warning: The processed high-frequency features are empty after applying the date filter.")
 
-        # Debug: Print processed features
         print("Processed high-frequency features (first 5 rows):")
         print(high_freq_features.head())
 
         return high_freq_features
+
 
 
     def process_sub_periodicities(self, hourly_data, sub_periodicity_data, window_size):
