@@ -10,6 +10,19 @@ from keras.layers import Conv1D, Dense, GlobalAveragePooling1D, Flatten
 from keras.optimizers import Adam
 import os
 from tqdm import tqdm  # For progress indication
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import pandas as pd
+from keras.models import Sequential
+from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
+from keras.optimizers import Adam
+from sklearn.model_selection import train_test_split
+from keras.callbacks import EarlyStopping, ModelCheckpoint
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import SimpleImputer
+import numpy as np
+import joblib
+
 
 class Plugin:
     """
@@ -492,7 +505,7 @@ class Plugin:
 
     def _generate_training_signals(self, hourly_data, config):
         """
-        Generate training signals for trend and volatility.
+        Generate training signals for trend and volatility with enhanced outlier handling.
 
         Parameters:
         - hourly_data (pd.DataFrame): Hourly dataset with 'close' prices.
@@ -508,32 +521,50 @@ class Plugin:
         short_term_window = config['calendar_window_size'] // 10
         print(f"[DEBUG] Short-term window size for training signals: {short_term_window}")
 
-        # Calculate trend variation: relative change in EMA
-        ema = hourly_data['close'].ewm(span=short_term_window, adjust=False).mean()
-        trend_variation = ema.diff().fillna(0).values
+        # Calculate trend: moving average over the previous window
+        trend_signal = hourly_data['close'].rolling(window=short_term_window).mean().fillna(method='bfill').values
 
-        # Calculate volatility: rolling standard deviation
-        volatility = hourly_data['close'].rolling(window=short_term_window).std().fillna(0).values
+        # Calculate volatility: rolling standard deviation over the previous window
+        volatility_signal = hourly_data['close'].rolling(window=short_term_window).std().fillna(method='bfill').values
 
-        print("[DEBUG] Raw trend_variation and volatility calculated.")
-
-        # Outlier Detection and Imputation for Training Signals
-        from sklearn.impute import SimpleImputer
-        from sklearn.preprocessing import MinMaxScaler
-        import joblib
+        print("[DEBUG] Raw trend and volatility signals calculated.")
+        
+        # Outlier Detection and Capping for Training Signals
         import numpy as np
+        import pandas as pd
+
+        # Convert to DataFrame for easier manipulation
+        df_signals = pd.DataFrame({
+            'trend_signal': trend_signal,
+            'volatility_signal': volatility_signal
+        })
+
+        # Define a function to cap outliers based on IQR
+        def cap_outliers(series):
+            Q1 = series.quantile(0.25)
+            Q3 = series.quantile(0.75)
+            IQR = Q3 - Q1
+            lower_bound = Q1 - 1.5 * IQR
+            upper_bound = Q3 + 1.5 * IQR
+            return series.clip(lower=lower_bound, upper=upper_bound)
+
+        # Apply capping
+        df_signals['trend_signal'] = cap_outliers(df_signals['trend_signal'])
+        df_signals['volatility_signal'] = cap_outliers(df_signals['volatility_signal'])
+
+        print("[DEBUG] Outliers capped using IQR method.")
 
         # Reshape for imputation
-        trend_variation = trend_variation.reshape(-1, 1)
-        volatility = volatility.reshape(-1, 1)
+        trend_signal = df_signals['trend_signal'].values.reshape(-1, 1)
+        volatility_signal = df_signals['volatility_signal'].values.reshape(-1, 1)
 
         # Initialize imputers
         imputer_trend = SimpleImputer(strategy='median')
         imputer_volatility = SimpleImputer(strategy='median')
 
         # Fit imputers and transform the data
-        trend_variation_imputed = imputer_trend.fit_transform(trend_variation)
-        volatility_imputed = imputer_volatility.fit_transform(volatility)
+        trend_signal_imputed = imputer_trend.fit_transform(trend_signal)
+        volatility_signal_imputed = imputer_volatility.fit_transform(volatility_signal)
 
         # Save imputers for deployment
         joblib.dump(imputer_trend, 'imputer_trend_signals.pkl')
@@ -545,29 +576,85 @@ class Plugin:
         scaler_volatility = MinMaxScaler()
 
         # Fit scalers and transform the data
-        trend_variation_scaled = scaler_trend.fit_transform(trend_variation_imputed)
-        volatility_scaled = scaler_volatility.fit_transform(volatility_imputed)
+        trend_signal_scaled = scaler_trend.fit_transform(trend_signal_imputed)
+        volatility_signal_scaled = scaler_volatility.fit_transform(volatility_signal_imputed)
 
         # Save scalers for deployment
         joblib.dump(scaler_trend, 'scaler_trend_signals.pkl')
         joblib.dump(scaler_volatility, 'scaler_volatility_signals.pkl')
         print("[DEBUG] Scalers for trend and volatility signals saved as 'scaler_trend_signals.pkl' and 'scaler_volatility_signals.pkl'.")
 
-        # Optionally, remove or cap extreme outliers if necessary
-        # For example, capping trend variation to a certain range
-        trend_variation_scaled = np.clip(trend_variation_scaled, 0, 1)
-        volatility_scaled = np.clip(volatility_scaled, 0, 1)
-
         # Flatten the arrays
-        trend_signal = trend_variation_scaled.flatten()
-        volatility_signal = volatility_scaled.flatten()
+        trend_signal = trend_signal_scaled.flatten()
+        volatility_signal = volatility_signal_scaled.flatten()
 
-        print("[DEBUG] Training signals after imputation and scaling:")
+        print("[DEBUG] Training signals after capping, imputation, and scaling:")
         print(f"Trend signal stats:\n{pd.Series(trend_signal).describe()}")
         print(f"Volatility signal stats:\n{pd.Series(volatility_signal).describe()}")
 
         print("Training signals generated.")
         return trend_signal, volatility_signal
+
+
+
+    def plot_signals(training_trend, training_volatility, predicted_trend, predicted_volatility, index):
+        """
+        Plot the training signals and predicted signals for trend and volatility.
+
+        Parameters:
+        - training_trend (np.ndarray): Original training trend signal.
+        - training_volatility (np.ndarray): Original training volatility signal.
+        - predicted_trend (np.ndarray): Predicted trend signal.
+        - predicted_volatility (np.ndarray): Predicted volatility signal.
+        - index (pd.DatetimeIndex): Datetime index corresponding to the signals.
+        """
+        # Ensure that the index matches the length of the signals
+        if not (len(training_trend) == len(predicted_trend) == len(index)):
+            raise ValueError("Length of signals and index do not match.")
+
+        # Create DataFrames for easier plotting
+        df_trend = pd.DataFrame({
+            'Training Trend': training_trend,
+            'Predicted Trend': predicted_trend
+        }, index=index)
+
+        df_volatility = pd.DataFrame({
+            'Training Volatility': training_volatility,
+            'Predicted Volatility': predicted_volatility
+        }, index=index)
+
+        # Define date formatter for x-axis
+        date_fmt = mdates.DateFormatter('%Y-%m-%d %H:%M')
+
+        # Plot Trend Signals
+        plt.figure(figsize=(14, 6))
+        plt.plot(df_trend.index, df_trend['Training Trend'], label='Training Trend', color='blue', alpha=0.6)
+        plt.plot(df_trend.index, df_trend['Predicted Trend'], label='Predicted Trend', color='red', alpha=0.6)
+        plt.xlabel('Datetime')
+        plt.ylabel('Trend')
+        plt.title('Training vs Predicted Trend')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.gca().xaxis.set_major_formatter(date_fmt)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+        # Plot Volatility Signals
+        plt.figure(figsize=(14, 6))
+        plt.plot(df_volatility.index, df_volatility['Training Volatility'], label='Training Volatility', color='green', alpha=0.6)
+        plt.plot(df_volatility.index, df_volatility['Predicted Volatility'], label='Predicted Volatility', color='orange', alpha=0.6)
+        plt.xlabel('Datetime')
+        plt.ylabel('Volatility')
+        plt.title('Training vs Predicted Volatility')
+        plt.legend()
+        plt.grid(True, linestyle='--', alpha=0.5)
+        plt.gca().xaxis.set_major_formatter(date_fmt)
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.show()
+
+
 
     def _filter_duplicate_events(self, events):
             events_sorted = events.sort_values(by='volatility', ascending=False)
@@ -648,15 +735,6 @@ class Plugin:
         Returns:
         - np.ndarray: Predictions for trend and volatility for each hourly tick.
         """
-        from keras.models import Sequential
-        from keras.layers import Conv1D, Dense, Flatten, BatchNormalization, Dropout
-        from keras.optimizers import Adam
-        from sklearn.model_selection import train_test_split
-        from keras.callbacks import EarlyStopping, ModelCheckpoint
-        from sklearn.preprocessing import MinMaxScaler
-        from sklearn.impute import SimpleImputer
-        import numpy as np
-        import joblib
 
         print("Training Conv1D model for trend and volatility predictions...")
 
@@ -755,6 +833,10 @@ class Plugin:
         model.save('trained_conv1d_model.h5')
         print("[DEBUG] Trained Conv1D model saved to 'trained_conv1d_model.h5'.")
 
+        # Evaluate the model on test data and print MAE
+        loss, mae = model.evaluate(X_test, y_test, verbose=0)
+        print(f"[DEBUG] Model Evaluation - Loss: {loss}, MAE: {mae}")
+
         # Predict on all data
         predictions_scaled = model.predict(econ_features)
         print(f"Predictions shape: {predictions_scaled.shape}")
@@ -768,6 +850,8 @@ class Plugin:
         predictions_volatility = scaler_volatility_loaded.inverse_transform(predictions_scaled[:, 1].reshape(-1, 1)).flatten()
 
         return np.vstack((predictions_trend, predictions_volatility)).T
+
+
 
 
     
