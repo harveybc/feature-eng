@@ -227,6 +227,9 @@ class Plugin:
         print("[DEBUG] Main dataset first 5 rows:")
         print(data.head())
 
+        # Dictionary to store aligned datasets before final trimming
+        aligned_datasets = {}
+
         def log_dataset_range(dataset_key, dataset):
             print(f"[DEBUG] Dataset: {dataset_key}")
             if dataset is not None and not dataset.empty:
@@ -236,7 +239,7 @@ class Plugin:
             else:
                 print(f"[ERROR] {dataset_key} is empty or invalid.")
 
-        def process_and_save_dataset(dataset_func, dataset_key, output_filename):
+        def process_dataset(dataset_func, dataset_key):
             nonlocal common_start, common_end
             print(f"[DEBUG] Processing {dataset_key} with current range {common_start} to {common_end}")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
@@ -247,6 +250,7 @@ class Plugin:
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
                 if aligned_dataset.empty:
                     print(f"[ERROR] After alignment, {dataset_key} dataset is empty. Check the alignment logic.")
+                    return None
                 else:
                     # Update common_start and common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
@@ -260,80 +264,84 @@ class Plugin:
                     # Re-align with updated common_start and common_end if changed
                     aligned_dataset = aligned_dataset[(aligned_dataset.index >= common_start) & (aligned_dataset.index <= common_end)]
 
-                    # Save the aligned dataset to CSV with updated and correct range
-                    aligned_dataset.reset_index().rename(columns={'index': 'datetime'}).to_csv(output_filename, index=False)
-                    print(f"[DEBUG] Saved {dataset_key} dataset to {output_filename}")
-                return aligned_dataset
+                    return aligned_dataset
             else:
                 print(f"[DEBUG] {dataset_key} is empty or no data returned, skipping alignment update.")
             return None
 
         additional_features = {}
 
-        # Process and save economic calendar
+        # Process datasets without saving first; just determine final common range and store results
+        econ_calendar = None
         if config.get('economic_calendar'):
-            econ_calendar = process_and_save_dataset(
-                self.process_economic_calendar,
-                'economic_calendar',
-                'economic_calendar_aligned.csv'
-            )
+            econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None and not econ_calendar.empty:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
+                aligned_datasets['economic_calendar'] = econ_calendar
 
-        # Process and save Forex datasets
+        forex_features = None
         if config.get('forex_datasets'):
-            forex_features = process_and_save_dataset(
-                self.process_forex_data,
-                'forex_datasets',
-                'forex_datasets_aligned.csv'
-            )
+            forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None and not forex_features.empty:
                 additional_features.update(forex_features.to_dict(orient='series'))
+                aligned_datasets['forex_datasets'] = forex_features
 
-        # Process and save SP500 dataset
+        sp500_features = None
         if config.get('sp500_dataset'):
-            sp500_features = process_and_save_dataset(
-                self.process_sp500_data,
-                'sp500_dataset',
-                'sp500_aligned.csv'
-            )
+            sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None and not sp500_features.empty:
                 additional_features.update(sp500_features.to_dict(orient='series'))
+                aligned_datasets['sp500_dataset'] = sp500_features
 
-        # Process and save VIX dataset
+        vix_features = None
         if config.get('vix_dataset'):
-            vix_features = process_and_save_dataset(
-                self.process_vix_data,
-                'vix_dataset',
-                'vix_aligned.csv'
-            )
+            vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
             if vix_features is not None and not vix_features.empty:
                 additional_features.update(vix_features.to_dict(orient='series'))
+                aligned_datasets['vix_dataset'] = vix_features
 
-        # Process and save high-frequency dataset
+        high_freq_features = None
         if config.get('high_freq_dataset'):
-            high_freq_features = process_and_save_dataset(
-                self.process_high_frequency_data,
-                'high_freq_dataset',
-                'high_freq_aligned.csv'
-            )
+            high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
             if high_freq_features is not None and not high_freq_features.empty:
                 additional_features.update(high_freq_features.to_dict(orient='series'))
+                aligned_datasets['high_freq_dataset'] = high_freq_features
 
         print("[DEBUG] After all datasets processed:")
         print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
-        additional_features_df = pd.DataFrame(additional_features)
 
+        additional_features_df = pd.DataFrame(additional_features)
         if not additional_features_df.empty:
             # Final trimming with final common_start and common_end
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
 
-            # Save the final merged dataset
+        # Now re-trim and re-save each aligned dataset to ensure they match the final common range
+        def save_aligned_dataset(name, df, filename):
+            if df is not None and not df.empty:
+                trimmed = df[(df.index >= common_start) & (df.index <= common_end)]
+                trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv(filename, index=False)
+                print(f"[DEBUG] Re-saved {name} dataset to {filename} with final range {common_start} to {common_end}")
+
+        # Re-save each dataset with final common range
+        if 'economic_calendar' in aligned_datasets:
+            save_aligned_dataset('economic_calendar', aligned_datasets['economic_calendar'], 'economic_calendar_aligned.csv')
+        if 'forex_datasets' in aligned_datasets:
+            save_aligned_dataset('forex_datasets', aligned_datasets['forex_datasets'], 'forex_datasets_aligned.csv')
+        if 'sp500_dataset' in aligned_datasets:
+            save_aligned_dataset('sp500_dataset', aligned_datasets['sp500_dataset'], 'sp500_aligned.csv')
+        if 'vix_dataset' in aligned_datasets:
+            save_aligned_dataset('vix_dataset', aligned_datasets['vix_dataset'], 'vix_aligned.csv')
+        if 'high_freq_dataset' in aligned_datasets:
+            save_aligned_dataset('high_freq_dataset', aligned_datasets['high_freq_dataset'], 'high_freq_aligned.csv')
+
+        # Save the final merged dataset
+        if not additional_features_df.empty:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
             print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
 
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
+
 
 
 
