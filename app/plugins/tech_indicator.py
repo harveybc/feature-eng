@@ -243,24 +243,17 @@ class Plugin:
             log_dataset_range(dataset_key, dataset)
 
             if dataset is not None and not dataset.empty:
-                # Initial alignment based on current common_start and common_end
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
                 if aligned_dataset.empty:
                     print(f"[ERROR] After alignment, {dataset_key} dataset is empty. Check the alignment logic.")
                 else:
-                    # Update common_start and common_end based on aligned dataset
                     old_common_start, old_common_end = common_start, common_end
                     new_common_start = max(common_start, aligned_dataset.index.min())
                     new_common_end = min(common_end, aligned_dataset.index.max())
                     print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {new_common_start} to {new_common_end}")
 
-                    # Assign updated range
                     common_start, common_end = new_common_start, new_common_end
-
-                    # Re-align with updated common_start and common_end if changed
                     aligned_dataset = aligned_dataset[(aligned_dataset.index >= common_start) & (aligned_dataset.index <= common_end)]
-
-                    # Save the aligned dataset to CSV with updated and correct range
                     aligned_dataset.reset_index().rename(columns={'index': 'datetime'}).to_csv(output_filename, index=False)
                     print(f"[DEBUG] Saved {dataset_key} dataset to {output_filename}")
                 return aligned_dataset
@@ -270,7 +263,7 @@ class Plugin:
 
         additional_features = {}
 
-        # Process and save economic calendar
+        # Process and save datasets
         if config.get('economic_calendar'):
             econ_calendar = process_and_save_dataset(
                 self.process_economic_calendar,
@@ -280,7 +273,6 @@ class Plugin:
             if econ_calendar is not None and not econ_calendar.empty:
                 additional_features.update(econ_calendar.to_dict(orient='series'))
 
-        # Process and save Forex datasets
         if config.get('forex_datasets'):
             forex_features = process_and_save_dataset(
                 self.process_forex_data,
@@ -290,7 +282,6 @@ class Plugin:
             if forex_features is not None and not forex_features.empty:
                 additional_features.update(forex_features.to_dict(orient='series'))
 
-        # Process and save SP500 dataset
         if config.get('sp500_dataset'):
             sp500_features = process_and_save_dataset(
                 self.process_sp500_data,
@@ -300,7 +291,6 @@ class Plugin:
             if sp500_features is not None and not sp500_features.empty:
                 additional_features.update(sp500_features.to_dict(orient='series'))
 
-        # Process and save VIX dataset
         if config.get('vix_dataset'):
             vix_features = process_and_save_dataset(
                 self.process_vix_data,
@@ -310,7 +300,6 @@ class Plugin:
             if vix_features is not None and not vix_features.empty:
                 additional_features.update(vix_features.to_dict(orient='series'))
 
-        # Process and save high-frequency dataset
         if config.get('high_freq_dataset'):
             high_freq_features = process_and_save_dataset(
                 self.process_high_frequency_data,
@@ -325,15 +314,22 @@ class Plugin:
         additional_features_df = pd.DataFrame(additional_features)
 
         if not additional_features_df.empty:
-            # Final trimming with final common_start and common_end
             additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
-
-            # Save the final merged dataset
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
             print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
 
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
+
+        # Trim and save the original technical indicators dataset
+        trimmed_data = data[(data.index >= common_start) & (data.index <= common_end)]
+        if not trimmed_data.empty:
+            trimmed_data.reset_index().rename(columns={'index': 'datetime'}).to_csv('technical_indicators_aligned.csv', index=False)
+            print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
+        else:
+            print("[ERROR] Trimmed technical indicators dataset is empty after alignment.")
+
         return additional_features_df, common_start, common_end
+
 
 
 
