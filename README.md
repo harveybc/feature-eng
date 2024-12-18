@@ -71,17 +71,19 @@ To install and set up the feature-eng application, follow these steps:
         ```
 
 ## Usage
-
 The application provides a command-line interface to control its behavior and manage feature generation through plugins.
-
-### Command Line Arguments
-
-#### Required Arguments
-
-- `input_file` (str): Path to the input CSV file.
+    - On Windows:
+        ```bash
+        f-eng.bat
+        ```
+    - On Linux:
+        ```bash
+        sh f-eng.sh
+        ```
 
 #### Optional Arguments
 
+- `input_file` (str): Path to the input CSV file.
 - `output_file` (str, optional): Path to the output CSV file. If not specified, the system will not generate an output file.
 - `plugin` (str, default='technical_indicator'): Name of the plugin to use for feature generation. The default plugin generates technical indicators, but additional plugins such as SSA and FFT can be used.
 - `correlation_analysis` (flag): Compute and display Pearson and Spearman correlation matrices.
