@@ -351,6 +351,26 @@ class Plugin:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
             print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
 
+
+        def save_aligned_dataset(name, df, filename):
+            if df is not None and not df.empty:
+                trimmed = df[(df.index >= common_start) & (df.index <= common_end)]
+                trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv(filename, index=False)
+                print(f"[DEBUG] Re-saved {name} dataset to {filename} with final range {common_start} to {common_end}")
+                
+        # Re-save each dataset with final common range
+        if 'economic_calendar' in aligned_datasets:
+            save_aligned_dataset('economic_calendar', aligned_datasets['economic_calendar'], 'economic_calendar_aligned.csv')
+        if 'forex_datasets' in aligned_datasets:
+            save_aligned_dataset('forex_datasets', aligned_datasets['forex_datasets'], 'forex_datasets_aligned.csv')
+        if 'sp500_dataset' in aligned_datasets:
+            save_aligned_dataset('sp500_dataset', aligned_datasets['sp500_dataset'], 'sp500_aligned.csv')
+        if 'vix_dataset' in aligned_datasets:
+            save_aligned_dataset('vix_dataset', aligned_datasets['vix_dataset'], 'vix_aligned.csv')
+        if 'high_freq_dataset' in aligned_datasets:
+            save_aligned_dataset('high_freq_dataset', aligned_datasets['high_freq_dataset'], 'high_freq_aligned.csv')
+
+
         print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
         return additional_features_df, common_start, common_end
 
