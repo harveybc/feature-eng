@@ -334,6 +334,18 @@ class Plugin:
             hourly_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('hourly_dataset_aligned.csv', index=False)
             print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
 
+        # Add seasonality columns to the additional_features_df
+        if not hourly_trimmed.empty:
+            additional_features_df['day_of_month'] = hourly_trimmed.index.day
+            additional_features_df['hour_of_day'] = hourly_trimmed.index.hour
+            additional_features_df['day_of_week'] = hourly_trimmed.index.dayofweek
+            print("[DEBUG] Added seasonality columns (day_of_month, hour_of_day, day_of_week).")
+
+        # Save the seasonality dataset
+        if not additional_features_df.empty:
+            additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('seasonality_dataset.csv', index=False)
+            print("[DEBUG] Saved seasonality dataset to 'seasonality_dataset.csv'.")
+
         # Save the final merged dataset
         if not additional_features_df.empty:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
