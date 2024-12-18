@@ -71,17 +71,19 @@ To install and set up the feature-eng application, follow these steps:
         ```
 
 ## Usage
-
 The application provides a command-line interface to control its behavior and manage feature generation through plugins.
-
-### Command Line Arguments
-
-#### Required Arguments
-
-- `input_file` (str): Path to the input CSV file.
+    - On Windows:
+        ```bash
+        f-eng.bat
+        ```
+    - On Linux:
+        ```bash
+        sh f-eng.sh
+        ```
 
 #### Optional Arguments
 
+- `input_file` (str): Path to the input CSV file.
 - `output_file` (str, optional): Path to the output CSV file. If not specified, the system will not generate an output file.
 - `plugin` (str, default='technical_indicator'): Name of the plugin to use for feature generation. The default plugin generates technical indicators, but additional plugins such as SSA and FFT can be used.
 - `correlation_analysis` (flag): Compute and display Pearson and Spearman correlation matrices.
@@ -103,43 +105,10 @@ The application provides a command-line interface to control its behavior and ma
 To generate technical indicators using the default plugin:
 
 ```bash
-f-eng.bat tests/data/eurusd_hour_2005_2020_ohlc.csv
+f-eng.bat
 
 ```
 
-#### Perform Singular Spectrum Analysis (plugin)
-
-To perform SSA feature extraction:
-
-```bash
-f-eng.bat tests/data/eurusd_hour_2005_2020_ohlc.csv --plugin ssa
-
-```
-
-#### Fast Fourier Transform (plugin)
-
-To perform FFT feature extraction:
-
-```bash
-f-eng.bat tests/data/eurusd_hour_2005_2020_ohlc.csv --plugin fft
-
-```
-
-#### Example with Distribution Plotting
-
-Distribution plotting is enabled to visualize the distributions of the generated technical indicators, a normal distribution is recommended when using Pearson correlation (see Correlation Analysis), while a Spearman is recommended otherwise:
-
-```bash
-f-eng.bat tests/data/eurusd_hour_2005_2020_ohlc.csv --distribution_plot
-```
-
-#### Run Correlation Analysis
-
-To compute and display correlation matrices for the generated features, use Pearson preferibly when the features have normal distribution, otherwise, use Spearman, both are calculated with the command:
-
-```bash
-f-eng.bat --input_file tests/data/eurusd_hour_2005_2020_ohlc.csv --correlation_analysis
-```
 
 
 ## Project Directory Structure

@@ -107,7 +107,12 @@ def analyze_variability_and_normality(data, config):
 
     # Adjust layout and vertical separation
     plt.tight_layout(h_pad=10, pad=3)  # Added padding to prevent overlap
-    plt.show()
+
+    # Save the plot as a PNG image
+    output_image_path = config.get('variability_normality_plot', 'variability_normality_analysis.png')
+    plt.savefig(output_image_path)
+    print(f"[DEBUG] Saved variability and normality analysis plot to '{output_image_path}'.")
+    plt.close(fig)  # Close the plot to prevent it from displaying
 
     # Convert the transformed columns dictionary back into a DataFrame and return it
     transformed_data = pd.DataFrame(transformed_columns, index=data.index)
@@ -117,6 +122,7 @@ def analyze_variability_and_normality(data, config):
     print(f"Transformed data index range: {transformed_data.index.min()} to {transformed_data.index.max()}")
 
     return transformed_data
+
 
 
 def process_data(data, plugin, config):
