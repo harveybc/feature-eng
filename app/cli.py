@@ -6,7 +6,7 @@ def parse_args():
     )
 
     # Required argument
-    parser.add_argument('input_file', type=str, help='Path to the input CSV file.')
+    parser.add_argument('--input_file', type=str, help='Path to the input CSV file.')
 
     # Optional arguments
     parser.add_argument('--output_file', type=str, help='Path to the output CSV file (optional).')
