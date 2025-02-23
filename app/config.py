@@ -21,6 +21,7 @@ DEFAULT_VALUES = {
     #'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
     #'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
     #'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',
+    'seasonality_colums':False,
 
     # Forex datasets (15-minute data)
     #'forex_datasets': [
