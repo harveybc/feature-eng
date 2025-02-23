@@ -335,7 +335,7 @@ class Plugin:
             print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
 
         # Add seasonality columns to the additional_features_df
-        if not hourly_trimmed.empty and config.get('seasonality_columns'):
+        if config.get('seasonality_columns'):
             additional_features_df['day_of_month'] = hourly_trimmed.index.day
             additional_features_df['hour_of_day'] = hourly_trimmed.index.hour
             additional_features_df['day_of_week'] = hourly_trimmed.index.dayofweek
