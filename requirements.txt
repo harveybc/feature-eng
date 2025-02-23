@@ -11,3 +11,4 @@ Pillow
 kiwisolver
 requests
 seaborn
+tqdm
