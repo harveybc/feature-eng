@@ -17,18 +17,18 @@ DEFAULT_VALUES = {
     'headers': True,
 
     # Additional datasets
-    'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
-    'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
-    'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
-    'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',
+    #'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
+    #'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
+    #'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
+    #'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',
 
     # Forex datasets (15-minute data)
-    'forex_datasets': [
-        'tests/data/USDCAD-2000-2020-15m.csv',
-        'tests/data/USDJPY-2000-2020-15m.csv',
-        'tests/data/EURCHF-2000-2020-15m.csv',
-        'tests/data/AUDUSD-2000-2020-15m.csv'
-    ],
+    #'forex_datasets': [
+    #    'tests/data/USDCAD-2000-2020-15m.csv',
+    #    'tests/data/USDJPY-2000-2020-15m.csv',
+    #    'tests/data/EURCHF-2000-2020-15m.csv',
+    #    'tests/data/AUDUSD-2000-2020-15m.csv'
+    #],
 
     # General configurations
     'sub_periodicity_window_size': 8,  # Default window size for sub-periodicities
