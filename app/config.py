@@ -22,7 +22,7 @@ DEFAULT_VALUES = {
     #'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
     #'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',
     'seasonality_colums':False,
-
+    'tech_indicators': False,
     # Forex datasets (15-minute data)
     #'forex_datasets': [
     #    'tests/data/USDCAD-2000-2020-15m.csv',

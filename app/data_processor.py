@@ -191,9 +191,15 @@ def process_data(data, plugin, config):
         print("[DEBUG] additional_features_df first 5 rows:", additional_features_df.head())
         raise e
 
-    final_data = pd.concat([transformed_data, additional_features_df], axis=1)
-    print("[DEBUG] Final combined data shape:", final_data.shape)
-    print("[DEBUG] Final combined data first 5 rows:")
+    # Combine the transformed data with additional features
+    if config.get('tech_indicators'):
+        final_data = pd.concat([transformed_data, additional_features_df], axis=1)
+        print("[DEBUG] Final combined data shape:", final_data.shape)
+        print("[DEBUG] Final combined data first 5 rows:")
+    else:
+        final_data = additional_features_df
+        print("[DEBUG] Final data shape:", final_data.shape)
+        print("[DEBUG] Final data first 5 rows:")
     print(final_data.head())
 
     # Reset the index for the final dataset
