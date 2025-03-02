@@ -17,12 +17,12 @@ DEFAULT_VALUES = {
     'headers': True,
 
     # Additional datasets
-    #'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
+    'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
     'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
     'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
     #'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',
-    'seasonality_columns': False,
-    'tech_indicators': False,
+    'seasonality_columns': True,
+    'tech_indicators': True,
     # Forex datasets (15-minute data)
     #'forex_datasets': [
     #    'tests/data/USDCAD-2000-2020-15m.csv',
