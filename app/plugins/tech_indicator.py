@@ -322,7 +322,7 @@ class Plugin:
             print("[DEBUG] Added seasonality columns (day_of_month, hour_of_day, day_of_week).")
 
         # Save the merged dataset containing all aligned datasets within the final common date range
-        merged_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
+        merged_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('additional_merged_features.csv', index=False)
         print(f"[DEBUG] Saved merged dataset to 'merged_features.csv' with final range {common_start} to {common_end}")
 
         # Optionally, re-save each individual aligned dataset with the final common range
