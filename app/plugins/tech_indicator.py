@@ -226,8 +226,8 @@ class Plugin:
         print(f"[DEBUG] Initial common range: {common_start} to {common_end}")
         print("[DEBUG] Main dataset first 5 rows:")
         print(data.head())
-
-        # Dictionary to store aligned datasets before final trimming
+        
+        # Dictionary to store aligned datasets
         aligned_datasets = {}
 
         def log_dataset_range(dataset_key, dataset):
@@ -244,122 +244,94 @@ class Plugin:
             print(f"[DEBUG] Processing {dataset_key} with current range {common_start} to {common_end}")
             dataset = dataset_func(config[dataset_key], config, common_start, common_end)
             log_dataset_range(dataset_key, dataset)
-
             if dataset is not None and not dataset.empty:
-                # Initial alignment based on current common_start and common_end
                 aligned_dataset = dataset[(dataset.index >= common_start) & (dataset.index <= common_end)]
                 if aligned_dataset.empty:
                     print(f"[ERROR] After alignment, {dataset_key} dataset is empty. Check the alignment logic.")
                     return None
                 else:
-                    # Update common_start and common_end based on aligned dataset
-                    old_common_start, old_common_end = common_start, common_end
+                    # Update common range based on the aligned dataset
                     new_common_start = max(common_start, aligned_dataset.index.min())
                     new_common_end = min(common_end, aligned_dataset.index.max())
-                    print(f"[DEBUG] Updated common range: {old_common_start} to {old_common_end} -> {new_common_start} to {new_common_end}")
-
-                    # Assign updated range
+                    print(f"[DEBUG] Updated common range: {common_start} to {common_end} -> {new_common_start} to {new_common_end}")
                     common_start, common_end = new_common_start, new_common_end
-
-                    # Re-align with updated common_start and common_end if changed
                     aligned_dataset = aligned_dataset[(aligned_dataset.index >= common_start) & (aligned_dataset.index <= common_end)]
-
                     return aligned_dataset
             else:
                 print(f"[DEBUG] {dataset_key} is empty or no data returned, skipping alignment update.")
             return None
 
-        additional_features = {}
-
-        # Process datasets without saving first; just determine final common range and store results
+        # Process each dataset and store the aligned data
         econ_calendar = None
         if config.get('economic_calendar'):
             econ_calendar = process_dataset(self.process_economic_calendar, 'economic_calendar')
             if econ_calendar is not None and not econ_calendar.empty:
-                additional_features.update(econ_calendar.to_dict(orient='series'))
                 aligned_datasets['economic_calendar'] = econ_calendar
 
         forex_features = None
         if config.get('forex_datasets'):
             forex_features = process_dataset(self.process_forex_data, 'forex_datasets')
             if forex_features is not None and not forex_features.empty:
-                additional_features.update(forex_features.to_dict(orient='series'))
                 aligned_datasets['forex_datasets'] = forex_features
 
         sp500_features = None
         if config.get('sp500_dataset'):
             sp500_features = process_dataset(self.process_sp500_data, 'sp500_dataset')
             if sp500_features is not None and not sp500_features.empty:
-                additional_features.update(sp500_features.to_dict(orient='series'))
                 aligned_datasets['sp500_dataset'] = sp500_features
 
         vix_features = None
         if config.get('vix_dataset'):
             vix_features = process_dataset(self.process_vix_data, 'vix_dataset')
             if vix_features is not None and not vix_features.empty:
-                additional_features.update(vix_features.to_dict(orient='series'))
                 aligned_datasets['vix_dataset'] = vix_features
 
         high_freq_features = None
         if config.get('high_freq_dataset'):
             high_freq_features = process_dataset(self.process_high_frequency_data, 'high_freq_dataset')
             if high_freq_features is not None and not high_freq_features.empty:
-                additional_features.update(high_freq_features.to_dict(orient='series'))
                 aligned_datasets['high_freq_dataset'] = high_freq_features
 
         print("[DEBUG] After all datasets processed:")
         print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
 
-        # Build merged features DataFrame from all additional features.
-        additional_features_df = pd.DataFrame(additional_features)
-        if additional_features_df.empty:
-            additional_features_df = pd.DataFrame(index=data.index)
-        # Final trimming with final common_start and common_end on additional features.
-        additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
-
-        # Include the hourly dataset (all columns) in the final merged dataset
-        hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)].copy()  # Use .copy() to avoid SettingWithCopyWarning
+        # Trim the main hourly dataset based on final common range
+        hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)].copy()
         if not hourly_trimmed.empty:
-            # Remove volume column and add new calculated columns
+            # Drop volume column if it exists and add calculated columns
             if 'volume' in hourly_trimmed.columns:
-                hourly_trimmed = hourly_trimmed.drop(columns=['volume'])  # Avoid inplace to ensure new object
+                hourly_trimmed = hourly_trimmed.drop(columns=['volume'])
             hourly_trimmed['BH-BL'] = hourly_trimmed['HIGH'] - hourly_trimmed['LOW']
             hourly_trimmed['BH-BO'] = hourly_trimmed['HIGH'] - hourly_trimmed['OPEN']
             hourly_trimmed['BO-BL'] = hourly_trimmed['OPEN'] - hourly_trimmed['LOW']
             print(f"[DEBUG] Prepared hourly dataset with additional calculated columns.")
+        else:
+            print("[ERROR] Hourly dataset is empty after trimming based on the common date range.")
 
-            # Merge hourly dataset with additional features ensuring all datasets are included
-            additional_features_df = pd.concat([additional_features_df, hourly_trimmed], axis=1)
-            print(f"[DEBUG] Merged hourly dataset columns with additional features.")
+        # Merge all aligned datasets with the hourly dataset so that merged_features.csv contains them all
+        merged_features_df = hourly_trimmed.copy()
+        for key, df in aligned_datasets.items():
+            merged_features_df = merged_features_df.join(df, how='left', rsuffix=f"_{key}")
+            print(f"[DEBUG] Joined {key} dataset. Current merged shape: {merged_features_df.shape}")
 
-            # Save hourly dataset for reference
-            hourly_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('hourly_dataset_aligned.csv', index=False)
-            print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
-
-        # Add seasonality columns to the merged DataFrame if specified
+        # Add seasonality columns if specified in the config
         if config.get('seasonality_columns'):
-            additional_features_df['day_of_month'] = additional_features_df.index.day
-            additional_features_df['hour_of_day'] = additional_features_df.index.hour
-            additional_features_df['day_of_week'] = additional_features_df.index.dayofweek
+            merged_features_df['day_of_month'] = merged_features_df.index.day
+            merged_features_df['hour_of_day'] = merged_features_df.index.hour
+            merged_features_df['day_of_week'] = merged_features_df.index.dayofweek
             print("[DEBUG] Added seasonality columns (day_of_month, hour_of_day, day_of_week).")
 
-        # Save the seasonality dataset
-        if not additional_features_df.empty:
-            additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('seasonality_dataset.csv', index=False)
-            print("[DEBUG] Saved seasonality dataset to 'seasonality_dataset.csv'.")
+        # Save the merged dataset containing all aligned datasets within the final common date range
+        merged_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
+        print(f"[DEBUG] Saved merged dataset to 'merged_features.csv' with final range {common_start} to {common_end}")
 
-        # Save the final merged dataset containing all datasets
-        if not additional_features_df.empty:
-            additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
-            print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
-
+        # Optionally, re-save each individual aligned dataset with the final common range
         def save_aligned_dataset(name, df, filename):
             if df is not None and not df.empty:
                 trimmed = df[(df.index >= common_start) & (df.index <= common_end)]
                 trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv(filename, index=False)
                 print(f"[DEBUG] Re-saved {name} dataset to {filename} with final range {common_start} to {common_end}")
 
-        # Re-save each dataset with final common range
         if 'economic_calendar' in aligned_datasets:
             save_aligned_dataset('economic_calendar', aligned_datasets['economic_calendar'], 'economic_calendar_aligned.csv')
         if 'forex_datasets' in aligned_datasets:
@@ -372,8 +344,8 @@ class Plugin:
             save_aligned_dataset('high_freq_dataset', aligned_datasets['high_freq_dataset'], 'high_freq_aligned.csv')
 
 
-        print(f"[DEBUG] additional_features_df final shape: {additional_features_df.shape}")
-        return additional_features_df, common_start, common_end
+        print(f"[DEBUG] merged_features_df final shape: {merged_features_df.shape}")
+        return merged_features_df, common_start, common_end
 
 
 
