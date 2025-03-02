@@ -310,35 +310,37 @@ class Plugin:
         print("[DEBUG] After all datasets processed:")
         print(f"[DEBUG] final_common_start={common_start}, final_common_end={common_end}")
 
+        # Build merged features DataFrame from all additional features.
         additional_features_df = pd.DataFrame(additional_features)
-        if not additional_features_df.empty:
-            # Final trimming with final common_start and common_end
-            additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
+        if additional_features_df.empty:
+            additional_features_df = pd.DataFrame(index=data.index)
+        # Final trimming with final common_start and common_end on additional features.
+        additional_features_df = additional_features_df[(additional_features_df.index >= common_start) & (additional_features_df.index <= common_end)]
 
         # Include the hourly dataset (all columns) in the final merged dataset
         hourly_trimmed = data[(data.index >= common_start) & (data.index <= common_end)].copy()  # Use .copy() to avoid SettingWithCopyWarning
         if not hourly_trimmed.empty:
             # Remove volume column and add new calculated columns
             if 'volume' in hourly_trimmed.columns:
-                hourly_trimmed = hourly_trimmed.drop(columns=['volume'])  # Avoid inplace to ensure a new object
+                hourly_trimmed = hourly_trimmed.drop(columns=['volume'])  # Avoid inplace to ensure new object
             hourly_trimmed['BH-BL'] = hourly_trimmed['HIGH'] - hourly_trimmed['LOW']
             hourly_trimmed['BH-BO'] = hourly_trimmed['HIGH'] - hourly_trimmed['OPEN']
             hourly_trimmed['BO-BL'] = hourly_trimmed['OPEN'] - hourly_trimmed['LOW']
+            print(f"[DEBUG] Prepared hourly dataset with additional calculated columns.")
 
-            # Add hourly dataset columns to additional_features_df
-            for col in hourly_trimmed.columns:
-                additional_features_df[col] = hourly_trimmed[col]
-            print(f"[DEBUG] Added hourly dataset columns to additional_features_df.")
+            # Merge hourly dataset with additional features ensuring all datasets are included
+            additional_features_df = pd.concat([additional_features_df, hourly_trimmed], axis=1)
+            print(f"[DEBUG] Merged hourly dataset columns with additional features.")
 
             # Save hourly dataset for reference
             hourly_trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv('hourly_dataset_aligned.csv', index=False)
             print(f"[DEBUG] Saved hourly dataset to 'hourly_dataset_aligned.csv' with range {common_start} to {common_end}")
 
-        # Add seasonality columns to the additional_features_df
+        # Add seasonality columns to the merged DataFrame if specified
         if config.get('seasonality_columns'):
-            additional_features_df['day_of_month'] = hourly_trimmed.index.day
-            additional_features_df['hour_of_day'] = hourly_trimmed.index.hour
-            additional_features_df['day_of_week'] = hourly_trimmed.index.dayofweek
+            additional_features_df['day_of_month'] = additional_features_df.index.day
+            additional_features_df['hour_of_day'] = additional_features_df.index.hour
+            additional_features_df['day_of_week'] = additional_features_df.index.dayofweek
             print("[DEBUG] Added seasonality columns (day_of_month, hour_of_day, day_of_week).")
 
         # Save the seasonality dataset
@@ -346,7 +348,7 @@ class Plugin:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('seasonality_dataset.csv', index=False)
             print("[DEBUG] Saved seasonality dataset to 'seasonality_dataset.csv'.")
 
-        # Save the final merged dataset
+        # Save the final merged dataset containing all datasets
         if not additional_features_df.empty:
             additional_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('merged_features.csv', index=False)
             print("[DEBUG] Saved merged dataset to 'merged_features.csv'.")
@@ -356,7 +358,7 @@ class Plugin:
                 trimmed = df[(df.index >= common_start) & (df.index <= common_end)]
                 trimmed.reset_index().rename(columns={'index': 'datetime'}).to_csv(filename, index=False)
                 print(f"[DEBUG] Re-saved {name} dataset to {filename} with final range {common_start} to {common_end}")
-                
+
         # Re-save each dataset with final common range
         if 'economic_calendar' in aligned_datasets:
             save_aligned_dataset('economic_calendar', aligned_datasets['economic_calendar'], 'economic_calendar_aligned.csv')
