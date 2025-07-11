@@ -39,10 +39,15 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 
 ### 4.2 Persona: Marcus - Data Scientist
 **Background**: PhD in Machine Learning, works on predictive models for financial forecasting
-**Goals**: Extract complex features using FFT/SSA, integrate multiple data sources, automate pipelines
-**Pain Points**: Need for custom feature engineering methods, integration complexity
+**Goals**: Extract complex features using FFT/SSA, integrate multiple data sources, automate pipelines, decompose features into trend/seasonal/residual components
+**Pain Points**: Need for custom feature engineering methods, integration complexity, lack of advanced decomposition methods
 
-### 4.3 Persona: Lisa - ML Engineer
+### 4.3 Persona: David - Research Analyst
+**Background**: Financial mathematics background, researches market microstructure and seasonality patterns
+**Goals**: Decompose price and volume features to isolate trend, seasonal, and noise components using STL, wavelet, and multi-taper methods
+**Pain Points**: Limited access to advanced decomposition techniques, difficulty in isolating signal from noise in financial time series
+
+### 4.4 Persona: Lisa - ML Engineer
 **Background**: Software engineering background, responsible for production ML pipelines
 **Goals**: Deploy reliable feature engineering in production, monitor performance, ensure reproducibility
 **Pain Points**: Configuration management, system reliability, debugging capabilities
@@ -75,6 +80,21 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 - **AC-09**: Advanced transformations preserve data integrity and temporal relationships
 - **AC-10**: System provides clear documentation for parameter selection guidance
 
+#### 5.1.3 Feature Decomposition Post-Processing (Feature: FE-001-03)
+**As a** research analyst  
+**I want** to decompose selected features into their constituent components  
+**So that** I can isolate trend, seasonal, and residual patterns for better signal extraction
+
+**Acceptance Criteria:**
+- **AC-11**: System decomposes selected features using STL (Seasonal and Trend decomposition using Loess)
+- **AC-12**: System decomposes selected features using Wavelet decomposition with configurable wavelets (db4, haar, etc.)
+- **AC-13**: System decomposes selected features using Multi-taper method (MTM) for spectral analysis
+- **AC-14**: Users can specify which features to decompose via configuration parameters
+- **AC-15**: System replaces original features with decomposed components or keeps both based on user preference
+- **AC-16**: Decomposed features maintain temporal alignment with original data
+- **AC-17**: System provides visualization outputs for decomposition results when requested
+- **AC-18**: Decomposition parameters (STL period, wavelet levels, MTM bandwidth) are user-configurable
+
 ### 5.2 Data Management (Epic: FE-002)
 
 #### 5.2.1 Multi-Format Data Input (Feature: FE-002-01)
@@ -83,11 +103,11 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 **So that** I can work with data from different sources without preprocessing
 
 **Acceptance Criteria:**
-- **AC-11**: System accepts CSV files with customizable column mappings
-- **AC-12**: System handles multiple timeframes (15-minute, hourly, daily data)
-- **AC-13**: System supports both header and headerless CSV files
-- **AC-14**: System automatically detects and adjusts OHLC column ordering
-- **AC-15**: System validates data quality and reports issues before processing
+- **AC-19**: System accepts CSV files with customizable column mappings
+- **AC-20**: System handles multiple timeframes (15-minute, hourly, daily data)
+- **AC-21**: System supports both header and headerless CSV files
+- **AC-22**: System automatically detects and adjusts OHLC column ordering
+- **AC-23**: System validates data quality and reports issues before processing
 
 #### 5.2.2 Multi-Source Data Integration (Feature: FE-002-02)
 **As a** quantitative researcher  
@@ -95,11 +115,11 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 **So that** I can create comprehensive feature sets for multi-factor models
 
 **Acceptance Criteria:**
-- **AC-16**: System integrates high-frequency Forex data with daily market indices
-- **AC-17**: System aligns different data frequencies through intelligent resampling
-- **AC-18**: System handles timezone differences and market hours automatically
-- **AC-19**: Users can specify custom resampling frequencies and aggregation methods
-- **AC-20**: System maintains data lineage and source tracking for all integrated features
+- **AC-24**: System integrates high-frequency Forex data with daily market indices
+- **AC-25**: System aligns different data frequencies through intelligent resampling
+- **AC-26**: System handles timezone differences and market hours automatically
+- **AC-27**: Users can specify custom resampling frequencies and aggregation methods
+- **AC-28**: System maintains data lineage and source tracking for all integrated features
 
 ### 5.3 Analysis and Visualization (Epic: FE-003)
 
@@ -109,11 +129,11 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 **So that** I can identify redundant features and select the most informative ones
 
 **Acceptance Criteria:**
-- **AC-21**: System computes Pearson and Spearman correlation matrices for all features
-- **AC-22**: System generates correlation heatmaps with configurable visualization parameters
-- **AC-23**: System identifies highly correlated feature pairs with user-defined thresholds
-- **AC-24**: System provides correlation analysis export in multiple formats (PNG, PDF, CSV)
-- **AC-25**: System handles large feature sets (1000+ features) efficiently
+- **AC-29**: System computes Pearson and Spearman correlation matrices for all features
+- **AC-30**: System generates correlation heatmaps with configurable visualization parameters
+- **AC-31**: System identifies highly correlated feature pairs with user-defined thresholds
+- **AC-32**: System provides correlation analysis export in multiple formats (PNG, PDF, CSV)
+- **AC-33**: System handles large feature sets (1000+ features) efficiently
 
 #### 5.3.2 Distribution Analysis (Feature: FE-003-02)
 **As a** statistical analyst  
@@ -121,11 +141,11 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 **So that** I can understand feature characteristics and apply appropriate transformations
 
 **Acceptance Criteria:**
-- **AC-26**: System generates distribution plots for all features with KDE overlays
-- **AC-27**: System performs normality tests (D'Agostino, Shapiro-Wilk) with statistical reporting
-- **AC-28**: System computes and reports skewness, kurtosis, and coefficient of variation
-- **AC-29**: System suggests and applies log transformations when they improve normality
-- **AC-30**: System generates comprehensive statistical summary reports
+- **AC-34**: System generates distribution plots for all features with KDE overlays
+- **AC-35**: System performs normality tests (D'Agostino, Shapiro-Wilk) with statistical reporting
+- **AC-36**: System computes and reports skewness, kurtosis, and coefficient of variation
+- **AC-37**: System suggests and applies log transformations when they improve normality
+- **AC-38**: System generates comprehensive statistical summary reports
 
 ### 5.4 Configuration Management (Epic: FE-004)
 
@@ -178,6 +198,11 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 - **AC-48**: Custom plugins integrate seamlessly with existing analysis features
 - **AC-49**: Plugin development documentation includes complete examples
 - **AC-50**: System provides plugin testing framework and utilities
+- **AC-51**: System loads and executes plugins from external repositories with perfect isolation
+- **AC-52**: Plugin execution produces identical results across different execution contexts when using same configuration
+- **AC-53**: System maintains complete plugin state isolation preventing cross-execution contamination
+- **AC-54**: External plugin integration requires only plugin files and configuration parameters
+- **AC-55**: System validates and enforces deterministic plugin execution for perfect replicability
 
 ## 6. Non-Functional Requirements
 
@@ -227,7 +252,16 @@ The Feature Engineering System is a flexible, plugin-based tool designed for gen
 4. **Feature Selection**: User selects optimal features based on analysis
 5. **Production**: User deploys configuration in automated pipeline
 
-### 7.3 Plugin Development Journey (Developer)
+### 7.3 Feature Decomposition Journey (Research Analyst)
+1. **Feature Selection**: User identifies features requiring decomposition analysis
+2. **Configuration**: User specifies decomp_features parameter with target column names
+3. **Method Selection**: User configures STL, wavelet, and/or MTM decomposition options
+4. **Processing**: User runs pipeline with decomposition post-processing enabled
+5. **Analysis**: User analyzes trend, seasonal, and residual components separately
+6. **Validation**: User validates decomposition quality through visualization outputs
+7. **Integration**: User integrates decomposed features into downstream models
+
+### 7.4 Plugin Development Journey (Developer)
 1. **Learning**: Developer studies plugin interface documentation
 2. **Development**: Developer implements custom feature engineering method
 3. **Testing**: Developer validates plugin with test framework

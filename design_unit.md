@@ -1126,11 +1126,143 @@ class AnalysisEngine_Component_Behavior:
         
         Args:
             analysis_results: Results from statistical analysis
-            viz_config: Configuration for visualization generation
-            
-        Returns:
+            viz_config: Configuration for visualization generation            Returns:
             VisualizationResult with generated plots and metadata
         """
+```
+
+### 7.4 PostProcessor_Component Unit
+
+#### 7.4.1 Behavioral Purpose
+Apply post-processing transformations including feature decomposition with support for multiple decomposition methods and feature replacement.
+
+#### 7.4.2 Behavioral Responsibilities
+- **BR-POST-001**: Decompose time series features using STL (Seasonal-Trend decomposition using Loess)
+- **BR-POST-002**: Decompose features using wavelet transformation with configurable wavelets
+- **BR-POST-003**: Decompose features using Multi-Taper Method (MTM) for spectral analysis
+- **BR-POST-004**: Replace original features with decomposed components following naming conventions
+- **BR-POST-005**: Validate decomposition quality and provide quality metrics
+- **BR-POST-006**: Maintain feature metadata and data lineage through decomposition
+
+#### 7.4.3 Behavioral Interface Contract
+```python
+class PostProcessor_Component_Behavior:
+    """Behavioral contract for post-processing component"""
+    
+    def apply_feature_decomposition(self, data: DataFrame, decomp_config: DecompositionConfig) -> DecompositionResult:
+        """
+        Apply feature decomposition using specified methods and parameters
+        
+        Behavior:
+        - MUST validate decomposition parameters before execution
+        - MUST handle insufficient data gracefully with fallback strategies
+        - MUST apply multiple decomposition methods to different features
+        - MUST maintain temporal alignment of decomposed components
+        - MUST preserve data types and precision during decomposition
+        
+        Args:
+            data: Dataset containing features to decompose
+            decomp_config: Configuration specifying decomposition methods and parameters
+            
+        Returns:
+            DecompositionResult with decomposed features and metadata
+        """
+    
+    def decompose_stl_features(self, data: DataFrame, stl_config: STLConfig) -> STLDecompositionResult:
+        """
+        Decompose features using STL (Seasonal-Trend decomposition using Loess)
+        
+        Behavior:
+        - MUST validate minimum data length for STL decomposition
+        - MUST apply robust decomposition with appropriate seasonal period
+        - MUST generate trend, seasonal, and residual components
+        - MUST handle missing values in time series appropriately
+        - MUST provide decomposition quality metrics
+        
+        Args:
+            data: Time series data for STL decomposition
+            stl_config: STL-specific configuration parameters
+            
+        Returns:
+            STLDecompositionResult with trend, seasonal, and residual components
+        """
+        
+    def decompose_wavelet_features(self, data: DataFrame, wavelet_config: WaveletConfig) -> WaveletDecompositionResult:
+        """
+        Decompose features using wavelet transformation
+        
+        Behavior:
+        - MUST validate data length compatibility with wavelet type
+        - MUST apply specified wavelet family and decomposition level
+        - MUST generate approximation and detail coefficients
+        - MUST handle edge effects appropriately
+        - MUST provide reconstruction error metrics
+        
+        Args:
+            data: Data for wavelet decomposition
+            wavelet_config: Wavelet-specific configuration parameters
+            
+        Returns:
+            WaveletDecompositionResult with approximation and detail components
+        """
+        
+    def decompose_mtm_features(self, data: DataFrame, mtm_config: MTMConfig) -> MTMDecompositionResult:
+        """
+        Decompose features using Multi-Taper Method for spectral analysis
+        
+        Behavior:
+        - MUST validate data length for reliable spectral estimation
+        - MUST apply multi-taper method with specified bandwidth
+        - MUST generate frequency domain components
+        - MUST provide spectral density estimates
+        - MUST handle data preprocessing for spectral analysis
+        
+        Args:
+            data: Data for MTM spectral decomposition
+            mtm_config: MTM-specific configuration parameters
+            
+        Returns:
+            MTMDecompositionResult with spectral components and power estimates
+        """
+        
+    def replace_decomposed_features(self, original_data: DataFrame, decomposed_results: Dict[str, DecompositionComponents]) -> FeatureReplacementResult:
+        """
+        Replace original features with their decomposed components
+        
+        Behavior:
+        - MUST follow consistent naming conventions for decomposed features
+        - MUST preserve non-decomposed features in original form
+        - MUST maintain column order for consistency
+        - MUST update feature metadata to reflect decomposition
+        - MUST validate final dataset structure and completeness
+        
+        Args:
+            original_data: Original dataset with features to replace
+            decomposed_results: Decomposition results for specified features
+            
+        Returns:
+            FeatureReplacementResult with final dataset and replacement metadata
+        """
+        
+    def validate_decomposition_quality(self, original: Series, decomposed: DecompositionComponents) -> DecompositionQualityResult:
+        """
+        Validate quality of feature decomposition
+        
+        Behavior:
+        - MUST compute reconstruction error and variance explained
+        - MUST assess component orthogonality and independence
+        - MUST validate temporal consistency of components
+        - MUST provide quality score and recommendations
+        - MUST detect potential decomposition failures
+        
+        Args:
+            original: Original feature time series
+            decomposed: Decomposed components for validation
+            
+        Returns:
+            DecompositionQualityResult with quality metrics and assessment
+        """
+```
 ```
 
 ## 8. Infrastructure Layer Units

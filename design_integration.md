@@ -61,6 +61,16 @@ The system is decomposed into fine-grained components based on behavioral respon
 │  │ - Monitor       │ │ - Maintain      │ │ - Create        │    │
 │  │   progress      │ │   integrity     │ │   visualizations│    │
 │  └─────────────────┘ └─────────────────┘ └─────────────────┘    │
+│  ┌─────────────────┐                                           │
+│  │ PostProcessor   │                                           │
+│  │ (Behavioral)    │                                           │
+│  │ - Decompose     │                                           │
+│  │   features      │                                           │
+│  │ - Apply STL/    │                                           │
+│  │   wavelet/MTM   │                                           │
+│  │ - Replace       │                                           │
+│  │   columns       │                                           │
+│  └─────────────────┘                                           │
 ├─────────────────────────────────────────────────────────────────┤
 │  Infrastructure Layer                                           │
 │  ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐    │
@@ -87,7 +97,9 @@ User Request → CLI_Component → ConfigMerger → PluginDiscovery
                      ↓              ↓              ↓
               DataProcessor ←── AnalysisEngine ← ErrorHandler
                      ↓              ↓              ↓
-              DataExporter ←── Logger ←──── SecurityMgr
+              PostProcessor ←── Logger ←──── SecurityMgr
+                     ↓
+              DataExporter
 ```
 
 ## 3. Component Behavioral Specifications
@@ -537,6 +549,45 @@ class AnalysisEngine:
 - **Dependencies**: DataProcessor
 - **Dependents**: DataExporter (for results export)
 
+#### 3.5.4 PostProcessor (Post-Processing Component)
+
+**Behavioral Purpose**: Apply post-processing transformations including feature decomposition
+
+**Behavioral Responsibilities**:
+- Decompose specified features using STL, wavelet, or MTM methods
+- Replace original columns with decomposed components
+- Maintain feature naming conventions for decomposed features
+- Handle multiple decomposition methods simultaneously
+- Preserve data lineage for decomposed features
+
+**Behavioral Interfaces**:
+```python
+class PostProcessor:
+    def apply_decomposition(self, data: DataFrame, config: DecompositionConfig) -> DecomposedData:
+        """Apply feature decomposition using specified methods"""
+        
+    def decompose_stl(self, series: Series, config: STLConfig) -> STLComponents:
+        """Decompose time series using STL (Seasonal-Trend decomposition using Loess)"""
+        
+    def decompose_wavelet(self, series: Series, config: WaveletConfig) -> WaveletComponents:
+        """Decompose series using wavelet transformation"""
+        
+    def decompose_mtm(self, series: Series, config: MTMConfig) -> MTMComponents:
+        """Decompose series using Multi-Taper Method"""
+        
+    def replace_columns(self, data: DataFrame, decomposed: Dict[str, DecomposedComponents]) -> DataFrame:
+        """Replace original columns with decomposed components"""
+        
+    def validate_decomposition(self, original: Series, decomposed: DecomposedComponents) -> ValidationResult:
+        """Validate decomposition quality and completeness"""
+```
+
+**Integration Contracts**:
+- **Publishes**: `PostProcessingCompleted` events with decomposed data
+- **Subscribes**: `DataProcessed` events from DataProcessor
+- **Dependencies**: DataProcessor
+- **Dependents**: AnalysisEngine, DataExporter
+
 ### 3.6 Infrastructure Layer Components
 
 #### 3.6.1 ErrorHandler (Error Management Component)
@@ -651,9 +702,9 @@ CLI_Component → ConfigLoader → ConfigMerger → ConfigValidator → [All Com
 
 #### 4.1.2 Data Processing Flow Pattern
 ```
-DataLoader → DataValidator → PluginExecutor → DataProcessor → AnalysisEngine → DataExporter
-     ↓           ↓              ↓              ↓              ↓              ↓
- Raw Data → Quality Check → Feature Gen → Transformation → Analysis → Output
+DataLoader → DataValidator → PluginExecutor → DataProcessor → PostProcessor → AnalysisEngine → DataExporter
+     ↓           ↓              ↓              ↓              ↓              ↓              ↓
+ Raw Data → Quality Check → Feature Gen → Transformation → Decomposition → Analysis → Output
 ```
 
 #### 4.1.3 Plugin Management Flow Pattern
@@ -807,6 +858,14 @@ class ComponentConfiguration:
 - **IR-CONS-003**: Data types must be consistent across component interfaces
 - **IR-CONS-004**: Missing data handling must be coordinated across components
 
+#### 5.2.3 Decomposition Integration Requirements
+- **IR-DECOMP-001**: PostProcessor must validate decomposition parameters before execution
+- **IR-DECOMP-002**: Original column metadata must be preserved in decomposed components
+- **IR-DECOMP-003**: Decomposition methods must maintain temporal alignment
+- **IR-DECOMP-004**: Decomposed features must follow consistent naming conventions
+- **IR-DECOMP-005**: DataProcessor and PostProcessor must coordinate column replacement
+- **IR-DECOMP-006**: AnalysisEngine must adapt to dynamically changed column structure
+
 ### 5.3 Performance Integration Requirements
 
 #### 5.3.1 Component Performance Requirements
@@ -877,6 +936,24 @@ class ComponentConfiguration:
 - Memory pressure handling across component boundaries
 - Network latency impact on remote configuration operations
 
+#### 6.2.4 Decomposition Integration Scenarios
+- **Happy Path Decomposition**:
+  - Complete pipeline with STL decomposition of specified features
+  - Multi-method decomposition (STL + wavelet) on different features
+  - PostProcessor correctly replacing columns and updating metadata
+  - AnalysisEngine adapting to new column structure
+
+- **Error Path Decomposition**:
+  - Invalid decomposition parameters handled gracefully
+  - Insufficient data for decomposition methods
+  - Memory pressure during large dataset decomposition
+  - Recovery when decomposition plugin fails
+
+- **Performance Decomposition**:
+  - Decomposition performance on large datasets
+  - Memory usage during multi-feature decomposition
+  - Impact of decomposition on downstream analysis
+
 ## 7. Component Deployment and Configuration
 
 ### 7.1 Component Deployment Patterns
@@ -914,6 +991,13 @@ components:
   plugin_executor:
     isolation_level: process
     timeout_seconds: 300
+    
+  post_processor:
+    decomposition_methods: [stl, wavelet, mtm]
+    stl_period: 12
+    wavelet_type: 'db4'
+    mtm_bandwidth: 2.5
+    validation_threshold: 0.95
 ```
 
 #### 7.2.2 Integration Configuration

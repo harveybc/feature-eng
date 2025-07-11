@@ -16,6 +16,12 @@ DEFAULT_VALUES = {
     'save_config': './output_config.json',
     'headers': True,
 
+    # Decomposition settings
+    'decomp_features': [],  # List of feature names to decompose using STL, wavelet, and MTM methods
+    'use_stl_decomp': True,  # Enable STL decomposition for decomp_features
+    'use_wavelet_decomp': True,  # Enable wavelet decomposition for decomp_features
+    'use_mtm_decomp': False,  # Enable MTM decomposition for decomp_features
+
     # Additional datasets
     'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
     'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',

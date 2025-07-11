@@ -12,3 +12,6 @@ kiwisolver
 requests
 seaborn
 tqdm
+scikit-learn
+statsmodels
+PyWavelets

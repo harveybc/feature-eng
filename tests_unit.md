@@ -872,6 +872,315 @@ invalid_date,not_number,105.0,99.0,104.0"""
         assert result.outlier_analysis is not None
         assert result.visualization_data is not None
 
+### 5.4 PostProcessor Component Unit Tests
+
+#### 5.4.1 Test Class: TestPostProcessorComponentBehavior
+
+**Purpose**: Validate feature decomposition and post-processing behaviors.
+
+##### Test Case: BR-POST-001 - STL Decomposition
+
+    def test_br_post_001_decomposes_time_series_using_stl_correctly(self):
+        """
+        Verify that PostProcessor correctly decomposes time series features
+        using STL method with proper trend, seasonal, and residual components.
+        
+        Behavioral Contract: BR-POST-001
+        """
+        # Given: Time series data suitable for STL decomposition
+        time_series_data = create_seasonal_time_series_data(periods=100, seasonal_period=12)
+        stl_config = STLConfig(features=['price'], period=12, robust=True)
+        
+        # When: Applying STL decomposition
+        result = post_processor.decompose_stl_features(time_series_data, stl_config)
+        
+        # Then: STL decomposition produces expected components
+        assert result.success == True
+        assert 'price_trend' in result.decomposed_features
+        assert 'price_seasonal' in result.decomposed_features
+        assert 'price_residual' in result.decomposed_features
+        
+        # Validate decomposition quality
+        original_series = time_series_data['price']
+        reconstructed = (result.decomposed_features['price_trend'] + 
+                        result.decomposed_features['price_seasonal'] + 
+                        result.decomposed_features['price_residual'])
+        
+        reconstruction_error = np.mean(np.abs(original_series - reconstructed))
+        assert reconstruction_error < 0.01  # High quality reconstruction
+        
+    def test_br_post_001_validates_insufficient_data_for_stl(self):
+        """
+        Verify that PostProcessor validates data length requirements
+        for STL decomposition and handles insufficient data gracefully.
+        
+        Behavioral Contract: BR-POST-001
+        """
+        # Given: Time series data insufficient for STL (less than 2 periods)
+        insufficient_data = create_short_time_series_data(periods=10)
+        stl_config = STLConfig(features=['price'], period=12)
+        
+        # When: Attempting STL decomposition with insufficient data
+        result = post_processor.decompose_stl_features(insufficient_data, stl_config)
+        
+        # Then: Insufficient data is detected and handled gracefully
+        assert result.success == False
+        assert result.error_type == 'INSUFFICIENT_DATA'
+        assert result.fallback_strategy == 'SKIP_DECOMPOSITION'
+        assert result.error_message is not None
+
+##### Test Case: BR-POST-002 - Wavelet Decomposition
+
+    def test_br_post_002_decomposes_features_using_wavelet_correctly(self):
+        """
+        Verify that PostProcessor correctly decomposes features using
+        wavelet transformation with proper approximation and detail coefficients.
+        
+        Behavioral Contract: BR-POST-002
+        """
+        # Given: Feature data suitable for wavelet decomposition
+        feature_data = create_noisy_signal_data(length=128)  # Power of 2 for wavelets
+        wavelet_config = WaveletConfig(features=['signal'], wavelet='db4', levels=3)
+        
+        # When: Applying wavelet decomposition
+        result = post_processor.decompose_wavelet_features(feature_data, wavelet_config)
+        
+        # Then: Wavelet decomposition produces expected components
+        assert result.success == True
+        assert 'signal_approx' in result.decomposed_features
+        assert 'signal_detail' in result.decomposed_features
+        
+        # Validate wavelet reconstruction
+        original_signal = feature_data['signal']
+        approximation = result.decomposed_features['signal_approx']
+        detail = result.decomposed_features['signal_detail']
+        
+        # Check that approximation captures main signal characteristics
+        assert np.corrcoef(original_signal, approximation)[0, 1] > 0.8
+        
+        # REPLICABILITY: Verify exact reproducibility with same config
+        config_copy = deepcopy(wavelet_config)
+        result_replicated = post_processor.decompose_wavelet_features(feature_data, config_copy)
+        
+        # Results must be bitwise identical for perfect replicability
+        assert np.array_equal(result.decomposed_features['signal_approx'], 
+                             result_replicated.decomposed_features['signal_approx'])
+        assert np.array_equal(result.decomposed_features['signal_detail'], 
+                             result_replicated.decomposed_features['signal_detail'])
+        
+    def test_br_post_002_handles_wavelet_edge_effects_appropriately(self):
+        """
+        Verify that PostProcessor handles wavelet edge effects and
+        data length constraints appropriately.
+        
+        Behavioral Contract: BR-POST-002
+        """
+        # Given: Feature data with edge effects challenges
+        edge_data = create_data_with_edge_artifacts(length=64)
+        wavelet_config = WaveletConfig(features=['signal'], wavelet='db8', mode='symmetric')
+        
+        # When: Applying wavelet decomposition with edge handling
+        result = post_processor.decompose_wavelet_features(edge_data, wavelet_config)
+        
+        # Then: Edge effects are handled appropriately
+        assert result.success == True
+        assert result.edge_handling_applied == True
+        assert result.boundary_condition == 'symmetric'
+
+##### Test Case: BR-POST-003 - MTM Decomposition
+
+    def test_br_post_003_decomposes_features_using_mtm_correctly(self):
+        """
+        Verify that PostProcessor correctly decomposes features using
+        Multi-Taper Method for spectral analysis.
+        
+        Behavioral Contract: BR-POST-003
+        """
+        # Given: Time series data suitable for spectral analysis
+        spectral_data = create_multi_frequency_signal_data(length=256, frequencies=[10, 25, 50])
+        mtm_config = MTMConfig(features=['signal'], bandwidth=2.5, n_tapers=4)
+        
+        # When: Applying MTM decomposition
+        result = post_processor.decompose_mtm_features(spectral_data, mtm_config)
+        
+        # Then: MTM decomposition produces spectral components
+        assert result.success == True
+        assert 'signal_psd' in result.decomposed_features  # Power spectral density
+        assert 'signal_frequencies' in result.decomposed_features
+        
+        # Validate that major frequencies are detected
+        frequencies = result.decomposed_features['signal_frequencies']
+        psd = result.decomposed_features['signal_psd']
+        
+        # Find peaks in PSD
+        peak_indices = find_spectral_peaks(psd, prominence=0.1)
+        detected_frequencies = frequencies[peak_indices]
+        
+        # Should detect the input frequencies (10, 25, 50 Hz)
+        assert len(detected_frequencies) >= 3
+        
+        # REPLICABILITY: Test exact reproducibility across different contexts
+        config_copy = deepcopy(mtm_config)
+        result_replicated = post_processor.decompose_mtm_features(spectral_data, config_copy)
+        
+        # Results must be bitwise identical for perfect replicability
+        assert np.array_equal(result.decomposed_features['signal_psd'], 
+                             result_replicated.decomposed_features['signal_psd'])
+        assert np.array_equal(result.decomposed_features['signal_frequencies'], 
+                             result_replicated.decomposed_features['signal_frequencies'])
+        
+        # CROSS-APP REPLICABILITY: Simulate external app usage
+        # Verify that only config parameters are needed for exact reproduction
+        external_config = extract_config_only(mtm_config)  # Strip any internal state
+        result_external = post_processor.decompose_mtm_features(spectral_data, external_config)
+        
+        assert np.array_equal(result.decomposed_features['signal_psd'], 
+                             result_external.decomposed_features['signal_psd'])
+
+##### Test Case: BR-POST-004 - Feature Replacement
+
+    def test_br_post_004_replaces_features_with_naming_conventions(self):
+        """
+        Verify that PostProcessor correctly replaces original features
+        with decomposed components following naming conventions.
+        
+        Behavioral Contract: BR-POST-004
+        """
+        # Given: Dataset with features to decompose and replace
+        original_data = create_multi_feature_dataset(['price', 'volume', 'indicator'])
+        decomp_config = DecompositionConfig(
+            features=['price', 'volume'],
+            methods={'price': 'stl', 'volume': 'wavelet'},
+            replace_original=True
+        )
+        
+        # When: Applying decomposition with feature replacement
+        result = post_processor.apply_feature_decomposition(original_data, decomp_config)
+        
+        # Then: Original features are replaced with decomposed components
+        final_data = result.processed_data
+        
+        # Original decomposed features should be removed
+        assert 'price' not in final_data.columns
+        assert 'volume' not in final_data.columns
+        
+        # Decomposed features should follow naming conventions
+        assert 'price_trend' in final_data.columns
+        assert 'price_seasonal' in final_data.columns
+        assert 'price_residual' in final_data.columns
+        assert 'volume_approx' in final_data.columns
+        assert 'volume_detail' in final_data.columns
+        
+        # Non-decomposed features should remain unchanged
+        assert 'indicator' in final_data.columns
+        
+    def test_br_post_004_preserves_non_decomposed_features(self):
+        """
+        Verify that PostProcessor preserves features not specified
+        for decomposition in their original form.
+        
+        Behavioral Contract: BR-POST-004
+        """
+        # Given: Dataset with mixed features (some for decomposition, some not)
+        mixed_data = create_mixed_feature_dataset()
+        selective_config = DecompositionConfig(
+            features=['price'],  # Only decompose price
+            methods={'price': 'stl'}
+        )
+        
+        # When: Applying selective decomposition
+        result = post_processor.apply_feature_decomposition(mixed_data, selective_config)
+        
+        # Then: Non-specified features remain unchanged
+        final_data = result.processed_data
+        
+        # Non-decomposed features preserved
+        assert 'volume' in final_data.columns
+        assert 'rsi' in final_data.columns
+        assert 'macd' in final_data.columns
+        
+        # Only specified feature decomposed
+        assert 'price_trend' in final_data.columns
+        assert 'price_seasonal' in final_data.columns
+
+##### Test Case: BR-POST-005 - Decomposition Quality Validation
+
+    def test_br_post_005_validates_decomposition_quality_metrics(self):
+        """
+        Verify that PostProcessor validates decomposition quality and
+        provides comprehensive quality metrics.
+        
+        Behavioral Contract: BR-POST-005
+        """
+        # Given: Time series data for quality validation
+        test_series = create_known_quality_test_series()
+        decomp_components = create_test_decomposition_components()
+        
+        # When: Validating decomposition quality
+        result = post_processor.validate_decomposition_quality(test_series, decomp_components)
+        
+        # Then: Comprehensive quality metrics are provided
+        assert result.variance_explained is not None
+        assert result.reconstruction_error is not None
+        assert result.component_orthogonality is not None
+        assert result.quality_score is not None
+        
+        # Quality thresholds should be met for good decomposition
+        assert result.variance_explained > 0.95
+        assert result.reconstruction_error < 0.05
+        assert result.quality_score > 0.8
+        
+    def test_br_post_005_detects_poor_decomposition_quality(self):
+        """
+        Verify that PostProcessor detects poor decomposition quality
+        and provides appropriate warnings and recommendations.
+        
+        Behavioral Contract: BR-POST-005
+        """
+        # Given: Poor quality decomposition components
+        poor_series = create_poor_quality_test_series()
+        poor_components = create_poor_decomposition_components()
+        
+        # When: Validating poor decomposition quality
+        result = post_processor.validate_decomposition_quality(poor_series, poor_components)
+        
+        # Then: Poor quality is detected with appropriate warnings
+        assert result.quality_warnings is not None
+        assert len(result.quality_warnings) > 0
+        assert result.quality_score < 0.5
+        assert result.recommendations is not None
+
+##### Test Case: BR-POST-006 - Data Lineage Maintenance
+
+    def test_br_post_006_maintains_feature_metadata_and_lineage(self):
+        """
+        Verify that PostProcessor maintains feature metadata and
+        data lineage information through decomposition process.
+        
+        Behavioral Contract: BR-POST-006
+        """
+        # Given: Dataset with comprehensive metadata
+        data_with_metadata = create_dataset_with_metadata()
+        decomp_config = DecompositionConfig(features=['price'])
+        
+        # When: Applying decomposition with metadata preservation
+        result = post_processor.apply_feature_decomposition(data_with_metadata, decomp_config)
+        
+        # Then: Metadata and lineage are preserved and updated
+        assert result.feature_lineage is not None
+        assert result.metadata_preserved == True
+        
+        # Original feature lineage should be tracked
+        price_lineage = result.feature_lineage['price_trend']
+        assert price_lineage.source_feature == 'price'
+        assert price_lineage.transformation_method == 'stl'
+        assert price_lineage.component_type == 'trend'
+        
+        # Metadata should be updated for new features
+        final_metadata = result.updated_metadata
+        assert 'price_trend' in final_metadata.feature_descriptions
+        assert 'price_seasonal' in final_metadata.feature_descriptions
+
 ## 6. Plugin System Layer Unit Tests
 
 ### 6.1 Plugin Loader Component Unit Tests
@@ -958,6 +1267,123 @@ invalid_date,not_number,105.0,99.0,104.0"""
         assert result.error_type is not None
         assert result.error_message is not None
         assert result.plugin_instance is None
+
+##### Test Case: BR-PL-003 - Cross-Application Plugin Replicability
+
+    def test_br_pl_003_ensures_perfect_plugin_replicability_across_apps(self):
+        """
+        Verify that plugins loaded from external repositories produce
+        exactly identical results when using only config parameters.
+        
+        This is critical for ensuring that feature-eng can use plugins
+        from prediction_provider or any other repository with perfect
+        replicability.
+        
+        Behavioral Contract: BR-PL-003
+        """
+        # Given: Plugin and config that could be imported from external app
+        external_plugin_path = '/home/harveybc/Documents/GitHub/prediction_provider/plugins/decomposition'
+        plugin_config = {
+            'method': 'stl',
+            'period': 12,
+            'robust': True,
+            'features': ['price']
+        }
+        test_data = create_deterministic_test_data()
+        
+        # When: Loading and executing plugin in isolation
+        plugin_instance = plugin_loader.load_external_plugin(external_plugin_path)
+        result_1 = plugin_instance.process(test_data, plugin_config)
+        
+        # Clear plugin cache and reload (simulate different execution context)
+        plugin_loader.clear_plugin_cache()
+        plugin_instance_2 = plugin_loader.load_external_plugin(external_plugin_path)
+        result_2 = plugin_instance_2.process(test_data, plugin_config)
+        
+        # Then: Results must be bitwise identical across executions
+        assert np.array_equal(result_1.output_data, result_2.output_data)
+        assert result_1.metadata == result_2.metadata
+        assert result_1.execution_trace == result_2.execution_trace
+        
+        # CROSS-APP VALIDATION: Simulate using plugin from different app
+        # This verifies that only config and plugin files are needed
+        simulation_config = extract_portable_config(plugin_config)
+        result_portable = plugin_instance.process(test_data, simulation_config)
+        
+        assert np.array_equal(result_1.output_data, result_portable.output_data)
+        
+    def test_br_pl_003_validates_plugin_isolation_boundaries(self):
+        """
+        Verify that plugins execute in complete isolation without
+        depending on internal feature-eng state or implementation details.
+        
+        Behavioral Contract: BR-PL-003
+        """
+        # Given: Plugin that should not access internal state
+        plugin_instance = plugin_loader.load_plugin('technical_indicator')
+        isolated_config = create_isolated_plugin_config()
+        
+        # When: Executing plugin in isolation mode
+        result = plugin_loader.execute_plugin_isolated(
+            plugin_instance, 
+            config=isolated_config,
+            isolation_level='strict'
+        )
+        
+        # Then: Plugin executes without accessing internal state
+        assert result.isolation_violations == []
+        assert result.internal_dependencies == []
+        assert result.success == True
+        
+        # Verify that plugin state doesn't persist between calls
+        result_2 = plugin_loader.execute_plugin_isolated(
+            plugin_instance, 
+            config=isolated_config,
+            isolation_level='strict'
+        )
+        
+        assert result.execution_state != result_2.execution_state  # No state carryover
+
+### 6.4 Plugin System Test Utilities
+
+#### 6.4.1 Cross-App Replicability Test Helpers
+
+    def create_deterministic_test_data():
+        """Create test data with known deterministic characteristics for replicability testing."""
+        np.random.seed(42)  # Fixed seed for reproducibility
+        data = pd.DataFrame({
+            'Date': pd.date_range('2023-01-01', periods=100, freq='D'),
+            'price': 100 + np.cumsum(np.random.normal(0, 1, 100) * 0.01),
+            'volume': 1000 + np.random.normal(0, 100, 100)
+        })
+        return data
+
+    def extract_portable_config(config):
+        """Extract only portable configuration parameters, removing any internal state."""
+        portable_keys = [
+            'method', 'period', 'robust', 'features', 'wavelet', 'levels',
+            'bandwidth', 'n_tapers', 'decomp_features', 'decomp_methods'
+        ]
+        return {k: v for k, v in config.items() if k in portable_keys}
+
+    def validate_plugin_isolation(plugin_instance):
+        """Validate that plugin executes in complete isolation."""
+        # Check for no global variable access
+        # Check for no file system persistence
+        # Check for no network communication
+        # Check for deterministic behavior
+        pass
+
+    def create_isolated_plugin_config():
+        """Create configuration that enforces strict plugin isolation."""
+        return {
+            'isolation_mode': 'strict',
+            'allow_file_access': False,
+            'allow_network_access': False,
+            'allow_global_state': False,
+            'random_seed': 42,
+            'deterministic_execution': True
+        }
 
 ### 6.2 Plugin Manager Unit Tests
 

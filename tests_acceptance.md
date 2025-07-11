@@ -147,11 +147,120 @@ And component importance should be ranked and documented
 And the decomposition should maintain temporal relationships
 ```
 
-### 4.3 Data Management Tests
+### 4.3 Feature Decomposition Tests
+
+#### Test Case: AT-FE-001-06 - STL Decomposition
+**Feature Reference**: FE-001-03  
+**Acceptance Criteria**: AC-11, AC-16, AC-17
+
+**Scenario**: Decompose selected features using STL method
+```gherkin
+Given I have technical indicators generated from OHLC data
+And I specify decomp_features=['RSI', 'MACD'] in the configuration
+And I enable use_stl_decomp=True
+When I run the feature engineering pipeline
+Then the system should decompose RSI and MACD into trend, seasonal, and residual components
+And the output should contain RSI_stl_trend, RSI_stl_seasonal, RSI_stl_resid columns
+And the output should contain MACD_stl_trend, MACD_stl_seasonal, MACD_stl_resid columns
+And decomposed components should maintain temporal alignment with original data
+And original RSI and MACD columns should be replaced unless keep_original=True
+```
+
+#### Test Case: AT-FE-001-07 - Wavelet Decomposition
+**Feature Reference**: FE-001-03  
+**Acceptance Criteria**: AC-12, AC-16, AC-18
+
+**Scenario**: Decompose selected features using wavelet method
+```gherkin
+Given I have feature data with both trend and high-frequency noise
+And I specify decomp_features=['Close'] in the configuration
+And I enable use_wavelet_decomp=True with wavelet_name='db4' and wavelet_levels=2
+When I run the decomposition post-processing
+Then the system should generate Close_wav_detail_L1, Close_wav_detail_L2, and Close_wav_approx_L2 features
+And wavelet components should capture different frequency bands
+And the sum of all components should approximately reconstruct the original signal
+And decomposition parameters should be configurable via CLI or config file
+```
+
+#### Test Case: AT-FE-001-08 - Multi-Method Decomposition
+**Feature Reference**: FE-001-03  
+**Acceptance Criteria**: AC-11, AC-12, AC-15, AC-17
+
+**Scenario**: Apply multiple decomposition methods to the same features
+```gherkin
+Given I have a feature dataset with Volume and Close columns
+And I specify decomp_features=['Volume', 'Close']
+And I enable both use_stl_decomp=True and use_wavelet_decomp=True
+When I run the decomposition pipeline
+Then the system should generate both STL and wavelet components for Volume and Close
+And the output should contain Volume_stl_trend, Volume_stl_seasonal, Volume_stl_resid
+And the output should contain Volume_wav_detail_L1, Volume_wav_detail_L2, Volume_wav_approx_L2
+And the same pattern should apply to Close features
+And all decomposed features should be normalized if normalize_decomposed_features=True
+```
+
+#### Test Case: AT-FE-001-09 - Decomposition Visualization
+**Feature Reference**: FE-001-03  
+**Acceptance Criteria**: AC-17
+
+**Scenario**: Generate visualization outputs for decomposition results
+```gherkin
+Given I have configured decomposition with stl_plot_file='stl_decomp.png'
+And I have configured decomposition with wavelet_plot_file='wavelet_decomp.png'
+And I specify decomp_features=['Close']
+When I run the decomposition pipeline
+Then the system should generate stl_decomp_Close.png showing STL components
+And the system should generate wavelet_decomp_Close.png showing wavelet components
+And plots should clearly show original signal and decomposed components
+And plots should include appropriate titles and labels for each component
+```
+
+#### Test Case: AT-FE-001-10 - Cross-Application Plugin Replicability
+**Feature Reference**: FE-001-04  
+**Acceptance Criteria**: AC-51, AC-52, AC-53, AC-54, AC-55
+
+**Scenario**: Use decomposition plugins from external applications with perfect replicability
+```gherkin
+Given I have decomposition plugins available from the prediction_provider repository
+And I configure the system to use external plugins with external_plugin_paths=['/path/to/prediction_provider/plugins']
+And I specify decomp_features=['Close', 'Volume'] with decomp_methods={'Close': 'stl', 'Volume': 'wavelet'}
+And I prepare deterministic test data with known characteristics
+When I run the feature engineering pipeline using external plugins
+And I clear all caches and run the pipeline again with identical configuration
+Then both executions should produce exactly identical results (bitwise equality)
+And the external plugins should execute without accessing internal feature-eng state
+And only the configuration parameters should influence the plugin behavior
+And results should be perfectly reproducible across different execution contexts
+And the system should maintain complete plugin isolation and deterministic execution
+```
+
+**Implementation Notes**:
+```python
+def test_cross_app_plugin_replicability():
+    # Execution 1
+    config_1 = load_config('test_external_plugins.json')
+    result_1 = run_feature_engineering(test_data, config_1)
+    
+    # Clear all state and caches
+    clear_plugin_cache()
+    clear_config_cache()
+    restart_plugin_system()
+    
+    # Execution 2 with identical config
+    config_2 = load_config('test_external_plugins.json')
+    result_2 = run_feature_engineering(test_data, config_2)
+    
+    # Validate perfect replicability
+    assert np.array_equal(result_1.values, result_2.values)
+    assert result_1.columns.equals(result_2.columns)
+    assert result_1.metadata == result_2.metadata
+```
+
+### 4.4 Data Management Tests
 
 #### Test Case: AT-FE-002-01 - Multi-Format Data Input
 **Feature Reference**: FE-002-01  
-**Acceptance Criteria**: AC-11, AC-12, AC-13, AC-14
+**Acceptance Criteria**: AC-19, AC-20, AC-21, AC-22
 
 **Scenario**: Process various CSV formats and column orderings
 ```gherkin
@@ -247,7 +356,34 @@ And failed operations should retry with exponential backoff
 And local backups should be maintained for all remote operations
 ```
 
-### 4.6 Plugin Architecture Tests
+### 4.6 CLI Configuration Tests
+
+#### Test Case: AT-FE-004-03 - Decomposition CLI Arguments
+**Feature Reference**: FE-001-03  
+**Acceptance Criteria**: AC-14, AC-18
+
+**Scenario**: Configure decomposition through command-line arguments
+```gherkin
+Given I want to decompose RSI and Volume features using STL and wavelet methods
+When I run the CLI with arguments:
+  --decomp_features RSI Volume
+  --use_stl_decomp
+  --use_wavelet_decomp
+  --wavelet_levels 3
+Then the system should parse all decomposition arguments correctly
+And apply STL decomposition to both RSI and Volume features
+And apply wavelet decomposition with 3 levels to both features
+And generate appropriate decomposed feature columns in the output
+```
+
+**Manual Test Steps**:
+1. Prepare test data with RSI and Volume columns
+2. Execute: `feature-eng --input_file test_data.csv --decomp_features RSI Volume --use_stl_decomp --use_wavelet_decomp --wavelet_levels 3 --output_file decomp_output.csv`
+3. Verify output contains: RSI_stl_trend, RSI_stl_seasonal, RSI_stl_resid, RSI_wav_detail_L1, RSI_wav_detail_L2, RSI_wav_detail_L3, RSI_wav_approx_L3
+4. Verify same pattern for Volume features
+5. Verify original RSI and Volume columns are replaced
+
+### 4.7 Plugin Architecture Tests
 
 #### Test Case: AT-FE-005-01 - Plugin Discovery and Loading
 **Feature Reference**: FE-005-01  

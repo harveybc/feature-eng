@@ -137,6 +137,18 @@ The Feature Engineering System provides a scalable, plugin-based platform for ti
 - Input: Feature data, analysis configuration
 - Output: Statistical reports, visualization files
 
+#### 3.2.7 Post-Processing Component
+**Purpose**: Apply advanced post-processing transformations to generated features  
+**Responsibilities**:
+- Decompose selected features using STL, wavelet, and MTM methods
+- Replace or augment original features with decomposed components
+- Normalize and validate decomposed features
+- Generate decomposition visualization outputs
+
+**Interfaces**:
+- Input: Feature data, decomposition configuration
+- Output: Decomposed feature data, visualization files
+
 ## 4. System Requirements
 
 ### 4.1 Functional System Requirements
@@ -168,6 +180,15 @@ The Feature Engineering System provides a scalable, plugin-based platform for ti
 - **SR-F-018**: System shall perform normality tests with p-value reporting
 - **SR-F-019**: System shall suggest transformations based on statistical analysis
 - **SR-F-020**: System shall export analysis results in CSV, PNG, and PDF formats
+
+#### 4.1.5 Post-Processing Requirements
+- **SR-F-021**: System shall decompose specified features using STL method with configurable periods
+- **SR-F-022**: System shall decompose specified features using wavelet transform with configurable wavelets and levels
+- **SR-F-023**: System shall decompose specified features using multi-taper method with configurable bandwidth
+- **SR-F-024**: System shall replace original features with decomposed components or keep both based on configuration
+- **SR-F-025**: System shall normalize decomposed features using standardized scaling methods
+- **SR-F-026**: System shall generate visualization plots for decomposition results when requested
+- **SR-F-027**: System shall validate decomposition parameters for mathematical consistency
 
 ### 4.2 Non-Functional System Requirements
 

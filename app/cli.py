@@ -27,6 +27,12 @@ def parse_args():
     parser.add_argument('--save_config', type=str, help='Path to save the current configuration.')
     parser.add_argument('--headers', action='store_true', help='Input includes headers.')
 
+    # Decomposition arguments
+    parser.add_argument('--decomp_features', type=str, nargs='+', help='List of feature names to decompose using STL, wavelet, and MTM methods.')
+    parser.add_argument('--use_stl_decomp', action='store_true', help='Enable STL decomposition for decomp_features.')
+    parser.add_argument('--use_wavelet_decomp', action='store_true', help='Enable wavelet decomposition for decomp_features.')
+    parser.add_argument('--use_mtm_decomp', action='store_true', help='Enable MTM decomposition for decomp_features.')
+
     # Additional datasets arguments
     parser.add_argument('--high_freq_dataset', type=str, help='Path to the high-frequency dataset (default: set in config.py).')
     parser.add_argument('--sp500_dataset', type=str, help='Path to the S&P 500 daily dataset (default: set in config.py).')

@@ -202,9 +202,51 @@ def process_data(data, plugin, config):
         print("[DEBUG] Final data first 5 rows:")
     print(final_data.head())
 
+    # Apply decomposition post-processing if configured
+    decomp_features = config.get('decomp_features', [])
+    if decomp_features:
+        print(f"[DEBUG] Applying decomposition post-processing to features: {decomp_features}")
+        try:
+            from app.plugins.post_processors.decomposition_post_processor import DecompositionPostProcessor
+            
+            # Create post-processor with configuration
+            decomp_params = {
+                'decomp_features': decomp_features,
+                'use_stl_decomp': config.get('use_stl_decomp', True),
+                'use_wavelet_decomp': config.get('use_wavelet_decomp', True),
+                'use_mtm_decomp': config.get('use_mtm_decomp', False),
+                'normalize_decomposed_features': True,
+                'replace_original': True,
+                'keep_original': False
+            }
+            
+            decomp_processor = DecompositionPostProcessor(decomp_params)
+            
+            # Set the index back to datetime for decomposition processing
+            final_data_with_index = final_data.copy()
+            final_data_with_index['DATE_TIME'] = pd.to_datetime(final_data_with_index['DATE_TIME'])
+            final_data_with_index.set_index('DATE_TIME', inplace=True)
+            
+            # Apply decomposition
+            decomposed_data = decomp_processor.process_features(final_data_with_index)
+            
+            # Reset index again for final output
+            decomposed_data.reset_index(inplace=True)
+            decomposed_data.rename(columns={'DATE_TIME': 'DATE_TIME'}, inplace=True)
+            
+            final_data = decomposed_data
+            print(f"[DEBUG] After decomposition post-processing, final data shape: {final_data.shape}")
+            print(f"[DEBUG] Final decomposed data columns: {list(final_data.columns)}")
+            
+        except Exception as e:
+            print(f"[ERROR] Decomposition post-processing failed: {e}")
+            print("[DEBUG] Continuing with original data...")
+
     # Reset the index for the final dataset
-    final_data.reset_index(inplace=True)
-    final_data.rename(columns={'index': 'DATE_TIME'}, inplace=True)
+    if 'DATE_TIME' not in final_data.columns:
+        final_data.reset_index(inplace=True)
+        if final_data.columns[0] == 'index':
+            final_data.rename(columns={'index': 'DATE_TIME'}, inplace=True)
     print("[DEBUG] Final dataset with DATE_TIME column restored, first 5 rows:")
     print(final_data.head())
 

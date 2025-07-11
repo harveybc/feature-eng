@@ -374,6 +374,215 @@ And Pipeline should continue with alternative plugin or skip feature generation
 And Data integrity should be maintained throughout error handling
 ```
 
+### 3.6 DataProcessor ↔ PostProcessor Integration
+
+#### Test Case: IT-CP-009 - Data Processing to Post-Processing Flow
+**Integration Scope**: DataProcessor → PostProcessor  
+**Behavioral Focus**: Feature transformation and decomposition workflow
+
+**Test Scenario**: Validate processed data flows correctly to post-processing
+```gherkin
+Given DataProcessor has completed feature generation and transformations
+And PostProcessor is configured for STL decomposition of specific features
+When DataProcessor publishes DataProcessed event with transformed dataset
+Then PostProcessor should receive the processed dataset
+And PostProcessor should identify features specified for decomposition
+And PostProcessor should validate decomposition parameters
+And PostProcessor should apply STL decomposition to specified features
+And PostProcessor should replace original columns with decomposed components
+And PostProcessor should publish PostProcessingCompleted event with final dataset
+And Final dataset should contain trend, seasonal, and residual components
+```
+
+**Test Implementation**:
+```python
+class DataProcessorPostProcessorIntegrationTest:
+    def setup_decomposition_test(self):
+        self.event_bus = MockEventBus()
+        self.data_processor = DataProcessor(self.event_bus)
+        self.post_processor = PostProcessor(self.event_bus)
+        
+        # Configure decomposition
+        self.decomp_config = DecompositionConfig(
+            features=['close_price', 'volume'],
+            methods=['stl'],
+            stl_period=12,
+            replace_original=True
+        )
+        
+    def test_data_processing_to_decomposition_flow(self):
+        # Create test dataset with features to decompose
+        test_data = pd.DataFrame({
+            'timestamp': pd.date_range('2023-01-01', periods=100, freq='D'),
+            'close_price': np.random.random(100) * 100 + 50,
+            'volume': np.random.random(100) * 1000 + 500,
+            'feature_1': np.random.random(100),
+            'feature_2': np.random.random(100)
+        })
+        
+        # Setup event monitoring
+        events_received = []
+        self.event_bus.subscribe('DataProcessed', 
+                                lambda e: events_received.append(e))
+        self.event_bus.subscribe('PostProcessingCompleted', 
+                                lambda e: events_received.append(e))
+        
+        # Process data through DataProcessor
+        processed_result = self.data_processor.apply_transformations(
+            test_data, TransformConfig()
+        )
+        
+        # Publish DataProcessed event
+        self.data_processor.publish_processing_complete(processed_result)
+        
+        # PostProcessor should receive and process
+        decomposed_result = self.post_processor.apply_decomposition(
+            processed_result.data, self.decomp_config
+        )
+        
+        # Validate decomposition results
+        assert 'close_price_trend' in decomposed_result.data.columns
+        assert 'close_price_seasonal' in decomposed_result.data.columns
+        assert 'close_price_residual' in decomposed_result.data.columns
+        assert 'volume_trend' in decomposed_result.data.columns
+        assert 'volume_seasonal' in decomposed_result.data.columns
+        assert 'volume_residual' in decomposed_result.data.columns
+        
+        # Original columns should be replaced
+        assert 'close_price' not in decomposed_result.data.columns
+        assert 'volume' not in decomposed_result.data.columns
+        
+        # Other features should remain unchanged
+        assert 'feature_1' in decomposed_result.data.columns
+        assert 'feature_2' in decomposed_result.data.columns
+        
+        # Validate events
+        assert len(events_received) == 2
+        assert events_received[0].event_type == 'DataProcessed'
+        assert events_received[1].event_type == 'PostProcessingCompleted'
+```
+
+#### Test Case: IT-CP-010 - Multi-Method Decomposition Integration
+**Integration Scope**: DataProcessor → PostProcessor  
+**Behavioral Focus**: Multiple decomposition methods on different features
+
+**Test Scenario**: Apply different decomposition methods to different features
+```gherkin
+Given DataProcessor has completed feature processing
+And PostProcessor is configured for multiple decomposition methods
+And STL decomposition is specified for price features
+And Wavelet decomposition is specified for volume features
+When PostProcessor receives processed dataset
+Then PostProcessor should apply STL decomposition to price features
+And PostProcessor should apply wavelet decomposition to volume features
+And PostProcessor should maintain naming conventions for all components
+And PostProcessor should preserve feature metadata
+And Final dataset should contain all decomposed components correctly
+```
+
+#### Test Case: IT-CP-011 - Decomposition Error Handling
+**Integration Scope**: DataProcessor ↔ PostProcessor ↔ ErrorHandler  
+**Behavioral Focus**: Error handling during decomposition
+
+**Test Scenario**: Handle decomposition errors gracefully
+```gherkin
+Given DataProcessor provides dataset insufficient for decomposition
+When PostProcessor attempts STL decomposition with insufficient data
+Then PostProcessor should detect insufficient data condition
+And PostProcessor should publish DecompositionError event
+And ErrorHandler should receive and categorize decomposition error
+And PostProcessor should implement fallback strategy (skip decomposition)
+And Pipeline should continue with original features
+And Error should be logged with appropriate detail
+```
+
+#### Test Case: IT-CP-012 - Cross-Application Plugin Replicability
+**Integration Scope**: PluginLoader ↔ PostProcessor ↔ External Repository  
+**Behavioral Focus**: Perfect replicability using plugins from external apps
+
+**Test Scenario**: Use decomposition plugins from prediction_provider with perfect replicability
+```gherkin
+Given External plugins are available from prediction_provider repository
+And Configuration specifies external plugin usage for decomposition
+And Test dataset with deterministic characteristics is prepared
+When PluginLoader loads STL decomposition plugin from external repository
+And PostProcessor applies decomposition using only config parameters
+And Process is repeated with fresh plugin instance and identical config
+Then Both executions should produce bitwise identical results
+And No internal feature-eng state should influence plugin execution
+And Plugin should execute with complete isolation from host application
+And Results should be perfectly reproducible across different execution contexts
+And Only configuration parameters should determine plugin behavior
+```
+
+**Test Implementation**:
+```python
+class CrossAppReplicabilityIntegrationTest:
+    def setup_external_plugin_test(self):
+        # Configure external plugin usage
+        self.external_plugin_path = '/home/harveybc/Documents/GitHub/prediction_provider/plugins/decomposition'
+        self.config = {
+            'external_plugins': [self.external_plugin_path],
+            'decomp_features': ['price', 'volume'],
+            'decomp_methods': {'price': 'stl', 'volume': 'wavelet'},
+            'stl_config': {'period': 12, 'robust': True},
+            'wavelet_config': {'wavelet': 'db4', 'levels': 3}
+        }
+        self.test_data = create_deterministic_test_dataset()
+        
+    def test_perfect_replicability_across_executions(self):
+        # First execution
+        plugin_loader_1 = PluginLoader()
+        post_processor_1 = PostProcessor(plugin_loader_1)
+        result_1 = post_processor_1.process(self.test_data, self.config)
+        
+        # Clear all caches and create fresh instances
+        clear_all_plugin_caches()
+        plugin_loader_2 = PluginLoader()
+        post_processor_2 = PostProcessor(plugin_loader_2)
+        result_2 = post_processor_2.process(self.test_data, self.config)
+        
+        # Validate perfect replicability
+        assert np.array_equal(result_1.output_data.values, result_2.output_data.values)
+        assert result_1.feature_metadata == result_2.feature_metadata
+        assert result_1.processing_trace == result_2.processing_trace
+        
+    def test_config_only_reproducibility(self):
+        # Verify that only config parameters are needed for reproduction
+        portable_config = extract_portable_config(self.config)
+        
+        # Execute with portable config (no internal state)
+        result_portable = execute_with_portable_config(
+            self.test_data, 
+            portable_config,
+            plugin_path=self.external_plugin_path
+        )
+        
+        # Execute with full config
+        result_full = execute_with_full_config(self.test_data, self.config)
+        
+        # Results should be identical
+        assert np.array_equal(result_portable.output_data.values, result_full.output_data.values)
+```
+
+### 3.8 PostProcessor ↔ AnalysisEngine Integration
+
+#### Test Case: IT-CP-012 - Post-Processing to Analysis Flow
+**Integration Scope**: PostProcessor → AnalysisEngine  
+**Behavioral Focus**: Analysis adaptation to decomposed features
+
+**Test Scenario**: Validate analysis engine adapts to decomposed feature structure
+```gherkin
+Given PostProcessor has completed feature decomposition
+And AnalysisEngine is configured for correlation analysis
+When PostProcessor publishes PostProcessingCompleted event
+Then AnalysisEngine should receive decomposed dataset
+And AnalysisEngine should adapt analysis to new column structure
+And AnalysisEngine should compute correlations for decomposed components
+And AnalysisEngine should generate visualizations for new feature structure
+And Analysis results should reflect decomposed feature relationships
+```
+
 ## 4. Subsystem Integration Tests
 
 ### 4.1 Configuration Management Subsystem Integration
@@ -520,20 +729,86 @@ And Plugin performance should be monitored and reported
 
 ### 4.4 Processing Engine Subsystem Integration
 
-#### Test Case: IT-SUB-004 - Complete Processing Workflow
-**Subsystem Scope**: PipelineManager + DataProcessor + AnalysisEngine  
-**Behavioral Focus**: End-to-end processing orchestration
+#### Test Case: IT-SUB-004 - Complete Processing Workflow with Decomposition
+**Subsystem Scope**: PipelineManager + DataProcessor + PostProcessor + AnalysisEngine  
+**Behavioral Focus**: End-to-end processing orchestration including post-processing
 
-**Test Scenario**: Validate complete processing engine workflow
+**Test Scenario**: Validate complete processing engine workflow with decomposition
 ```gherkin
 Given Validated configuration and loaded data
+And Configuration specifies features for decomposition
 When Processing engine subsystem executes complete workflow
-Then PipelineManager should orchestrate all processing steps
+Then PipelineManager should orchestrate all processing steps in correct order
 And DataProcessor should apply transformations and integrate plugin results
-And AnalysisEngine should perform statistical analysis on processed data
-And All processing steps should maintain data integrity
+And PostProcessor should receive processed data and apply decomposition
+And PostProcessor should replace specified features with decomposed components
+And AnalysisEngine should adapt to new feature structure from decomposition
+And AnalysisEngine should perform statistical analysis on final dataset
+And All processing steps should maintain data integrity and lineage
 And Progress should be monitored and reported throughout processing
 And Processing should complete within performance targets
+```
+
+**Test Implementation**:
+```python
+class ProcessingEngineSubsystemIntegrationTest:
+    def setup_complete_processing_test(self):
+        # Setup complete processing engine subsystem
+        self.event_bus = MockEventBus()
+        self.pipeline_manager = PipelineManager(self.event_bus)
+        self.data_processor = DataProcessor(self.event_bus)
+        self.post_processor = PostProcessor(self.event_bus)
+        self.analysis_engine = AnalysisEngine(self.event_bus)
+        
+        # Configure decomposition
+        self.config = ProcessingConfig(
+            decomp_features=['close_price', 'volume'],
+            use_stl_decomp=True,
+            stl_period=12,
+            correlation_analysis=True
+        )
+        
+    def test_complete_processing_workflow_with_decomposition(self):
+        # Setup test data
+        test_data = self.create_test_timeseries_data()
+        
+        # Monitor subsystem events
+        events = []
+        self.event_bus.subscribe_all(lambda e: events.append(e))
+        
+        # Execute complete workflow
+        result = self.pipeline_manager.orchestrate_pipeline(
+            data=test_data,
+            config=self.config
+        )
+        
+        # Validate workflow execution order
+        event_types = [e.event_type for e in events]
+        assert 'DataProcessingStarted' in event_types
+        assert 'DataProcessed' in event_types
+        assert 'PostProcessingStarted' in event_types
+        assert 'PostProcessingCompleted' in event_types
+        assert 'AnalysisStarted' in event_types
+        assert 'AnalysisCompleted' in event_types
+        
+        # Validate data transformations
+        final_data = result.processed_data
+        assert 'close_price_trend' in final_data.columns
+        assert 'close_price_seasonal' in final_data.columns
+        assert 'close_price_residual' in final_data.columns
+        assert 'volume_trend' in final_data.columns
+        assert 'volume_seasonal' in final_data.columns
+        assert 'volume_residual' in final_data.columns
+        
+        # Original columns should be replaced
+        assert 'close_price' not in final_data.columns
+        assert 'volume' not in final_data.columns
+        
+        # Validate analysis results adapted to new structure
+        analysis_result = result.analysis_results
+        assert analysis_result.correlation_matrix is not None
+        assert 'close_price_trend' in analysis_result.correlation_matrix.columns
+        assert analysis_result.feature_count == len(final_data.columns)
 ```
 
 ## 5. Cross-Layer Integration Tests
@@ -671,6 +946,97 @@ class CompleteE2EIntegrationTest:
         assert 'component_interactions' in execution_log
         assert 'performance_metrics' in execution_log
         assert 'data_lineage' in execution_log
+```
+
+#### Test Case: IT-E2E-002 - Complete Pipeline with Feature Decomposition
+**End-to-End Scope**: All components including decomposition post-processing  
+**Behavioral Focus**: Complete system functionality with decomposition features
+
+**Test Scenario**: Execute complete pipeline with feature decomposition
+```gherkin
+Given System configured for feature decomposition
+And Input data suitable for time series decomposition
+And PostProcessor plugin properly installed and configured
+When User executes pipeline with decomposition parameters
+Then CLI should parse decomposition arguments correctly
+And Configuration should include decomposition parameters
+And Data should be loaded and validated successfully
+And Feature generation should complete normally
+And PostProcessor should decompose specified features using STL/wavelet/MTM
+And Original features should be replaced with decomposed components
+And Analysis should adapt to new feature structure automatically
+And Results should include decomposed feature visualizations
+And Export should contain all decomposed features with proper naming
+And Execution should complete successfully with decomposition overhead
+```
+
+**Test Implementation**:
+```python
+class DecompositionE2EIntegrationTest:
+    def setup_decomposition_test(self):
+        self.test_env = IntegrationTestEnvironment()
+        self.test_data = self.generate_timeseries_test_data()
+        
+    def test_complete_pipeline_with_decomposition(self):
+        # Configure pipeline with decomposition
+        pipeline_config = {
+            'input_file': 'tests/integration_data/eurusd_timeseries.csv',
+            'output_file': 'results/decomp_output.csv',
+            'plugin': 'tech_indicator',
+            'decomp_features': ['close_price', 'volume', 'rsi'],
+            'use_stl_decomp': True,
+            'use_wavelet_decomp': True,  # Apply to some features
+            'stl_period': 12,
+            'wavelet_type': 'db4',
+            'correlation_analysis': True,
+            'save_config': 'results/decomp_config.json'
+        }
+        
+        # Monitor decomposition-specific metrics
+        decomp_monitor = DecompositionMonitor()
+        decomp_monitor.start_monitoring()
+        
+        # Execute pipeline
+        result = run_complete_pipeline(pipeline_config)
+        
+        metrics = decomp_monitor.stop_monitoring()
+        
+        # Validate decomposition success
+        assert result.success == True
+        assert result.decomposition_applied == True
+        
+        # Validate decomposed output structure
+        output_data = pd.read_csv('results/decomp_output.csv')
+        
+        # Check decomposed feature columns
+        expected_decomp_columns = [
+            'close_price_trend', 'close_price_seasonal', 'close_price_residual',
+            'volume_trend', 'volume_seasonal', 'volume_residual',
+            'rsi_approx', 'rsi_detail'  # Wavelet components
+        ]
+        
+        for col in expected_decomp_columns:
+            assert col in output_data.columns, f"Missing decomposed column: {col}"
+        
+        # Original columns should be replaced
+        assert 'close_price' not in output_data.columns
+        assert 'volume' not in output_data.columns
+        assert 'rsi' not in output_data.columns
+        
+        # Validate decomposition quality
+        assert metrics.decomposition_variance_explained > 0.90
+        assert metrics.decomposition_errors == 0
+        
+        # Validate analysis adapted to decomposed features
+        assert os.path.exists('results/decomp_correlation_matrix.png')
+        correlation_data = result.analysis_results.correlation_matrix
+        assert 'close_price_trend' in correlation_data.columns
+        
+        # Validate configuration captured decomposition settings
+        final_config = json.load(open('results/decomp_config.json'))
+        assert final_config['decomp_features'] == ['close_price', 'volume', 'rsi']
+        assert final_config['use_stl_decomp'] == True
+        assert final_config['stl_period'] == 12
 ```
 
 #### Test Case: IT-E2E-002 - Error Recovery Complete Pipeline

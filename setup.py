@@ -14,6 +14,9 @@ setup(
             'technical_indicator=app.plugins.tech_indicator:Plugin',
             'ssa=app.plugins.ssa:Plugin',
             'fft=app.plugins.fft:Plugin'
+        ],
+        'feature_eng.post_processors': [
+            'decomposition=app.plugins.post_processors.decomposition_post_processor:DecompositionPostProcessor'
         ]
     },
     install_requires=[
