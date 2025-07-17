@@ -3,11 +3,11 @@
 
 ## Description
 
-The Feature Engineering System is a flexible, plugin-based tool designed for generating and selecting features from time-series data. This system allows for the integration of various feature engineering techniques via plugins, starting with the generation of technical indicators and supporting future methods such as Singular Spectrum Analysis (SSA) and Fast Fourier Transform (FFT).
+The Feature Engineering System is a flexible, plugin-based tool designed for generating and selecting features from time-series data. This system allows for the integration of various feature engineering techniques via plugins
 
 ### Key Features:
 
-- **Plugin-Based Architecture**: The system uses a modular plugin architecture, allowing users to add, configure, and switch between different feature generation methods. The initial implementation includes a technical indicator generator, with support for additional plugins like SSA, FFT, and others in the future.
+- **Plugin-Based Architecture**: The system uses a modular plugin architecture, allowing users to add, configure, and switch between different feature generation methods. The initial implementation includes a technical indicator generator
 - **Configurable Parameters**: The system allows for dynamic configuration of input parameters such as input/output file paths, method-specific parameters, and other options via a command-line interface (CLI).
 - **Correlation and Distribution Analysis**: Users can automatically compute and visualize Pearson and Spearman correlation matrices to identify relationships between features. The system also supports the visualization of feature distributions to help in manual feature selection.
 - **Manual Feature Selection**: Users can manually select which features (e.g., technical indicators, SSA components) to include in the final output dataset, based on the results of the correlation and distribution analysis.
