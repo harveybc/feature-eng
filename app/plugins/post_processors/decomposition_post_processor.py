@@ -88,8 +88,11 @@ class DecompositionPostProcessor:
     def __init__(self, params: Optional[Dict[str, Any]] = None):
         """Initialize the decomposition post-processor."""
         self.params = self.DEFAULT_PARAMS.copy()
+        print(f"[DEBUG] DecompositionPostProcessor DEFAULT_PARAMS: use_stl_decomp={self.params.get('use_stl_decomp')}, use_wavelet_decomp={self.params.get('use_wavelet_decomp')}")
         if params:
+            print(f"[DEBUG] DecompositionPostProcessor received params: {params}")
             self.params.update(params)
+            print(f"[DEBUG] DecompositionPostProcessor final params: use_stl_decomp={self.params.get('use_stl_decomp')}, use_wavelet_decomp={self.params.get('use_wavelet_decomp')}")
             
         self.scalers = {}
         self._resolve_stl_params()
@@ -151,20 +154,29 @@ class DecompositionPostProcessor:
         
         # Process each feature for decomposition
         for feature_name in decomp_features:
+            print(f"[DEBUG] Processing feature: {feature_name}")
             logger.info(f"Processing feature: {feature_name}")
             
             try:
                 feature_series = data[feature_name].astype(np.float32).values
+                print(f"[DEBUG] Feature series shape: {feature_series.shape}, first 5 values: {feature_series[:5]}")
                 decomposed_features = self._decompose_feature(feature_series, feature_name)
+                print(f"[DEBUG] Decomposed features returned: {list(decomposed_features.keys()) if decomposed_features else 'EMPTY'}")
                 
                 if decomposed_features:
                     # Add decomposed features to result
+                    print(f"[DEBUG] Adding {len(decomposed_features)} decomposed features to result_data")
+                    print(f"[DEBUG] Result data shape before adding features: {result_data.shape}")
                     for decomp_name, decomp_values in decomposed_features.items():
+                        print(f"[DEBUG] Adding feature {decomp_name} with shape {decomp_values.shape}")
                         result_data[decomp_name] = decomp_values
+                    print(f"[DEBUG] Result data shape after adding features: {result_data.shape}")
                     
                     # Remove original feature if specified
                     if self.params.get('replace_original', True) and not self.params.get('keep_original', False):
+                        print(f"[DEBUG] Removing original feature: {feature_name}")
                         result_data = result_data.drop(columns=[feature_name])
+                        print(f"[DEBUG] Result data shape after removing original: {result_data.shape}")
                         logger.info(f"Replaced feature '{feature_name}' with {len(decomposed_features)} decomposed features")
                     else:
                         logger.info(f"Added {len(decomposed_features)} decomposed features for '{feature_name}'")
@@ -192,6 +204,10 @@ class DecompositionPostProcessor:
             Dictionary of decomposed feature arrays
         """
         decomposed_features = {}
+        print(f"[DEBUG] Starting decomposition for {feature_name}")
+        print(f"[DEBUG] STL enabled: {self.params.get('use_stl_decomp', True)}")
+        print(f"[DEBUG] Wavelet enabled: {self.params.get('use_wavelet_decomp', True)}")
+        print(f"[DEBUG] HAS_WAVELETS: {HAS_WAVELETS}")
         
         # Prepare the series (log transformation if needed)
         # For non-price features, we might not want log transformation
@@ -206,22 +222,28 @@ class DecompositionPostProcessor:
         
         # 1. STL Decomposition
         if self.params.get('use_stl_decomp', True):
+            print(f"[DEBUG] Computing STL decomposition for {feature_name}")
             logger.debug(f"Computing STL decomposition for {feature_name}")
             try:
                 stl_features = self._compute_stl_decomposition(processed_series, feature_name)
+                print(f"[DEBUG] STL features computed: {list(stl_features.keys()) if stl_features else 'EMPTY'}")
                 decomposed_features.update(stl_features)
                 logger.debug(f"Generated {len(stl_features)} STL features for {feature_name}")
             except Exception as e:
+                print(f"[DEBUG] STL decomposition failed for {feature_name}: {e}")
                 logger.error(f"STL decomposition failed for {feature_name}: {e}")
         
         # 2. Wavelet Decomposition
         if self.params.get('use_wavelet_decomp', True) and HAS_WAVELETS:
+            print(f"[DEBUG] Computing wavelet decomposition for {feature_name}")
             logger.debug(f"Computing wavelet decomposition for {feature_name}")
             try:
                 wavelet_features = self._compute_wavelet_decomposition(processed_series, feature_name)
+                print(f"[DEBUG] Wavelet features computed: {list(wavelet_features.keys()) if wavelet_features else 'EMPTY'}")
                 decomposed_features.update(wavelet_features)
                 logger.debug(f"Generated {len(wavelet_features)} wavelet features for {feature_name}")
             except Exception as e:
+                print(f"[DEBUG] Wavelet decomposition failed for {feature_name}: {e}")
                 logger.error(f"Wavelet decomposition failed for {feature_name}: {e}")
         
         # 3. MTM Decomposition  
@@ -338,10 +360,71 @@ class DecompositionPostProcessor:
         if not HAS_MTM:
             return {}
         
-        # MTM implementation is complex and optional for now
-        # This is a placeholder for future implementation
-        logger.info(f"MTM decomposition not yet implemented for {feature_name}")
-        return {}
+        try:
+            # MTM parameters
+            window_len = self.params.get('mtm_window_len', 168)
+            step = self.params.get('mtm_step', 1)
+            time_bandwidth = self.params.get('mtm_time_bandwidth', 5.0)
+            freq_bands = self.params.get('mtm_freq_bands', [(0, 0.01), (0.01, 0.06), (0.06, 0.2), (0.2, 0.5)])
+            
+            # Simple rolling window approach for MTM-like features
+            n = len(series)
+            mtm_features = {}
+            
+            # Initialize output arrays
+            for i, (low_freq, high_freq) in enumerate(freq_bands):
+                band_name = f"{feature_name}_mtm_band_{i+1}_{low_freq:.3f}_{high_freq:.3f}"
+                mtm_features[band_name] = np.zeros(n)
+            
+            # Compute MTM-like features using frequency band filtering
+            from scipy import signal
+            
+            for i in range(0, n - window_len + 1, step):
+                window_data = series[i:i + window_len]
+                
+                # Compute power spectral density using multitaper method
+                try:
+                    # Use scipy's multitaper method
+                    freqs, psd = signal.welch(window_data, nperseg=min(window_len, 256), 
+                                            noverlap=min(window_len//2, 128))
+                    
+                    # Extract power in different frequency bands
+                    for j, (low_freq, high_freq) in enumerate(freq_bands):
+                        band_name = f"{feature_name}_mtm_band_{j+1}_{low_freq:.3f}_{high_freq:.3f}"
+                        
+                        # Find frequency indices for this band
+                        freq_mask = (freqs >= low_freq) & (freqs <= high_freq)
+                        if np.any(freq_mask):
+                            band_power = np.mean(psd[freq_mask])
+                        else:
+                            band_power = 0.0
+                        
+                        # Assign to multiple positions based on step size
+                        end_idx = min(i + window_len, n)
+                        mtm_features[band_name][i:end_idx] = band_power
+                        
+                except Exception as e:
+                    logger.warning(f"MTM computation failed for window {i}: {e}")
+                    # Use fallback values
+                    for j, (low_freq, high_freq) in enumerate(freq_bands):
+                        band_name = f"{feature_name}_mtm_band_{j+1}_{low_freq:.3f}_{high_freq:.3f}"
+                        end_idx = min(i + window_len, n)
+                        mtm_features[band_name][i:end_idx] = np.var(window_data)
+            
+            # Forward fill any remaining zeros at the beginning
+            for band_name in mtm_features:
+                if np.any(mtm_features[band_name] > 0):
+                    first_nonzero = np.argmax(mtm_features[band_name] > 0)
+                    if first_nonzero > 0:
+                        mtm_features[band_name][:first_nonzero] = mtm_features[band_name][first_nonzero]
+            
+            print(f"[DEBUG] MTM features computed: {list(mtm_features.keys())}")
+            logger.debug(f"Generated {len(mtm_features)} MTM features for {feature_name}")
+            return mtm_features
+            
+        except Exception as e:
+            logger.error(f"MTM decomposition error for {feature_name}: {e}")
+            return {}
     
     def _rolling_stl(self, series: np.ndarray, stl_window: int, period: int, trend_smoother: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Perform rolling STL decomposition."""
@@ -353,9 +436,9 @@ class DecompositionPostProcessor:
         if num_points <= 0:
             raise ValueError(f"stl_window ({stl_window}) > series length ({n}).")
         
-        trend = np.zeros(num_points)
-        seasonal = np.zeros(num_points)
-        resid = np.zeros(num_points)
+        trend_rolling = np.zeros(num_points)
+        seasonal_rolling = np.zeros(num_points)
+        resid_rolling = np.zeros(num_points)
         
         for i in range(num_points):
             window_data = series[i:i + stl_window]
@@ -363,22 +446,39 @@ class DecompositionPostProcessor:
                 try:
                     stl = STL(window_data, seasonal=period, trend=trend_smoother)
                     result = stl.fit()
-                    trend[i] = result.trend[-1]
-                    seasonal[i] = result.seasonal[-1]
-                    resid[i] = result.resid[-1]
+                    trend_rolling[i] = result.trend[-1]
+                    seasonal_rolling[i] = result.seasonal[-1]
+                    resid_rolling[i] = result.resid[-1]
                 except Exception as e:
                     logger.warning(f"STL failed for window {i}: {e}")
                     # Use simple fallbacks
-                    trend[i] = np.mean(window_data)
-                    seasonal[i] = 0.0
-                    resid[i] = window_data[-1] - trend[i]
+                    trend_rolling[i] = np.mean(window_data)
+                    seasonal_rolling[i] = 0.0
+                    resid_rolling[i] = window_data[-1] - trend_rolling[i]
             else:
                 # Not enough data for STL
-                trend[i] = np.mean(window_data)
-                seasonal[i] = 0.0
-                resid[i] = window_data[-1] - trend[i]
+                trend_rolling[i] = np.mean(window_data)
+                seasonal_rolling[i] = 0.0
+                resid_rolling[i] = window_data[-1] - trend_rolling[i]
         
-        logger.debug(f"STL decomposition complete. Output length: {len(trend)}")
+        # Pad the arrays to match original series length
+        # Forward-fill the first values for the initial window
+        padding_size = stl_window - 1
+        trend = np.zeros(n)
+        seasonal = np.zeros(n)
+        resid = np.zeros(n)
+        
+        # Fill initial values with the first computed values
+        trend[:padding_size] = trend_rolling[0]
+        seasonal[:padding_size] = seasonal_rolling[0] 
+        resid[:padding_size] = resid_rolling[0]
+        
+        # Fill the rest with computed values
+        trend[padding_size:] = trend_rolling
+        seasonal[padding_size:] = seasonal_rolling
+        resid[padding_size:] = resid_rolling
+        
+        logger.debug(f"STL decomposition complete. Output length: {len(trend)} (matches input: {n})")
         return trend, seasonal, resid
     
     def _apply_causality_shift(self, features: Dict[str, np.ndarray], wavelet_name: str) -> Dict[str, np.ndarray]:

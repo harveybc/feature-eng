@@ -203,9 +203,16 @@ def process_data(data, plugin, config):
     print(final_data.head())
 
     # Apply decomposition post-processing if configured
+    print(f"[DEBUG] Config keys: {list(config.keys())}")
+    print(f"[DEBUG] decomp_features in config: {config.get('decomp_features', 'NOT_FOUND')}")
+    print(f"[DEBUG] use_stl_decomp in config: {config.get('use_stl_decomp', 'NOT_FOUND')}")
+    print(f"[DEBUG] use_wavelet_decomp in config: {config.get('use_wavelet_decomp', 'NOT_FOUND')}")
     decomp_features = config.get('decomp_features', [])
+    print(f"[DEBUG] decomp_features value: {decomp_features}, type: {type(decomp_features)}")
     if decomp_features:
         print(f"[DEBUG] Applying decomposition post-processing to features: {decomp_features}")
+        print(f"[DEBUG] Available columns for decomposition: {list(final_data.columns)}")
+        print(f"[DEBUG] Final data shape before decomposition: {final_data.shape}")
         try:
             from app.plugins.post_processors.decomposition_post_processor import DecompositionPostProcessor
             
@@ -224,8 +231,13 @@ def process_data(data, plugin, config):
             
             # Set the index back to datetime for decomposition processing
             final_data_with_index = final_data.copy()
-            final_data_with_index['DATE_TIME'] = pd.to_datetime(final_data_with_index['DATE_TIME'])
-            final_data_with_index.set_index('DATE_TIME', inplace=True)
+            if 'DATE_TIME' not in final_data_with_index.columns:
+                # DATE_TIME is already the index
+                pass
+            else:
+                # DATE_TIME is a column, convert to datetime and set as index
+                final_data_with_index['DATE_TIME'] = pd.to_datetime(final_data_with_index['DATE_TIME'])
+                final_data_with_index.set_index('DATE_TIME', inplace=True)
             
             # Apply decomposition
             decomposed_data = decomp_processor.process_features(final_data_with_index)
