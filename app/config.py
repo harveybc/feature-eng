@@ -1,3 +1,6 @@
+# Feature Engineering Configuration Export/Import filename
+FE_CONFIG_FILENAME = 'fe_config.json'
+
 DEFAULT_VALUES = {
     'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc.csv',
     'output_file': './feature_eng_output.csv',
@@ -14,6 +17,7 @@ DEFAULT_VALUES = {
     'remote_log': None,
     'load_config': None,
     'save_config': './output_config.json',
+    'fe_config_export': f'./{FE_CONFIG_FILENAME}',  # Export comprehensive feature engineering configuration for replicability
     'headers': True,
 
     # Decomposition settings

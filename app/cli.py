@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument('--remote_log', type=str, help='URL of a remote API endpoint for saving debug variables in JSON format.')
     parser.add_argument('--load_config', type=str, help='Path to load a configuration file.')
     parser.add_argument('--save_config', type=str, help='Path to save the current configuration.')
+    parser.add_argument('--fe_config_export', type=str, help='Path to export comprehensive feature engineering configuration for perfect replicability.')
     parser.add_argument('--headers', action='store_true', help='Input includes headers.')
 
     return parser.parse_known_args()  # Returns (args, unknown_args)

@@ -131,6 +131,9 @@ def process_data(data, plugin, config):
     print(f"[DEBUG] Initial data columns: {list(data.columns)}")
     print(f"[DEBUG] Initial data index type: {data.index.dtype}")
 
+    # Initialize decomposition processor as None
+    decomp_processor = None
+
     date_column_name = 'DATE_TIME'
     if date_column_name in data.columns:
         data[date_column_name] = pd.to_datetime(data[date_column_name])
@@ -191,6 +194,39 @@ def process_data(data, plugin, config):
         print("[DEBUG] additional_features_df first 5 rows:", additional_features_df.head())
         raise e
 
+    # Extract the original CLOSE column from the raw input file for the final output
+    original_close_column = None
+    
+    # Get the input file path from config and load the raw data
+    input_file = config.get('input_file')
+    if input_file:
+        try:
+            raw_data = load_csv(input_file, config)
+            print(f"[DEBUG] Loaded raw data from {input_file} with shape: {raw_data.shape}")
+            print(f"[DEBUG] Raw data columns: {raw_data.columns.tolist()}")
+            
+            # Set the datetime index on raw data if needed
+            if 'DATE_TIME' in raw_data.columns and raw_data.index.dtype != 'datetime64[ns]':
+                raw_data['DATE_TIME'] = pd.to_datetime(raw_data['DATE_TIME'])
+                raw_data.set_index('DATE_TIME', inplace=True)
+                print("[DEBUG] Set datetime index on raw data")
+            
+            print(f"[DEBUG] Raw data index type: {raw_data.index.dtype}")
+            print(f"[DEBUG] Raw data date range: {raw_data.index.min()} to {raw_data.index.max()}")
+            
+            if 'close' in raw_data.columns:
+                original_close_column = raw_data['close']
+                print("[DEBUG] Found original 'close' column in raw input data")
+            elif 'CLOSE' in raw_data.columns:
+                original_close_column = raw_data['CLOSE']
+                print("[DEBUG] Found original 'CLOSE' column in raw input data")
+            elif 'Close' in raw_data.columns:
+                original_close_column = raw_data['Close']
+                print("[DEBUG] Found original 'Close' column in raw input data")
+        except Exception as e:
+            print(f"[WARNING] Could not load original close column from input file: {e}")
+            original_close_column = None
+    
     # Combine the transformed data with additional features
     if config.get('tech_indicators'):
         final_data = pd.concat([transformed_data, additional_features_df], axis=1)
@@ -253,6 +289,58 @@ def process_data(data, plugin, config):
         except Exception as e:
             print(f"[ERROR] Decomposition post-processing failed: {e}")
             print("[DEBUG] Continuing with original data...")
+    
+    # Add the original CLOSE column to the final data after decomposition if found
+    if original_close_column is not None:
+        # Get the actual date range from the final data
+        if 'DATE_TIME' in final_data.columns:
+            final_data_dates = pd.to_datetime(final_data['DATE_TIME'])
+            actual_start = final_data_dates.min()
+            actual_end = final_data_dates.max()
+        else:
+            actual_start = final_data.index.min()
+            actual_end = final_data.index.max()
+        
+        print(f"[DEBUG] Final data range: {actual_start} to {actual_end}")
+        print(f"[DEBUG] Original close column range: {original_close_column.index.min()} to {original_close_column.index.max()}")
+        
+        # Get final dates
+        if 'DATE_TIME' not in final_data.columns:
+            final_dates = final_data.index
+        else:
+            final_dates = pd.to_datetime(final_data['DATE_TIME'])
+            
+        print(f"[DEBUG] Final dates range: {final_dates.min()} to {final_dates.max()}")
+        
+        # Create a simple lookup by using the original close column directly 
+        # Filter to the overlapping time range first
+        overlap_start = max(original_close_column.index.min(), final_dates.min())
+        overlap_end = min(original_close_column.index.max(), final_dates.max())
+        
+        # Create a temporary series with all available original close data in the overlap period
+        temp_close = original_close_column[(original_close_column.index >= overlap_start) & 
+                                          (original_close_column.index <= overlap_end)]
+        
+        print(f"[DEBUG] Temp close data points: {len(temp_close)}")
+        
+        # For each final date, find the closest original close value using merge_asof
+        final_dates_df = pd.DataFrame({'timestamp': final_dates}).sort_values('timestamp')
+        temp_close_df = pd.DataFrame({'timestamp': temp_close.index, 'close_value': temp_close.values}).sort_values('timestamp')
+        
+        # Use merge_asof to get the closest previous close value for each final timestamp
+        merged = pd.merge_asof(final_dates_df, temp_close_df, on='timestamp', direction='backward')
+        
+        # Set the CLOSE column
+        final_data['CLOSE'] = merged['close_value'].values
+        
+        print(f"[DEBUG] Added original CLOSE column to final data after decomposition. Final data shape: {final_data.shape}")
+        print(f"[DEBUG] CLOSE column non-NaN count: {final_data['CLOSE'].notna().sum()} out of {len(final_data)}")
+        if final_data['CLOSE'].notna().sum() > 0:
+            print(f"[DEBUG] Sample CLOSE values: {final_data['CLOSE'].dropna().head().tolist()}")
+        else:
+            print(f"[DEBUG] No valid CLOSE values found")
+    else:
+        print("[WARNING] No original CLOSE column found in input data to add to final output")
 
     # Reset the index for the final dataset
     if 'DATE_TIME' not in final_data.columns:
@@ -266,7 +354,7 @@ def process_data(data, plugin, config):
     final_data.to_csv('indicators_output.csv', index=False)
     print("[DEBUG] Saved final dataset to 'indicators_output.csv'.")
 
-    return final_data
+    return final_data, decomp_processor
 
 
 
@@ -284,8 +372,27 @@ def run_feature_engineering_pipeline(config, plugin):
     print(f"Data loaded with shape: {data.shape}")
     print(f"Data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
 
-    # Process the data
-    processed_data = process_data(data, plugin, config)
+    # Process the data and capture plugin instances for FE config export
+    processed_data, decomp_processor = process_data(data, plugin, config)
+
+    # Export comprehensive FE configuration for perfect replicability if specified
+    if config.get('fe_config_export'):
+        try:
+            from app.fe_config_manager import FeConfigManager
+            
+            # Create FE config manager and export comprehensive configuration
+            fe_manager = FeConfigManager()
+            exported_config = fe_manager.export_comprehensive_config(plugin, decomp_processor, config)
+            fe_config_path = fe_manager.save_fe_config(exported_config, config['fe_config_export'])
+            
+            print(f"[FE_CONFIG] ✅ PERFECT REPLICABILITY CONFIG EXPORTED: {fe_config_path}")
+            print(f"[FE_CONFIG] ✅ Contains ALL tech indicator parameters and decomposition settings")
+            print(f"[FE_CONFIG] ✅ Ready for exact replication in prediction_provider repo")
+            
+        except Exception as e:
+            print(f"[WARNING] ❌ Failed to export FE configuration: {e}")
+            import traceback
+            traceback.print_exc()
 
     # Save the processed data to the output file if specified
     if config.get('output_file'):

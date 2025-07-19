@@ -16,6 +16,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.seasonal import STL
+from tqdm import tqdm
 import json
 import os
 import logging
@@ -210,14 +211,16 @@ class DecompositionPostProcessor:
         print(f"[DEBUG] HAS_WAVELETS: {HAS_WAVELETS}")
         
         # Prepare the series (log transformation if needed)
-        # For non-price features, we might not want log transformation
-        if feature_name.lower() in ['close', 'open', 'high', 'low', 'price']:
-            # Apply log transformation for price-like features
+        # For price features, apply log transformation like in predictor STL preprocessor
+        if feature_name.upper() in ['CLOSE', 'OPEN', 'HIGH', 'LOW', 'PRICE']:
+            # Apply log transformation for price-like features (same as predictor STL)
             processed_series = np.log1p(np.maximum(0, feature_series))
+            print(f"[DEBUG] Applied log1p transformation to {feature_name}")
             logger.debug(f"Applied log transformation to {feature_name}")
         else:
             # Use original values for other features
             processed_series = feature_series.copy()
+            print(f"[DEBUG] Using original values for {feature_name}")
             logger.debug(f"Using original values for {feature_name}")
         
         # 1. STL Decomposition
@@ -427,59 +430,49 @@ class DecompositionPostProcessor:
             return {}
     
     def _rolling_stl(self, series: np.ndarray, stl_window: int, period: int, trend_smoother: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Perform rolling STL decomposition."""
-        logger.debug(f"Performing rolling STL: Win={stl_window}, Period={period}, Trend={trend_smoother}")
-        
+        """Perform rolling STL decomposition using the exact same implementation as predictor repo."""
+        # Uses the robust version compatible with conditional logic
+        print(f"Performing rolling STL: Win={stl_window}, Period={period}, Trend={trend_smoother}...", end="")
         n = len(series)
         num_points = n - stl_window + 1
+        if num_points <= 0: raise ValueError(f"stl_window ({stl_window}) > series length ({n}).")
+        trend=np.zeros(num_points); seasonal=np.zeros(num_points); resid=np.zeros(num_points)
+        if trend_smoother is not None: # Validate trend smoother parameter
+             if not isinstance(trend_smoother,int) or trend_smoother<=0: trend_smoother=None
+             elif trend_smoother % 2 == 0: trend_smoother += 1
+        for i in tqdm(range(stl_window, n + 1), desc="STL", unit="w", disable=None, leave=False):
+            window = series[i - stl_window: i]
+            current_trend = trend_smoother
+            if current_trend is not None and current_trend >= len(window):
+                 current_trend = len(window) - 1 if len(window) > 1 else None
+                 if current_trend is not None and current_trend % 2 == 0: current_trend = max(1, current_trend -1 )
+            try:
+                 stl = STL(window, period=period, trend=current_trend, robust=True); result = stl.fit()
+                 trend[i-stl_window]=result.trend[-1]; seasonal[i-stl_window]=result.seasonal[-1]; resid[i-stl_window]=result.resid[-1]
+            except Exception as e: trend[i-stl_window]=np.nan; seasonal[i-stl_window]=np.nan; resid[i-stl_window]=np.nan # Keep NaN fill on error
+        trend = pd.Series(trend).fillna(method='ffill').fillna(method='bfill').values
+        seasonal = pd.Series(seasonal).fillna(method='ffill').fillna(method='bfill').values
+        resid = pd.Series(resid).fillna(method='ffill').fillna(method='bfill').values
+        print(" Done.")
         
-        if num_points <= 0:
-            raise ValueError(f"stl_window ({stl_window}) > series length ({n}).")
-        
-        trend_rolling = np.zeros(num_points)
-        seasonal_rolling = np.zeros(num_points)
-        resid_rolling = np.zeros(num_points)
-        
-        for i in range(num_points):
-            window_data = series[i:i + stl_window]
-            if len(window_data) >= 2 * period:
-                try:
-                    stl = STL(window_data, seasonal=period, trend=trend_smoother)
-                    result = stl.fit()
-                    trend_rolling[i] = result.trend[-1]
-                    seasonal_rolling[i] = result.seasonal[-1]
-                    resid_rolling[i] = result.resid[-1]
-                except Exception as e:
-                    logger.warning(f"STL failed for window {i}: {e}")
-                    # Use simple fallbacks
-                    trend_rolling[i] = np.mean(window_data)
-                    seasonal_rolling[i] = 0.0
-                    resid_rolling[i] = window_data[-1] - trend_rolling[i]
-            else:
-                # Not enough data for STL
-                trend_rolling[i] = np.mean(window_data)
-                seasonal_rolling[i] = 0.0
-                resid_rolling[i] = window_data[-1] - trend_rolling[i]
-        
-        # Pad the arrays to match original series length
+        # Pad the arrays to match original series length to maintain same output format
         # Forward-fill the first values for the initial window
         padding_size = stl_window - 1
-        trend = np.zeros(n)
-        seasonal = np.zeros(n)
-        resid = np.zeros(n)
+        trend_padded = np.zeros(n)
+        seasonal_padded = np.zeros(n)
+        resid_padded = np.zeros(n)
         
         # Fill initial values with the first computed values
-        trend[:padding_size] = trend_rolling[0]
-        seasonal[:padding_size] = seasonal_rolling[0] 
-        resid[:padding_size] = resid_rolling[0]
+        trend_padded[:padding_size] = trend[0]
+        seasonal_padded[:padding_size] = seasonal[0] 
+        resid_padded[:padding_size] = resid[0]
         
         # Fill the rest with computed values
-        trend[padding_size:] = trend_rolling
-        seasonal[padding_size:] = seasonal_rolling
-        resid[padding_size:] = resid_rolling
+        trend_padded[padding_size:] = trend
+        seasonal_padded[padding_size:] = seasonal
+        resid_padded[padding_size:] = resid
         
-        logger.debug(f"STL decomposition complete. Output length: {len(trend)} (matches input: {n})")
-        return trend, seasonal, resid
+        return trend_padded, seasonal_padded, resid_padded
     
     def _apply_causality_shift(self, features: Dict[str, np.ndarray], wavelet_name: str) -> Dict[str, np.ndarray]:
         """Apply causality shift correction to wavelet features."""
@@ -663,6 +656,44 @@ class DecompositionPostProcessor:
                     pass
         
         return output_columns
+
+    def get_comprehensive_params(self):
+        """
+        Get comprehensive parameters for perfect replicability.
+        
+        Returns:
+            Dictionary containing all decomposition parameters needed for exact replication
+        """
+        comprehensive_params = self.params.copy()
+        
+        # Ensure calculated parameters are included
+        if hasattr(self, 'params'):
+            # Re-resolve parameters to ensure consistency
+            self._resolve_stl_params()
+            comprehensive_params = self.params.copy()
+        
+        return comprehensive_params
+
+    def apply_fe_config(self, fe_config):
+        """
+        Apply feature engineering configuration for perfect replicability.
+        
+        Args:
+            fe_config: Dictionary containing comprehensive FE configuration
+        """
+        if 'decomposition_params' in fe_config:
+            decomp_params = fe_config['decomposition_params']
+            
+            # Apply all decomposition parameters
+            self.params.update(decomp_params)
+            
+            # Re-resolve STL parameters after applying config
+            self._resolve_stl_params()
+            
+            print(f"[FE_CONFIG] Applied decomposition parameters: {decomp_params}")
+            print(f"[FE_CONFIG] Final resolved parameters: use_stl_decomp={self.params.get('use_stl_decomp')}, use_wavelet_decomp={self.params.get('use_wavelet_decomp')}")
+            return True
+        return False
 
 
 # Plugin interface for feature-eng system

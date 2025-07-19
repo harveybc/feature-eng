@@ -7,7 +7,8 @@ from app.data_processor import run_feature_engineering_pipeline
 from app.data_handler import load_csv
 from app.config import DEFAULT_VALUES
 from app.plugin_loader import load_plugin
-from config_merger import merge_config, process_unknown_args
+from app.config_merger import merge_config, process_unknown_args
+from app.fe_config_manager import export_fe_config
 
 def main():
     print("Parsing initial arguments...")

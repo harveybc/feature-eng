@@ -1,5 +1,8 @@
 {
+    "output_file": "test_output.csv",
     "include_original_5": false,
     "distribution_plot": false,
+    "quiet_mode": true,
+    "fe_config_export": "fe_config_test.json",
     "headers": false
 }

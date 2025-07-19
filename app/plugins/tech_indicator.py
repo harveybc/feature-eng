@@ -52,6 +52,56 @@ class Plugin:
     def get_debug_info(self):
         return {var: self.params.get(var, None) for var in self.plugin_debug_vars}
 
+    def get_comprehensive_params(self):
+        """
+        Get comprehensive parameters for perfect replicability.
+        
+        Returns:
+            Dictionary containing all plugin parameters needed for exact replication
+        """
+        comprehensive_params = self.params.copy()
+        
+        # Add specific indicator parameters that are derived or computed
+        comprehensive_params['indicator_specific_params'] = {
+            'rsi_period': self.params.get('short_term_period', 14),
+            'macd_fast': 12,  # MACD standard fast period
+            'macd_slow': 26,  # MACD standard slow period  
+            'macd_signal': 9,  # MACD standard signal period
+            'ema_period': self.params.get('mid_term_period', 50),
+            'stoch_k_period': self.params.get('short_term_period', 14),
+            'stoch_d_period': 3,  # Stochastic D period
+            'stoch_smooth': 3,  # Stochastic smoothing
+            'adx_period': self.params.get('short_term_period', 14),
+            'atr_period': self.params.get('short_term_period', 14),
+            'cci_period': 20,  # CCI standard period
+            'bbands_period': 5,  # Bollinger Bands period (based on debug output)
+            'bbands_std': 2.0,  # Bollinger Bands standard deviation
+            'williams_period': self.params.get('short_term_period', 14),
+            'momentum_period': 4,  # Momentum period
+            'roc_period': 12  # Rate of Change period
+        }
+        
+        return comprehensive_params
+
+    def apply_fe_config(self, fe_config):
+        """
+        Apply feature engineering configuration for perfect replicability.
+        
+        Args:
+            fe_config: Dictionary containing comprehensive FE configuration
+        """
+        if 'tech_indicator_params' in fe_config:
+            tech_params = fe_config['tech_indicator_params']
+            
+            # Apply core parameters
+            for key, value in tech_params.items():
+                if key != 'indicator_specific_params':  # Skip nested dict for now
+                    self.params[key] = value
+            
+            print(f"[FE_CONFIG] Applied tech indicator parameters: {tech_params}")
+            return True
+        return False
+
 
 
     def adjust_ohlc(self, data):
