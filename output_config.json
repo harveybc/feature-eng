@@ -1,8 +1,9 @@
 {
-    "output_file": "test_output.csv",
+    "output_file": "test_output_1000_no_norm.csv",
     "include_original_5": false,
     "distribution_plot": false,
-    "quiet_mode": true,
-    "fe_config_export": "fe_config_test.json",
-    "headers": false
+    "headers": false,
+    "num_rows": 1000,
+    "config_file_path": "/dev/null",
+    "additional_args": "{\"decomposition_params\": {\"normalize_decomposed_features\": false}}"
 }

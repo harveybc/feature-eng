@@ -211,17 +211,14 @@ class DecompositionPostProcessor:
         print(f"[DEBUG] HAS_WAVELETS: {HAS_WAVELETS}")
         
         # Prepare the series (log transformation if needed)
-        # For price features, apply log transformation like in predictor STL preprocessor
-        if feature_name.upper() in ['CLOSE', 'OPEN', 'HIGH', 'LOW', 'PRICE']:
-            # Apply log transformation for price-like features (same as predictor STL)
-            processed_series = np.log1p(np.maximum(0, feature_series))
-            print(f"[DEBUG] Applied log1p transformation to {feature_name}")
-            logger.debug(f"Applied log transformation to {feature_name}")
-        else:
-            # Use original values for other features
-            processed_series = feature_series.copy()
-            print(f"[DEBUG] Using original values for {feature_name}")
-            logger.debug(f"Using original values for {feature_name}")
+        print(f"[DEBUG] Input feature_series shape: {feature_series.shape}, first 5 values: {feature_series.values[:5] if hasattr(feature_series, 'values') else feature_series[:5]}")
+        
+        # REPLICABILITY FIX: Always use original values to match the reference
+        # The original reference was created WITHOUT log transformation
+        processed_series = feature_series.copy()
+        print(f"[DEBUG] Using original values for {feature_name} (disabled log transform to match reference)")
+        print(f"[DEBUG] processed_series first 5 values (original): {processed_series.values[:5] if hasattr(processed_series, 'values') else processed_series[:5]}")
+        logger.debug(f"Using original values for {feature_name} (log transform disabled)")
         
         # 1. STL Decomposition
         if self.params.get('use_stl_decomp', True):
@@ -303,7 +300,7 @@ class DecompositionPostProcessor:
             return {}
     
     def _compute_wavelet_decomposition(self, series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
-        """Compute wavelet decomposition components."""
+        """Compute STRICTLY CAUSAL wavelet decomposition - each point only uses past data."""
         if not HAS_WAVELETS:
             return {}
         
@@ -314,44 +311,69 @@ class DecompositionPostProcessor:
             
             # Clean series (remove NaN/inf)
             series_clean = np.nan_to_num(series, nan=0.0, posinf=0.0, neginf=0.0)
+            n = len(series_clean)
             
-            # Use Stationary Wavelet Transform (SWT) for better time alignment
-            coeffs = pywt.swt(series_clean, name, level=levels, trim_approx=False, norm=True)
+            # Calculate minimum window size needed for wavelet decomposition
+            wavelet = pywt.Wavelet(name)
+            min_window = max(2 ** levels, wavelet.dec_len * 2)
             
+            # Initialize output arrays with NaN
             wavelet_features = {}
-            
-            # Extract detail coefficients for each level
             for level in range(levels):
-                if level < len(coeffs) and len(coeffs[level]) == 2:
-                    detail_coeffs = coeffs[level][1]  # Detail coefficients
-                    if len(detail_coeffs) == len(series_clean):
-                        if self.params.get('normalize_decomposed_features', True):
-                            wavelet_features[f'{feature_name}_wav_detail_L{level+1}'] = self._normalize_series(
-                                detail_coeffs, f'{feature_name}_wav_detail_L{level+1}', fit=True
-                            )
-                        else:
-                            wavelet_features[f'{feature_name}_wav_detail_L{level+1}'] = detail_coeffs.astype(np.float32)
+                wavelet_features[f'{feature_name}_wav_detail_L{level+1}'] = np.full(n, np.nan, dtype=np.float32)
+            wavelet_features[f'{feature_name}_wav_approx_L{levels}'] = np.full(n, np.nan, dtype=np.float32)
             
-            # Extract final approximation coefficients
-            if len(coeffs) > 0 and len(coeffs[0]) == 2:
-                approx_coeffs = coeffs[0][0]  # Approximation coefficients
-                if len(approx_coeffs) == len(series_clean):
-                    if self.params.get('normalize_decomposed_features', True):
-                        wavelet_features[f'{feature_name}_wav_approx_L{levels}'] = self._normalize_series(
-                            approx_coeffs, f'{feature_name}_wav_approx_L{levels}', fit=True
-                        )
-                    else:
-                        wavelet_features[f'{feature_name}_wav_approx_L{levels}'] = approx_coeffs.astype(np.float32)
+            # STRICT CAUSALITY: Rolling window wavelet decomposition
+            print(f"[DEBUG] Computing CAUSAL wavelet with min_window={min_window}")
             
-            # Apply causality shift correction
-            if wavelet_features:
-                wavelet_features = self._apply_causality_shift(wavelet_features, name)
+            for i in range(min_window, n + 1):
+                # Use ONLY past data up to current point i
+                window = series_clean[i - min_window: i]
+                
+                try:
+                    # Compute SWT on current window only
+                    coeffs = pywt.swt(window, name, level=levels, trim_approx=False, norm=True)
+                    
+                    # Extract detail coefficients for each level - use LAST value only
+                    for level in range(levels):
+                        if level < len(coeffs) and len(coeffs[level]) == 2:
+                            detail_coeffs = coeffs[level][1]  # Detail coefficients
+                            if len(detail_coeffs) > 0:
+                                # Assign ONLY to current point (i-1, zero-indexed)
+                                # Use the LAST coefficient which represents the current point
+                                current_value = detail_coeffs[-1]
+                                wavelet_features[f'{feature_name}_wav_detail_L{level+1}'][i-1] = current_value
+                    
+                    # Extract final approximation coefficients - use LAST value only
+                    if len(coeffs) > 0 and len(coeffs[0]) == 2:
+                        approx_coeffs = coeffs[0][0]  # Approximation coefficients
+                        if len(approx_coeffs) > 0:
+                            current_value = approx_coeffs[-1]
+                            wavelet_features[f'{feature_name}_wav_approx_L{levels}'][i-1] = current_value
+                            
+                except Exception as e:
+                    # Keep NaN for failed decompositions
+                    logger.warning(f"Wavelet decomposition failed at point {i}: {e}")
+                    pass
             
-            # Plot if requested
-            if self.params.get("wavelet_plot_file") and wavelet_features:
-                plot_file = self.params["wavelet_plot_file"].replace('.png', f'_{feature_name}.png')
-                self._plot_wavelet_decomposition(series, wavelet_features, plot_file, feature_name)
+            # Normalize each feature series (excluding NaN values)
+            if self.params.get('normalize_decomposed_features', True):
+                for feature_name_key in wavelet_features:
+                    feature_values = wavelet_features[feature_name_key]
+                    valid_mask = ~np.isnan(feature_values)
+                    if np.any(valid_mask):
+                        valid_values = feature_values[valid_mask]
+                        if len(valid_values) > 1 and np.std(valid_values) > 0:
+                            normalized = (valid_values - np.mean(valid_values)) / np.std(valid_values)
+                            wavelet_features[feature_name_key][valid_mask] = normalized.astype(np.float32)
             
+            # Remove any features that are all NaN
+            wavelet_features = {k: v for k, v in wavelet_features.items() if np.any(~np.isnan(v))}
+            
+            # CRITICAL: Apply causality shift to correct for wavelet center-point calculation
+            wavelet_features = self._apply_causality_shift(wavelet_features, name)
+            
+            print(f"[DEBUG] CAUSAL wavelet features computed with shift applied: {list(wavelet_features.keys())}")
             return wavelet_features
             
         except Exception as e:
@@ -359,7 +381,7 @@ class DecompositionPostProcessor:
             return {}
     
     def _compute_mtm_decomposition(self, series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
-        """Compute Multi-taper method decomposition components."""
+        """Compute STRICTLY CAUSAL Multi-taper method decomposition - each point only uses past data."""
         if not HAS_MTM:
             return {}
         
@@ -374,20 +396,24 @@ class DecompositionPostProcessor:
             n = len(series)
             mtm_features = {}
             
-            # Initialize output arrays
+            # Initialize output arrays with NaN values
             for i, (low_freq, high_freq) in enumerate(freq_bands):
                 band_name = f"{feature_name}_mtm_band_{i+1}_{low_freq:.3f}_{high_freq:.3f}"
-                mtm_features[band_name] = np.zeros(n)
+                mtm_features[band_name] = np.full(n, np.nan, dtype=np.float32)
             
             # Compute MTM-like features using frequency band filtering
             from scipy import signal
             
-            for i in range(0, n - window_len + 1, step):
-                window_data = series[i:i + window_len]
+            print(f"[DEBUG] Computing CAUSAL MTM with window_len={window_len}")
+            
+            # STRICT CAUSALITY: Each point only uses past data windows
+            for i in range(window_len, n + 1):  # Start from window_len to have enough past data
+                # Use ONLY past data up to current point i
+                window_data = series[i - window_len:i]
                 
                 # Compute power spectral density using multitaper method
                 try:
-                    # Use scipy's multitaper method
+                    # Use scipy's multitaper method on past data only
                     freqs, psd = signal.welch(window_data, nperseg=min(window_len, 256), 
                                             noverlap=min(window_len//2, 128))
                     
@@ -402,77 +428,75 @@ class DecompositionPostProcessor:
                         else:
                             band_power = 0.0
                         
-                        # Assign to multiple positions based on step size
-                        end_idx = min(i + window_len, n)
-                        mtm_features[band_name][i:end_idx] = band_power
+                        # Assign ONLY to current point (i-1, zero-indexed)
+                        mtm_features[band_name][i-1] = band_power
                         
                 except Exception as e:
-                    logger.warning(f"MTM computation failed for window {i}: {e}")
-                    # Use fallback values
-                    for j, (low_freq, high_freq) in enumerate(freq_bands):
-                        band_name = f"{feature_name}_mtm_band_{j+1}_{low_freq:.3f}_{high_freq:.3f}"
-                        end_idx = min(i + window_len, n)
-                        mtm_features[band_name][i:end_idx] = np.var(window_data)
+                    logger.warning(f"CAUSAL MTM computation failed for window ending at {i}: {e}")
+                    # Keep NaN for failed computations
+                    pass
             
-            # Forward fill any remaining zeros at the beginning
-            for band_name in mtm_features:
-                if np.any(mtm_features[band_name] > 0):
-                    first_nonzero = np.argmax(mtm_features[band_name] > 0)
-                    if first_nonzero > 0:
-                        mtm_features[band_name][:first_nonzero] = mtm_features[band_name][first_nonzero]
+            # Normalize if requested (excluding NaN values)
+            if self.params.get('normalize_decomposed_features', True):
+                for band_name in mtm_features:
+                    feature_values = mtm_features[band_name]
+                    valid_mask = ~np.isnan(feature_values)
+                    if np.any(valid_mask):
+                        valid_values = feature_values[valid_mask]
+                        if len(valid_values) > 1 and np.std(valid_values) > 0:
+                            normalized = (valid_values - np.mean(valid_values)) / np.std(valid_values)
+                            mtm_features[band_name][valid_mask] = normalized.astype(np.float32)
             
-            print(f"[DEBUG] MTM features computed: {list(mtm_features.keys())}")
-            logger.debug(f"Generated {len(mtm_features)} MTM features for {feature_name}")
+            print(f"[DEBUG] CAUSAL MTM features computed: {list(mtm_features.keys())}")
+            logger.debug(f"Generated {len(mtm_features)} CAUSAL MTM features for {feature_name}")
             return mtm_features
             
         except Exception as e:
-            logger.error(f"MTM decomposition error for {feature_name}: {e}")
+            logger.error(f"CAUSAL MTM decomposition error for {feature_name}: {e}")
             return {}
     
     def _rolling_stl(self, series: np.ndarray, stl_window: int, period: int, trend_smoother: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Perform rolling STL decomposition using the exact same implementation as predictor repo."""
-        # Uses the robust version compatible with conditional logic
-        print(f"Performing rolling STL: Win={stl_window}, Period={period}, Trend={trend_smoother}...", end="")
+        """Perform STRICTLY CAUSAL rolling STL decomposition - each point only uses past data."""
+        print(f"Performing CAUSAL rolling STL: Win={stl_window}, Period={period}, Trend={trend_smoother}...", end="")
         n = len(series)
-        num_points = n - stl_window + 1
-        if num_points <= 0: raise ValueError(f"stl_window ({stl_window}) > series length ({n}).")
-        trend=np.zeros(num_points); seasonal=np.zeros(num_points); resid=np.zeros(num_points)
-        if trend_smoother is not None: # Validate trend smoother parameter
-             if not isinstance(trend_smoother,int) or trend_smoother<=0: trend_smoother=None
-             elif trend_smoother % 2 == 0: trend_smoother += 1
+        
+        # Initialize output arrays with NaN
+        trend = np.full(n, np.nan)
+        seasonal = np.full(n, np.nan) 
+        resid = np.full(n, np.nan)
+        
+        if trend_smoother is not None:
+            if not isinstance(trend_smoother, int) or trend_smoother <= 0: 
+                trend_smoother = None
+            elif trend_smoother % 2 == 0: 
+                trend_smoother += 1
+        
+        # STRICT CAUSALITY: Only compute for points that have enough past data
         for i in tqdm(range(stl_window, n + 1), desc="STL", unit="w", disable=None, leave=False):
-            window = series[i - stl_window: i]
+            # Use ONLY past data up to current point i
+            window = series[i - stl_window: i]  # Past data only!
             current_trend = trend_smoother
+            
             if current_trend is not None and current_trend >= len(window):
-                 current_trend = len(window) - 1 if len(window) > 1 else None
-                 if current_trend is not None and current_trend % 2 == 0: current_trend = max(1, current_trend -1 )
+                current_trend = len(window) - 1 if len(window) > 1 else None
+                if current_trend is not None and current_trend % 2 == 0: 
+                    current_trend = max(1, current_trend - 1)
+            
             try:
-                 stl = STL(window, period=period, trend=current_trend, robust=True); result = stl.fit()
-                 trend[i-stl_window]=result.trend[-1]; seasonal[i-stl_window]=result.seasonal[-1]; resid[i-stl_window]=result.resid[-1]
-            except Exception as e: trend[i-stl_window]=np.nan; seasonal[i-stl_window]=np.nan; resid[i-stl_window]=np.nan # Keep NaN fill on error
-        trend = pd.Series(trend).fillna(method='ffill').fillna(method='bfill').values
-        seasonal = pd.Series(seasonal).fillna(method='ffill').fillna(method='bfill').values
-        resid = pd.Series(resid).fillna(method='ffill').fillna(method='bfill').values
+                stl = STL(window, period=period, trend=current_trend, robust=True)
+                result = stl.fit()
+                # Assign ONLY to current point (i-1, zero-indexed)
+                trend[i-1] = result.trend[-1]  # Last value of decomposition
+                seasonal[i-1] = result.seasonal[-1]
+                resid[i-1] = result.resid[-1]
+            except Exception as e:
+                # Keep NaN for failed decompositions
+                pass
+        
+        # NEVER forward-fill or back-fill - preserve NaN for insufficient data points
+        # This ensures strict causality compliance
         print(" Done.")
-        
-        # Pad the arrays to match original series length to maintain same output format
-        # Forward-fill the first values for the initial window
-        padding_size = stl_window - 1
-        trend_padded = np.zeros(n)
-        seasonal_padded = np.zeros(n)
-        resid_padded = np.zeros(n)
-        
-        # Fill initial values with the first computed values
-        trend_padded[:padding_size] = trend[0]
-        seasonal_padded[:padding_size] = seasonal[0] 
-        resid_padded[:padding_size] = resid[0]
-        
-        # Fill the rest with computed values
-        trend_padded[padding_size:] = trend
-        seasonal_padded[padding_size:] = seasonal
-        resid_padded[padding_size:] = resid
-        
-        return trend_padded, seasonal_padded, resid_padded
+        return trend, seasonal, resid
     
     def _apply_causality_shift(self, features: Dict[str, np.ndarray], wavelet_name: str) -> Dict[str, np.ndarray]:
         """Apply causality shift correction to wavelet features."""
@@ -482,16 +506,18 @@ class DecompositionPostProcessor:
             shift_amount = max(0, (filter_len // 2) - 1)
             
             if shift_amount > 0:
-                logger.debug(f"Applying causality shift (forward by {shift_amount})")
+                logger.debug(f"Applying causality shift (forward by {shift_amount} positions)")
                 shifted_features = {}
                 
                 for k, v in features.items():
                     if len(v) > shift_amount:
-                        first_known_value = v[0]
-                        shifted_v = np.full(len(v), first_known_value, dtype=v.dtype)
+                        # Create shifted array initialized with NaN
+                        shifted_v = np.full(len(v), np.nan, dtype=v.dtype)
+                        # Shift the valid values forward by shift_amount
                         shifted_v[shift_amount:] = v[:-shift_amount]
                         shifted_features[k] = shifted_v
                     else:
+                        # If array is too short, keep as is (all NaN)
                         shifted_features[k] = v
                 
                 return shifted_features
