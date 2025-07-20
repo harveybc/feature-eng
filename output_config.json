@@ -1,9 +1,7 @@
 {
-    "output_file": "test_output_1000_no_norm.csv",
+    "output_file": "perfect_reference_raw.csv",
     "include_original_5": false,
     "distribution_plot": false,
     "headers": false,
-    "num_rows": 1000,
-    "config_file_path": "/dev/null",
-    "additional_args": "{\"decomposition_params\": {\"normalize_decomposed_features\": false}}"
+    "config": "fe_config_test.json"
 }

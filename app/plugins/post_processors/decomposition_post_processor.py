@@ -14,7 +14,6 @@ Based on the STL preprocessor from the prediction_provider repository.
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
 from statsmodels.tsa.seasonal import STL
 from tqdm import tqdm
 import json
@@ -81,7 +80,6 @@ class DecompositionPostProcessor:
         "tapper_plot_points": 480,
         
         # --- Output Settings ---
-        "normalize_decomposed_features": True,
         "replace_original": True,  # Replace original features with decomposed ones
         "keep_original": False,    # Keep original features alongside decomposed ones
     }
@@ -95,7 +93,6 @@ class DecompositionPostProcessor:
             self.params.update(params)
             print(f"[DEBUG] DecompositionPostProcessor final params: use_stl_decomp={self.params.get('use_stl_decomp')}, use_wavelet_decomp={self.params.get('use_wavelet_decomp')}")
             
-        self.scalers = {}
         self._resolve_stl_params()
         
         logger.info(f"Initialized DecompositionPostProcessor with features: {self.params['decomp_features']}")
@@ -271,15 +268,10 @@ class DecompositionPostProcessor:
             if len(trend) > 0:
                 stl_features = {}
                 
-                # Normalize if specified
-                if self.params.get('normalize_decomposed_features', True):
-                    stl_features[f'{feature_name}_stl_trend'] = self._normalize_series(trend, f'{feature_name}_stl_trend', fit=True)
-                    stl_features[f'{feature_name}_stl_seasonal'] = self._normalize_series(seasonal, f'{feature_name}_stl_seasonal', fit=True)
-                    stl_features[f'{feature_name}_stl_resid'] = self._normalize_series(resid, f'{feature_name}_stl_resid', fit=True)
-                else:
-                    stl_features[f'{feature_name}_stl_trend'] = trend.astype(np.float32)
-                    stl_features[f'{feature_name}_stl_seasonal'] = seasonal.astype(np.float32)
-                    stl_features[f'{feature_name}_stl_resid'] = resid.astype(np.float32)
+                # Return raw decomposed features - no processing needed
+                stl_features[f'{feature_name}_stl_trend'] = trend.astype(np.float32)
+                stl_features[f'{feature_name}_stl_seasonal'] = seasonal.astype(np.float32)
+                stl_features[f'{feature_name}_stl_resid'] = resid.astype(np.float32)
                 
                 # Plot if requested
                 if self.params.get("stl_plot_file"):
@@ -356,17 +348,6 @@ class DecompositionPostProcessor:
                     logger.warning(f"Wavelet decomposition failed at point {i}: {e}")
                     pass
             
-            # Normalize each feature series (excluding NaN values)
-            if self.params.get('normalize_decomposed_features', True):
-                for feature_name_key in wavelet_features:
-                    feature_values = wavelet_features[feature_name_key]
-                    valid_mask = ~np.isnan(feature_values)
-                    if np.any(valid_mask):
-                        valid_values = feature_values[valid_mask]
-                        if len(valid_values) > 1 and np.std(valid_values) > 0:
-                            normalized = (valid_values - np.mean(valid_values)) / np.std(valid_values)
-                            wavelet_features[feature_name_key][valid_mask] = normalized.astype(np.float32)
-            
             # Remove any features that are all NaN
             wavelet_features = {k: v for k, v in wavelet_features.items() if np.any(~np.isnan(v))}
             
@@ -435,17 +416,6 @@ class DecompositionPostProcessor:
                     logger.warning(f"CAUSAL MTM computation failed for window ending at {i}: {e}")
                     # Keep NaN for failed computations
                     pass
-            
-            # Normalize if requested (excluding NaN values)
-            if self.params.get('normalize_decomposed_features', True):
-                for band_name in mtm_features:
-                    feature_values = mtm_features[band_name]
-                    valid_mask = ~np.isnan(feature_values)
-                    if np.any(valid_mask):
-                        valid_values = feature_values[valid_mask]
-                        if len(valid_values) > 1 and np.std(valid_values) > 0:
-                            normalized = (valid_values - np.mean(valid_values)) / np.std(valid_values)
-                            mtm_features[band_name][valid_mask] = normalized.astype(np.float32)
             
             print(f"[DEBUG] CAUSAL MTM features computed: {list(mtm_features.keys())}")
             logger.debug(f"Generated {len(mtm_features)} CAUSAL MTM features for {feature_name}")
@@ -528,44 +498,29 @@ class DecompositionPostProcessor:
             logger.warning(f"Causality shift failed: {e}. Using original features.")
             return features
     
-    def _normalize_series(self, series: np.ndarray, name: str, fit: bool = False) -> np.ndarray:
-        """Normalize a time series using StandardScaler."""
-        if not self.params.get("normalize_decomposed_features", True):
-            return series.astype(np.float32)
+    def _apply_causality_shift(self, features: Dict[str, np.ndarray], wavelet_name: str) -> Dict[str, np.ndarray]:
+        """Apply causality shift to decomposition features based on wavelet-specific delays."""
+        shifted_features = {}
         
-        series = series.astype(np.float32)
-        
-        # Handle NaNs and infinities
-        if np.any(np.isnan(series)) or np.any(np.isinf(series)):
-            logger.warning(f"NaNs/Infs in '{name}' pre-normalization. Filling...")
-            series_df = pd.Series(series).fillna(method='ffill').fillna(method='bfill')
-            series = series_df.values
-            if np.any(np.isnan(series)) or np.any(np.isinf(series)):
-                logger.warning(f"Filling failed for '{name}'. Using zeros.")
-                series = np.nan_to_num(series, nan=0.0, posinf=0.0, neginf=0.0)
-        
-        data_reshaped = series.reshape(-1, 1)
-        
-        if fit:
-            scaler = StandardScaler()
-            if np.std(data_reshaped) < 1e-9:
-                logger.warning(f"'{name}' is constant. Using dummy scaler.")
-                # Create dummy scaler for constant data
-                class DummyScaler:
-                    def fit(self, X): pass
-                    def transform(self, X): return X.astype(np.float32)
-                    def inverse_transform(self, X): return X.astype(np.float32)
-                scaler = DummyScaler()
+        # Apply wavelet-specific shifts for causality
+        for feature_key, feature_values in features.items():
+            if wavelet_name == 'db1':
+                shift = 1
+            elif wavelet_name == 'db4':
+                shift = 3
+            elif wavelet_name == 'haar':
+                shift = 1
+            elif wavelet_name == 'bior2.2':
+                shift = 2
             else:
-                scaler.fit(data_reshaped)
-            self.scalers[name] = scaler
-        else:
-            if name not in self.scalers:
-                raise RuntimeError(f"Scaler '{name}' not fitted.")
-            scaler = self.scalers[name]
-        
-        normalized_data = scaler.transform(data_reshaped)
-        return normalized_data.flatten()
+                shift = 2  # Default shift for unknown wavelets
+            
+            # Apply shift
+            shifted_values = np.roll(feature_values, shift)
+            shifted_values[:shift] = shifted_values[shift]  # Forward fill the initial values
+            shifted_features[feature_key] = shifted_values
+            
+        return shifted_features
     
     def _plot_stl_decomposition(self, series: np.ndarray, trend: np.ndarray, seasonal: np.ndarray, 
                               resid: np.ndarray, file_path: str, feature_name: str):
