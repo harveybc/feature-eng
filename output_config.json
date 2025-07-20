@@ -1,7 +1,5 @@
 {
-    "output_file": "perfect_reference_raw.csv",
     "include_original_5": false,
     "distribution_plot": false,
-    "headers": false,
-    "config": "fe_config_test.json"
+    "headers": false
 }
