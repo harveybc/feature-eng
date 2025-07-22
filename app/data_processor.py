@@ -350,6 +350,17 @@ def process_data(data, plugin, config):
     print("[DEBUG] Final dataset with DATE_TIME column restored, first 5 rows:")
     print(final_data.head())
 
+    # Remove rows with any NaN values before saving
+    rows_before = len(final_data)
+    final_data = final_data.dropna()
+    rows_after = len(final_data)
+    rows_removed = rows_before - rows_after
+    
+    if rows_removed > 0:
+        print(f"[DEBUG] Removed {rows_removed} rows containing NaN values ({rows_before} -> {rows_after})")
+    else:
+        print(f"[DEBUG] No NaN values found, all {rows_before} rows retained")
+
     # Save the final combined dataset as indicators_output.csv
     final_data.to_csv('indicators_output.csv', index=False)
     print("[DEBUG] Saved final dataset to 'indicators_output.csv'.")
@@ -396,6 +407,17 @@ def run_feature_engineering_pipeline(config, plugin):
 
     # Save the processed data to the output file if specified
     if config.get('output_file'):
+        # Remove rows with any NaN values before final export
+        rows_before = len(processed_data)
+        processed_data = processed_data.dropna()
+        rows_after = len(processed_data)
+        rows_removed = rows_before - rows_after
+        
+        if rows_removed > 0:
+            print(f"[FINAL EXPORT] Removed {rows_removed} rows containing NaN values ({rows_before} -> {rows_after})")
+        else:
+            print(f"[FINAL EXPORT] No NaN values found, all {rows_before} rows retained")
+        
         processed_data.to_csv(config['output_file'], index=False) 
         print(f"Processed data saved to {config['output_file']}.")
     else:

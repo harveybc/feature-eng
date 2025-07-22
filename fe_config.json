@@ -59,7 +59,7 @@
         "open": "open"
       }
     },
-    "headers": false
+    "headers": true
   },
   "decomposition_params": {
     "decomp_features": [
@@ -168,7 +168,7 @@
   },
   "version_info": {
     "config_version": "1.0.0",
-    "export_timestamp": "2025-07-22T03:51:37.583327",
+    "export_timestamp": "2025-07-22T05:58:08.126453",
     "system_info": "Feature Engineering System - Perfect Replicability Config"
   }
 }
