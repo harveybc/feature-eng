@@ -158,14 +158,8 @@
       "rsi",
       "macd",
       "ema",
-      "stoch",
-      "adx",
-      "atr",
-      "cci",
-      "bbands",
-      "williams",
-      "momentum",
-      "roc"
+      "sma",
+      "bb"
     ],
     "long_term_period": 200,
     "mid_term_period": 50,
@@ -174,7 +168,7 @@
   },
   "version_info": {
     "config_version": "1.0.0",
-    "export_timestamp": "2025-07-20T01:01:11.611401",
+    "export_timestamp": "2025-07-22T03:51:37.583327",
     "system_info": "Feature Engineering System - Perfect Replicability Config"
   }
 }

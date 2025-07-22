@@ -1,0 +1,180 @@
+{
+  "data_handling_params": {
+    "dataset_type": "forex_15m",
+    "dataset_types": {
+      "calendar": [
+        "economic_calendar"
+      ],
+      "forex": [
+        "forex_15m"
+      ],
+      "stock": [
+        "sp500"
+      ],
+      "volatility": [
+        "vix"
+      ]
+    },
+    "header_mappings": {
+      "economic_calendar": {
+        "actual": "c8",
+        "country": "c3",
+        "data_format": "c7",
+        "description": "c5",
+        "evaluation": "c6",
+        "event_date": "c1",
+        "event_time": "c2",
+        "forecast": "c9",
+        "previous": "c10",
+        "volatility": "c4"
+      },
+      "forex_15m": {
+        "close": "CLOSE",
+        "datetime": "DATE_TIME",
+        "high": "HIGH",
+        "low": "LOW",
+        "open": "OPEN"
+      },
+      "hourly": {
+        "close": "close",
+        "datetime": "datetime",
+        "high": "high",
+        "low": "low",
+        "open": "open"
+      },
+      "sp500": {
+        "adj_close": "Adj Close",
+        "close": "Close",
+        "date": "Date",
+        "high": "High",
+        "low": "Low",
+        "open": "Open",
+        "volume": "Volume"
+      },
+      "vix": {
+        "close": "close",
+        "date": "date",
+        "high": "high",
+        "low": "low",
+        "open": "open"
+      }
+    },
+    "headers": false
+  },
+  "decomposition_params": {
+    "decomp_features": [
+      "CLOSE"
+    ],
+    "keep_original": false,
+    "mtm_freq_bands": [
+      [
+        0,
+        0.01
+      ],
+      [
+        0.01,
+        0.06
+      ],
+      [
+        0.06,
+        0.2
+      ],
+      [
+        0.2,
+        0.5
+      ]
+    ],
+    "mtm_num_tapers": null,
+    "mtm_step": 1,
+    "mtm_time_bandwidth": 5.0,
+    "mtm_window_len": 168,
+    "normalize_decomposed_features": true,
+    "replace_original": true,
+    "stl_period": 24,
+    "stl_plot_file": null,
+    "stl_trend": 39,
+    "stl_window": 49,
+    "tapper_plot_file": null,
+    "tapper_plot_points": 480,
+    "use_mtm_decomp": true,
+    "use_stl_decomp": true,
+    "use_wavelet_decomp": true,
+    "wavelet_levels": 2,
+    "wavelet_mode": "symmetric",
+    "wavelet_name": "db4",
+    "wavelet_plot_file": null
+  },
+  "processing_params": {
+    "calendar_window_size": 128,
+    "calendar_window_size_divisor": 5,
+    "decomp_features": [
+      "CLOSE"
+    ],
+    "default_positional_encoding_dim": 8,
+    "filter_by_volatility": true,
+    "high_freq_dataset": "tests/data/EURUSD-2000-2020-15m.csv",
+    "include_original_5": false,
+    "ohlc_columns": [
+      "open",
+      "high",
+      "low",
+      "close"
+    ],
+    "output_resample_frequency": "1H",
+    "relevant_countries": [
+      "United States",
+      "Euro Zone"
+    ],
+    "seasonality_columns": true,
+    "sp500_dataset": "tests/data/sp_500_day_1927_2020_ohlc.csv",
+    "sub_periodicity_window_size": 8,
+    "tech_indicators": true,
+    "temporal_decay": 0.1,
+    "use_mtm_decomp": true,
+    "use_stl_decomp": true,
+    "use_wavelet_decomp": true,
+    "vix_dataset": "tests/data/vix_day_1990_2024.csv"
+  },
+  "tech_indicator_params": {
+    "indicator_specific_params": {
+      "adx_period": 14,
+      "atr_period": 14,
+      "bbands_period": 5,
+      "bbands_std": 2.0,
+      "cci_period": 20,
+      "ema_period": 50,
+      "macd_fast": 12,
+      "macd_signal": 9,
+      "macd_slow": 26,
+      "momentum_period": 4,
+      "roc_period": 12,
+      "rsi_period": 14,
+      "stoch_d_period": 3,
+      "stoch_k_period": 14,
+      "stoch_smooth": 3,
+      "williams_period": 14
+    },
+    "indicators": [
+      "rsi",
+      "macd",
+      "ema",
+      "stoch",
+      "adx",
+      "atr",
+      "cci",
+      "bbands",
+      "williams",
+      "momentum",
+      "roc"
+    ],
+    "long_term_period": 200,
+    "mid_term_period": 50,
+    "ohlc_order": "ohlc",
+    "short_term_period": 14
+  },
+  "version_info": {
+    "config_version": "1.0.0",
+    "export_timestamp": "2025-07-20T01:01:11.611401",
+    "system_info": "Feature Engineering System - Perfect Replicability Config"
+  }
+}

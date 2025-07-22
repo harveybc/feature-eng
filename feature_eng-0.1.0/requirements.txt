@@ -1,0 +1,17 @@
+numpy
+pandas
+pandas_ta
+h5py
+scipy
+build
+pytest
+pdoc3
+matplotlib
+Pillow
+kiwisolver
+requests
+seaborn
+tqdm
+scikit-learn
+statsmodels
+PyWavelets
