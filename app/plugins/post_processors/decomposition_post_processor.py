@@ -315,12 +315,12 @@ class DecompositionPostProcessor:
                 wavelet_features[f'{feature_name}_wav_detail_L{level+1}'] = np.full(n, np.nan, dtype=np.float32)
             wavelet_features[f'{feature_name}_wav_approx_L{levels}'] = np.full(n, np.nan, dtype=np.float32)
             
-            # STRICT CAUSALITY: Rolling window wavelet decomposition
+            # PROPER CAUSALITY: Rolling window wavelet decomposition
             print(f"[DEBUG] Computing CAUSAL wavelet with min_window={min_window}")
             
             for i in range(min_window, n + 1):
-                # Use ONLY past data up to current point i
-                window = series_clean[i - min_window: i]
+                # Use data from t-window+1 to t (includes current point)
+                window = series_clean[i - min_window: i]  # INCLUDES current point (i-1 in 0-indexed)
                 
                 try:
                     # Compute SWT on current window only
@@ -353,6 +353,23 @@ class DecompositionPostProcessor:
             
             # CRITICAL: Apply causality shift to correct for wavelet center-point calculation
             wavelet_features = self._apply_causality_shift(wavelet_features, name)
+            
+            # Forward fill NaN values for all wavelet features using first calculated value
+            for feature_name_key, feature_values in wavelet_features.items():
+                # Find first non-NaN value
+                first_valid_value = None
+                first_valid_pos = None
+                
+                for i in range(len(feature_values)):
+                    if not np.isnan(feature_values[i]):
+                        first_valid_value = feature_values[i]
+                        first_valid_pos = i
+                        break
+                
+                # Forward fill using the first valid value
+                if first_valid_value is not None and first_valid_pos is not None:
+                    for i in range(first_valid_pos):
+                        feature_values[i] = first_valid_value
             
             print(f"[DEBUG] CAUSAL wavelet features computed with shift applied: {list(wavelet_features.keys())}")
             return wavelet_features
@@ -387,10 +404,10 @@ class DecompositionPostProcessor:
             
             print(f"[DEBUG] Computing CAUSAL MTM with window_len={window_len}")
             
-            # STRICT CAUSALITY: Each point only uses past data windows
-            for i in range(window_len, n + 1):  # Start from window_len to have enough past data
-                # Use ONLY past data up to current point i
-                window_data = series[i - window_len:i]
+            # PROPER CAUSALITY: Each point uses data window including current point
+            for i in range(window_len, n + 1):  # Start from window_len to have enough data
+                # Use data from t-window+1 to t (includes current point)
+                window_data = series[i - window_len:i]  # INCLUDES current point (i-1 in 0-indexed)
                 
                 # Compute power spectral density using multitaper method
                 try:
@@ -418,6 +435,24 @@ class DecompositionPostProcessor:
                     pass
             
             print(f"[DEBUG] CAUSAL MTM features computed: {list(mtm_features.keys())}")
+            
+            # Forward fill NaN values for all MTM bands using first calculated value
+            for band_name, band_values in mtm_features.items():
+                # Find first non-NaN value
+                first_valid_value = None
+                first_valid_pos = None
+                
+                for i in range(len(band_values)):
+                    if not np.isnan(band_values[i]):
+                        first_valid_value = band_values[i]
+                        first_valid_pos = i
+                        break
+                
+                # Forward fill using the first valid value
+                if first_valid_value is not None and first_valid_pos is not None:
+                    for i in range(first_valid_pos):
+                        band_values[i] = first_valid_value
+            
             logger.debug(f"Generated {len(mtm_features)} CAUSAL MTM features for {feature_name}")
             return mtm_features
             
@@ -441,10 +476,10 @@ class DecompositionPostProcessor:
             elif trend_smoother % 2 == 0: 
                 trend_smoother += 1
         
-        # STRICT CAUSALITY: Only compute for points that have enough past data
+        # PROPER CAUSALITY: Only compute for points that have enough past data
         for i in tqdm(range(stl_window, n + 1), desc="STL", unit="w", disable=None, leave=False):
-            # Use ONLY past data up to current point i
-            window = series[i - stl_window: i]  # Past data only!
+            # Use data from t-window+1 to t (includes current point)
+            window = series[i - stl_window: i]  # INCLUDES current point (i-1 in 0-indexed)
             current_trend = trend_smoother
             
             if current_trend is not None and current_trend >= len(window):
@@ -463,8 +498,24 @@ class DecompositionPostProcessor:
                 # Keep NaN for failed decompositions
                 pass
         
-        # NEVER forward-fill or back-fill - preserve NaN for insufficient data points
-        # This ensures strict causality compliance
+        # Forward fill NaN values to eliminate any NaN data points
+        # Forward fill each STL component using first calculated value
+        for component in [trend, seasonal, resid]:
+            # Find first non-NaN value
+            first_valid_value = None
+            first_valid_pos = None
+            
+            for i in range(len(component)):
+                if not np.isnan(component[i]):
+                    first_valid_value = component[i]
+                    first_valid_pos = i
+                    break
+            
+            # Forward fill using the first valid value
+            if first_valid_value is not None and first_valid_pos is not None:
+                for i in range(first_valid_pos):
+                    component[i] = first_valid_value
+        
         print(" Done.")
         return trend, seasonal, resid
     

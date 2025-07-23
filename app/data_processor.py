@@ -175,6 +175,7 @@ def process_data(data, plugin, config):
 
     # Trim and save the technical indicators dataset to the final valid date range
     processed_data_trimmed = processed_data[(processed_data.index >= final_common_start) & (processed_data.index <= final_common_end)]
+    processed_data_trimmed = processed_data_trimmed.iloc[168:]
     processed_data_trimmed.reset_index().rename(columns={processed_data_trimmed.index.name: 'DATE_TIME'}).to_csv('technical_indicators_aligned.csv', index=False)
     print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
 

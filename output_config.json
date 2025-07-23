@@ -1,7 +1,5 @@
 {
-    "output_file": "test_no_nan_output.csv",
     "include_original_5": false,
     "distribution_plot": false,
-    "max_rows": 100,
-    "datetime_column": "datetime"
+    "headers": false
 }

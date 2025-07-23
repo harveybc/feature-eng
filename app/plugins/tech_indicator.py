@@ -123,33 +123,39 @@ class Plugin:
 
     def _calculate_causal_rsi(self, prices):
         """
-        Calculate RSI causally - at time t, use only data up to t-1
+        Calculate RSI causally - starts at position 168 to match MTM decomposition requirements
         """
         rsi_values = pd.Series(index=prices.index, dtype=float)
         period = self.params['rsi_period']
+        min_start_position = 168  # Match MTM decomposition requirement
+        
+        print(f"[DEBUG] RSI calculation: period={period}, min_start_position={min_start_position}, data_length={len(prices)}")
+        print(f"[DEBUG] First few prices: {prices.iloc[:5].tolist()}")
+        print(f"[DEBUG] Prices around position {min_start_position}: {prices.iloc[min_start_position-2:min_start_position+3].tolist()}")
         
         for i in range(len(prices)):
-            if i < period:
-                # Not enough data for RSI calculation
+            if i < min_start_position:  # Wait until min_start_position
+                # Not enough data for RSI calculation - will forward fill later
                 rsi_values.iloc[i] = np.nan
                 continue
             
-            # Use only data up to current point (including current for price change calc)
-            # But the RSI at time t uses gains/losses calculated up to t-1
-            recent_prices = prices.iloc[max(0, i - period):i + 1]
+            # PROPER CAUSALITY: Use data from t-period+1 to t (includes current point)
+            # Need at least period+1 points for RSI calculation (to get period price changes)
+            start_idx = max(0, i - period)  # This gives us period+1 points: [i-period, i-period+1, ..., i]
+            recent_prices = prices.iloc[start_idx:i + 1]  # INCLUDES current point i
             
-            if len(recent_prices) < 2:
+            if len(recent_prices) < period + 1:  # Need period+1 points for period price changes
                 rsi_values.iloc[i] = np.nan
                 continue
                 
             # Calculate price changes (current vs previous)
             price_changes = recent_prices.diff().dropna()
             
-            if len(price_changes) < period:
+            if len(price_changes) < period:  # Need exactly period price changes
                 rsi_values.iloc[i] = np.nan
                 continue
             
-            # Use only the most recent period changes
+            # Use the most recent period changes
             recent_changes = price_changes.tail(period)
             
             gains = recent_changes[recent_changes > 0].sum()
@@ -161,39 +167,80 @@ class Plugin:
                 rs = gains / losses
                 rsi_values.iloc[i] = 100.0 - (100.0 / (1.0 + rs))
         
+        # Forward fill the first valid value to eliminate NaN values
+        rsi_values.fillna(method='bfill', inplace=True)
+        
         return rsi_values
 
     def _calculate_causal_ema(self, prices, period):
         """
-        Calculate EMA causally - at time t, use only data up to t-1
+        Calculate EMA causally - starts at position 168 to match MTM decomposition requirements
         """
         ema_values = pd.Series(index=prices.index, dtype=float)
         alpha = 2.0 / (period + 1.0)
+        min_start_position = 168  # Match MTM decomposition requirement
         
+        # Initialize EMA calculation
         for i in range(len(prices)):
-            if i == 0:
-                ema_values.iloc[i] = prices.iloc[i]
+            if i < min_start_position:
+                # Not enough data - will forward fill later
+                ema_values.iloc[i] = np.nan
+            elif i == min_start_position:
+                # Start EMA calculation from min_start_position using SMA as seed
+                seed_data = prices.iloc[max(0, i - period + 1):i + 1]
+                ema_values.iloc[i] = seed_data.mean()
             else:
-                # EMA at time t uses EMA at t-1 and price at t
-                # This is causal because past EMA values don't use future data
+                # PROPER CAUSALITY: EMA at time t uses EMA at t-1 and price at t
                 ema_values.iloc[i] = alpha * prices.iloc[i] + (1 - alpha) * ema_values.iloc[i-1]
+        
+        # Forward fill the first valid value to eliminate NaN values
+        # Find first non-NaN value manually
+        first_valid_value = None
+        first_valid_pos = None
+        
+        for i in range(len(ema_values)):
+            if not pd.isna(ema_values.iloc[i]):
+                first_valid_value = ema_values.iloc[i]
+                first_valid_pos = i
+                break
+        
+        # Forward fill using the first valid value
+        if first_valid_value is not None and first_valid_pos is not None:
+            for i in range(first_valid_pos):
+                ema_values.iloc[i] = first_valid_value
         
         return ema_values
 
     def _calculate_causal_sma(self, prices, period):
         """
-        Calculate SMA causally - at time t, use only data up to t-1
+        Calculate SMA causally - starts at position 168 to match MTM decomposition requirements
         """
         sma_values = pd.Series(index=prices.index, dtype=float)
+        min_start_position = 168  # Match MTM decomposition requirement
         
         for i in range(len(prices)):
-            if i < period - 1:
+            if i < max(period - 1, min_start_position):
                 sma_values.iloc[i] = np.nan
             else:
-                # SMA at time t uses prices from t-period+1 to t
-                # This uses current and past data only
-                recent_prices = prices.iloc[i - period + 1:i + 1]
+                # PROPER CAUSALITY: SMA at time t uses prices from t-period+1 to t (includes current)
+                recent_prices = prices.iloc[i - period + 1:i + 1]  # INCLUDES current point i
                 sma_values.iloc[i] = recent_prices.mean()
+        
+        # Forward fill the first valid value to eliminate NaN values
+        # Find first non-NaN value manually
+        first_valid_value = None
+        first_valid_pos = None
+        
+        for i in range(len(sma_values)):
+            if not pd.isna(sma_values.iloc[i]):
+                first_valid_value = sma_values.iloc[i]
+                first_valid_pos = i
+                break
+        
+        # Forward fill using the first valid value
+        if first_valid_value is not None and first_valid_pos is not None:
+            for i in range(first_valid_pos):
+                sma_values.iloc[i] = first_valid_value
         
         return sma_values
 
@@ -217,31 +264,49 @@ class Plugin:
 
     def _calculate_causal_bollinger_bands(self, prices):
         """
-        Calculate Bollinger Bands causally
+        Calculate Bollinger Bands causally - starts at position 168 to match MTM decomposition requirements
         """
         sma = self._calculate_causal_sma(prices, self.params['bb_period'])
+        min_start_position = 168  # Match MTM decomposition requirement
         
         bb_upper = pd.Series(index=prices.index, dtype=float)
         bb_lower = pd.Series(index=prices.index, dtype=float)
         bb_width = pd.Series(index=prices.index, dtype=float)
         
         for i in range(len(prices)):
-            if i < self.params['bb_period'] - 1:
+            if i < max(self.params['bb_period'] - 1, min_start_position):
                 bb_upper.iloc[i] = np.nan
                 bb_lower.iloc[i] = np.nan
                 bb_width.iloc[i] = np.nan
             else:
-                # Calculate standard deviation using data up to current point
-                recent_prices = prices.iloc[i - self.params['bb_period'] + 1:i + 1]
+                # PROPER CAUSALITY: Calculate standard deviation using data from t-period+1 to t (includes current)
+                recent_prices = prices.iloc[i - self.params['bb_period'] + 1:i + 1]  # INCLUDES current point i
                 std_dev = recent_prices.std()
                 
                 bb_upper.iloc[i] = sma.iloc[i] + (self.params['bb_std'] * std_dev)
                 bb_lower.iloc[i] = sma.iloc[i] - (self.params['bb_std'] * std_dev)
                 bb_width.iloc[i] = bb_upper.iloc[i] - bb_lower.iloc[i]
         
+        # Forward fill NaN values for all Bollinger Band components
+        for series in [bb_upper, bb_lower, bb_width]:
+            # Find first non-NaN value manually
+            first_valid_value = None
+            first_valid_pos = None
+            
+            for i in range(len(series)):
+                if not pd.isna(series.iloc[i]):
+                    first_valid_value = series.iloc[i]
+                    first_valid_pos = i
+                    break
+            
+            # Forward fill using the first valid value
+            if first_valid_value is not None and first_valid_pos is not None:
+                for i in range(first_valid_pos):
+                    series.iloc[i] = first_valid_value
+        
         result = pd.DataFrame(index=prices.index)
         result['BB_Upper'] = bb_upper
-        result['BB_Middle'] = sma
+        result['BB_Middle'] = sma  # SMA already forward-filled
         result['BB_Lower'] = bb_lower
         result['BB_Width'] = bb_width
         
