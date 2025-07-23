@@ -175,10 +175,7 @@ def process_data(data, plugin, config):
 
     # Trim and save the technical indicators dataset to the final valid date range
     processed_data_trimmed = processed_data[(processed_data.index >= final_common_start) & (processed_data.index <= final_common_end)]
-    processed_data_trimmed = processed_data_trimmed.iloc[168:]
-    processed_data_trimmed.reset_index().rename(columns={processed_data_trimmed.index.name: 'DATE_TIME'}).to_csv('technical_indicators_aligned.csv', index=False)
-    print("[DEBUG] Saved trimmed technical indicators dataset to 'technical_indicators_aligned.csv'.")
-
+    
     # Re-slice transformed_data and additional_features_df to final_common_start and final_common_end
     transformed_data = transformed_data[(transformed_data.index >= final_common_start) & (transformed_data.index <= final_common_end)]
     additional_features_df = additional_features_df[(additional_features_df.index >= final_common_start) & (additional_features_df.index <= final_common_end)]
@@ -362,10 +359,6 @@ def process_data(data, plugin, config):
     else:
         print(f"[DEBUG] No NaN values found, all {rows_before} rows retained")
 
-    # Save the final combined dataset as indicators_output.csv
-    final_data.to_csv('indicators_output.csv', index=False)
-    print("[DEBUG] Saved final dataset to 'indicators_output.csv'.")
-
     return final_data, decomp_processor
 
 
@@ -418,6 +411,10 @@ def run_feature_engineering_pipeline(config, plugin):
             print(f"[FINAL EXPORT] Removed {rows_removed} rows containing NaN values ({rows_before} -> {rows_after})")
         else:
             print(f"[FINAL EXPORT] No NaN values found, all {rows_before} rows retained")
+        
+        # Remove the first 168 rows before final export
+        processed_data = processed_data.iloc[168:]
+        print(f"[FINAL EXPORT] Removed first 168 rows. Final dataset shape: {processed_data.shape}")
         
         processed_data.to_csv(config['output_file'], index=False) 
         print(f"Processed data saved to {config['output_file']}.")
