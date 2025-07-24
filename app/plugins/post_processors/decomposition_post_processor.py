@@ -269,12 +269,12 @@ class DecompositionPostProcessor:
             else:
                 print(f"[DEBUG] MTM feature '{pattern}' not found in result_data")
         
-        # 5. Add original features in exact order (exclude CLOSE to match STL preprocessor)
-        # This is the exact order from phase 3.1 dataset minus CLOSE
+        # 5. Add original features in exact order matching phase 3.1 structure
+        # This is the exact order from phase 3.1 dataset with CLOSE in correct position
         original_feature_order = [
             'RSI', 'MACD', 'MACD_Histogram', 'MACD_Signal', 'EMA', 'Stochastic_%K', 'Stochastic_%D', 
             'ADX', 'DI+', 'DI-', 'ATR', 'CCI', 'WilliamsR', 'Momentum', 'ROC',
-            'OPEN', 'HIGH', 'LOW', 'BC-BO', 'BH-BL', 'BH-BO', 'BO-BL',
+            'OPEN', 'HIGH', 'LOW', 'CLOSE', 'BC-BO', 'BH-BL', 'BH-BO', 'BO-BL',
             'S&P500_Close', 'vix_close',
             'CLOSE_15m_tick_1', 'CLOSE_15m_tick_2', 'CLOSE_15m_tick_3', 'CLOSE_15m_tick_4',
             'CLOSE_15m_tick_5', 'CLOSE_15m_tick_6', 'CLOSE_15m_tick_7', 'CLOSE_15m_tick_8',
@@ -284,19 +284,20 @@ class DecompositionPostProcessor:
         ]
         
         for feature in original_feature_order:
-            if feature in data.columns:
+            if feature in data.columns and feature not in final_data.columns:
                 final_data[feature] = data[feature]
                 print(f"[DEBUG] Added original feature: {feature}")
-            elif feature in result_data.columns:
+            elif feature in result_data.columns and feature not in final_data.columns:
                 final_data[feature] = result_data[feature]
                 print(f"[DEBUG] Added original feature from result_data: {feature}")
             else:
-                print(f"[DEBUG] WARNING: Required feature '{feature}' not found")
+                if feature not in final_data.columns:
+                    print(f"[DEBUG] WARNING: Required feature '{feature}' not found")
         
         logger.info(f"Decomposition post-processing complete. Output shape: {final_data.shape}")
         logger.info(f"Final features: {list(final_data.columns)}")
         print(f"[DEBUG] Final column order: {list(final_data.columns)}")
-        print(f"[DEBUG] Expected 54 features, got {final_data.shape[1]} features")
+        print(f"[DEBUG] Expected 56 features, got {final_data.shape[1]} features")
         
         return final_data
     

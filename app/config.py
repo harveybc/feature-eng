@@ -19,7 +19,7 @@ DEFAULT_VALUES = {
     'save_config': './output_config.json',
     'fe_config_export': f'./{FE_CONFIG_FILENAME}',  # Export comprehensive feature engineering configuration for replicability
     'headers': True,
-    'max_rows': 1000,  # Limit for CSV reading
+    'max_rows': 100000,  # Limit for CSV reading
 
     # Decomposition settings - PHASE 3.1 COMPATIBILITY: STL + WAVELET + MTM
     'decomp_features': ['CLOSE'],  # List of feature names to decompose using STL, wavelet, and MTM methods

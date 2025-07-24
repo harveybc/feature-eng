@@ -197,9 +197,13 @@ def process_data(data, plugin, config):
     
     # Get the input file path from config and load the raw data
     input_file = config.get('input_file')
+    max_rows = config.get('max_rows', None)
     if input_file:
         try:
             raw_data = load_csv(input_file, config)
+            if max_rows and len(raw_data) > max_rows:
+                raw_data = raw_data.head(max_rows)
+                print(f"[DEBUG] Limited raw data to {max_rows} rows")
             print(f"[DEBUG] Loaded raw data from {input_file} with shape: {raw_data.shape}")
             print(f"[DEBUG] Raw data columns: {raw_data.columns.tolist()}")
             
@@ -227,17 +231,20 @@ def process_data(data, plugin, config):
     
     # Combine the transformed data with additional features
     if config.get('tech_indicators'):
-        # CRITICAL FIX: Remove duplicate columns before concatenation
-        # Find overlapping columns between transformed_data and additional_features_df
-        overlap_cols = set(transformed_data.columns).intersection(set(additional_features_df.columns))
-        print(f"[DEBUG] Overlapping columns found: {overlap_cols}")
+        # CRITICAL FIX: Remove duplicates to prevent _x, _y suffixes
+        print(f"[DEBUG] transformed_data columns: {list(transformed_data.columns)}")
+        print(f"[DEBUG] additional_features_df columns: {list(additional_features_df.columns)}")
         
-        # Remove overlapping columns from additional_features_df (keep from transformed_data)
-        additional_features_clean = additional_features_df.drop(columns=overlap_cols, errors='ignore')
-        print(f"[DEBUG] additional_features_clean columns after removing overlaps: {list(additional_features_clean.columns)}")
+        # Find and remove duplicate columns from additional_features_df
+        duplicate_columns = set(transformed_data.columns) & set(additional_features_df.columns)
+        if duplicate_columns:
+            print(f"[DEBUG] Found duplicate columns: {duplicate_columns}")
+            additional_features_df = additional_features_df.drop(columns=list(duplicate_columns))
+            print(f"[DEBUG] Removed duplicates from additional_features_df. New columns: {list(additional_features_df.columns)}")
         
-        final_data = pd.concat([transformed_data, additional_features_clean], axis=1)
+        final_data = pd.concat([transformed_data, additional_features_df], axis=1)
         print("[DEBUG] Final combined data shape:", final_data.shape)
+        print("[DEBUG] Final combined data columns:", list(final_data.columns))
         print("[DEBUG] Final combined data first 5 rows:")
     else:
         final_data = additional_features_df
@@ -312,57 +319,8 @@ def process_data(data, plugin, config):
             print(f"[ERROR] Decomposition post-processing failed: {e}")
             print("[DEBUG] Continuing with original data...")
     
-    # Add the original CLOSE column to the final data after decomposition if found
-    if original_close_column is not None:
-        # Get the actual date range from the final data
-        if 'DATE_TIME' in final_data.columns:
-            final_data_dates = pd.to_datetime(final_data['DATE_TIME'])
-            actual_start = final_data_dates.min()
-            actual_end = final_data_dates.max()
-        else:
-            actual_start = final_data.index.min()
-            actual_end = final_data.index.max()
-        
-        print(f"[DEBUG] Final data range: {actual_start} to {actual_end}")
-        print(f"[DEBUG] Original close column range: {original_close_column.index.min()} to {original_close_column.index.max()}")
-        
-        # Get final dates
-        if 'DATE_TIME' not in final_data.columns:
-            final_dates = final_data.index
-        else:
-            final_dates = pd.to_datetime(final_data['DATE_TIME'])
-            
-        print(f"[DEBUG] Final dates range: {final_dates.min()} to {final_dates.max()}")
-        
-        # Create a simple lookup by using the original close column directly 
-        # Filter to the overlapping time range first
-        overlap_start = max(original_close_column.index.min(), final_dates.min())
-        overlap_end = min(original_close_column.index.max(), final_dates.max())
-        
-        # Create a temporary series with all available original close data in the overlap period
-        temp_close = original_close_column[(original_close_column.index >= overlap_start) & 
-                                          (original_close_column.index <= overlap_end)]
-        
-        print(f"[DEBUG] Temp close data points: {len(temp_close)}")
-        
-        # For each final date, find the closest original close value using merge_asof
-        final_dates_df = pd.DataFrame({'timestamp': final_dates}).sort_values('timestamp')
-        temp_close_df = pd.DataFrame({'timestamp': temp_close.index, 'close_value': temp_close.values}).sort_values('timestamp')
-        
-        # Use merge_asof to get the closest previous close value for each final timestamp
-        merged = pd.merge_asof(final_dates_df, temp_close_df, on='timestamp', direction='backward')
-        
-        # Set the CLOSE column
-        final_data['CLOSE'] = merged['close_value'].values
-        
-        print(f"[DEBUG] Added original CLOSE column to final data after decomposition. Final data shape: {final_data.shape}")
-        print(f"[DEBUG] CLOSE column non-NaN count: {final_data['CLOSE'].notna().sum()} out of {len(final_data)}")
-        if final_data['CLOSE'].notna().sum() > 0:
-            print(f"[DEBUG] Sample CLOSE values: {final_data['CLOSE'].dropna().head().tolist()}")
-        else:
-            print(f"[DEBUG] No valid CLOSE values found")
-    else:
-        print("[WARNING] No original CLOSE column found in input data to add to final output")
+    # Note: CLOSE column is now handled by the decomposition post-processor in the correct order
+    # No need to add extra CLOSE column here
 
     # Reset the index for the final dataset
     if 'DATE_TIME' not in final_data.columns:
@@ -395,9 +353,15 @@ def run_feature_engineering_pipeline(config, plugin):
     """
     start_time = time.time()
 
-    # Load the data
+    # Load the data with max_rows limit for faster testing
     print(f"Loading data from {config['input_file']}...")
+    max_rows = config.get('max_rows', None)
+    if max_rows:
+        print(f"[DEBUG] Limiting data to {max_rows} rows for faster processing")
     data = load_csv(config['input_file'], config=config)
+    if max_rows and len(data) > max_rows:
+        data = data.head(max_rows)
+        print(f"[DEBUG] Limited data to {max_rows} rows")
     print(f"Data loaded with shape: {data.shape}")
     print(f"Data index type: {data.index.dtype}, range: {data.index.min()} to {data.index.max()}")
 

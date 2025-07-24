@@ -201,6 +201,14 @@ class Plugin:
         print(f"Calculated technical indicators shape: {indicator_df.shape}")
         print(f"Calculated technical indicators index type: {indicator_df.index.dtype}, range: {indicator_df.index.min()} to {indicator_df.index.max()}")
 
+        # CRITICAL FIX: Include OHLC combination features (BC-BO, BH-BL, BH-BO, BO-BL) in the output
+        ohlc_combination_features = ['BC-BO', 'BH-BL', 'BH-BO', 'BO-BL']
+        for feature in ohlc_combination_features:
+            if feature in data.columns:
+                indicator_df[feature] = data[feature]
+                print(f"[DEBUG] Added OHLC combination feature to output: {feature}")
+
+        print(f"[DEBUG] Final output columns including OHLC combinations: {list(indicator_df.columns)}")
         return indicator_df
 
     def process_additional_datasets(self, data, config):
@@ -310,13 +318,23 @@ class Plugin:
         # Merge all aligned datasets with the hourly dataset so that merged_features.csv contains them all
         merged_features_df = hourly_trimmed.copy()
         
-        # CRITICAL FIX: Add OHLC combination features to the merged dataset
+        # CRITICAL FIX: Only add combination features if they're NOT already in the main dataset
+        # to prevent _x, _y duplicates
         combination_features_trimmed = combination_features_df[(combination_features_df.index >= common_start) & (combination_features_df.index <= common_end)]
         if not combination_features_trimmed.empty:
-            print(f"[DEBUG] Adding OHLC combination features with shape: {combination_features_trimmed.shape}")
+            print(f"[DEBUG] Checking OHLC combination features with shape: {combination_features_trimmed.shape}")
             print(f"[DEBUG] Combination features columns: {list(combination_features_trimmed.columns)}")
-            merged_features_df = pd.merge(merged_features_df, combination_features_trimmed, left_index=True, right_index=True, how='inner')
-            print(f"[DEBUG] After adding combination features, merged_features_df shape: {merged_features_df.shape}")
+            print(f"[DEBUG] Current merged_features_df columns: {list(merged_features_df.columns)}")
+            
+            # Only add combination features that don't already exist in merged_features_df
+            features_to_add = [col for col in combination_features_trimmed.columns if col not in merged_features_df.columns]
+            if features_to_add:
+                print(f"[DEBUG] Adding missing OHLC combination features: {features_to_add}")
+                for feature in features_to_add:
+                    merged_features_df[feature] = combination_features_trimmed[feature]
+                print(f"[DEBUG] After adding combination features, merged_features_df shape: {merged_features_df.shape}")
+            else:
+                print(f"[DEBUG] All OHLC combination features already exist in merged_features_df")
         
         for key, df in aligned_datasets.items():
             if df is not None and not df.empty:
@@ -332,6 +350,14 @@ class Plugin:
             merged_features_df['day_of_month'] = merged_features_df.index.day
             merged_features_df['hour_of_day'] = merged_features_df.index.hour
             merged_features_df['day_of_week'] = merged_features_df.index.dayofweek
+
+        # CRITICAL FIX: Remove unwanted columns that shouldn't be in the final output
+        unwanted_columns = ['volume', 'VOLUME', 'Volume']
+        columns_to_remove = [col for col in unwanted_columns if col in merged_features_df.columns]
+        if columns_to_remove:
+            print(f"[DEBUG] Removing unwanted columns: {columns_to_remove}")
+            merged_features_df = merged_features_df.drop(columns=columns_to_remove)
+            print(f"[DEBUG] After removing unwanted columns, shape: {merged_features_df.shape}")
 
         # Save the merged dataset containing all aligned datasets within the final common date range
         merged_features_df.reset_index().rename(columns={'index': 'datetime'}).to_csv('additional_merged_features.csv', index=False)
