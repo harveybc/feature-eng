@@ -344,12 +344,28 @@ class Plugin:
                 merged_features_df = pd.merge(merged_features_df, df_trimmed, left_index=True, right_index=True, how='inner')
                 print(f"[DEBUG] After merging {key}, merged_features_df shape: {merged_features_df.shape}")
 
-        # Add seasonality columns if specified in the config
+        # Add seasonality columns if specified in the config - MUST be calculated from original hourly data
         if config.get('seasonality_columns'):
-            print("[DEBUG] Adding seasonality columns...")
-            merged_features_df['day_of_month'] = merged_features_df.index.day
-            merged_features_df['hour_of_day'] = merged_features_df.index.hour
-            merged_features_df['day_of_week'] = merged_features_df.index.dayofweek
+            print("[DEBUG] Adding seasonality columns from original hourly data...")
+            print(f"[DEBUG] data index first 5 values: {data.index[:5]}")
+            print(f"[DEBUG] data index hours: {data.index.hour[:5]}")
+            
+            # Calculate seasonality from original hourly data, then align to merged data
+            hourly_seasonality = pd.DataFrame(index=data.index)
+            hourly_seasonality['day_of_month'] = data.index.day
+            hourly_seasonality['hour_of_day'] = data.index.hour
+            hourly_seasonality['day_of_week'] = data.index.dayofweek
+            
+            # Align seasonality with the final trimmed data
+            seasonality_trimmed = hourly_seasonality[(hourly_seasonality.index >= common_start) & (hourly_seasonality.index <= common_end)]
+            
+            # Merge seasonality with the existing merged features
+            merged_features_df = pd.merge(merged_features_df, seasonality_trimmed, left_index=True, right_index=True, how='inner')
+            
+            print(f"[DEBUG] Seasonality columns added from hourly data - day_of_month: {seasonality_trimmed['day_of_month'].iloc[:5].tolist()}")
+            print(f"[DEBUG] Seasonality columns added from hourly data - hour_of_day: {seasonality_trimmed['hour_of_day'].iloc[:5].tolist()}")
+            print(f"[DEBUG] Seasonality columns added from hourly data - day_of_week: {seasonality_trimmed['day_of_week'].iloc[:5].tolist()}")
+            print(f"[DEBUG] merged_features_df shape after adding seasonality: {merged_features_df.shape}")
 
         # CRITICAL FIX: Remove unwanted columns that shouldn't be in the final output
         unwanted_columns = ['volume', 'VOLUME', 'Volume']
@@ -376,8 +392,19 @@ class Plugin:
                 # Rename close column to match phase 3.1
                 if 'Close' in sp500_data.columns:
                     sp500_data = sp500_data.rename(columns={'Close': 'S&P500_Close'})
-                    print(f"[DEBUG] S&P 500 data processed. Shape: {sp500_data.shape}")
-                    return sp500_data[['S&P500_Close']]
+                    
+                    # CRITICAL FIX: Interpolate daily data to hourly frequency to preserve datetime structure
+                    print(f"[DEBUG] S&P 500 data before interpolation. Shape: {sp500_data.shape}, Index freq: {sp500_data.index.freq}")
+                    
+                    # Create hourly frequency index within the common range
+                    hourly_index = pd.date_range(start=common_start, end=common_end, freq='H')
+                    
+                    # Reindex to hourly and forward fill the values
+                    sp500_hourly = sp500_data.reindex(hourly_index, method='ffill')
+                    
+                    print(f"[DEBUG] S&P 500 data after hourly interpolation. Shape: {sp500_hourly.shape}")
+                    print(f"[DEBUG] S&P 500 hourly index sample: {sp500_hourly.index[:5]}")
+                    return sp500_hourly[['S&P500_Close']]
         except Exception as e:
             print(f"[DEBUG] Error processing S&P 500 data: {e}")
         return None
@@ -395,8 +422,19 @@ class Plugin:
                 # Rename close column to match phase 3.1
                 if 'close' in vix_data.columns:
                     vix_data = vix_data.rename(columns={'close': 'vix_close'})
-                    print(f"[DEBUG] VIX data processed. Shape: {vix_data.shape}")
-                    return vix_data[['vix_close']]
+                    
+                    # CRITICAL FIX: Interpolate daily data to hourly frequency to preserve datetime structure
+                    print(f"[DEBUG] VIX data before interpolation. Shape: {vix_data.shape}, Index freq: {vix_data.index.freq}")
+                    
+                    # Create hourly frequency index within the common range
+                    hourly_index = pd.date_range(start=common_start, end=common_end, freq='H')
+                    
+                    # Reindex to hourly and forward fill the values
+                    vix_hourly = vix_data.reindex(hourly_index, method='ffill')
+                    
+                    print(f"[DEBUG] VIX data after hourly interpolation. Shape: {vix_hourly.shape}")
+                    print(f"[DEBUG] VIX hourly index sample: {vix_hourly.index[:5]}")
+                    return vix_hourly[['vix_close']]
         except Exception as e:
             print(f"[DEBUG] Error processing VIX data: {e}")
         return None

@@ -134,13 +134,20 @@ def process_data(data, plugin, config):
     # Initialize decomposition processor as None
     decomp_processor = None
 
-    date_column_name = 'DATE_TIME'
-    if date_column_name in data.columns:
+    # Look for datetime column with multiple possible names
+    date_column_name = None
+    possible_date_columns = ['DATE_TIME', 'datetime', 'date', 'Date']
+    for col_name in possible_date_columns:
+        if col_name in data.columns:
+            date_column_name = col_name
+            break
+    
+    if date_column_name:
         data[date_column_name] = pd.to_datetime(data[date_column_name])
         data.set_index(date_column_name, inplace=True)
         print(f"[DEBUG] Set data index to {date_column_name}")
     else:
-        raise KeyError(f"Date column '{date_column_name}' not found in data columns")
+        raise KeyError(f"Date column not found. Looked for: {possible_date_columns}. Available: {list(data.columns)}")
 
     print(f"[DEBUG] Data index type after setting datetime index: {data.index.dtype}")
     print(f"[DEBUG] Data index range: {data.index.min()} to {data.index.max()}")
@@ -208,10 +215,19 @@ def process_data(data, plugin, config):
             print(f"[DEBUG] Raw data columns: {raw_data.columns.tolist()}")
             
             # Set the datetime index on raw data if needed
-            if 'DATE_TIME' in raw_data.columns and raw_data.index.dtype != 'datetime64[ns]':
-                raw_data['DATE_TIME'] = pd.to_datetime(raw_data['DATE_TIME'])
-                raw_data.set_index('DATE_TIME', inplace=True)
-                print("[DEBUG] Set datetime index on raw data")
+            possible_date_columns = ['DATE_TIME', 'datetime', 'date', 'Date']
+            date_col_found = None
+            for col_name in possible_date_columns:
+                if col_name in raw_data.columns:
+                    date_col_found = col_name
+                    break
+            
+            if date_col_found and raw_data.index.dtype != 'datetime64[ns]':
+                raw_data[date_col_found] = pd.to_datetime(raw_data[date_col_found])
+                raw_data.set_index(date_col_found, inplace=True)
+                print(f"[DEBUG] Set datetime index on raw data using column: {date_col_found}")
+            elif raw_data.index.dtype == 'datetime64[ns]':
+                print("[DEBUG] Raw data already has datetime index")
             
             print(f"[DEBUG] Raw data index type: {raw_data.index.dtype}")
             print(f"[DEBUG] Raw data date range: {raw_data.index.min()} to {raw_data.index.max()}")
