@@ -121,19 +121,42 @@ class DecompositionPostProcessor:
     def process_features(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Apply decomposition to selected features in the input data.
+        PHASE 3.1 COMPATIBILITY: Adds log_return as the first column.
         
         Args:
             data: DataFrame with features to be decomposed
             
         Returns:
-            DataFrame with decomposed features replacing or alongside original features
+            DataFrame with log_return as first column, followed by decomposed features and original features
         """
         logger.info("Starting decomposition post-processing pipeline")
         
+        # PHASE 3.1 COMPATIBILITY: Add log_return as the FIRST column
+        result_data = pd.DataFrame(index=data.index)
+        
+        # Calculate log_return from CLOSE column if it exists
+        if 'CLOSE' in data.columns:
+            print("[DEBUG] Calculating log_return from CLOSE column (Phase 3.1 compatibility)")
+            close_prices = data['CLOSE']
+            # Calculate log returns: log(price_t / price_t-1)
+            log_returns = np.log(close_prices / close_prices.shift(1))
+            
+            # Handle first NaN value by forward filling with 0 or a small value
+            log_returns.iloc[0] = 0.0  # First log return is set to 0
+            
+            result_data['log_return'] = log_returns
+            logger.info("Added log_return as the first feature")
+        else:
+            logger.warning("CLOSE column not found - cannot calculate log_return")
+        
         decomp_features = self.params.get('decomp_features', [])
         if not decomp_features:
-            logger.info("No features specified for decomposition. Returning original data.")
-            return data.copy()
+            logger.info("No features specified for decomposition. Returning data with log_return only.")
+            # Still add original data
+            for col in data.columns:
+                if col not in result_data.columns:
+                    result_data[col] = data[col]
+            return result_data
         
         # Validate that specified features exist in the data
         missing_features = [f for f in decomp_features if f not in data.columns]
@@ -142,13 +165,14 @@ class DecompositionPostProcessor:
             decomp_features = [f for f in decomp_features if f in data.columns]
         
         if not decomp_features:
-            logger.warning("No valid features found for decomposition. Returning original data.")
-            return data.copy()
+            logger.warning("No valid features found for decomposition. Returning data with log_return.")
+            # Still add original data
+            for col in data.columns:
+                if col not in result_data.columns:
+                    result_data[col] = data[col]
+            return result_data
         
         logger.info(f"Decomposing features: {decomp_features}")
-        
-        # Start with a copy of the original data
-        result_data = data.copy()
         
         # Process each feature for decomposition
         for feature_name in decomp_features:
@@ -162,7 +186,7 @@ class DecompositionPostProcessor:
                 print(f"[DEBUG] Decomposed features returned: {list(decomposed_features.keys()) if decomposed_features else 'EMPTY'}")
                 
                 if decomposed_features:
-                    # Add decomposed features to result
+                    # Add decomposed features to result AFTER log_return
                     print(f"[DEBUG] Adding {len(decomposed_features)} decomposed features to result_data")
                     print(f"[DEBUG] Result data shape before adding features: {result_data.shape}")
                     for decomp_name, decomp_values in decomposed_features.items():
@@ -185,10 +209,96 @@ class DecompositionPostProcessor:
                 logger.error(f"Error decomposing feature '{feature_name}': {e}. Skipping.")
                 continue
         
-        logger.info(f"Decomposition post-processing complete. Output shape: {result_data.shape}")
-        logger.info(f"Final features: {list(result_data.columns)}")
+        # PHASE 3.1 COMPATIBILITY: Reorder features to exactly match STL preprocessor output
+        # Final feature order: [log_return] + [stl_trend, stl_seasonal, stl_residual] + [original features minus CLOSE]
         
-        return result_data
+        print(f"[DEBUG] Reordering features to match STL preprocessor format...")
+        
+        # Create final dataset with exact feature order
+        final_data = pd.DataFrame(index=data.index)
+        
+        # 1. Add log_return as first feature (already in result_data)
+        if 'log_return' in result_data.columns:
+            final_data['log_return'] = result_data['log_return']
+            print(f"[DEBUG] Added log_return as feature 0")
+        
+        # 2. Add decomposition features in the EXACT order expected by CNN model
+        # STL decomposition features first
+        stl_feature_mapping = {
+            'stl_trend': ['CLOSE_stl_trend', 'stl_trend'],
+            'stl_seasonal': ['CLOSE_stl_seasonal', 'stl_seasonal'], 
+            'stl_residual': ['CLOSE_stl_resid', 'stl_resid', 'stl_residual']
+        }
+        
+        for target_name, possible_names in stl_feature_mapping.items():
+            found = False
+            for possible_name in possible_names:
+                if possible_name in result_data.columns:
+                    final_data[target_name] = result_data[possible_name]
+                    print(f"[DEBUG] Added {target_name} (from {possible_name})")
+                    found = True
+                    break
+            if not found:
+                print(f"[DEBUG] STL feature '{target_name}' not found in result_data")
+        
+        # 3. Add wavelet decomposition features in expected order
+        wavelet_feature_patterns = [
+            'CLOSE_wav_detail_L1', 'CLOSE_wav_detail_L2', 'CLOSE_wav_approx_L2'
+        ]
+        
+        for pattern in wavelet_feature_patterns:
+            if pattern in result_data.columns:
+                final_data[pattern] = result_data[pattern]
+                print(f"[DEBUG] Added wavelet feature: {pattern}")
+            else:
+                print(f"[DEBUG] Wavelet feature '{pattern}' not found in result_data")
+        
+        # 4. Add MTM decomposition features in expected order
+        # MTM features follow pattern: CLOSE_mtm_band_X_freq1_freq2
+        mtm_feature_patterns = [
+            'CLOSE_mtm_band_1_0.000_0.010',
+            'CLOSE_mtm_band_2_0.010_0.060', 
+            'CLOSE_mtm_band_3_0.060_0.200',
+            'CLOSE_mtm_band_4_0.200_0.500'
+        ]
+        
+        for pattern in mtm_feature_patterns:
+            if pattern in result_data.columns:
+                final_data[pattern] = result_data[pattern] 
+                print(f"[DEBUG] Added MTM feature: {pattern}")
+            else:
+                print(f"[DEBUG] MTM feature '{pattern}' not found in result_data")
+        
+        # 5. Add original features in exact order (exclude CLOSE to match STL preprocessor)
+        # This is the exact order from phase 3.1 dataset minus CLOSE
+        original_feature_order = [
+            'RSI', 'MACD', 'MACD_Histogram', 'MACD_Signal', 'EMA', 'Stochastic_%K', 'Stochastic_%D', 
+            'ADX', 'DI+', 'DI-', 'ATR', 'CCI', 'WilliamsR', 'Momentum', 'ROC',
+            'OPEN', 'HIGH', 'LOW', 'BC-BO', 'BH-BL', 'BH-BO', 'BO-BL',
+            'S&P500_Close', 'vix_close',
+            'CLOSE_15m_tick_1', 'CLOSE_15m_tick_2', 'CLOSE_15m_tick_3', 'CLOSE_15m_tick_4',
+            'CLOSE_15m_tick_5', 'CLOSE_15m_tick_6', 'CLOSE_15m_tick_7', 'CLOSE_15m_tick_8',
+            'CLOSE_30m_tick_1', 'CLOSE_30m_tick_2', 'CLOSE_30m_tick_3', 'CLOSE_30m_tick_4',
+            'CLOSE_30m_tick_5', 'CLOSE_30m_tick_6', 'CLOSE_30m_tick_7', 'CLOSE_30m_tick_8',
+            'day_of_month', 'hour_of_day', 'day_of_week'
+        ]
+        
+        for feature in original_feature_order:
+            if feature in data.columns:
+                final_data[feature] = data[feature]
+                print(f"[DEBUG] Added original feature: {feature}")
+            elif feature in result_data.columns:
+                final_data[feature] = result_data[feature]
+                print(f"[DEBUG] Added original feature from result_data: {feature}")
+            else:
+                print(f"[DEBUG] WARNING: Required feature '{feature}' not found")
+        
+        logger.info(f"Decomposition post-processing complete. Output shape: {final_data.shape}")
+        logger.info(f"Final features: {list(final_data.columns)}")
+        print(f"[DEBUG] Final column order: {list(final_data.columns)}")
+        print(f"[DEBUG] Expected 54 features, got {final_data.shape[1]} features")
+        
+        return final_data
     
     def _decompose_feature(self, feature_series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
         """
@@ -205,7 +315,9 @@ class DecompositionPostProcessor:
         print(f"[DEBUG] Starting decomposition for {feature_name}")
         print(f"[DEBUG] STL enabled: {self.params.get('use_stl_decomp', True)}")
         print(f"[DEBUG] Wavelet enabled: {self.params.get('use_wavelet_decomp', True)}")
+        print(f"[DEBUG] MTM enabled: {self.params.get('use_mtm_decomp', False)}")
         print(f"[DEBUG] HAS_WAVELETS: {HAS_WAVELETS}")
+        print(f"[DEBUG] HAS_MTM: {HAS_MTM}")
         
         # Prepare the series (log transformation if needed)
         print(f"[DEBUG] Input feature_series shape: {feature_series.shape}, first 5 values: {feature_series.values[:5] if hasattr(feature_series, 'values') else feature_series[:5]}")
@@ -245,12 +357,15 @@ class DecompositionPostProcessor:
         
         # 3. MTM Decomposition  
         if self.params.get('use_mtm_decomp', False) and HAS_MTM:
+            print(f"[DEBUG] Computing MTM decomposition for {feature_name}")
             logger.debug(f"Computing MTM decomposition for {feature_name}")
             try:
                 mtm_features = self._compute_mtm_decomposition(processed_series, feature_name)
+                print(f"[DEBUG] MTM features computed: {list(mtm_features.keys()) if mtm_features else 'EMPTY'}")
                 decomposed_features.update(mtm_features)
                 logger.debug(f"Generated {len(mtm_features)} MTM features for {feature_name}")
             except Exception as e:
+                print(f"[DEBUG] MTM decomposition failed for {feature_name}: {e}")
                 logger.error(f"MTM decomposition failed for {feature_name}: {e}")
         
         return decomposed_features

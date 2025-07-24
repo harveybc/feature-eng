@@ -227,7 +227,16 @@ def process_data(data, plugin, config):
     
     # Combine the transformed data with additional features
     if config.get('tech_indicators'):
-        final_data = pd.concat([transformed_data, additional_features_df], axis=1)
+        # CRITICAL FIX: Remove duplicate columns before concatenation
+        # Find overlapping columns between transformed_data and additional_features_df
+        overlap_cols = set(transformed_data.columns).intersection(set(additional_features_df.columns))
+        print(f"[DEBUG] Overlapping columns found: {overlap_cols}")
+        
+        # Remove overlapping columns from additional_features_df (keep from transformed_data)
+        additional_features_clean = additional_features_df.drop(columns=overlap_cols, errors='ignore')
+        print(f"[DEBUG] additional_features_clean columns after removing overlaps: {list(additional_features_clean.columns)}")
+        
+        final_data = pd.concat([transformed_data, additional_features_clean], axis=1)
         print("[DEBUG] Final combined data shape:", final_data.shape)
         print("[DEBUG] Final combined data first 5 rows:")
     else:
@@ -255,11 +264,26 @@ def process_data(data, plugin, config):
                 'decomp_features': decomp_features,
                 'use_stl_decomp': config.get('use_stl_decomp', True),
                 'use_wavelet_decomp': config.get('use_wavelet_decomp', True),
-                'use_mtm_decomp': config.get('use_mtm_decomp', False),
+                'use_mtm_decomp': config.get('use_mtm_decomp', True),  # PHASE 3.1 REQUIRES MTM
                 'normalize_decomposed_features': True,
                 'replace_original': True,
-                'keep_original': False
+                'keep_original': False,
+                # MTM parameters for proper decomposition
+                'mtm_window_len': 168,
+                'mtm_step': 1,
+                'mtm_time_bandwidth': 5.0,
+                'mtm_freq_bands': [(0, 0.01), (0.01, 0.06), (0.06, 0.2), (0.2, 0.5)],
+                # Wavelet parameters
+                'wavelet_name': 'db4',
+                'wavelet_levels': 2,
+                'wavelet_mode': 'symmetric',
+                # STL parameters
+                'stl_period': 24,
+                'stl_window': None,  # Will be auto-calculated
+                'stl_trend': None    # Will be auto-calculated
             }
+            
+            print(f"[DEBUG] Decomposition parameters being passed: {decomp_params}")
             
             decomp_processor = DecompositionPostProcessor(decomp_params)
             

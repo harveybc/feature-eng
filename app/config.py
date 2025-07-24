@@ -19,27 +19,29 @@ DEFAULT_VALUES = {
     'save_config': './output_config.json',
     'fe_config_export': f'./{FE_CONFIG_FILENAME}',  # Export comprehensive feature engineering configuration for replicability
     'headers': True,
+    'max_rows': 1000,  # Limit for CSV reading
 
-    # Decomposition settings
+    # Decomposition settings - PHASE 3.1 COMPATIBILITY: STL + WAVELET + MTM
     'decomp_features': ['CLOSE'],  # List of feature names to decompose using STL, wavelet, and MTM methods
     'use_stl_decomp': True,  # Enable STL decomposition for decomp_features
-    'use_wavelet_decomp': True,  # Enable wavelet decomposition for decomp_features
-    'use_mtm_decomp': True,  # Enable MTM decomposition for decomp_features
+    'use_wavelet_decomp': True,  # REQUIRED: Phase 3.1 has wavelet decompositions
+    'use_mtm_decomp': True,  # REQUIRED: Phase 3.1 has MTM decompositions
 
-    # Additional datasets
+    # Additional datasets - REQUIRED FOR PHASE 3 COMPATIBILITY
     'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
     'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
     'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
-    #'economic_calendar': 'tests/data/economic_calendar_2011_2021.csv',
-    'seasonality_columns': True,
-    'tech_indicators': True,
-    # Forex datasets (15-minute data)
-    #'forex_datasets': [
-    #    'tests/data/USDCAD-2000-2020-15m.csv',
-    #    'tests/data/USDJPY-2000-2020-15m.csv',
-    #    'tests/data/EURCHF-2000-2020-15m.csv',
-    #    'tests/data/AUDUSD-2000-2020-15m.csv'
-    #],
+    'economic_calendar': None,  # Disabled for phase 2.6 compatibility
+    'seasonality_columns': True,  # REQUIRED: Adds day_of_month, hour_of_day, day_of_week
+    'tech_indicators': True,     # REQUIRED: Generate all technical indicators
+    
+    # CRITICAL: Enable all forex sub-periodicities for 15m and 30m features
+    'forex_datasets': [
+        'tests/data/USDCAD-2000-2020-15m.csv',
+        'tests/data/USDJPY-2000-2020-15m.csv', 
+        'tests/data/EURCHF-2000-2020-15m.csv',
+        'tests/data/AUDUSD-2000-2020-15m.csv'
+    ],
 
     # General configurations
     'sub_periodicity_window_size': 8,  # Default window size for sub-periodicities

@@ -371,7 +371,7 @@ def load_csv(file_path, config=None):
     
     Parameters:
     - file_path (str): Path to the file.
-    - config (dict): Configuration for header mappings.
+    - config (dict): Configuration for header mappings and max_rows limit.
 
     Returns:
     - pd.DataFrame: Loaded and processed data.
@@ -417,7 +417,7 @@ def load_additional_csv(file_path, dataset_type, config=None):
     Parameters:
     - file_path (str): Path to the file.
     - dataset_type (str): Type of the dataset ('forex_15m', 'sp500', 'vix', 'economic_calendar').
-    - config (dict): Configuration for header mappings.
+    - config (dict): Configuration for header mappings and max_rows limit.
 
     Returns:
     - pd.DataFrame: Loaded and processed data.
@@ -427,8 +427,15 @@ def load_additional_csv(file_path, dataset_type, config=None):
         header_mappings = config.get('header_mappings', {}) if config else {}
         column_map = header_mappings.get(dataset_type, {})
 
-        # Load the CSV file
-        data = pd.read_csv(file_path, sep=',', encoding='utf-8')
+        # Get max_rows limit from config
+        max_rows = config.get('max_rows', None) if config else None
+
+        # Load the CSV file with max_rows limit if specified
+        if max_rows:
+            print(f"[DEBUG] Loading additional CSV with max_rows limit: {max_rows}")
+            data = pd.read_csv(file_path, sep=',', encoding='utf-8', nrows=max_rows)
+        else:
+            data = pd.read_csv(file_path, sep=',', encoding='utf-8')
 
         # Apply column mappings
         if column_map:
