@@ -91,14 +91,20 @@ def analyze_variability_and_normality(data, config):
         normality_score_original = abs(skewness_original) + abs(kurtosis_original)
         normality_score_log = abs(skewness_log) + abs(kurtosis_log)
 
-        if normality_score_log < normality_score_original:
+        # Check if log transformation is enabled in config
+        apply_log_transform = config.get('apply_log_transform', False)
+        
+        if apply_log_transform and normality_score_log < normality_score_original:
             print(f"Using log-transformed data for {column} (improved normality).")
             transformed_columns[column] = log_transformed_data
             # Plot log-transformed data
             sns.histplot(log_transformed_data, kde=True, ax=axes[plot_index])
             axes[plot_index].set_title(f"{column} (Log-Transformed)", fontsize=10)
         else:
-            print(f"Using original data for {column} (log transform did not improve normality).")
+            if not apply_log_transform:
+                print(f"Using original data for {column} (log transformation disabled).")
+            else:
+                print(f"Using original data for {column} (log transform did not improve normality).")
             transformed_columns[column] = original_data
             # Plot original data
             sns.histplot(original_data, kde=True, ax=axes[plot_index])
@@ -288,6 +294,7 @@ def process_data(data, plugin, config):
                 'use_stl_decomp': config.get('use_stl_decomp', True),
                 'use_wavelet_decomp': config.get('use_wavelet_decomp', True),
                 'use_mtm_decomp': config.get('use_mtm_decomp', True),  # PHASE 3.1 REQUIRES MTM
+                'add_log_return': config.get('add_log_return', False),  # Pass the log return config parameter
                 'normalize_decomposed_features': True,
                 'replace_original': True,
                 'keep_original': False,

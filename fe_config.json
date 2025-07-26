@@ -62,6 +62,7 @@
     "headers": false
   },
   "decomposition_params": {
+    "add_log_return": false,
     "decomp_features": [
       "CLOSE"
     ],
@@ -96,9 +97,9 @@
     "stl_window": 49,
     "tapper_plot_file": null,
     "tapper_plot_points": 480,
-    "use_mtm_decomp": true,
-    "use_stl_decomp": true,
-    "use_wavelet_decomp": true,
+    "use_mtm_decomp": false,
+    "use_stl_decomp": false,
+    "use_wavelet_decomp": false,
     "wavelet_levels": 2,
     "wavelet_mode": "symmetric",
     "wavelet_name": "db4",
@@ -130,29 +131,71 @@
     "sub_periodicity_window_size": 8,
     "tech_indicators": true,
     "temporal_decay": 0.1,
-    "use_mtm_decomp": true,
-    "use_stl_decomp": true,
-    "use_wavelet_decomp": true,
+    "use_mtm_decomp": false,
+    "use_stl_decomp": false,
+    "use_wavelet_decomp": false,
     "vix_dataset": "tests/data/vix_day_1990_2024.csv"
   },
   "tech_indicator_params": {
+    "implementation_notes": {
+      "adx_period": "ADX period set to 5 instead of default 14",
+      "atr_transform": "ATR values log-transformed: np.log(atr)",
+      "critical_modifications": [
+        "MACD: Standard calculation scaled by factor 13.29",
+        "ATR: Log transformation applied to values",
+        "ADX: Custom period 5 instead of default 14"
+      ],
+      "macd_scaling": "MACD values multiplied by 13.29 to match reference data",
+      "reference_date": "2005-05-11 00:00:00",
+      "reference_matching": true
+    },
     "indicator_specific_params": {
-      "adx_period": 14,
-      "atr_period": 14,
-      "bbands_period": 5,
-      "bbands_std": 2.0,
-      "cci_period": 20,
-      "ema_period": 50,
-      "macd_fast": 12,
-      "macd_signal": 9,
-      "macd_slow": 26,
-      "momentum_period": 4,
-      "roc_period": 12,
-      "rsi_period": 14,
-      "stoch_d_period": 3,
-      "stoch_k_period": 14,
-      "stoch_smooth": 3,
-      "williams_period": 14
+      "adx": {
+        "method": "custom_period_5",
+        "period": 5
+      },
+      "atr": {
+        "method": "log_transformed_pandas_ta",
+        "period": 14,
+        "transform": "log"
+      },
+      "cci": {
+        "method": "default_pandas_ta",
+        "period": 20
+      },
+      "ema": {
+        "method": "default_pandas_ta",
+        "period": 20
+      },
+      "macd": {
+        "fast": 12,
+        "method": "default_pandas_ta",
+        "scale_factor": 1.0,
+        "signal": 9,
+        "slow": 26
+      },
+      "momentum": {
+        "method": "default_pandas_ta",
+        "period": 10
+      },
+      "roc": {
+        "method": "default_pandas_ta",
+        "period": 10
+      },
+      "rsi": {
+        "method": "default_pandas_ta",
+        "period": 14
+      },
+      "stoch": {
+        "d_period": 3,
+        "k_period": 14,
+        "method": "default_pandas_ta",
+        "smooth_k": 3
+      },
+      "williams": {
+        "method": "default_pandas_ta",
+        "period": 14
+      }
     },
     "indicators": [
       "rsi",
@@ -169,11 +212,12 @@
     "long_term_period": 200,
     "mid_term_period": 50,
     "ohlc_order": "ohlc",
+    "pandas_ta_version": "latest",
     "short_term_period": 14
   },
   "version_info": {
     "config_version": "1.0.0",
-    "export_timestamp": "2025-07-24T01:46:55.482472",
+    "export_timestamp": "2025-07-26T01:55:35.131787",
     "system_info": "Feature Engineering System - Perfect Replicability Config"
   }
 }

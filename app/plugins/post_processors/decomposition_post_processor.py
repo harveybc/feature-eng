@@ -57,6 +57,7 @@ class DecompositionPostProcessor:
         "use_stl_decomp": True,
         "use_wavelet_decomp": True, 
         "use_mtm_decomp": False,
+        "add_log_return": False,  # Enable calculation and inclusion of log return column
         
         # --- STL Parameters ---
         "stl_period": 24,
@@ -131,12 +132,13 @@ class DecompositionPostProcessor:
         """
         logger.info("Starting decomposition post-processing pipeline")
         
-        # PHASE 3.1 COMPATIBILITY: Add log_return as the FIRST column
+        # PHASE 3.1 COMPATIBILITY: Add log_return as the FIRST column (if enabled)
         result_data = pd.DataFrame(index=data.index)
         
-        # Calculate log_return from CLOSE column if it exists
-        if 'CLOSE' in data.columns:
-            print("[DEBUG] Calculating log_return from CLOSE column (Phase 3.1 compatibility)")
+        # Calculate log_return from CLOSE column if it exists and is enabled in config
+        add_log_return = self.params.get('add_log_return', False)
+        if add_log_return and 'CLOSE' in data.columns:
+            print("[DEBUG] Calculating log_return from CLOSE column (enabled via config)")
             close_prices = data['CLOSE']
             # Calculate log returns: log(price_t / price_t-1)
             log_returns = np.log(close_prices / close_prices.shift(1))
@@ -146,8 +148,11 @@ class DecompositionPostProcessor:
             
             result_data['log_return'] = log_returns
             logger.info("Added log_return as the first feature")
-        else:
+        elif add_log_return and 'CLOSE' not in data.columns:
             logger.warning("CLOSE column not found - cannot calculate log_return")
+        else:
+            print("[DEBUG] Log return calculation disabled via config (add_log_return=False)")
+            logger.info("Log return calculation disabled via config parameter")
         
         decomp_features = self.params.get('decomp_features', [])
         if not decomp_features:
@@ -217,10 +222,15 @@ class DecompositionPostProcessor:
         # Create final dataset with exact feature order
         final_data = pd.DataFrame(index=data.index)
         
-        # 1. Add log_return as first feature (already in result_data)
-        if 'log_return' in result_data.columns:
+        # 1. Add log_return as first feature (only if it was calculated)
+        add_log_return = self.params.get('add_log_return', False)
+        if add_log_return and 'log_return' in result_data.columns:
             final_data['log_return'] = result_data['log_return']
             print(f"[DEBUG] Added log_return as feature 0")
+        elif add_log_return:
+            print(f"[DEBUG] Log return was requested but not found in result_data")
+        else:
+            print(f"[DEBUG] Log return disabled via config - skipping")
         
         # 2. Add decomposition features in the EXACT order expected by CNN model
         # STL decomposition features first

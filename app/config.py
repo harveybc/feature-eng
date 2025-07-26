@@ -23,9 +23,9 @@ DEFAULT_VALUES = {
 
     # Decomposition settings - PHASE 3.1 COMPATIBILITY: STL + WAVELET + MTM
     'decomp_features': ['CLOSE'],  # List of feature names to decompose using STL, wavelet, and MTM methods
-    'use_stl_decomp': True,  # Enable STL decomposition for decomp_features
-    'use_wavelet_decomp': True,  # REQUIRED: Phase 3.1 has wavelet decompositions
-    'use_mtm_decomp': True,  # REQUIRED: Phase 3.1 has MTM decompositions
+    'use_stl_decomp': False,  # Enable STL decomposition for decomp_features
+    'use_wavelet_decomp': False,  # REQUIRED: Phase 3.1 has wavelet decFalse
+    'use_mtm_decomp': False,  # REQUIRED: Phase 3.1 has MTM decomFalse
 
     # Additional datasets - REQUIRED FOR PHASE 3 COMPATIBILITY
     'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
@@ -34,6 +34,8 @@ DEFAULT_VALUES = {
     'economic_calendar': None,  # Disabled for phase 2.6 compatibility
     'seasonality_columns': True,  # REQUIRED: Adds day_of_month, hour_of_day, day_of_week
     'tech_indicators': True,     # REQUIRED: Generate all technical indicators
+    'add_log_return': False,     # Enable calculation and inclusion of log return column
+    'apply_log_transform': False,  # Disable log transformation analysis to match reference data
     
     # CRITICAL: Enable all forex sub-periodicities for 15m and 30m features
     'forex_datasets': [
