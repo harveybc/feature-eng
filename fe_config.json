@@ -97,9 +97,9 @@
     "stl_window": 49,
     "tapper_plot_file": null,
     "tapper_plot_points": 480,
-    "use_mtm_decomp": false,
-    "use_stl_decomp": false,
-    "use_wavelet_decomp": false,
+    "use_mtm_decomp": true,
+    "use_stl_decomp": true,
+    "use_wavelet_decomp": true,
     "wavelet_levels": 2,
     "wavelet_mode": "symmetric",
     "wavelet_name": "db4",
@@ -131,9 +131,9 @@
     "sub_periodicity_window_size": 8,
     "tech_indicators": true,
     "temporal_decay": 0.1,
-    "use_mtm_decomp": false,
-    "use_stl_decomp": false,
-    "use_wavelet_decomp": false,
+    "use_mtm_decomp": true,
+    "use_stl_decomp": true,
+    "use_wavelet_decomp": true,
     "vix_dataset": "tests/data/vix_day_1990_2024.csv"
   },
   "tech_indicator_params": {
@@ -217,7 +217,7 @@
   },
   "version_info": {
     "config_version": "1.0.0",
-    "export_timestamp": "2025-07-26T02:00:46.192122",
+    "export_timestamp": "2025-07-28T14:51:09.645058",
     "system_info": "Feature Engineering System - Perfect Replicability Config"
   }
 }
