@@ -55,6 +55,10 @@ class Plugin:
             if key in self.params:
                 self.params[key] = value
 
+    def get_debug_info(self): return {var: self.params.get(var) for var in self.plugin_debug_vars}
+    
+    def add_debug_info(self, debug_info): debug_info.update(self.get_debug_info())
+
     def adjust_ohlc(self, data):
         """
         Adjust OHLC columns by renaming them according to the expected OHLC order.
