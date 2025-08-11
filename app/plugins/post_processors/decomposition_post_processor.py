@@ -253,9 +253,8 @@ class DecompositionPostProcessor:
         
         for feature in original_feature_order:
             if feature in data.columns and feature not in final_data.columns:
-                # Only add if not being replaced by decomposition
-                if feature not in decomp_features or self.params.get('keep_original', False):
-                    final_data[feature] = data[feature]
+                # Always add original features - decomposition creates additional features, doesn't replace
+                final_data[feature] = data[feature]
         
         logger.info(f"Decomposition post-processing complete. Output shape: {final_data.shape}")
         return final_data
