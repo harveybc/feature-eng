@@ -23,9 +23,9 @@ DEFAULT_VALUES = {
 
     # Decomposition settings - PHASE 3.1 COMPATIBILITY: STL + WAVELET + MTM
     'decomp_features': ['CLOSE'],  # List of feature names to decompose using STL, wavelet, and MTM methods
-    'use_stl_decomp': False,  # Enable STL decomposition for decomp_features
-    'use_wavelet_decomp': False,  # REQUIRED: Phase 3.1 has wavelet decFalse
-    'use_mtm_decomp': False,  # REQUIRED: Phase 3.1 has MTM decomFalse
+    'use_stl_decomp': True,  # Enable STL decomposition for decomp_features
+    'use_wavelet_decomp': True,  # REQUIRED: Phase 3.1 has wavelet decFalse
+    'use_mtm_decomp': True,  # REQUIRED: Phase 3.1 has MTM decomFalse
 
     # Additional datasets - REQUIRED FOR PHASE 3 COMPATIBILITY
     'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
