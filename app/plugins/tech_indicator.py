@@ -527,12 +527,12 @@ class Plugin:
         For each hourly timestamp, extract the previous 1-8 consecutive ticks at 15min and 30min intervals.
         tick_1 = most recent, tick_8 = oldest (8 periods back)
         
-        OPTIMIZATION: Only process first 1000 rows for testing purposes.
+        
         """
         print(f"[DEBUG] Processing sub-periodicities with window_size: {window_size}")
         
         # CRITICAL OPTIMIZATION: Limit to first 2000 rows for testing
-        max_test_rows = 2000
+        max_test_rows = self.params.get('max_rows', 1000000)
         if len(hourly_data) > max_test_rows:
             print(f"[DEBUG] OPTIMIZATION: Processing only first {max_test_rows} rows instead of {len(hourly_data)} for testing")
             hourly_data_subset = hourly_data.head(max_test_rows)
