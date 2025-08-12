@@ -5,8 +5,12 @@ setup(
     version='0.1.0',
     packages=find_packages(),
     entry_points={
-        'console_scripts': [
+        'console'
+        '_scripts': [
             'feature_eng=app.main:main'
+        ],
+        'feature_eng.pipelines': [
+            'default=plugins.pipelines.default:Plugin'
         ],
         'feature_eng.features': [
             'default=plugins.features.tech_indicator:Plugin',
@@ -14,6 +18,9 @@ setup(
             'technical_indicator=plugins.features.tech_indicator:Plugin',
             'ssa=plugins.features.ssa:Plugin',
             'fft=plugins.features.fft:Plugin'
+        ],
+        'feature_eng.aligner': [
+            'default=plugins.aligner.default:Plugin'
         ],
         'feature_eng.post_processors': [
             'decomposition=app.plugins.post_processors.decomposition_post_processor:DecompositionPostProcessor'
