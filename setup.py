@@ -8,12 +8,12 @@ setup(
         'console_scripts': [
             'feature_eng=app.main:main'
         ],
-        'feature_eng.plugins': [
-            'default=app.plugins.tech_indicator:Plugin',
-            'tech_indicator=app.plugins.tech_indicator:Plugin',
-            'technical_indicator=app.plugins.tech_indicator:Plugin',
-            'ssa=app.plugins.ssa:Plugin',
-            'fft=app.plugins.fft:Plugin'
+        'feature_eng.features': [
+            'default=plugins.features.tech_indicator:Plugin',
+            'tech_indicator=plugins.features.tech_indicator:Plugin',
+            'technical_indicator=plugins.features.tech_indicator:Plugin',
+            'ssa=plugins.features.ssa:Plugin',
+            'fft=plugins.features.fft:Plugin'
         ],
         'feature_eng.post_processors': [
             'decomposition=app.plugins.post_processors.decomposition_post_processor:DecompositionPostProcessor'
