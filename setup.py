@@ -9,20 +9,17 @@ setup(
         '_scripts': [
             'feature_eng=app.main:main'
         ],
-        'feature_eng.pipelines': [
-            'default=plugins.pipelines.default:Plugin'
+        'feature_eng.pipeline': [
+            'default=plugins.pipeline.default:Plugin'
         ],
         'feature_eng.features': [
             'default=plugins.features.tech_indicator:Plugin',
-            'tech_indicator=plugins.features.tech_indicator:Plugin',
-            'technical_indicator=plugins.features.tech_indicator:Plugin',
-            'ssa=plugins.features.ssa:Plugin',
-            'fft=plugins.features.fft:Plugin'
+            'tech_indicator=plugins.features.tech_indicator:Plugin'
         ],
         'feature_eng.aligner': [
             'default=plugins.aligner.default:Plugin'
         ],
-        'feature_eng.post_processors': [
+        'feature_eng.post_processor': [
             'decomposition=app.plugins.post_processors.decomposition_post_processor:DecompositionPostProcessor'
         ]
     },
