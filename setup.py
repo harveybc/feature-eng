@@ -10,14 +10,14 @@ setup(
             'feature_eng=app.main:main'
         ],
         'feature_eng.pipeline': [
-            'default=plugins.pipeline.default:Plugin'
+            'default=plugins.pipeline.default_pipeline:PipelinePlugin'
         ],
         'feature_eng.features': [
-            'default=plugins.features.tech_indicator:Plugin',
-            'tech_indicator=plugins.features.tech_indicator:Plugin'
+            'default=plugins.features.tech_indicator:FeaturePlugin',
+            'tech_indicator=plugins.features.tech_indicator:FeaturePlugin'
         ],
         'feature_eng.aligner': [
-            'default=plugins.aligner.default:Plugin'
+            'default=plugins.aligner.default_aligner:AlignerPlugin'
         ],
         'feature_eng.post_processor': [
             'decomposition=app.plugins.post_processors.decomposition_post_processor:DecompositionPostProcessor'

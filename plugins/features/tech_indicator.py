@@ -20,7 +20,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Plugin:
+class FeaturePlugin:
     """
     Strictly causal technical indicators plugin.
     """
