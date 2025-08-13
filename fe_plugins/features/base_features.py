@@ -38,7 +38,11 @@ class BaseFeaturePlugin:
         "base_features_input_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",  # Default path (can be overridden)
         "base_features_max_rows": 1000000,
         "date_time_col": "DATE_TIME",
-        "date_time_format": None,  # Optional explicit datetime format for parsing
+    "date_time_format": None,  # Optional explicit datetime format for parsing
+    # Datetime parsing controls
+    "date_time_dayfirst_fallback": True,
+    "date_time_additional_formats": ["%Y.%m.%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"],
+    "date_time_fail_fast": True,
         "open_col": "OPEN",
         "high_col": "HIGH",
         "low_col": "LOW",
@@ -148,15 +152,43 @@ class BaseFeaturePlugin:
         # -----------------------------------------------------------------
         selected_frames = []
         if mapped_cols["date_time"]:
-            dt_series = df[mapped_cols["date_time"]]
+            raw_dt = df[mapped_cols["date_time"]].copy()
+            # Always attempt to parse to datetime dtype
             if date_time_format is not None:
                 try:
-                    dt_series = pd.to_datetime(dt_series, format=date_time_format, errors="coerce")
+                    dt_series = pd.to_datetime(raw_dt, format=date_time_format, errors="coerce")
                 except Exception as exc:  # noqa: BLE001
                     logger.warning(
-                        "Failed to parse date_time column with provided format '%s': %s", date_time_format, exc
+                        "Failed to parse date_time with format '%s': %s; falling back to generic parsing",
+                        date_time_format,
+                        exc,
                     )
-                    dt_series = pd.to_datetime(dt_series, errors="coerce")
+                    dt_series = pd.to_datetime(raw_dt, errors="coerce")
+            else:
+                dt_series = pd.to_datetime(raw_dt, errors="coerce")
+
+            # Adaptive dayfirst if it improves valid count
+            if params.get("date_time_dayfirst_fallback", True) and dt_series.isna().any():
+                alt = pd.to_datetime(raw_dt, errors="coerce", dayfirst=True)
+                if alt.notna().sum() > dt_series.notna().sum():
+                    dt_series = alt
+
+            # Try additional explicit formats to maximize valid parses
+            if dt_series.isna().any():
+                for fmt in params.get("date_time_additional_formats", []) or []:
+                    alt = pd.to_datetime(raw_dt, format=fmt, errors="coerce")
+                    if alt.notna().sum() > dt_series.notna().sum():
+                        dt_series = alt
+                    if not dt_series.isna().any():
+                        break
+
+            # Fail-fast on first invalid timestamp
+            if params.get("date_time_fail_fast", True) and dt_series.isna().any():
+                bad_idx = int(dt_series[dt_series.isna()].index[0])
+                raise RuntimeError(
+                    f"base_features: invalid timestamp at index {bad_idx} raw_value={raw_dt.iloc[bad_idx]!r} row={df.iloc[bad_idx].to_dict()}"
+                )
+
             selected_frames.append(dt_series.to_frame(name=date_time_col))
 
         if close_only:
