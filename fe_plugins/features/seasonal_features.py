@@ -40,8 +40,12 @@ class SeasonalFeaturePlugin:  # Name expected by loader
         "seasonal_features_input_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",  # Optional CSV path
         "seasonal_features_max_rows": 1000000,  # Optional row cap
         # DATETIME HANDLING ---------------------------------------------
-        "date_time_col": "date_time",  # Name of timestamp column
+        "date_time_col": "date_time",  # Preferred timestamp column name
         "date_time_format": None,  # Optional explicit strftime format
+        "date_time_fail_fast": True,  # Raise immediately if timestamp column missing
+        "date_time_fail_fast_invalid": True,  # Raise immediately on first invalid timestamp
+        "date_time_additional_synonyms": ["datetime", "timestamp", "time"],  # Extra names to try
+        "date_time_dayfirst_fallback": True,  # Try dayfirst if >90% NA
         # FEATURE FLAGS -------------------------------------------------
         "generate_cyclic_features": True,  # If True produce sin/cos pairs
     }
@@ -110,41 +114,75 @@ class SeasonalFeaturePlugin:  # Name expected by loader
 
         row_count = len(df)
 
-        if date_time_col not in df.columns:
-            # Attempt a case-insensitive match
-            lower_map = {c.lower(): c for c in df.columns}
-            resolved = lower_map.get(date_time_col.lower())
-            if resolved:
-                date_time_col = resolved
+        # Flexible timestamp column resolution (case + normalization + synonyms)
+        def _normalize(s: str) -> str:
+            return ''.join(ch for ch in s.lower() if ch.isalnum())
+        lower_map = {c.lower(): c for c in df.columns}
+        norm_map = {_normalize(c): c for c in df.columns}
+        synonyms = [date_time_col, *self.params.get("date_time_additional_synonyms", [])]
+        resolved_col = None
+        for cand in synonyms:
+            # direct lower
+            if cand.lower() in lower_map:
+                resolved_col = lower_map[cand.lower()]
+                break
+            # normalized
+            n = _normalize(cand)
+            if n in norm_map:
+                resolved_col = norm_map[n]
+                break
+        if resolved_col is None:
+            msg = (
+                f"seasonal_features: timestamp column '{date_time_col}' not found. "
+                f"Available: {list(df.columns)[:20]}"
+            )
+            if params.get("date_time_fail_fast", True):
+                raise RuntimeError(msg)
             else:
-                raise ValueError(f"Timestamp column '{date_time_col}' not found in data.")
+                logger.error(msg)
+                raise RuntimeError(msg)  # still abort – seasonal requires timestamp
+        date_time_col = resolved_col
 
         # -----------------------------------------------------------------
         # 3. Parse datetime (explicit format if provided)
         # -----------------------------------------------------------------
+        raw_ts = df[date_time_col]
         if date_time_format:
             try:
-                ts = pd.to_datetime(df[date_time_col], format=date_time_format, errors="coerce")
+                ts = pd.to_datetime(raw_ts, format=date_time_format, errors="coerce")
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
-                    "Failed to parse '%s' with format '%s': %s; falling back to generic parsing.",
-                    date_time_col,
-                    date_time_format,
-                    exc,
+                    "Failed explicit parse for '%s' (%s); fallback generic: %s", date_time_col, date_time_format, exc
                 )
-                ts = pd.to_datetime(df[date_time_col], errors="coerce")
+                ts = pd.to_datetime(raw_ts, errors="coerce")
         else:
-            ts = pd.to_datetime(df[date_time_col], errors="coerce")
+            ts = pd.to_datetime(raw_ts, errors="coerce")
+        # dayfirst fallback if mostly NA
+        if ts.isna().mean() > 0.9 and params.get("date_time_dayfirst_fallback", True):
+            alt = pd.to_datetime(raw_ts, errors="coerce", dayfirst=True)
+            if alt.notna().sum() > ts.notna().sum():
+                ts = alt
+                logger.info("seasonal_features: improved timestamp parse using dayfirst=True")
 
         # -----------------------------------------------------------------
         # 4. Drop rows with invalid timestamps & init working frame
         # -----------------------------------------------------------------
         valid_mask = ts.notna()
         if not valid_mask.all():
-            dropped = (~valid_mask).sum()
-            logger.warning("Dropped %s rows with unparseable timestamps in seasonal_features", dropped)
-        ts = ts[valid_mask]
-        work_df = pd.DataFrame({date_time_col: ts})
+            invalid_mask = ~valid_mask
+            invalid_count = int(invalid_mask.sum())
+            first_bad = int(invalid_mask[invalid_mask].index[0])
+            raw_value = raw_ts.iloc[first_bad]
+            row_ctx = df.iloc[first_bad].to_dict()
+            msg = (
+                "seasonal_features: invalid timestamp encountered "
+                f"count={invalid_count} first_index={first_bad} raw_value={raw_value!r} row={row_ctx}"
+            )
+            if params.get("date_time_fail_fast_invalid", True):
+                raise RuntimeError(msg)
+            logger.warning(msg)
+            ts = ts[valid_mask]
+        work_df = pd.DataFrame({date_time_col: ts[valid_mask]})
 
         # -----------------------------------------------------------------
         # 5. Derive raw seasonal integer components
