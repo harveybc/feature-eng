@@ -152,8 +152,9 @@ class FundamentalFeaturePlugin:
                     prev_vix = vix_daily.loc[vix_daily.date_time.dt.date == common_days[idx - 1], 'VIX'].iloc[0]
                 else:
                     prev_sp = sp_val; prev_vix = vix_val
+                base_day = pd.Timestamp(day).normalize()
                 for hour in range(24):
-                    ts = pd.Timestamp.combine(pd.Timestamp(day).date(), pd.Timestamp(hour=hour).time())
+                    ts = base_day + pd.Timedelta(hours=hour)
                     if use_interp and idx > 0:
                         frac = (hour + 1) / 24.0
                         sp_hour = prev_sp + (sp_val - prev_sp) * frac
