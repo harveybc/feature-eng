@@ -45,6 +45,12 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
         "high_col": "HIGH",
         "low_col": "LOW",
         "close_col": "CLOSE",
+    # DATETIME PARSING ENHANCEMENTS ------------------------------
+    "datetime_dayfirst_fallback": True,            # try dayfirst if >90% parse fail
+    "datetime_additional_formats": ["%Y-%m-%d %H:%M", "%d/%m/%Y %H:%M"],  # attempted sequentially if base parse poor
+    "datetime_capture_invalid_samples": 5,         # number of invalid raw timestamp samples to log
+    "datetime_keep_unparsed": False,               # if True keep rows with unparsed timestamps (label NaT) instead of dropping
+    "fail_fast_on_invalid_timestamp": True,        # immediately raise with context if any timestamp invalid
     # PROGRESS -----------------------------------------------------
     "show_progress": True,
     "progress_min_rows": 5000,
@@ -220,9 +226,11 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
                 f"{missing}. (Tried flexible resolution for '{dt_col}', got '{resolved_dt}')"
             )
 
+        raw_ts_series = df[resolved_dt]
+        # Primary parse
         if dt_fmt:
             try:
-                ts = pd.to_datetime(df[resolved_dt], format=dt_fmt, errors="coerce")
+                ts = pd.to_datetime(raw_ts_series, format=dt_fmt, errors="coerce")
             except Exception as exc:  # noqa: BLE001
                 logger.warning(
                     "Failed to parse '%s' with format '%s': %s; falling back to generic parsing.",
@@ -230,16 +238,56 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
                     dt_fmt,
                     exc,
                 )
-                ts = pd.to_datetime(df[resolved_dt], errors="coerce")
+                ts = pd.to_datetime(raw_ts_series, errors="coerce")
         else:
-            ts = pd.to_datetime(df[resolved_dt], errors="coerce")
+            ts = pd.to_datetime(raw_ts_series, errors="coerce")
+
+        # Fallback: dayfirst
+        if ts.isna().mean() > 0.9 and params.get("datetime_dayfirst_fallback", True):
+            alt = pd.to_datetime(raw_ts_series, errors="coerce", dayfirst=True)
+            if alt.notna().sum() > ts.notna().sum():
+                ts = alt
+                logger.info("technical_features: improved timestamp parse using dayfirst=True (valid %s)", alt.notna().sum())
+
+        # Additional explicit formats
+        if ts.isna().mean() > 0.5:
+            for fmt in params.get("datetime_additional_formats", []) or []:
+                alt = pd.to_datetime(raw_ts_series, format=fmt, errors="coerce")
+                if alt.notna().sum() > ts.notna().sum():
+                    ts = alt
+                    logger.info("technical_features: improved timestamp parse with explicit format '%s'", fmt)
+                if ts.isna().mean() < 0.5:
+                    break
 
         valid_mask = ts.notna()
         if not valid_mask.all():
-            dropped = (~valid_mask).sum()
-            logger.warning("Dropped %s rows with invalid timestamps in technical_features", dropped)
-        df = df.loc[valid_mask].reset_index(drop=True)
-        ts = ts[valid_mask].reset_index(drop=True)
+            invalid_mask = ~valid_mask
+            invalid_count = int(invalid_mask.sum())
+            first_bad_idx = int(invalid_mask[invalid_mask].index[0])
+            raw_bad_value = raw_ts_series.iloc[first_bad_idx]
+            row_context = df.iloc[first_bad_idx].to_dict()
+            attempted_info = {
+                "date_time_col_requested": dt_col,
+                "resolved_date_time_col": resolved_dt,
+                "explicit_format": dt_fmt,
+                "dayfirst_fallback_used": bool(ts.isna().mean() < 1.0 and params.get("datetime_dayfirst_fallback", True)),
+                "additional_formats": params.get("datetime_additional_formats", []),
+            }
+            sample_n = int(params.get("datetime_capture_invalid_samples", 5))
+            sample_values = list(raw_ts_series[invalid_mask].head(sample_n))
+            if params.get("fail_fast_on_invalid_timestamp", True):
+                raise RuntimeError(
+                    "technical_features: invalid timestamp encountered. "
+                    f"invalid_count={invalid_count} first_index={first_bad_idx} raw_value={raw_bad_value!r} "
+                    f"sample_invalid_values={sample_values} row_context={row_context} attempted={attempted_info}"
+                )
+            else:
+                logger.warning(
+                    "Invalid timestamps (%s) detected (sample: %s). Continuing (fail_fast disabled).", invalid_count, sample_values
+                )
+                if not params.get("datetime_keep_unparsed", False):
+                    df = df.loc[valid_mask].reset_index(drop=True)
+                    ts = ts[valid_mask].reset_index(drop=True)
 
         opens = df[resolved_o].astype(float).reset_index(drop=True)
         highs = df[resolved_h].astype(float).reset_index(drop=True)

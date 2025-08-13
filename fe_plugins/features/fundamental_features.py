@@ -41,6 +41,8 @@ class FundamentalFeaturePlugin:
         "use_daily_data": True,
         "use_interpolation": False,
         "fundamental_features_max_rows": 1_000_000,
+    # Fail-fast controls
+    "fail_fast_on_invalid_timestamp": True,
     }
 
     plugin_debug_vars: List[str] = [
@@ -122,8 +124,21 @@ class FundamentalFeaturePlugin:
         vix_ts = self._parse_datetime(vix_raw[vix_dt_col], p['vix_date_time_format'], 'VIX')
         sp_valid = sp_ts.notna(); vix_valid = vix_ts.notna()
         sp_dropped = int((~sp_valid).sum()); vix_dropped = int((~vix_valid).sum())
-        if sp_dropped: logger.warning("SP500: dropped %s invalid timestamp rows", sp_dropped)
-        if vix_dropped: logger.warning("VIX: dropped %s invalid timestamp rows", vix_dropped)
+        if (sp_dropped or vix_dropped) and p.get('fail_fast_on_invalid_timestamp', True):
+            # capture first invalid details
+            if sp_dropped:
+                bad_idx = int((~sp_valid).idxmax())
+                raise RuntimeError(
+                    f"fundamental_features: invalid SP500 timestamp at index {bad_idx} raw_value={sp_raw.loc[bad_idx, sp_dt_col]!r} row={sp_raw.loc[bad_idx].to_dict()}"
+                )
+            if vix_dropped:
+                bad_idx = int((~vix_valid).idxmax())
+                raise RuntimeError(
+                    f"fundamental_features: invalid VIX timestamp at index {bad_idx} raw_value={vix_raw.loc[bad_idx, vix_dt_col]!r} row={vix_raw.loc[bad_idx].to_dict()}"
+                )
+        else:
+            if sp_dropped: logger.warning("SP500: dropped %s invalid timestamp rows", sp_dropped)
+            if vix_dropped: logger.warning("VIX: dropped %s invalid timestamp rows", vix_dropped)
         sp_df = pd.DataFrame({'date_time': sp_ts[sp_valid], 'SP500': sp_raw.loc[sp_valid, sp_target_col].astype(float)}).sort_values('date_time').reset_index(drop=True)
         vix_df = pd.DataFrame({'date_time': vix_ts[vix_valid], 'VIX': vix_raw.loc[vix_valid, vix_target_col].astype(float)}).sort_values('date_time').reset_index(drop=True)
 
