@@ -10,18 +10,21 @@ setup(
             'feature_eng=app.main:main'
         ],
         'feature_eng.pipeline': [
-            'default=plugins.pipeline.default_pipeline:PipelinePlugin'
+            'default=fe_plugins.pipeline.default_pipeline:PipelinePlugin'
         ],
         'feature_eng.features': [
-            'default=plugins.features.tech_indicator:FeaturePlugin',
-            'tech_indicator=plugins.features.tech_indicator:FeaturePlugin',
-            'base_features=plugins.features.base_features:FeaturePlugin'
+            'default=fe_plugins.features.base_features:FeaturePlugin',
+            'base_features=fe_plugins.features.base_features:FeaturePlugin',
+            'technical_features=fe_plugins.features.technical_features:FeaturePlugin',
+            'fundamental_features=fe_plugins.features.fundamental_features:FeaturePlugin',
+            'seasonal_features=fe_plugins.features.seasonal_features:FeaturePlugin',
+            'high_frequency_features=fe_plugins.features.high_frequency_features:FeaturePlugin'
         ],
         'feature_eng.aligner': [
-            'default=plugins.aligner.default_aligner:AlignerPlugin'
+            'default=fe_plugins.aligner.default_aligner:AlignerPlugin'
         ],
         'feature_eng.post_processor': [
-            'decomposition=app.plugins.post_processors.decomposition_post_processor:DecompositionPostProcessor'
+            'decomposition=fe_plugins.post_processor.decomposition_post_processor:DecompositionPostProcessor'
         ]
     },
     install_requires=[

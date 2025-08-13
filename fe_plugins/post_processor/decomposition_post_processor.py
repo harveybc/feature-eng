@@ -120,7 +120,7 @@ class DecompositionPostProcessor:
             if self.params.get("stl_trend") is not None and self.params["stl_trend"] % 2 == 0:
                 self.params["stl_trend"] += 1
     
-    def process_features(self, data: pd.DataFrame) -> pd.DataFrame:
+    def post_process(self, data: pd.DataFrame) -> pd.DataFrame:
         """
         Apply decomposition to selected features in the input data.
         

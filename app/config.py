@@ -2,14 +2,13 @@
 FE_CONFIG_FILENAME = 'fe_config.json'
 
 DEFAULT_VALUES = {
-    'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc.csv',
     'output_file': './feature_eng_output.csv',
     'include_original_5': True,
-    'feature_plugins': ['base_features', 'tech_indicator'],
+    'feature_plugins': ['base_features', 'technical_features', 'fundamental_features', 'seasonal_features', 'high_frequency_features'],
     'pipeline_plugin': 'default',
     'aligner_plugin': 'default',
     'post_processor_plugin': 'decomposition',
-    
+
     'correlation_analysis': False,
     'distribution_plot': True,
     'quiet_mode': False,
@@ -23,7 +22,7 @@ DEFAULT_VALUES = {
     'save_config': './output_config.json',
     'fe_config_export': f'./{FE_CONFIG_FILENAME}',  # Export comprehensive feature engineering configuration for replicability
     'headers': True,
-    'max_rows': 1000000,  # Limit for CSV reading
+    'base_features_max_rows': 1000000,  # Limit for CSV reading
 
     # Decomposition settings - PHASE 3.1 COMPATIBILITY: STL + WAVELET + MTM
     'decomp_features': ['CLOSE'],  # List of feature names to decompose using STL, wavelet, and MTM methods

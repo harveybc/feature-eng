@@ -6,7 +6,7 @@ from .target_calculation import calculate_targets_from_baselines
 from .anti_naive_lock import apply_anti_naive_lock_to_datasets
 
 
-class PipelinePlugin:
+class AlignerPlugin:
     """
     1. Load already normalized CSV data ✅
     2. Denormalize all input datasets using JSON parameters
@@ -15,7 +15,7 @@ class PipelinePlugin:
     5. Calculate log return targets with those baselines (train, validation, test)
     6. Apply anti-naive-lock transformations to the denormalized input datasets of step 2
     7. Create final sliding windows matrix from anti-naive-lock processed datasets
-    8.Keep baselines and targets unchanged (they're already calculated correctly)
+    8. Keep baselines and targets unchanged (they're already calculated correctly)
     """
 
     # Plugin-specific parameters they get overwritten if declared in the config
@@ -45,7 +45,7 @@ class PipelinePlugin:
         debug_info.update(self.get_debug_info())
     # End of plugin interface methods
 
-    def process_data(self, config):
+    def align(self, config):
         # Main process orchestration
         try:
             self.set_params(**config)
