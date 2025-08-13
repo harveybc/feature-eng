@@ -65,6 +65,11 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
         "high_freq_max_rows_hourly": 1000000,
         "high_freq_max_rows_15m": 1000000,
         "high_freq_max_rows_30m": 1000000,
+    # Parsing & validation controls
+    "hf_dayfirst_fallback": True,
+    "hf_additional_formats": ["%Y.%m.%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"],
+    "hf_fail_fast_on_invalid_timestamp": True,
+    "hf_timestamp_synonyms": ["date_time", "datetime", "timestamp", "time"],
     }
 
     plugin_debug_vars: List[str] = [
@@ -111,9 +116,7 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
             7. Update debug info and return the feature DataFrame.
         """
 
-        # -----------------------------------------------------------------
-        # 1. Resolve parameters
-        # -----------------------------------------------------------------
+        # 1) Resolve parameters
         p = {**self.params, **{k: config.get(k, v) for k, v in self.params.items()}}
         file_hourly = p["high_freq_hourly_file"]
         file_15m = p["high_freq_15m_file"]
@@ -133,23 +136,17 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
         max_15 = p["high_freq_max_rows_15m"]
         max_30 = p["high_freq_max_rows_30m"]
         need_synth_30m = (file_30m is None or str(file_30m).lower() == "none") and synth_enabled
-        # We'll use files if at least hourly or 15m file is provided (we can synthesize 30m if missing)
-        use_files = any([
-            file_hourly is not None and str(file_hourly).lower() != "none",
-            file_15m is not None and str(file_15m).lower() != "none",
-            (not need_synth_30m) and file_30m is not None and str(file_30m).lower() != "none",
-        ])
+        have_hourly_file = file_hourly is not None and str(file_hourly).lower() != "none"
+        have_15m_file = file_15m is not None and str(file_15m).lower() != "none"
+        have_30m_file = file_30m is not None and str(file_30m).lower() != "none"
+        use_files = have_hourly_file and have_15m_file and (need_synth_30m or have_30m_file)
 
-        # -----------------------------------------------------------------
-        # 2. Load datasets
-        # -----------------------------------------------------------------
+        # 2) Load datasets
         if use_files:
             try:
-                hourly_df = pd.read_csv(file_hourly, usecols=[col_hourly_dt], nrows=max_h)
+                hourly_df = pd.read_csv(file_hourly, nrows=max_h)
                 df_15m = pd.read_csv(file_15m, nrows=max_15)
                 if need_synth_30m:
-                    # Synthetic 30m series: PURE SAMPLING of every 2nd 15m bar (no averaging/aggregation)
-                    # This preserves exact timestamp alignment at 30m cadence without mixing prices.
                     df_30m = df_15m.iloc[::2].copy().reset_index(drop=True)
                     data_source_mode = "files+synthetic30m"
                 else:
@@ -160,16 +157,18 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
         else:
             if data is None:
                 raise ValueError(
-                    "All high frequency file paths are None/'none' and no data dict provided to process()."
+                    "All high frequency file paths are None/'none' or incomplete and no data dict provided to process()."
                 )
             if need_synth_30m and "m15" not in data:
                 raise ValueError("Synthetic 30m generation requested but 15m dataset not provided in data dict.")
             if "hourly" not in data or "m15" not in data:
                 raise ValueError("High frequency data dict missing required 'hourly' or 'm15' dataset.")
-            hourly_df = data["hourly"][ [ self._resolve_ci(data["hourly"], col_hourly_dt) ] ]
+            resolved_hourly_dt = self._resolve_ci(data["hourly"], col_hourly_dt)
+            if resolved_hourly_dt is None:
+                raise ValueError("Failed to resolve hourly datetime column from provided data dict.")
+            hourly_df = data["hourly"][ [resolved_hourly_dt] ].copy()
             df_15m = data["m15"].copy()
             if need_synth_30m or "m30" not in data:
-                # Synthetic 30m series: sampling every second 15m observation (no aggregation)
                 df_30m = df_15m.iloc[::2].copy().reset_index(drop=True)
                 data_source_mode = "data_param+synthetic30m"
             else:
@@ -186,53 +185,60 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
         rows_15m_raw = len(df_15m)
         rows_30m_raw = len(df_30m)
 
-        # -----------------------------------------------------------------
-        # 3. Parse datetime columns & normalize case-insensitive mappings
-        # -----------------------------------------------------------------
-        hourly_dt_col_res = self._resolve_ci(hourly_df, col_hourly_dt)
-        m15_dt_col_res = self._resolve_ci(df_15m, col_15m_dt)
-        m30_dt_col_res = self._resolve_ci(df_30m, col_30m_dt)
-        m15_target_col_res = self._resolve_ci(df_15m, col_15m_target)
-        m30_target_col_res = self._resolve_ci(df_30m, col_30m_target)
+        # 3) Resolve column names flexibly
+        hourly_dt_col_res = self._resolve_flex(hourly_df, col_hourly_dt, p.get("hf_timestamp_synonyms", []))
+        m15_dt_col_res = self._resolve_flex(df_15m, col_15m_dt, p.get("hf_timestamp_synonyms", []))
+        m30_dt_col_res = self._resolve_flex(df_30m, col_30m_dt, p.get("hf_timestamp_synonyms", []))
+        m15_target_col_res = self._resolve_flex(df_15m, col_15m_target, ["close", "adjclose"]) 
+        m30_target_col_res = self._resolve_flex(df_30m, col_30m_target, ["close", "adjclose"]) 
 
         if hourly_dt_col_res is None or m15_dt_col_res is None or m30_dt_col_res is None:
             raise ValueError("Failed to resolve required datetime columns for high frequency processing.")
         if m15_target_col_res is None or m30_target_col_res is None:
             raise ValueError("Failed to resolve target (value) columns for 15m or 30m datasets.")
 
-        hourly_df[hourly_dt_col_res] = self._parse_dt(hourly_df[hourly_dt_col_res], fmt_hourly)
-        df_15m[m15_dt_col_res] = self._parse_dt(df_15m[m15_dt_col_res], fmt_15m)
-        df_30m[m30_dt_col_res] = self._parse_dt(df_30m[m30_dt_col_res], fmt_30m)
+        # 4) Parse datetimes with adaptive fallback and fail-fast
+        raw_hourly_dt = hourly_df[hourly_dt_col_res].copy()
+        hourly_df[hourly_dt_col_res] = self._parse_dt(raw_hourly_dt, fmt_hourly, p)
+        raw_15m_dt = df_15m[m15_dt_col_res].copy()
+        df_15m[m15_dt_col_res] = self._parse_dt(raw_15m_dt, fmt_15m, p)
+        raw_30m_dt = df_30m[m30_dt_col_res].copy()
+        df_30m[m30_dt_col_res] = self._parse_dt(raw_30m_dt, fmt_30m, p)
 
-        # Drop invalid rows (NaT) and sort
+        def _fail_fast(raw: pd.Series, parsed: pd.Series, label: str, df_src: pd.DataFrame) -> None:
+            if parsed.isna().any() and p.get("hf_fail_fast_on_invalid_timestamp", True):
+                bad_idx = int(parsed[parsed.isna()].index[0])
+                raise RuntimeError(
+                    f"high_freq_features: invalid {label} timestamp at index {bad_idx} raw_value={raw.iloc[bad_idx]!r} row={df_src.iloc[bad_idx].to_dict()}"
+                )
+
+        _fail_fast(raw_hourly_dt, hourly_df[hourly_dt_col_res], "hourly", hourly_df)
+        _fail_fast(raw_15m_dt, df_15m[m15_dt_col_res], "15m", df_15m)
+        _fail_fast(raw_30m_dt, df_30m[m30_dt_col_res], "30m", df_30m)
+
+        # Drop invalid rows (NaT) and sort ascending
         hourly_df = hourly_df[hourly_df[hourly_dt_col_res].notna()].sort_values(hourly_dt_col_res).reset_index(drop=True)
         df_15m = df_15m[df_15m[m15_dt_col_res].notna()].sort_values(m15_dt_col_res).reset_index(drop=True)
         df_30m = df_30m[df_30m[m30_dt_col_res].notna()].sort_values(m30_dt_col_res).reset_index(drop=True)
 
-        # -----------------------------------------------------------------
-        # 4. Build hourly output base DataFrame
-        # -----------------------------------------------------------------
+        # 5) Build hourly output base DataFrame
         out = pd.DataFrame({col_hourly_dt: hourly_df[hourly_dt_col_res]})
 
-        # Pre-extract value Series for speed
+        # Pre-extract arrays for speed
         m15_times = df_15m[m15_dt_col_res].to_numpy()
         m15_vals = df_15m[m15_target_col_res].astype(float).to_numpy()
         m30_times = df_30m[m30_dt_col_res].to_numpy()
         m30_vals = df_30m[m30_target_col_res].astype(float).to_numpy()
 
-        # -----------------------------------------------------------------
-        # 5. Collect causal lag windows per hourly timestamp
-        # -----------------------------------------------------------------
+        # 6) Collect causal lag windows per hourly timestamp
         from bisect import bisect_right
 
-        m15_features: List[List[Optional[float]]] = []  # each inner list size = lags_15m
-        m30_features: List[List[Optional[float]]] = []  # each inner list size = lags_30m
+        m15_features: List[List[Optional[float]]] = []
+        m30_features: List[List[Optional[float]]] = []
 
         for ts in out[col_hourly_dt].to_numpy():
-            # 15m
-            pos_15 = bisect_right(m15_times, ts)  # index AFTER last <= ts
+            pos_15 = bisect_right(m15_times, ts)
             window_15 = m15_vals[max(0, pos_15 - lags_15m):pos_15]
-            # pad on left if fewer than lags
             if len(window_15) < lags_15m:
                 pad = [float('nan')] * (lags_15m - len(window_15))
                 window_15_list = pad + window_15.tolist()
@@ -240,7 +246,6 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
                 window_15_list = window_15.tolist()
             m15_features.append(window_15_list)
 
-            # 30m
             pos_30 = bisect_right(m30_times, ts)
             window_30 = m30_vals[max(0, pos_30 - lags_30m):pos_30]
             if len(window_30) < lags_30m:
@@ -250,25 +255,18 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
                 window_30_list = window_30.tolist()
             m30_features.append(window_30_list)
 
-        # -----------------------------------------------------------------
-        # 6. Assemble lag feature columns
-        # -----------------------------------------------------------------
-        # Column naming convention: M15_LAG_1 .. M15_LAG_N (1 = oldest in window, N = most recent <= timestamp)
+        # 7) Assemble lag feature columns
         for idx in range(lags_15m):
             out[f"M15_LAG_{idx + 1}"] = [row[idx] for row in m15_features]
         for idx in range(lags_30m):
             out[f"M30_LAG_{idx + 1}"] = [row[idx] for row in m30_features]
 
-        # -----------------------------------------------------------------
-        # 7. Drop rows containing any NaN (remove early rows lacking full history)
-        # -----------------------------------------------------------------
+        # 8) Drop rows containing any NaN (remove early rows lacking full history)
         pre_drop_rows = len(out)
         out = out.dropna(how="any").reset_index(drop=True)
         rows_after_drop = len(out)
 
-        # -----------------------------------------------------------------
-        # 8. Finalize debug info
-        # -----------------------------------------------------------------
+        # 9) Finalize debug info
         self._debug_state.update(
             {
                 "rows_hourly": rows_hourly_raw,
@@ -280,7 +278,7 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
                 "lags_15m": lags_15m,
                 "lags_30m": lags_30m,
                 "rows_dropped_due_to_nans": pre_drop_rows - rows_after_drop,
-                "synthetic_30m": bool(need_synth_30m or data_source_mode.endswith("synthetic30m")),
+                "synthetic_30m": bool(need_synth_30m or str(data_source_mode).endswith("synthetic30m")),
             }
         )
 
@@ -295,13 +293,44 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
         return lower_map.get(name.lower())
 
     @staticmethod
-    def _parse_dt(series: pd.Series, fmt: Optional[str]) -> pd.Series:
+    def _resolve_flex(df: pd.DataFrame, desired: str, synonyms: List[str]) -> Optional[str]:
+        lower_map = {c.lower(): c for c in df.columns}
+        def _norm(s: str) -> str:
+            return ''.join(ch for ch in s.lower() if ch.isalnum())
+        norm_map = {_norm(c): c for c in df.columns}
+        candidates = [desired, desired.lower(), desired.upper(), desired.replace('-', '_'), *synonyms]
+        for cand in candidates:
+            if cand.lower() in lower_map:
+                return lower_map[cand.lower()]
+            n = _norm(cand)
+            if n in norm_map:
+                return norm_map[n]
+        return None
+
+    @staticmethod
+    def _parse_dt(series: pd.Series, fmt: Optional[str], params: Dict[str, Any]) -> pd.Series:
+        # Primary parse
         if fmt:
             try:
-                return pd.to_datetime(series, format=fmt, errors="coerce")
+                ts = pd.to_datetime(series, format=fmt, errors="coerce")
             except Exception as exc:  # noqa: BLE001
                 logger.warning("Failed to parse datetime with format '%s': %s; falling back to generic parsing", fmt, exc)
-                return pd.to_datetime(series, errors="coerce")
-        return pd.to_datetime(series, errors="coerce")
+                ts = pd.to_datetime(series, errors="coerce")
+        else:
+            ts = pd.to_datetime(series, errors="coerce")
+        # Dayfirst adaptive
+        if params.get("hf_dayfirst_fallback", True) and ts.isna().any():
+            alt = pd.to_datetime(series, errors="coerce", dayfirst=True)
+            if alt.notna().sum() > ts.notna().sum():
+                ts = alt
+        # Additional explicit formats
+        if ts.isna().any():
+            for f in params.get("hf_additional_formats", []) or []:
+                alt = pd.to_datetime(series, format=f, errors="coerce")
+                if alt.notna().sum() > ts.notna().sum():
+                    ts = alt
+                if not ts.isna().any():
+                    break
+        return ts
 
 
