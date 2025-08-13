@@ -175,12 +175,38 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
 
         rows_read = len(df)
 
+        # -----------------------------------------------------------------
+        # Flexible (case / underscore / punctuation insensitive) column resolution
+        # -----------------------------------------------------------------
         lower_map = {c.lower(): c for c in df.columns}
-        resolved_dt = lower_map.get(dt_col.lower())
-        resolved_o = lower_map.get(o_col.lower())
-        resolved_h = lower_map.get(h_col.lower())
-        resolved_l = lower_map.get(l_col.lower())
-        resolved_c = lower_map.get(c_col.lower())
+
+        def _normalize(name: str) -> str:
+            return ''.join(ch for ch in name.lower() if ch.isalnum())
+
+        normalized_index = {_normalize(c): c for c in df.columns}
+
+        def resolve(name: str) -> Optional[str]:
+            # direct case-insensitive
+            direct = lower_map.get(name.lower())
+            if direct is not None:
+                return direct
+            # normalized (remove underscores, spaces, punctuation)
+            norm = _normalize(name)
+            if norm in normalized_index:
+                return normalized_index[norm]
+            # common datetime synonyms fallback
+            if name.lower() in {"date_time", "datetime", "timestamp", "time"}:
+                for candidate in ("datetime", "date_time", "timestamp", "time"):
+                    direct_c = lower_map.get(candidate)
+                    if direct_c is not None:
+                        return direct_c
+            return None
+
+        resolved_dt = resolve(dt_col)
+        resolved_o = resolve(o_col)
+        resolved_h = resolve(h_col)
+        resolved_l = resolve(l_col)
+        resolved_c = resolve(c_col)
         missing = [name for name, val in [
             (dt_col, resolved_dt),
             (o_col, resolved_o),
@@ -189,7 +215,10 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
             (c_col, resolved_c),
         ] if val is None]
         if missing:
-            raise ValueError(f"Missing required columns in technical features input: {missing}")
+            raise ValueError(
+                "Missing required columns in technical features input: "
+                f"{missing}. (Tried flexible resolution for '{dt_col}', got '{resolved_dt}')"
+            )
 
         if dt_fmt:
             try:
