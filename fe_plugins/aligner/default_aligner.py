@@ -1,247 +1,238 @@
-import numpy as np
+#!/usr/bin/env python3
+"""Default Aligner Plugin
+
+Merges multiple feature plugin output DataFrames on a common strictly shared datetime index.
+
+Responsibilities:
+    1. Accept a collection (dict or list) of feature DataFrames from previous feature plugins.
+    2. Detect and normalize each dataset's datetime column (case-insensitive; supports explicit format).
+    3. Determine a common intersection date range & exact shared timestamps across ALL datasets.
+    4. Slice each dataset to that intersection (dropping rows outside or with missing timestamps).
+    5. Optionally prefix non-datetime columns with the dataset key to avoid collisions.
+    6. Concatenate columns side-by-side aligned perfectly row-by-row on the datetime.
+    7. Enforce optional max row export limit (head truncation after alignment).
+    8. Provide debug information (row counts per input, rows aligned, start/end, columns exported, drops).
+
+Notes:
+    - Only timestamps present in every dataset survive (strict inner alignment).
+    - Datetime parsing uses provided format when given; otherwise generic pandas parsing.
+    - Duplicate datetimes inside an input are de-duplicated keeping the first occurrence.
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any, Dict, Iterable, List, Optional, Union
+
 import pandas as pd
-from .helpers import load_normalization_json, denormalize_all_datasets, load_normalized_csv, exclude_columns_from_datasets
-from .sliding_windows import create_sliding_windows, extract_baselines_from_sliding_windows
-from .target_calculation import calculate_targets_from_baselines
-from .anti_naive_lock import apply_anti_naive_lock_to_datasets
+
+logger = logging.getLogger(__name__)
 
 
 class AlignerPlugin:
-    """
-    1. Load already normalized CSV data ✅
-    2. Denormalize all input datasets using JSON parameters
-    3. Create sliding windows from denormalized data
-    4. Extract baselines (last elements of each window for target column)
-    5. Calculate log return targets with those baselines (train, validation, test)
-    6. Apply anti-naive-lock transformations to the denormalized input datasets of step 2
-    7. Create final sliding windows matrix from anti-naive-lock processed datasets
-    8. Keep baselines and targets unchanged (they're already calculated correctly)
-    """
+    """Dataset alignment & merge plugin."""
 
-    # Plugin-specific parameters they get overwritten if declared in the config
-    plugin_params = {
-        "window_size": 48,
-        "predicted_horizons": [1, 6],
-        "target_column": "CLOSE",
-        "use_returns": True,
-        "anti_naive_lock_enabled": True,
-        "feature_preprocessing_strategy": "selective"
+    # ------------------------------------------------------------------
+    # Default (merge-able) parameters
+    # ------------------------------------------------------------------
+    plugin_params: Dict[str, Any] = {
+        "aligner_date_time_col": "DATE_TIME",          # Standardized output datetime column name
+        "aligner_date_time_format": None,               # Optional explicit datetime format (applied if provided)
+        "aligner_max_rows": None,                       # Optional cap on exported aligned rows
+        "aligner_prefix_columns": True,                 # Prefix columns with dataset key (avoid collisions)
+        "aligner_sort_output": True,                    # Sort final output by datetime ascending
     }
-    
-    plugin_debug_vars = ["window_size", "predicted_horizons", "target_column"]
 
-    # Start of plugin interface methods    
-    def __init__(self):
-        self.params = self.plugin_params.copy()
+    plugin_debug_vars: List[str] = [
+        "input_datasets",
+        "rows_input_total",
+        "rows_aligned",
+        "columns_exported",
+        "start_timestamp",
+        "end_timestamp",
+        "dropped_empty_or_invalid",
+        "per_dataset_row_counts",
+    ]
 
-    def set_params(self, **kwargs):
-        for key, value in kwargs.items():
-            self.params[key] = value
-    
-    def get_debug_info(self):
-        return {var: self.params.get(var) for var in self.plugin_debug_vars}
-    
-    def add_debug_info(self, debug_info):
+    def __init__(self) -> None:
+        self.params: Dict[str, Any] = self.plugin_params.copy()
+        self._debug_state: Dict[str, Any] = {k: None for k in self.plugin_debug_vars}
+
+    # ------------------------------------------------------------------
+    # Interface methods
+    # ------------------------------------------------------------------
+    def set_params(self, **kwargs: Any) -> None:
+        for k, v in kwargs.items():
+            if k in self.params:
+                self.params[k] = v
+
+    def get_debug_info(self) -> Dict[str, Any]:  # noqa: D401
+        return {k: self._debug_state.get(k) for k in self.plugin_debug_vars}
+
+    def add_debug_info(self, debug_info: Dict[str, Any]) -> None:
         debug_info.update(self.get_debug_info())
-    # End of plugin interface methods
 
-    def align(self, config):
-        # Main process orchestration
-        try:
-            self.set_params(**config)
-            config = self.params
-            
-            predicted_horizons = config['predicted_horizons']
-            if not isinstance(predicted_horizons, list) or not predicted_horizons:
-                raise ValueError("predicted_horizons must be a non-empty list")
-            
-            # 1. Load already normalized CSV data
-            print("Step 1: Load normalized CSV data")
-            normalized_data, dates = load_normalized_csv(config)
-            if not normalized_data:
-                raise ValueError("No data loaded - check file paths in config")
-            
-            # 2. Denormalize all input datasets using JSON parameters
-            print("Step 2: Denormalize all input datasets")
-            denormalized_data = denormalize_all_datasets(normalized_data, config)
-            
-            # 3. Create FIRST sliding windows from denormalized data used only and only for baseline extraction
-            print("Step 3: Create first sliding windows from denormalized data")
-            denorm_sliding_windows = create_sliding_windows(denormalized_data, config, dates)
+    # ------------------------------------------------------------------
+    # Core alignment
+    # ------------------------------------------------------------------
+    def align(self, config: Dict[str, Any], datasets: Union[Dict[str, pd.DataFrame], List[pd.DataFrame]]) -> pd.DataFrame:  # noqa: D401
+        """Align multiple feature DataFrames on a shared datetime index and merge columns.
 
-            # 4. Extract baselines from the sliding windows (last elements of each window for target column)
-            print("Step 4: Extract baselines from sliding windows")
-            baselines = extract_baselines_from_sliding_windows(denorm_sliding_windows, config)
+        Parameters
+        ----------
+        config : dict
+            Runtime configuration (merged before call) used to override plugin_params.
+        datasets : dict[str, DataFrame] | list[DataFrame]
+            Collection of feature DataFrames produced by feature plugins. If a list is provided,
+            anonymous keys dataset_1 ... dataset_N are assigned.
 
-            # 5. Calculate targets directly from baselines
-            print("Step 5: Calculate targets from baselines")
-            #TODO: verify this method is correct
-            targets = calculate_targets_from_baselines(baselines, config)
+        Returns
+        -------
+        DataFrame
+            Aligned & merged feature dataset with a single datetime column and all feature columns.
+        """
 
-            # 6. Apply anti-naive-lock transformations to denormalized input datasets (creates "processed data")
-            print("Step 6: Apply anti-naive-lock to denormalized datasets")
-            #TODO: verify this method is correct
-            processed_data = apply_anti_naive_lock_to_datasets(denormalized_data, config)
-            
+        # -----------------------------------------------------------------
+        # 1. Resolve parameters
+        # -----------------------------------------------------------------
+        params = {**self.params, **{k: config.get(k, v) for k, v in self.params.items()}}
+        dt_col_standard = params["aligner_date_time_col"]
+        dt_format = params["aligner_date_time_format"]
+        max_rows = params["aligner_max_rows"]
+        prefix_cols = params["aligner_prefix_columns"]
+        sort_output = params["aligner_sort_output"]
 
-            # 7. Create SECOND sliding windows matrix from processed datasets (for model input only)
-            #print("Step 7: Create second sliding windows from processed datasets")
-            #final_sliding_windows = create_sliding_windows(normalized_data, config, dates)
-            final_sliding_windows = create_sliding_windows(processed_data, config, dates)
+        # Normalize datasets input to dict[str, DataFrame]
+        if isinstance(datasets, list):
+            ds_dict: Dict[str, pd.DataFrame] = {f"dataset_{i+1}": df for i, df in enumerate(datasets)}
+        elif isinstance(datasets, dict):
+            ds_dict = datasets.copy()
+        else:  # pragma: no cover - defensive
+            raise TypeError("'datasets' must be a list or dict of DataFrames")
 
-            # 8. Align final sliding windows with target data length
-            print("Step 8: Align sliding windows with target data")
-            final_sliding_windows = self._align_sliding_windows_with_targets(final_sliding_windows, targets, config)
-            
-            # Return final results
-            #TODO: verify this method is correct and required
-            output, preprocessor_params = self._prepare_final_output(final_sliding_windows, targets, baselines, config)
-            
-            # Store baselines for access in output preparation
-            self.extracted_baselines = baselines
-            
-            self.params.update(preprocessor_params)
-            return output
+        if not ds_dict:
+            raise ValueError("No datasets provided to align()")
 
-        except Exception as e:
-            print(f"ERROR in process_data: {e}")
-            raise
+        per_dataset_row_counts: Dict[str, int] = {}
+        dropped_invalid: Dict[str, int] = {}
+        parsed_frames: Dict[str, pd.DataFrame] = {}
 
-    def _align_sliding_windows_with_targets(self, sliding_windows, targets, config):
-        """Align sliding windows with target data to ensure same number of samples."""
-        print("  Aligning sliding windows with target data...")
-        
-        # Get the first target to determine the target length
-        predicted_horizons = config['predicted_horizons']
-        first_horizon = predicted_horizons[0]
-        
-        # Find target lengths for each split
-        target_lengths = {}
-        for split in ['train', 'val', 'test']:
-            target_key = f'y_{split}'
-            if target_key in targets and f'output_horizon_{first_horizon}' in targets[target_key]:
-                target_length = len(targets[target_key][f'output_horizon_{first_horizon}'])
-                target_lengths[split] = target_length
-                print(f"    {split} target length: {target_length}")
+        # -----------------------------------------------------------------
+        # 2. Detect & parse datetime column in each dataset
+        # -----------------------------------------------------------------
+        for name, df in ds_dict.items():
+            if not isinstance(df, pd.DataFrame):
+                raise TypeError(f"Dataset '{name}' is not a pandas DataFrame")
+            original_rows = len(df)
+            per_dataset_row_counts[name] = original_rows
+            if original_rows == 0:
+                dropped_invalid[name] = 0
+                continue
+
+            # Resolve datetime column case-insensitively
+            lower_map = {c.lower(): c for c in df.columns}
+            dt_candidates = [c for c in df.columns if 'date' in c.lower() or 'time' in c.lower()]
+            resolved = lower_map.get(dt_col_standard.lower())
+            if resolved is None:
+                # Fallback: choose first candidate containing date/time
+                resolved = dt_candidates[0] if dt_candidates else None
+            if resolved is None:
+                raise ValueError(f"Could not locate a datetime-like column in dataset '{name}'")
+
+            series = df[resolved]
+            if dt_format:
+                try:
+                    parsed = pd.to_datetime(series, format=dt_format, errors='coerce')
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning(
+                        "Failed to parse datetime in '%s' with format '%s': %s; falling back to generic parsing.",
+                        name,
+                        dt_format,
+                        exc,
+                    )
+                    parsed = pd.to_datetime(series, errors='coerce')
             else:
-                target_lengths[split] = 0
-        
-        # Trim sliding windows to match target lengths
-        aligned_windows = {}
+                parsed = pd.to_datetime(series, errors='coerce')
 
-        for key, windows in sliding_windows.items():
-            if key.startswith('X_'):
-                # Extract split name (train, val, test)
-                split = key.split('_')[1]
-                if split in target_lengths and target_lengths[split] > 0:
-                    target_length = target_lengths[split]
-                    if hasattr(windows, 'shape') and len(windows) > target_length:
-                        aligned_windows[key] = windows[:target_length]
-                        print(f"    Trimmed {key} from {len(windows)} to {target_length} samples")
-                    else:
-                        aligned_windows[key] = windows
-                        
-                else:
-                    aligned_windows[key] = windows
-                    
-            else:
-                # Keep non-window data as is
-                aligned_windows[key] = windows
-                
+            valid_mask = parsed.notna()
+            dropped = (~valid_mask).sum()
+            dropped_invalid[name] = int(dropped)
+            parsed_df = df.loc[valid_mask].copy()
+            parsed_df[dt_col_standard] = parsed.loc[valid_mask].values
 
-        return aligned_windows
+            # Drop duplicate timestamps keeping first (strict causality / uniqueness requirement)
+            parsed_df = parsed_df.sort_values(dt_col_standard).drop_duplicates(subset=dt_col_standard, keep='first')
 
-    def _prepare_final_output(self, sliding_windows, targets, baselines, config):
-        """Prepare final output structure."""
-        # Use the baselines passed as parameter (extracted from denormalized data)
-        baseline_data = {}
-        if isinstance(baselines, dict):
-            # baselines is already in the correct format
-            baseline_data = baselines
-        else:
-            # Handle legacy format
-            for split in ['train', 'val', 'test']:
-                baseline_key = f'baseline_{split}'
-                baseline_data[baseline_key] = np.array([])
-        
-        # Validate that we have the required data structures
-        required_sliding_window_keys = ['X_train', 'X_val', 'X_test']
-        required_target_keys = ['y_train', 'y_val', 'y_test']
-        
-        for key in required_sliding_window_keys:
-            if key not in sliding_windows:
-                print(f"WARNING: Missing sliding window data: {key}")
-                sliding_windows[key] = np.array([])
-        
-        for key in required_target_keys:
-            if key not in targets:
-                print(f"WARNING: Missing target data: {key}")
-                targets[key] = {}
-        
-        output = {
-            # Final sliding windows for model (SECOND sliding windows after anti-naive-lock)
-            "x_train": sliding_windows['X_train'],
-            "x_val": sliding_windows['X_val'],
-            "x_test": sliding_windows['X_test'],
-            
-            # Targets by horizon (calculated from FIRST sliding windows)
-            "y_train": targets['y_train'],
-            "y_val": targets['y_val'],
-            "y_test": targets['y_test'],
-            
-            # Dates
-            "x_train_dates": sliding_windows.get('x_dates_train'),
-            "y_train_dates": sliding_windows.get('x_dates_train'),
-            "x_val_dates": sliding_windows.get('x_dates_val'),
-            "y_val_dates": sliding_windows.get('x_dates_val'),
-            "x_test_dates": sliding_windows.get('x_dates_test'),
-            "y_test_dates": sliding_windows.get('x_dates_test'),
-            
-            # Baselines for prediction reconstruction
-            "baseline_train": baseline_data.get('baseline_train', np.array([])),
-            "baseline_val": baseline_data.get('baseline_val', np.array([])),
-            "baseline_test": baseline_data.get('baseline_test', np.array([])),
-            
-            # Metadata
-            "feature_names": sliding_windows.get('feature_names', []),
-            "target_returns_means": targets.get('target_returns_means', []),
-            "target_returns_stds": targets.get('target_returns_stds', []),
-            "predicted_horizons": config['predicted_horizons'],
-            "normalization_json": load_normalization_json(config),
-        }
-        
-        # Print summary statistics
-        print("\nPreprocessing Summary:")
-        print(f"  X_train shape: {output['x_train'].shape if hasattr(output['x_train'], 'shape') else 'N/A'}")
-        print(f"  X_val shape: {output['x_val'].shape if hasattr(output['x_val'], 'shape') else 'N/A'}")
-        print(f"  X_test shape: {output['x_test'].shape if hasattr(output['x_test'], 'shape') else 'N/A'}")
-        print(f"  Feature names: {len(output['feature_names'])}")
-        print(f"  Predicted horizons: {output['predicted_horizons']}")
-        print(f"  Target normalization parameters available: {len(output['target_returns_means'])}")
-        print(f"  Baseline train length: {len(output['baseline_train'])}")
-        print(f"  Baseline val length: {len(output['baseline_val'])}")
-        print(f"  Baseline test length: {len(output['baseline_test'])}")
+            parsed_frames[name] = parsed_df
 
-        output, preprocessor_params = exclude_columns_from_datasets(output, self.params, config)
+        # -----------------------------------------------------------------
+        # 3. Determine common intersection of timestamps
+        # -----------------------------------------------------------------
+        timestamp_sets: List[set] = [set(df[dt_col_standard].unique()) for df in parsed_frames.values() if len(df)]
+        if not timestamp_sets:
+            raise ValueError("All provided datasets are empty after datetime parsing")
+        common_timestamps = set.intersection(*timestamp_sets)
+        if not common_timestamps:
+            raise ValueError("No shared timestamps across all datasets; cannot align")
 
-        return output, preprocessor_params
-    
-    def run_preprocessing(self, config):
-        """Run preprocessing with configuration."""
-        run_config = self.params.copy()
-        run_config.update(config)
-        self.set_params(**run_config)
-        processed_data = self.process_data(self.params)
-        
-        params_with_targets = self.params.copy()
-        params_with_targets.update({
-            "target_returns_means": processed_data.get("target_returns_means", []),
-            "target_returns_stds": processed_data.get("target_returns_stds", []),
-            "normalization_json": processed_data.get("normalization_json", {})
-        })
-        
-        return processed_data, params_with_targets
+        # Convert to sorted list
+        common_index = sorted(common_timestamps)
+        start_ts = common_index[0]
+        end_ts = common_index[-1]
+
+        # -----------------------------------------------------------------
+        # 4. Slice each dataset to the common timestamps & rename columns
+        # -----------------------------------------------------------------
+        aligned_parts: List[pd.DataFrame] = []
+        total_input_rows = sum(per_dataset_row_counts.values())
+        for name, df in parsed_frames.items():
+            aligned_df = df[df[dt_col_standard].isin(common_timestamps)].copy()
+            # Ensure sorted
+            aligned_df = aligned_df.sort_values(dt_col_standard)
+            # Optionally prefix columns (except datetime)
+            if prefix_cols:
+                rename_map = {
+                    c: f"{name}__{c}" for c in aligned_df.columns if c != dt_col_standard
+                }
+                aligned_df = aligned_df.rename(columns=rename_map)
+            aligned_parts.append(aligned_df.set_index(dt_col_standard))
+
+        # -----------------------------------------------------------------
+        # 5. Concatenate features side-by-side on datetime index
+        # -----------------------------------------------------------------
+        merged = pd.concat(aligned_parts, axis=1, join='inner')
+        merged.index.name = dt_col_standard
+        if sort_output:
+            merged = merged.sort_index()
+
+        # Align to the exact common_index ordering
+        merged = merged.reindex(common_index)
+        merged.reset_index(inplace=True)
+
+        # -----------------------------------------------------------------
+        # 6. Apply max row cap if specified
+        # -----------------------------------------------------------------
+        if max_rows is not None:
+            merged = merged.head(int(max_rows))
+
+        # -----------------------------------------------------------------
+        # 7. Finalize debug info
+        # -----------------------------------------------------------------
+        self._debug_state.update(
+            {
+                "input_datasets": len(ds_dict),
+                "rows_input_total": total_input_rows,
+                "rows_aligned": len(merged),
+                "columns_exported": len(merged.columns) - 1,  # exclude datetime
+                "start_timestamp": start_ts,
+                "end_timestamp": end_ts,
+                "dropped_empty_or_invalid": dropped_invalid,
+                "per_dataset_row_counts": per_dataset_row_counts,
+            }
+        )
+
+        return merged
 
 
-# Plugin interface alias for the system
-PreprocessorPlugin = STLPreprocessorZScore
+# Backward compatibility alias (if framework expects a different class reference)
+Plugin = AlignerPlugin
