@@ -37,8 +37,8 @@ class FeaturePlugin:  # Name expected by loader
     # ------------------------------------------------------------------
     plugin_params: Dict[str, Any] = {
         # INPUT SOURCE --------------------------------------------------
-        "seasonal_features_input_file": None,  # Optional CSV path
-        "seasonal_features_max_rows": None,  # Optional row cap
+        "seasonal_features_input_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",  # Optional CSV path
+        "seasonal_features_max_rows": 1000000,  # Optional row cap
         # DATETIME HANDLING ---------------------------------------------
         "date_time_col": "date_time",  # Name of timestamp column
         "date_time_format": None,  # Optional explicit strftime format

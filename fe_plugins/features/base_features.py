@@ -35,7 +35,7 @@ class FeaturePlugin:
     # Default (merge-able) plugin parameters
     # ---------------------------------------------------------------------
     plugin_params: Dict[str, Any] = {
-        "base_features_input_file": "tests/data/base_features_input.csv",  # Default path (can be overridden)
+        "base_features_input_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",  # Default path (can be overridden)
         "base_features_max_rows": 1000000,
         "date_time_col": "DATE_TIME",
         "date_time_format": None,  # Optional explicit datetime format for parsing
