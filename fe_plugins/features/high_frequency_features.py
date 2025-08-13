@@ -45,8 +45,8 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
         "high_freq_hourly_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",
         "high_freq_15m_file": "tests/data/EURUSD-2000-2020-15m.csv",
         "high_freq_30m_file": None,
-    # Automatic synthesis: when 30m file missing/None, derive 30m by taking every 2nd 15m row
-    "high_freq_generate_30m_from_15m": True,
+        # Automatic synthesis: when 30m file missing/None, derive 30m by taking every 2nd 15m row
+        "high_freq_generate_30m_from_15m": True,
         # Optional per-source explicit datetime format strings
         "high_freq_hourly_date_time_format": None,
         "high_freq_15m_date_time_format": None,
@@ -304,5 +304,4 @@ class HighFreqFeaturePlugin:  # Consistent naming pattern
                 return pd.to_datetime(series, errors="coerce")
         return pd.to_datetime(series, errors="coerce")
 
-# Backward compatibility alias if loader expects 'Plugin'
-Plugin = FeaturePlugin
+
