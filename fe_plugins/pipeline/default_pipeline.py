@@ -2,6 +2,44 @@ import json
 import time
 from typing import Any, Dict, List
 
+# Lightweight JSON serializer to handle pandas.Timestamp, datetime, numpy types, sets, etc.
+def _json_default(o):  # noqa: D401
+    """Best-effort converter for non-JSON-serializable objects."""
+    # Handle datetime-like (including pandas.Timestamp which subclasses datetime)
+    if hasattr(o, "isoformat"):
+        try:
+            return o.isoformat()
+        except Exception:
+            pass
+    # Numpy scalars / arrays
+    try:
+        import numpy as np  # type: ignore
+
+        if isinstance(o, (np.integer,)):
+            return int(o)
+        if isinstance(o, (np.floating,)):
+            return float(o)
+        if isinstance(o, (np.ndarray,)):
+            return o.tolist()
+    except Exception:
+        # numpy may not be available or type checks may fail; ignore
+        pass
+    # Generic containers
+    if isinstance(o, set):
+        return list(o)
+    if hasattr(o, "tolist"):
+        try:
+            return o.tolist()
+        except Exception:
+            pass
+    if hasattr(o, "item"):
+        try:
+            return o.item()
+        except Exception:
+            pass
+    # Fallback to string
+    return str(o)
+
 
 class PipelinePlugin:
     """Feature Engineering Pipeline Plugin
@@ -147,7 +185,7 @@ class PipelinePlugin:
         if save_log_path:
             try:
                 with open(save_log_path, "w", encoding="utf-8") as f:
-                    json.dump(debug_log, f, indent=2, ensure_ascii=False)
+                    json.dump(debug_log, f, indent=2, ensure_ascii=False, default=_json_default)
                 print(f"  Debug log saved to: {save_log_path}")
             except Exception as exc:  # noqa: BLE001
                 print(f"Failed to write debug log '{save_log_path}': {exc}")
