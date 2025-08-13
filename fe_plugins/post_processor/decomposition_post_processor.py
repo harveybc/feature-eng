@@ -75,7 +75,7 @@ class FeaturePlugin:  # Consistent naming with other plugins
         "wavelet_name": "db4",
         "wavelet_levels": 2,
         # MTM / Welch PSD --------------------------------------------------
-        "use_mtm": False,
+        "use_mtm": True,
         "mtm_window_len": 168,
         "mtm_freq_bands": [(0.0, 0.01), (0.01, 0.06), (0.06, 0.2), (0.2, 0.5)],
         # OUTPUT CONTROL ---------------------------------------------------

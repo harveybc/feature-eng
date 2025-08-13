@@ -42,9 +42,9 @@ class FeaturePlugin:  # Consistent naming pattern
     # ------------------------------------------------------------------
     plugin_params: Dict[str, Any] = {
         # Input file paths (set to "none" or None to force data dict usage)
-        "high_freq_hourly_file": "tests/data/hourly.csv",
-        "high_freq_15m_file": "tests/data/15m.csv",
-        "high_freq_30m_file": "tests/data/30m.csv",
+        "high_freq_hourly_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",
+        "high_freq_15m_file": "tests/data/EURUSD-2000-2020-15m.csv",
+        "high_freq_30m_file": None,
     # Automatic synthesis: when 30m file missing/None, derive 30m by taking every 2nd 15m row
     "high_freq_generate_30m_from_15m": True,
         # Optional per-source explicit datetime format strings
@@ -62,9 +62,9 @@ class FeaturePlugin:  # Consistent naming pattern
         "high_freq_num_lags_15m": 8,
         "high_freq_num_lags_30m": 8,
         # Row limits
-        "high_freq_max_rows_hourly": 1_000_000,
-        "high_freq_max_rows_15m": 1_000_000,
-        "high_freq_max_rows_30m": 1_000_000,
+        "high_freq_max_rows_hourly": 1000000,
+        "high_freq_max_rows_15m": 1000000,
+        "high_freq_max_rows_30m": 1000000,
     }
 
     plugin_debug_vars: List[str] = [
