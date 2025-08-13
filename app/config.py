@@ -5,7 +5,11 @@ DEFAULT_VALUES = {
     'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc.csv',
     'output_file': './feature_eng_output.csv',
     'include_original_5': True,
-    'plugin': 'tech_indicator',
+    'feature_plugins': ['base_features', 'tech_indicator'],
+    'pipeline_plugin': 'default',
+    'aligner_plugin': 'default',
+    'post_processor_plugin': 'decomposition',
+    
     'correlation_analysis': False,
     'distribution_plot': True,
     'quiet_mode': False,
@@ -23,17 +27,15 @@ DEFAULT_VALUES = {
 
     # Decomposition settings - PHASE 3.1 COMPATIBILITY: STL + WAVELET + MTM
     'decomp_features': ['CLOSE'],  # List of feature names to decompose using STL, wavelet, and MTM methods
-    'use_stl_decomp': True,  # Enable STL decomposition for decomp_features
-    'use_wavelet_decomp': True,  # REQUIRED: Phase 3.1 has wavelet decFalse
-    'use_mtm_decomp': True,  # REQUIRED: Phase 3.1 has MTM decomFalse
+    'use_stl_decomp': False,  # Enable STL decomposition for decomp_features
+    'use_wavelet_decomp': False,  # REQUIRED: Phase 3.1 has wavelet decFalse
+    'use_mtm_decomp': False,  # REQUIRED: Phase 3.1 has MTM decomFalse
 
     # Additional datasets - REQUIRED FOR PHASE 3 COMPATIBILITY
     'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
     'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
     'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
     'economic_calendar': None,  # Disabled for phase 2.6 compatibility
-    'seasonality_columns': True,  # REQUIRED: Adds day_of_month, hour_of_day, day_of_week
-    'tech_indicators': True,     # REQUIRED: Generate all technical indicators
     'add_log_return': False,     # Enable calculation and inclusion of log return column
     'apply_log_transform': False,  # Disable log transformation analysis to match reference data
     

@@ -1,189 +1,181 @@
 #!/usr/bin/env python3
-"""
-main.py
+"""Feature Engineering System - main entry point
 
-Punto de entrada de la aplicación de predicción de EUR/USD. Este script orquesta:
-    - La carga y fusión de configuraciones (CLI, archivos locales y remotos).
-    - La inicialización de los plugins: Predictor, Optimizer, Pipeline y Preprocessor.
-    - La selección entre ejecutar la optimización de hiperparámetros o entrenar y evaluar directamente.
-    - El guardado de la configuración resultante de forma local y/o remota.
+This script orchestrates the complete feature engineering pipeline:
+    1. Load and merge configuration sources (defaults, remote/local files, CLI, unknown args).
+    2. Dynamically load the required plugins: Pipeline, Feature Generators (list), Aligner, Post-Processor.
+    3. Perform a second configuration merge including plugin-declared parameters.
+    4. Execute the pipeline (data loading, feature generation, alignment, post-processing, export).
+    5. Persist the final resolved configuration locally and/or remotely.
+
+Notes:
+    - We intentionally preserve the original pattern of configuration merging (two passes)
+      and plugin loading sequence used in the reference implementation.
+    - All plugin interfaces are assumed to provide: set_params(**config) and a plugin_params dict.
+    - The pipeline plugin is expected to expose run_pipeline(config, feature_plugins, aligner_plugin, post_processor_plugin).
 """
 
 import sys
 import json
-import pandas as pd
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from app.config_handler import (
     load_config,
     save_config,
     remote_load_config,
     remote_save_config,
-    remote_log
+    remote_log,  # Reserved for future remote debugging/log shipping if needed
 )
 from app.cli import parse_args
 from app.config import DEFAULT_VALUES
 from app.plugin_loader import load_plugin
 from app.config_merger import merge_config, process_unknown_args
 
-# Se asume que los siguientes plugins se cargan desde sus respectivos namespaces:
-# - predictor.plugins
-# - optimizer.plugins
-# - pipeline.plugins
-# - preprocessor.plugins
 
-def main():
-    """
-    Orquesta la ejecución completa del sistema, incluyendo la optimización (si se configura)
-    y la ejecución del pipeline completo (preprocesamiento, entrenamiento, predicción y evaluación).
-    """
-    print("Parsing initial arguments...")
+def main() -> None:
+    """Orchestrate the feature engineering execution flow (enumerated steps for clarity)."""
+
+    # ---------------------------------------------------------------------
+    # 1. Parse CLI arguments & initialize base configuration
+    # ---------------------------------------------------------------------
+    print("[1/7] Parsing CLI arguments...")
     args, unknown_args = parse_args()
     cli_args: Dict[str, Any] = vars(args)
 
-    print("Loading default configuration...")
+    print("[2/7] Loading default configuration values...")
     config: Dict[str, Any] = DEFAULT_VALUES.copy()
-
     file_config: Dict[str, Any] = {}
-    # Carga remota de configuración si se solicita
+
+    # ---------------------------------------------------------------------
+    # 2. Load remote and/or local configuration sources (optional)
+    # ---------------------------------------------------------------------
     if args.remote_load_config:
         try:
             file_config = remote_load_config(args.remote_load_config, args.username, args.password)
-            print(f"Loaded remote config: {file_config}")
-        except Exception as e:
-            print(f"Failed to load remote configuration: {e}")
+            print(f"Loaded remote configuration: {file_config}")
+        except Exception as exc:  # noqa: BLE001 - explicit error reporting
+            print(f"Failed to load remote configuration: {exc}")
             sys.exit(1)
 
-    # Carga local de configuración si se solicita
     if args.load_config:
         try:
             file_config = load_config(args.load_config)
-            print(f"Loaded local config: {file_config}")
-        except Exception as e:
-            print(f"Failed to load local configuration: {e}")
+            print(f"Loaded local configuration: {file_config}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Failed to load local configuration: {exc}")
             sys.exit(1)
 
-    # Primera fusión de la configuración (sin parámetros específicos de plugins)
-    print("Merging configuration with CLI arguments and unknown args (first pass, no plugin params)...")
+    # ---------------------------------------------------------------------
+    # 3. First configuration merge (no plugin params yet)
+    # ---------------------------------------------------------------------
+    print("[3/7] First configuration merge (defaults + file + CLI + unknown args)...")
     unknown_args_dict = process_unknown_args(unknown_args)
     config = merge_config(config, {}, {}, file_config, cli_args, unknown_args_dict)
 
-    # Selección del plugins
-    if not cli_args.get('predictor_plugin'):
-        cli_args['predictor_plugin'] = config.get('predictor_plugin', 'default_predictor')
-    plugin_name = config.get('predictor_plugin', 'default_predictor')
-    
-    
-    # --- CARGA DE PLUGINS ---
-    # Carga del Predictor Plugin
-    print(f"Loading Predictor Plugin: {plugin_name}")
-    try:
-        predictor_class, _ = load_plugin('predictor.plugins', plugin_name)
-        predictor_plugin = predictor_class(config)
-        predictor_plugin.set_params(**config)
-    except Exception as e:
-        print(f"Failed to load or initialize Predictor Plugin '{plugin_name}': {e}")
-        sys.exit(1)
+    # ---------------------------------------------------------------------
+    # 4. Plugin selection & dynamic loading (initialization + set_params)
+    #     We mimic the original sequence & style, adapted to feature-eng context.
+    # ---------------------------------------------------------------------
 
-    # Carga del Optimizer Plugin (por defecto, se usa el de DEAP)
-    # Selección del plugin si no se especifica
-    plugin_name = config.get('optimizer_plugin', 'default_optimizer')
-    print(f"Loading Plugin ..{plugin_name}")
-
+    # Pipeline Plugin -----------------------------------------------------
+    pipeline_plugin_name = config.get('pipeline_plugin', 'default')
+    print(f"Loading Pipeline Plugin: {pipeline_plugin_name}")
     try:
-        optimizer_class, _ = load_plugin('optimizer.plugins', plugin_name)
-        optimizer_plugin = optimizer_class()
-        optimizer_plugin.set_params(**config)
-    except Exception as e:
-        print(f"Failed to load or initialize Optimizer Plugin: {e}")
-        sys.exit(1)
-
-    # Carga del Pipeline Plugin (orquestador del flujo de entrenamiento y evaluación)
-    plugin_name = config.get('pipeline_plugin', 'default_pipeline')
-    print(f"Loading Plugin ..{plugin_name}")
-    try:
-        pipeline_class, _ = load_plugin('pipeline.plugins', plugin_name)
+        pipeline_class, _ = load_plugin('feature_eng.pipeline', pipeline_plugin_name)
         pipeline_plugin = pipeline_class()
         pipeline_plugin.set_params(**config)
-    except Exception as e:
-        print(f"Failed to load or initialize Pipeline Plugin: {e}")
+    except Exception as exc:  # noqa: BLE001
+        print(f"Failed to load or initialize Pipeline Plugin '{pipeline_plugin_name}': {exc}")
         sys.exit(1)
 
-    # Carga del Preprocessor Plugin (para process_data, ventanas deslizantes y STL)
-    plugin_name = config.get('preprocessor_plugin', 'default_preprocessor')
-    print(f"Loading Plugin ..{plugin_name}")
-    try:
-        preprocessor_class, _ = load_plugin('preprocessor.plugins', plugin_name)
-        preprocessor_plugin = preprocessor_class()
-        preprocessor_plugin.set_params(**config)
-    except Exception as e:
-        print(f"Failed to load or initialize Preprocessor Plugin: {e}")
-        sys.exit(1)
-
-    # fusión de configuración, integrando parámetros específicos de plugin predictor
-    print("Merging configuration with CLI arguments and unknown args (second pass, with plugin params)...")
-    config = merge_config(config, predictor_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
-    # fusión de configuración, integrando parámetros específicos de plugin optimizer
-    config = merge_config(config, optimizer_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
-    # fusión de configuración, integrando parámetros específicos de plugin pipeline
-    config = merge_config(config, pipeline_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
-    # fusión de configuración, integrando parámetros específicos de plugin preprocessor
-    config = merge_config(config, preprocessor_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
-    
-
-    # --- DECISIÓN DE EJECUCIÓN ---
-    if config.get('load_model', False):
-        print("Loading and evaluating existing model...")
+    # Feature Plugins (list) ---------------------------------------------
+    feature_plugin_names: List[str] = config.get('feature_plugins', [])
+    feature_plugins_instances = []
+    for fname in feature_plugin_names:
+        print(f"Loading Feature Plugin: {fname}")
         try:
-            # Usar el predictor plugin para cargar y evaluar el modelo (método ya existente)
-            predictor_plugin.load_and_evaluate_model(config)
-        except Exception as e:
-            print(f"Model evaluation failed: {e}")
+            feature_class, _ = load_plugin('feature_eng.features', fname)
+            feature_instance = feature_class()
+            feature_instance.set_params(**config)
+            feature_plugins_instances.append(feature_instance)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Failed to load or initialize Feature Plugin '{fname}': {exc}")
             sys.exit(1)
-    else:
-        # Si se activa el optimizador, se ejecuta el proceso de optimización antes del pipeline
-        if config.get('use_optimizer', False):
-            print("Running hyperparameter optimization with Optimizer Plugin...")
-            try:
-                # El optimizador optimiza el modelo (por ejemplo, invoca build_model, train, evaluate internamente)
-                optimal_params = optimizer_plugin.optimize(predictor_plugin, preprocessor_plugin, config)
-                # Se guardan los parámetros óptimos en un archivo JSON
-                optimizer_output_file = config.get("optimizer_output_file", "optimizer_output.json")
-                with open(optimizer_output_file, "w") as f:
-                    json.dump(optimal_params, f, indent=4)
-                print(f"Optimized parameters saved to {optimizer_output_file}.")
-                # Actualizar la configuración con los parámetros optimizados
-                config.update(optimal_params)
-            except Exception as e:
-                print(f"Hyperparameter optimization failed: {e}")
-                sys.exit(1)
-        else:
-            print("Skipping hyperparameter optimization.")
-            print("Running prediction pipeline...")
-            # El Pipeline Plugin orquesta:
-            # 1. Preprocesamiento (process_data, descomposición STL, ventanas deslizantes)
-            # 2. Entrenamiento y evaluación usando el Predictor Plugin
-            pipeline_plugin.run_prediction_pipeline(
-                config,
-                predictor_plugin,
-                preprocessor_plugin
-            )
-        
-    # Guardado de la configuración local y remota
+
+    # Aligner Plugin ------------------------------------------------------
+    aligner_plugin_name = config.get('aligner_plugin', 'default')
+    print(f"Loading Aligner Plugin: {aligner_plugin_name}")
+    try:
+        aligner_class, _ = load_plugin('feature_eng.aligner', aligner_plugin_name)
+        aligner_plugin = aligner_class()
+        aligner_plugin.set_params(**config)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Failed to load or initialize Aligner Plugin '{aligner_plugin_name}': {exc}")
+        sys.exit(1)
+
+    # Post-Processor Plugin -----------------------------------------------
+    post_processor_plugin_name = config.get('post_processor_plugin', 'decomposition')
+    print(f"Loading Post-Processor Plugin: {post_processor_plugin_name}")
+    try:
+        post_proc_class, _ = load_plugin('feature_eng.post_processor', post_processor_plugin_name)
+        post_processor_plugin = post_proc_class()
+        post_processor_plugin.set_params(**config)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Failed to load or initialize Post-Processor Plugin '{post_processor_plugin_name}': {exc}")
+        sys.exit(1)
+
+    # ---------------------------------------------------------------------
+    # 5. Second configuration merge including each plugin's declared params
+    #    Order: pipeline, each feature plugin, aligner, post-processor
+    # ---------------------------------------------------------------------
+    print("[4/7] Second configuration merge (including plugin-specific params)...")
+    config = merge_config(config, pipeline_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
+    for fp in feature_plugins_instances:
+        config = merge_config(config, fp.plugin_params, {}, file_config, cli_args, unknown_args_dict)
+    config = merge_config(config, aligner_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
+    config = merge_config(config, post_processor_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
+
+    # ---------------------------------------------------------------------
+    # 6. Execute pipeline (single consolidated action – no optimizer stage)
+    # ---------------------------------------------------------------------
+    print("[5/7] Executing feature engineering pipeline...")
+    try:
+        # Unified pipeline invocation passing all relevant plugin instances & config.
+        pipeline_plugin.run_pipeline(
+            config,
+            feature_plugins_instances,
+            aligner_plugin,
+            post_processor_plugin,
+        )
+    except Exception as exc:  # noqa: BLE001
+        print(f"Pipeline execution failed: {exc}")
+        sys.exit(1)
+
+    # ---------------------------------------------------------------------
+    # 7. Persist resulting configuration (local / remote)
+    # ---------------------------------------------------------------------
     if config.get('save_config'):
         try:
-            save_config(config, config['save_config'])
-            print(f"Configuration saved to {config['save_config']}.")
-        except Exception as e:
-            print(f"Failed to save configuration locally: {e}")
+            save_path = config['save_config']
+            save_config(config, save_path)
+            print(f"[6/7] Configuration saved locally to: {save_path}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Failed to save configuration locally: {exc}")
 
     if config.get('remote_save_config'):
-        print(f"Remote saving configuration to {config['remote_save_config']}")
+        remote_target = config['remote_save_config']
+        print(f"[7/7] Saving configuration remotely to: {remote_target}")
         try:
-            remote_save_config(config, config['remote_save_config'], config.get('username'), config.get('password'))
+            remote_save_config(
+                config,
+                remote_target,
+                config.get('username'),
+                config.get('password'),
+            )
             print("Remote configuration saved.")
-        except Exception as e:
-            print(f"Failed to save configuration remotely: {e}")
+        except Exception as exc:  # noqa: BLE001
+            print(f"Failed to save configuration remotely: {exc}")
 
-if __name__ == "__main__":
+
+if __name__ == "__main__":  # pragma: no cover
     main()

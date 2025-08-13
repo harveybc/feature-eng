@@ -14,7 +14,8 @@ setup(
         ],
         'feature_eng.features': [
             'default=plugins.features.tech_indicator:FeaturePlugin',
-            'tech_indicator=plugins.features.tech_indicator:FeaturePlugin'
+            'tech_indicator=plugins.features.tech_indicator:FeaturePlugin',
+            'base_features=plugins.features.base_features:FeaturePlugin'
         ],
         'feature_eng.aligner': [
             'default=plugins.aligner.default_aligner:AlignerPlugin'
