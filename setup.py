@@ -13,7 +13,7 @@ setup(
             'default=fe_plugins.pipeline.default_pipeline:PipelinePlugin'
         ],
         'feature_eng.features': [
-            'default=fe_plugins.features.base_features:FeaturePlugin',
+            'default=fe_plugins.features.base_features:BaseFeaturePlugin',
             'base_features=fe_plugins.features.base_features:BaseFeaturePlugin',
             'technical_features=fe_plugins.features.technical_features:TechnicalFeaturePlugin',
             'fundamental_features=fe_plugins.features.fundamental_features:FundamentalFeaturePlugin',
