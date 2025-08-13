@@ -41,8 +41,8 @@ class FeaturePlugin:
     # ---------------------------------------------------------------------
     plugin_params: Dict[str, Any] = {
         # INPUT FILES ----------------------------------------------------
-        "sp500_input_file": "tests/data/sp500.csv",
-        "vix_input_file": "tests/data/vix.csv",
+        "sp500_input_file": "tests/data/sp_500_day_1927_2020_ohlc.csv",
+        "vix_input_file": "tests/data/vix_day_1990_2024.csv",
         # DATETIME CONFIG ------------------------------------------------
         "sp500_date_time_col": "DATE_TIME",
         "vix_date_time_col": "DATE_TIME",

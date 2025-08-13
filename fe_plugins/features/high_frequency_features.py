@@ -45,6 +45,8 @@ class FeaturePlugin:  # Consistent naming pattern
         "high_freq_hourly_file": "tests/data/hourly.csv",
         "high_freq_15m_file": "tests/data/15m.csv",
         "high_freq_30m_file": "tests/data/30m.csv",
+    # Automatic synthesis: when 30m file missing/None, derive 30m by taking every 2nd 15m row
+    "high_freq_generate_30m_from_15m": True,
         # Optional per-source explicit datetime format strings
         "high_freq_hourly_date_time_format": None,
         "high_freq_15m_date_time_format": None,
@@ -75,6 +77,7 @@ class FeaturePlugin:  # Consistent naming pattern
         "lags_15m",
         "lags_30m",
     "rows_dropped_due_to_nans",
+    "synthetic_30m",
     ]
 
     def __init__(self) -> None:
@@ -115,6 +118,7 @@ class FeaturePlugin:  # Consistent naming pattern
         file_hourly = p["high_freq_hourly_file"]
         file_15m = p["high_freq_15m_file"]
         file_30m = p["high_freq_30m_file"]
+        synth_enabled = bool(p.get("high_freq_generate_30m_from_15m", True))
         fmt_hourly = p["high_freq_hourly_date_time_format"]
         fmt_15m = p["high_freq_15m_date_time_format"]
         fmt_30m = p["high_freq_30m_date_time_format"]
@@ -128,12 +132,13 @@ class FeaturePlugin:  # Consistent naming pattern
         max_h = p["high_freq_max_rows_hourly"]
         max_15 = p["high_freq_max_rows_15m"]
         max_30 = p["high_freq_max_rows_30m"]
-
-        use_files = not (
-            (file_hourly is None or str(file_hourly).lower() == "none")
-            and (file_15m is None or str(file_15m).lower() == "none")
-            and (file_30m is None or str(file_30m).lower() == "none")
-        )
+        need_synth_30m = (file_30m is None or str(file_30m).lower() == "none") and synth_enabled
+        # We'll use files if at least hourly or 15m file is provided (we can synthesize 30m if missing)
+        use_files = any([
+            file_hourly is not None and str(file_hourly).lower() != "none",
+            file_15m is not None and str(file_15m).lower() != "none",
+            (not need_synth_30m) and file_30m is not None and str(file_30m).lower() != "none",
+        ])
 
         # -----------------------------------------------------------------
         # 2. Load datasets
@@ -142,8 +147,14 @@ class FeaturePlugin:  # Consistent naming pattern
             try:
                 hourly_df = pd.read_csv(file_hourly, usecols=[col_hourly_dt], nrows=max_h)
                 df_15m = pd.read_csv(file_15m, nrows=max_15)
-                df_30m = pd.read_csv(file_30m, nrows=max_30)
-                data_source_mode = "files"
+                if need_synth_30m:
+                    # Synthetic 30m series: PURE SAMPLING of every 2nd 15m bar (no averaging/aggregation)
+                    # This preserves exact timestamp alignment at 30m cadence without mixing prices.
+                    df_30m = df_15m.iloc[::2].copy().reset_index(drop=True)
+                    data_source_mode = "files+synthetic30m"
+                else:
+                    df_30m = pd.read_csv(file_30m, nrows=max_30)
+                    data_source_mode = "files"
             except Exception as exc:  # noqa: BLE001
                 raise RuntimeError(f"Failed to load one or more high frequency input files: {exc}") from exc
         else:
@@ -151,13 +162,19 @@ class FeaturePlugin:  # Consistent naming pattern
                 raise ValueError(
                     "All high frequency file paths are None/'none' and no data dict provided to process()."
                 )
-            missing_keys = [k for k in ["hourly", "m15", "m30"] if k not in data]
-            if missing_keys:
-                raise ValueError(f"High frequency data dict missing required keys: {missing_keys}")
-            hourly_df = data["hourly"][[self._resolve_ci(data["hourly"], col_hourly_dt)]]
+            if need_synth_30m and "m15" not in data:
+                raise ValueError("Synthetic 30m generation requested but 15m dataset not provided in data dict.")
+            if "hourly" not in data or "m15" not in data:
+                raise ValueError("High frequency data dict missing required 'hourly' or 'm15' dataset.")
+            hourly_df = data["hourly"][ [ self._resolve_ci(data["hourly"], col_hourly_dt) ] ]
             df_15m = data["m15"].copy()
-            df_30m = data["m30"].copy()
-            data_source_mode = "data_param"
+            if need_synth_30m or "m30" not in data:
+                # Synthetic 30m series: sampling every second 15m observation (no aggregation)
+                df_30m = df_15m.iloc[::2].copy().reset_index(drop=True)
+                data_source_mode = "data_param+synthetic30m"
+            else:
+                df_30m = data["m30"].copy()
+                data_source_mode = "data_param"
             if max_h is not None:
                 hourly_df = hourly_df.head(max_h)
             if max_15 is not None:
@@ -263,6 +280,7 @@ class FeaturePlugin:  # Consistent naming pattern
                 "lags_15m": lags_15m,
                 "lags_30m": lags_30m,
                 "rows_dropped_due_to_nans": pre_drop_rows - rows_after_drop,
+                "synthetic_30m": bool(need_synth_30m or data_source_mode.endswith("synthetic30m")),
             }
         )
 

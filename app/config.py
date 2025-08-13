@@ -32,8 +32,6 @@ DEFAULT_VALUES = {
 
     # Additional datasets - REQUIRED FOR PHASE 3 COMPATIBILITY
     'high_freq_dataset': 'tests/data/EURUSD-2000-2020-15m.csv',
-    'sp500_dataset': 'tests/data/sp_500_day_1927_2020_ohlc.csv',
-    'vix_dataset': 'tests/data/vix_day_1990_2024.csv',
     'economic_calendar': None,  # Disabled for phase 2.6 compatibility
     'add_log_return': False,     # Enable calculation and inclusion of log return column
     'apply_log_transform': False,  # Disable log transformation analysis to match reference data

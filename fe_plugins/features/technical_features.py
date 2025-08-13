@@ -36,8 +36,8 @@ class FeaturePlugin:  # Consistent plugin class name
     # ------------------------------------------------------------------
     plugin_params: Dict[str, Any] = {
         # INPUT SOURCE -------------------------------------------------
-        "tech_features_input_file": "tests/data/technical_features_input.csv",
-        "tech_features_max_rows": 1_000_000,
+        "tech_features_input_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",
+        "tech_features_max_rows": 1000000,
         # DATETIME / COLUMN CONFIG ------------------------------------
         "date_time_col": "DATE_TIME",
         "date_time_format": None,
