@@ -134,26 +134,27 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
             7. Update debug state & return assembled DataFrame.
         """
 
-        # -----------------------------------------------------------------
-        # 1. Resolve parameters
-        # -----------------------------------------------------------------
+        # 1) Resolve parameters and finalize STL derived values
         p = {**self.params, **{k: config.get(k, v) for k, v in self.params.items()}}
-        self.set_params(**p)  # persist
+        self.set_params(**p)
         self._finalize_stl_params()
-        use_stl = p["use_stl"] and p["stl_period"] and p["stl_period"] > 1
-        use_wavelet = p["use_wavelet"] and HAS_WAVELETS
-        use_mtm = p["use_mtm"] and HAS_SIGNAL
+        stl_period = int(self.params.get("stl_period") or 0)
+        stl_window = int(self.params.get("stl_window") or 0)
+        stl_trend = int(self.params.get("stl_trend") or 0)
+        use_stl = bool(p.get("use_stl", True) and stl_period > 1 and stl_window > 0 and stl_trend > 0)
+        use_wavelet = bool(p.get("use_wavelet", True) and HAS_WAVELETS)
+        use_mtm = bool(p.get("use_mtm", True) and HAS_SIGNAL)
 
-        feature_list = list(p["decomp_features"] or [])
+        feature_list = list(p.get("decomp_features") or [])
 
-        # -----------------------------------------------------------------
-        # 2. Validate feature list
-        # -----------------------------------------------------------------
+        # 2) Validate feature list
         valid_features = [f for f in feature_list if f in data.columns]
         if feature_list and not valid_features:
-            logger.warning("None of the requested decomposition features were found in the dataset; returning original data")
+            logger.warning(
+                "None of the requested decomposition features were found in the dataset; returning original data"
+            )
             return data.copy()
-        if not feature_list:  # default: try all numeric (?) – stick with explicit only
+        if not feature_list:
             logger.info("No decomp_features specified; returning data unchanged.")
             return data.copy()
 
@@ -161,42 +162,34 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
         out = pd.DataFrame(index=data.index)
         components_generated: List[str] = []
 
-        # -----------------------------------------------------------------
-        # 3. Log return (optional)
-        # -----------------------------------------------------------------
-        if p["add_log_return"] and "CLOSE" in data.columns:
+        # 3) Log return (optional)
+        if p.get("add_log_return") and "CLOSE" in data.columns:
             close = data["CLOSE"].astype(float)
             log_ret = np.log(close / close.shift(1)).replace([np.inf, -np.inf], np.nan).fillna(0.0)
             out["log_return"] = log_ret
             components_generated.append("log_return")
-        elif p["add_log_return"]:
+        elif p.get("add_log_return"):
             logger.warning("Requested log_return but CLOSE column missing; skipping.")
 
         # Progress handling
         iterator = valid_features
-        if p["show_progress"] and len(valid_features) >= p["progress_min_features"]:
+        if p.get("show_progress", True) and len(valid_features) >= int(p.get("progress_min_features", 2)):
             try:
                 iterator = tqdm(valid_features, desc="decompose", leave=False)
             except Exception:  # pragma: no cover
                 iterator = valid_features
 
-        # -----------------------------------------------------------------
-        # 4. Per-feature causal rolling decompositions
-        # -----------------------------------------------------------------
+        # 4) Per-feature causal rolling decompositions
         for feat in iterator:
             series = data[feat].astype(float).to_numpy()
-            n = len(series)
 
             feat_components: Dict[str, np.ndarray] = {}
 
             if use_stl:
-                stl_trend, stl_seasonal, stl_resid = self._causal_stl(
-                    series,
-                    window=p["stl_window"],
-                    period=p["stl_period"],
-                    trend_len=p["stl_trend"],
+                stl_trend_arr, stl_seasonal, stl_resid = self._causal_stl(
+                    series, window=stl_window, period=stl_period, trend_len=stl_trend
                 )
-                feat_components[f"{feat}_stl_trend"] = stl_trend
+                feat_components[f"{feat}_stl_trend"] = stl_trend_arr
                 feat_components[f"{feat}_stl_seasonal"] = stl_seasonal
                 feat_components[f"{feat}_stl_resid"] = stl_resid
 
@@ -215,29 +208,22 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
                 out[comp_name] = comp_vals
                 components_generated.append(comp_name)
 
-            # Keep original feature if required
-            if p["keep_original"]:
+            # Keep or replace original feature
+            if p.get("keep_original", True):
                 out[feat] = series
-            elif p["replace_original"] and not p["keep_original"]:
-                # Original omitted intentionally
-                pass
-            else:  # default keep_original True covers main use-case
+            elif p.get("replace_original"):
                 pass
 
-        # -----------------------------------------------------------------
-        # 5. Enforce column cap if configured
-        # -----------------------------------------------------------------
+        # 5) Enforce column cap if configured
         max_cols = p.get("max_output_columns")
-        if max_cols is not None and len(out.columns) > max_cols:
+        if max_cols is not None and len(out.columns) > int(max_cols):
             logger.warning(
                 "Truncating output columns from %s to %s due to max_output_columns", len(out.columns), max_cols
             )
             keep = list(out.columns)[: int(max_cols)]
             out = out[keep]
 
-        # -----------------------------------------------------------------
-        # 6. Drop NaNs (optional) & update debug state
-        # -----------------------------------------------------------------
+        # 6) Drop NaNs (optional) & update debug state
         rows_before = len(out)
         if p.get("drop_na", True):
             out = out.dropna()
@@ -250,9 +236,9 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
                 "use_stl": use_stl,
                 "use_wavelet": use_wavelet,
                 "use_mtm": use_mtm,
-                "stl_period": p["stl_period"],
-                "stl_window": p["stl_window"],
-                "stl_trend": p["stl_trend"],
+                "stl_period": stl_period,
+                "stl_window": stl_window,
+                "stl_trend": stl_trend,
                 "wavelet_name": p["wavelet_name"],
                 "wavelet_levels": p["wavelet_levels"],
                 "mtm_window_len": p["mtm_window_len"],
@@ -374,7 +360,7 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
 
 # Plugin interface (if dynamic loader expects these)
 def get_plugin_class():  # noqa: D401
-    return FeaturePlugin
+    return DecompositionPostProcessor
 
 
 def get_plugin_info():  # noqa: D401
