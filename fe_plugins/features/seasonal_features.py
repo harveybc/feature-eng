@@ -157,12 +157,20 @@ class SeasonalFeaturePlugin:  # Name expected by loader
                 ts = pd.to_datetime(raw_ts, errors="coerce")
         else:
             ts = pd.to_datetime(raw_ts, errors="coerce")
-        # dayfirst fallback if mostly NA
-        if ts.isna().mean() > 0.9 and params.get("date_time_dayfirst_fallback", True):
+
+        # Adaptive dayfirst attempt: if any invalids and improvement possible choose best
+        if params.get("date_time_dayfirst_fallback", True) and ts.isna().any():
             alt = pd.to_datetime(raw_ts, errors="coerce", dayfirst=True)
-            if alt.notna().sum() > ts.notna().sum():
+            base_valid = ts.notna().sum()
+            alt_valid = alt.notna().sum()
+            if alt_valid > base_valid:
+                logger.info(
+                    "seasonal_features: switching to dayfirst=True parse (valid %s -> %s, improvement %d)",
+                    base_valid,
+                    alt_valid,
+                    alt_valid - base_valid,
+                )
                 ts = alt
-                logger.info("seasonal_features: improved timestamp parse using dayfirst=True")
 
         # -----------------------------------------------------------------
         # 4. Drop rows with invalid timestamps & init working frame
