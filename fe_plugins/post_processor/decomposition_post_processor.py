@@ -1,649 +1,390 @@
 #!/usr/bin/env python3
-"""
-Decomposition Post-Processor Plugin for Feature Engineering System
+"""Decomposition Post-Processor Plugin
 
-This plugin provides post-processing capabilities to decompose selected features
-using three different methods:
-1. STL (Seasonal and Trend decomposition using Loess)
-2. Wavelet decomposition 
-3. MTM (Multi-taper method) decomposition
+Per-feature strictly causal rolling decompositions (STL, Wavelet, MTM-style band power) using only
+data up to and including the current index (never future leakage).
 
-Fixed version with proper causality and alignment.
+Responsibilities:
+    1. Resolve runtime parameters (merged with plugin defaults) & validate target feature list.
+    2. Optionally compute log returns (first column) without future data usage.
+    3. For each selected feature perform enabled decompositions (STL, Wavelet, MTM) via rolling windows:
+         - Window covers past W points including current point t (indices i-W+1 .. i).
+         - Components assigned only to position i (causal) – no smoothing with future samples.
+    4. Aggregate all generated component columns (optionally keeping original feature).
+    5. Record comprehensive parameter snapshot & metrics (counts, output columns) in debug state.
+    6. Return resulting DataFrame with deterministic column ordering (log_return, decompositions, originals).
+
+Notes:
+    - STL requires sufficiently large window & period; if infeasible for early rows values stay NaN (forward-filled once at end).
+    - Wavelet uses per-window SWT (stationary wavelet transform) to maintain alignment (no decimation) when pywt available.
+    - MTM approximation uses Welch PSD over the causal window; band energies stored per horizon.
+    - All optional dependencies gracefully degrade (features skipped if library missing).
 """
+
+from __future__ import annotations
+
+import logging
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from statsmodels.tsa.seasonal import STL
 from tqdm import tqdm
-import logging
-from typing import Dict, Any, Optional, Tuple, List
 
 logger = logging.getLogger(__name__)
 
-# Try importing optional dependencies
-try:
-    import pywt  # For Wavelets
+try:  # Wavelets (optional)
+    import pywt  # type: ignore
     HAS_WAVELETS = True
-except ImportError:
-    logger.warning("pywt library not found. Wavelet features will be unavailable.")
-    pywt = None
+except Exception:  # pragma: no cover
     HAS_WAVELETS = False
+    pywt = None  # type: ignore
+    logger.warning("pywt not installed; wavelet decomposition disabled.")
 
-try:
-    from scipy import signal
-    HAS_MTM = True
-except ImportError:
-    logger.warning("scipy.signal not found. MTM features may be unavailable.")
-    signal = None
-    HAS_MTM = False
+try:  # Signal processing (optional)
+    from scipy import signal  # type: ignore
+    HAS_SIGNAL = True
+except Exception:  # pragma: no cover
+    HAS_SIGNAL = False
+    signal = None  # type: ignore
+    logger.warning("scipy.signal not installed; MTM/Welch decomposition disabled.")
 
 
-class DecompositionPostProcessor:
-    """
-    Post-processor that decomposes selected features using STL, Wavelet, and MTM methods.
-    
-    This plugin takes an existing feature dataset and replaces specified columns
-    with their decomposed components, providing additional insight into trend,
-    seasonal, and residual patterns.
-    """
-    
-    # Default parameters for decomposition methods
-    DEFAULT_PARAMS = {
-        # --- General Settings ---
-        "decomp_features": [],  # List of feature names to decompose
-        "use_stl_decomp": True,
-        "use_wavelet_decomp": True, 
-        "use_mtm_decomp": False,
-        "add_log_return": False,  # Enable calculation and inclusion of log return column
-        
-        # --- STL Parameters ---
+class FeaturePlugin:  # Consistent naming with other plugins
+    """Causal rolling decomposition post-processor."""
+
+    # ------------------------------------------------------------------
+    # Default parameters (merge-able)
+    # ------------------------------------------------------------------
+    plugin_params: Dict[str, Any] = {
+        # Feature selection -------------------------------------------------
+        "decomp_features": [],            # List of feature column names to decompose
+        "add_log_return": False,          # Add log return of CLOSE (if present)
+        "keep_original": True,            # Keep original feature alongside components
+        "replace_original": False,        # If True and keep_original False -> original removed
+        # Progress ---------------------------------------------------------
+        "show_progress": True,
+        "progress_min_features": 2,
+        # STL --------------------------------------------------------------
+        "use_stl": True,
         "stl_period": 24,
-        "stl_window": None,  # Will be calculated: 2 * stl_period + 1
-        "stl_trend": None,   # Will be calculated based on stl_period and stl_window
-        "stl_plot_file": None,
-        
-        # --- Wavelet Parameters ---
-        "wavelet_name": 'db4',
+        "stl_window": None,              # If None => 2*period+1
+        "stl_trend": None,               # If None -> auto adjusted (odd)
+        # WAVELET ----------------------------------------------------------
+        "use_wavelet": True,
+        "wavelet_name": "db4",
         "wavelet_levels": 2,
-        "wavelet_mode": 'symmetric',
-        "wavelet_plot_file": None,
-        
-        # --- MTM Parameters ---
+        # MTM / Welch PSD --------------------------------------------------
+        "use_mtm": False,
         "mtm_window_len": 168,
-        "mtm_step": 1,
-        "mtm_time_bandwidth": 5.0,
-        "mtm_num_tapers": None,
-        "mtm_freq_bands": [(0, 0.01), (0.01, 0.06), (0.06, 0.2), (0.2, 0.5)],
-        "tapper_plot_file": None,
-        "tapper_plot_points": 480,
-        
-        # --- Output Settings ---
-        "replace_original": True,  # Replace original features with decomposed ones
-        "keep_original": False,    # Keep original features alongside decomposed ones
+        "mtm_freq_bands": [(0.0, 0.01), (0.01, 0.06), (0.06, 0.2), (0.2, 0.5)],
+        # OUTPUT CONTROL ---------------------------------------------------
+        "max_output_columns": None,       # Optional safety cap
+    "drop_na": True,                  # Drop any rows containing NaNs before returning
     }
-    
-    def __init__(self, params: Optional[Dict[str, Any]] = None):
-        """Initialize the decomposition post-processor."""
-        self.params = self.DEFAULT_PARAMS.copy()
-        print(f"[DEBUG] DecompositionPostProcessor DEFAULT_PARAMS: use_stl_decomp={self.params.get('use_stl_decomp')}, use_wavelet_decomp={self.params.get('use_wavelet_decomp')}")
-        if params:
-            print(f"[DEBUG] DecompositionPostProcessor received params: {params}")
-            self.params.update(params)
-            print(f"[DEBUG] DecompositionPostProcessor final params: use_stl_decomp={self.params.get('use_stl_decomp')}, use_wavelet_decomp={self.params.get('use_wavelet_decomp')}")
-            
-        self._resolve_stl_params()
-        
-        # Plugin debug variables for interface compatibility
-        self.plugin_debug_vars = ['use_stl_decomp', 'use_wavelet_decomp', 'use_mtm_decomp', 'decomp_features', 'stl_period', 'wavelet_name', 'wavelet_levels']
-        
-        logger.info(f"Initialized DecompositionPostProcessor with features: {self.params['decomp_features']}")
-    
-    def _resolve_stl_params(self):
-        """Resolve STL parameters based on period."""
-        if self.params.get("stl_period") is not None and self.params.get("stl_period") > 1:
-            if self.params.get("stl_window") is None:
-                self.params["stl_window"] = 2 * self.params["stl_period"] + 1
-            
-            if self.params.get("stl_trend") is None:
-                current_stl_window = self.params.get("stl_window")
-                if current_stl_window is not None and current_stl_window > 3:
-                    try:
-                        trend_calc = int(1.5 * self.params["stl_period"] / (1 - 1.5 / current_stl_window)) + 1
-                        self.params["stl_trend"] = max(3, trend_calc)
-                    except ZeroDivisionError:
-                        self.params["stl_trend"] = self.params["stl_period"] + 1
-                else:
-                    self.params["stl_trend"] = self.params["stl_period"] + 1
-            
-            # Ensure stl_trend is odd
-            if self.params.get("stl_trend") is not None and self.params["stl_trend"] % 2 == 0:
-                self.params["stl_trend"] += 1
-    
-    def post_process(self, data: pd.DataFrame) -> pd.DataFrame:
+
+    plugin_debug_vars: List[str] = [
+        "features_requested",
+        "features_processed",
+        "use_stl",
+        "use_wavelet",
+        "use_mtm",
+        "stl_period",
+        "stl_window",
+        "stl_trend",
+        "wavelet_name",
+        "wavelet_levels",
+        "mtm_window_len",
+        "mtm_freq_bands",
+        "components_generated",
+        "output_columns",
+    "rows_before_drop",
+    "rows_after_drop",
+    "rows_dropped_due_to_nans",
+    ]
+
+    def __init__(self) -> None:
+        self.params: Dict[str, Any] = self.plugin_params.copy()
+        self._debug_state: Dict[str, Any] = {k: None for k in self.plugin_debug_vars}
+
+    # ------------------------------------------------------------------
+    # Interface methods
+    # ------------------------------------------------------------------
+    def set_params(self, **kwargs: Any) -> None:
+        for k, v in kwargs.items():
+            if k in self.params:
+                self.params[k] = v
+
+    def get_debug_info(self) -> Dict[str, Any]:  # noqa: D401
+        return {k: self._debug_state.get(k) for k in self.plugin_debug_vars}
+
+    # ------------------------------------------------------------------
+    # Core processing
+    # ------------------------------------------------------------------
+    def post_process(self, config: Dict[str, Any], data: pd.DataFrame) -> pd.DataFrame:  # noqa: D401
+        """Execute strictly causal decompositions.
+
+        Steps:
+            1. Resolve active parameters & compute derived STL window/trend if needed.
+            2. Validate and filter feature list to those present in data.
+            3. Optionally add log return column (CLOSE required).
+            4. For each feature perform enabled rolling decompositions (STL, Wavelet, MTM) using only past+current data.
+            5. Collect component arrays (aligned to original index) & optionally remove originals.
+            6. Enforce output column cap if configured.
+            7. Update debug state & return assembled DataFrame.
         """
-        Apply decomposition to selected features in the input data.
-        
-        Args:
-            data: DataFrame with features to be decomposed
-            
-        Returns:
-            DataFrame with log_return as first column, followed by decomposed features and original features
-        """
-        logger.info("Starting decomposition post-processing pipeline")
-        
-        # Initialize result with proper index
-        result_data = pd.DataFrame(index=data.index)
-        
-        # Add log_return as the FIRST column if enabled
-        add_log_return = self.params.get('add_log_return', False)
-        if add_log_return and 'CLOSE' in data.columns:
-            close_prices = data['CLOSE']
-            log_returns = np.log(close_prices / close_prices.shift(1))
-            log_returns.iloc[0] = 0.0  # First log return is set to 0
-            result_data['log_return'] = log_returns
-            logger.info("Added log_return as the first feature")
-        elif add_log_return and 'CLOSE' not in data.columns:
-            logger.warning("CLOSE column not found - cannot calculate log_return")
-        
-        decomp_features = self.params.get('decomp_features', [])
-        if not decomp_features:
-            logger.info("No features specified for decomposition.")
-            # Add original data
-            for col in data.columns:
-                if col not in result_data.columns:
-                    result_data[col] = data[col]
-            return result_data
-        
-        # Validate that specified features exist in the data
-        missing_features = [f for f in decomp_features if f not in data.columns]
-        if missing_features:
-            logger.warning(f"Features not found in data: {missing_features}")
-            decomp_features = [f for f in decomp_features if f in data.columns]
-        
-        if not decomp_features:
-            logger.warning("No valid features found for decomposition.")
-            # Add original data
-            for col in data.columns:
-                if col not in result_data.columns:
-                    result_data[col] = data[col]
-            return result_data
-        
-        logger.info(f"Decomposing features: {decomp_features}")
-        
-        # Process each feature for decomposition
-        for feature_name in decomp_features:
-            logger.info(f"Processing feature: {feature_name}")
-            
+
+        # -----------------------------------------------------------------
+        # 1. Resolve parameters
+        # -----------------------------------------------------------------
+        p = {**self.params, **{k: config.get(k, v) for k, v in self.params.items()}}
+        self.set_params(**p)  # persist
+        self._finalize_stl_params()
+        use_stl = p["use_stl"] and p["stl_period"] and p["stl_period"] > 1
+        use_wavelet = p["use_wavelet"] and HAS_WAVELETS
+        use_mtm = p["use_mtm"] and HAS_SIGNAL
+
+        feature_list = list(p["decomp_features"] or [])
+
+        # -----------------------------------------------------------------
+        # 2. Validate feature list
+        # -----------------------------------------------------------------
+        valid_features = [f for f in feature_list if f in data.columns]
+        if feature_list and not valid_features:
+            logger.warning("None of the requested decomposition features were found in the dataset; returning original data")
+            return data.copy()
+        if not feature_list:  # default: try all numeric (?) – stick with explicit only
+            logger.info("No decomp_features specified; returning data unchanged.")
+            return data.copy()
+
+        # Output structure
+        out = pd.DataFrame(index=data.index)
+        components_generated: List[str] = []
+
+        # -----------------------------------------------------------------
+        # 3. Log return (optional)
+        # -----------------------------------------------------------------
+        if p["add_log_return"] and "CLOSE" in data.columns:
+            close = data["CLOSE"].astype(float)
+            log_ret = np.log(close / close.shift(1)).replace([np.inf, -np.inf], np.nan).fillna(0.0)
+            out["log_return"] = log_ret
+            components_generated.append("log_return")
+        elif p["add_log_return"]:
+            logger.warning("Requested log_return but CLOSE column missing; skipping.")
+
+        # Progress handling
+        iterator = valid_features
+        if p["show_progress"] and len(valid_features) >= p["progress_min_features"]:
             try:
-                feature_series = data[feature_name].astype(np.float32).values
-                decomposed_features = self._decompose_feature(feature_series, feature_name)
-                
-                if decomposed_features:
-                    # Add decomposed features to result
-                    for decomp_name, decomp_values in decomposed_features.items():
-                        result_data[decomp_name] = decomp_values
-                    
-                    # Remove original feature if specified
-                    if self.params.get('replace_original', True) and not self.params.get('keep_original', False):
-                        # Don't remove from result_data if it's not there yet
-                        pass
-                    
-                    logger.info(f"Added {len(decomposed_features)} decomposed features for '{feature_name}'")
-                else:
-                    logger.warning(f"No decomposed features generated for '{feature_name}'")
-                    
-            except Exception as e:
-                logger.error(f"Error decomposing feature '{feature_name}': {e}. Skipping.")
-                continue
-        
-        # Reorder features to match expected output format
-        final_data = pd.DataFrame(index=data.index)
-        
-        # 1. Add log_return as first feature (if calculated)
-        if 'log_return' in result_data.columns:
-            final_data['log_return'] = result_data['log_return']
-        
-        # 2. Add STL decomposition features
-        stl_feature_mapping = {
-            'stl_trend': ['CLOSE_stl_trend', 'stl_trend'],
-            'stl_seasonal': ['CLOSE_stl_seasonal', 'stl_seasonal'], 
-            'stl_residual': ['CLOSE_stl_resid', 'stl_resid', 'stl_residual']
-        }
-        
-        for target_name, possible_names in stl_feature_mapping.items():
-            for possible_name in possible_names:
-                if possible_name in result_data.columns:
-                    final_data[target_name] = result_data[possible_name]
-                    break
-        
-        # 3. Add wavelet decomposition features
-        wavelet_feature_patterns = [
-            'CLOSE_wav_detail_L1', 'CLOSE_wav_detail_L2', 'CLOSE_wav_approx_L2'
-        ]
-        
-        for pattern in wavelet_feature_patterns:
-            if pattern in result_data.columns:
-                final_data[pattern] = result_data[pattern]
-        
-        # 4. Add MTM decomposition features
-        mtm_feature_patterns = [
-            'CLOSE_mtm_band_1_0.000_0.010',
-            'CLOSE_mtm_band_2_0.010_0.060', 
-            'CLOSE_mtm_band_3_0.060_0.200',
-            'CLOSE_mtm_band_4_0.200_0.500'
-        ]
-        
-        for pattern in mtm_feature_patterns:
-            if pattern in result_data.columns:
-                final_data[pattern] = result_data[pattern]
-        
-        # 5. Add original features in specific order
-        original_feature_order = [
-            'RSI', 'MACD', 'MACD_Histogram', 'MACD_Signal', 'EMA', 'Stochastic_%K', 'Stochastic_%D', 
-            'ADX', 'DI+', 'DI-', 'ATR', 'CCI', 'WilliamsR', 'Momentum', 'ROC',
-            'OPEN', 'HIGH', 'LOW', 'CLOSE', 'BC-BO', 'BH-BL', 'BH-BO', 'BO-BL',
-            'S&P500_Close', 'vix_close',
-            'CLOSE_15m_tick_1', 'CLOSE_15m_tick_2', 'CLOSE_15m_tick_3', 'CLOSE_15m_tick_4',
-            'CLOSE_15m_tick_5', 'CLOSE_15m_tick_6', 'CLOSE_15m_tick_7', 'CLOSE_15m_tick_8',
-            'CLOSE_30m_tick_1', 'CLOSE_30m_tick_2', 'CLOSE_30m_tick_3', 'CLOSE_30m_tick_4',
-            'CLOSE_30m_tick_5', 'CLOSE_30m_tick_6', 'CLOSE_30m_tick_7', 'CLOSE_30m_tick_8',
-            'day_of_month', 'hour_of_day', 'day_of_week'
-        ]
-        
-        for feature in original_feature_order:
-            if feature in data.columns and feature not in final_data.columns:
-                # Always add original features - decomposition creates additional features, doesn't replace
-                final_data[feature] = data[feature]
-        
-        logger.info(f"Decomposition post-processing complete. Output shape: {final_data.shape}")
-        return final_data
-    
-    def _decompose_feature(self, feature_series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
-        """
-        Decompose a single feature using the enabled decomposition methods.
-        
-        Args:
-            feature_series: Time series data for the feature
-            feature_name: Name of the feature being decomposed
-            
-        Returns:
-            Dictionary of decomposed feature arrays
-        """
-        decomposed_features = {}
-        
-        # Use original values (no log transformation)
-        processed_series = feature_series.copy()
-        
-        # 1. STL Decomposition
-        if self.params.get('use_stl_decomp', True):
-            try:
-                stl_features = self._compute_stl_decomposition(processed_series, feature_name)
-                decomposed_features.update(stl_features)
-            except Exception as e:
-                logger.error(f"STL decomposition failed for {feature_name}: {e}")
-        
-        # 2. Wavelet Decomposition
-        if self.params.get('use_wavelet_decomp', True) and HAS_WAVELETS:
-            try:
-                wavelet_features = self._compute_wavelet_decomposition(processed_series, feature_name)
-                decomposed_features.update(wavelet_features)
-            except Exception as e:
-                logger.error(f"Wavelet decomposition failed for {feature_name}: {e}")
-        
-        # 3. MTM Decomposition  
-        if self.params.get('use_mtm_decomp', False) and HAS_MTM:
-            try:
-                mtm_features = self._compute_mtm_decomposition(processed_series, feature_name)
-                decomposed_features.update(mtm_features)
-            except Exception as e:
-                logger.error(f"MTM decomposition failed for {feature_name}: {e}")
-        
-        return decomposed_features
-    
-    def _compute_stl_decomposition(self, series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
-        """Compute STL decomposition components with proper causality."""
-        try:
-            trend, seasonal, resid = self._rolling_stl(
-                series, 
-                self.params['stl_window'],
-                self.params['stl_period'], 
-                self.params['stl_trend']
+                iterator = tqdm(valid_features, desc="decompose", leave=False)
+            except Exception:  # pragma: no cover
+                iterator = valid_features
+
+        # -----------------------------------------------------------------
+        # 4. Per-feature causal rolling decompositions
+        # -----------------------------------------------------------------
+        for feat in iterator:
+            series = data[feat].astype(float).to_numpy()
+            n = len(series)
+
+            feat_components: Dict[str, np.ndarray] = {}
+
+            if use_stl:
+                stl_trend, stl_seasonal, stl_resid = self._causal_stl(
+                    series,
+                    window=p["stl_window"],
+                    period=p["stl_period"],
+                    trend_len=p["stl_trend"],
+                )
+                feat_components[f"{feat}_stl_trend"] = stl_trend
+                feat_components[f"{feat}_stl_seasonal"] = stl_seasonal
+                feat_components[f"{feat}_stl_resid"] = stl_resid
+
+            if use_wavelet:
+                wav_dict = self._causal_wavelet(series, p["wavelet_name"], p["wavelet_levels"])  # returns dict
+                for k, v in wav_dict.items():
+                    feat_components[f"{feat}_{k}"] = v
+
+            if use_mtm:
+                mtm_dict = self._causal_mtm(series, p["mtm_window_len"], p["mtm_freq_bands"])  # returns dict
+                for k, v in mtm_dict.items():
+                    feat_components[f"{feat}_{k}"] = v
+
+            # Assign to output
+            for comp_name, comp_vals in feat_components.items():
+                out[comp_name] = comp_vals
+                components_generated.append(comp_name)
+
+            # Keep original feature if required
+            if p["keep_original"]:
+                out[feat] = series
+            elif p["replace_original"] and not p["keep_original"]:
+                # Original omitted intentionally
+                pass
+            else:  # default keep_original True covers main use-case
+                pass
+
+        # -----------------------------------------------------------------
+        # 5. Enforce column cap if configured
+        # -----------------------------------------------------------------
+        max_cols = p.get("max_output_columns")
+        if max_cols is not None and len(out.columns) > max_cols:
+            logger.warning(
+                "Truncating output columns from %s to %s due to max_output_columns", len(out.columns), max_cols
             )
-            
-            stl_features = {}
-            stl_features[f'{feature_name}_stl_trend'] = trend.astype(np.float32)
-            stl_features[f'{feature_name}_stl_seasonal'] = seasonal.astype(np.float32)
-            stl_features[f'{feature_name}_stl_resid'] = resid.astype(np.float32)
-            
-            # Plot if requested
-            if self.params.get("stl_plot_file"):
-                plot_file = self.params["stl_plot_file"].replace('.png', f'_{feature_name}.png')
-                self._plot_stl_decomposition(series, trend, seasonal, resid, plot_file, feature_name)
-            
-            return stl_features
-                
-        except Exception as e:
-            logger.error(f"STL decomposition error for {feature_name}: {e}")
-            return {}
-    
-    def _compute_wavelet_decomposition(self, series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
-        """Compute wavelet decomposition with proper causality."""
+            keep = list(out.columns)[: int(max_cols)]
+            out = out[keep]
+
+        # -----------------------------------------------------------------
+        # 6. Drop NaNs (optional) & update debug state
+        # -----------------------------------------------------------------
+        rows_before = len(out)
+        if p.get("drop_na", True):
+            out = out.dropna()
+        rows_after = len(out)
+        rows_dropped = rows_before - rows_after
+        self._debug_state.update(
+            {
+                "features_requested": feature_list,
+                "features_processed": valid_features,
+                "use_stl": use_stl,
+                "use_wavelet": use_wavelet,
+                "use_mtm": use_mtm,
+                "stl_period": p["stl_period"],
+                "stl_window": p["stl_window"],
+                "stl_trend": p["stl_trend"],
+                "wavelet_name": p["wavelet_name"],
+                "wavelet_levels": p["wavelet_levels"],
+                "mtm_window_len": p["mtm_window_len"],
+                "mtm_freq_bands": p["mtm_freq_bands"],
+                "components_generated": len(components_generated),
+                "output_columns": list(out.columns),
+                "rows_before_drop": rows_before,
+                "rows_after_drop": rows_after,
+                "rows_dropped_due_to_nans": rows_dropped,
+            }
+        )
+
+        return out
+
+    # ------------------------------------------------------------------
+    # STL (causal rolling)
+    # ------------------------------------------------------------------
+    def _finalize_stl_params(self) -> None:
+        if self.params.get("stl_window") is None:
+            self.params["stl_window"] = 2 * int(self.params["stl_period"]) + 1
+        if self.params.get("stl_trend") is None:
+            # heuristic: near period + 1, must be odd
+            candidate = int(self.params["stl_period"]) + 1
+            if candidate % 2 == 0:
+                candidate += 1
+            self.params["stl_trend"] = candidate
+        # Ensure odd
+        if self.params["stl_trend"] % 2 == 0:
+            self.params["stl_trend"] += 1
+
+    def _causal_stl(self, series: np.ndarray, window: int, period: int, trend_len: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        n = len(series)
+        trend = np.full(n, np.nan, dtype=float)
+        seasonal = np.full(n, np.nan, dtype=float)
+        resid = np.full(n, np.nan, dtype=float)
+        if window < period * 2:  # minimal viability check
+            logger.warning("STL window (%s) may be too small for period %s; components may remain NaN", window, period)
+        for i in range(window - 1, n):  # inclusive window end at i
+            w_slice = series[i - window + 1 : i + 1]
+            try:
+                stl = STL(w_slice, period=period, trend=trend_len, robust=True)
+                res = stl.fit()
+                trend[i] = res.trend[-1]
+                seasonal[i] = res.seasonal[-1]
+                resid[i] = res.resid[-1]
+            except Exception:  # pragma: no cover
+                # Leave NaN
+                pass
+        self._forward_fill_first_valid([trend, seasonal, resid])
+        return trend.astype(np.float32), seasonal.astype(np.float32), resid.astype(np.float32)
+
+    # ------------------------------------------------------------------
+    # Wavelet (causal rolling SWT)
+    # ------------------------------------------------------------------
+    def _causal_wavelet(self, series: np.ndarray, wavelet_name: str, levels: int) -> Dict[str, np.ndarray]:
         if not HAS_WAVELETS:
             return {}
-        
-        try:
-            name = self.params['wavelet_name']
-            levels = self.params['wavelet_levels']
-            
-            # Clean series (remove NaN/inf)
-            series_clean = np.nan_to_num(series, nan=0.0, posinf=0.0, neginf=0.0)
-            n = len(series_clean)
-            
-            # Calculate minimum window size needed for wavelet decomposition
-            wavelet = pywt.Wavelet(name)
-            min_window = max(2 ** levels, wavelet.dec_len * 2)
-            
-            # Initialize output arrays with NaN
-            wavelet_features = {}
-            for level in range(levels):
-                wavelet_features[f'{feature_name}_wav_detail_L{level+1}'] = np.full(n, np.nan, dtype=np.float32)
-            wavelet_features[f'{feature_name}_wav_approx_L{levels}'] = np.full(n, np.nan, dtype=np.float32)
-            
-            # FIXED: Proper causality with correct window definition
-            for i in range(min_window-1, n):  # i is the current point t
-                # Window from (i-window+1) to i (inclusive) - INCLUDES current point t
-                window = series_clean[i - min_window + 1: i + 1]
-                
-                try:
-                    # Compute SWT on current window
-                    coeffs = pywt.swt(window, name, level=levels, trim_approx=False, norm=True)
-                    
-                    # Extract detail coefficients for each level - assign to current point i
-                    for level in range(levels):
-                        if level < len(coeffs) and len(coeffs[level]) == 2:
-                            detail_coeffs = coeffs[level][1]  # Detail coefficients
-                            if len(detail_coeffs) > 0:
-                                # Use the LAST coefficient which represents the current point
-                                wavelet_features[f'{feature_name}_wav_detail_L{level+1}'][i] = detail_coeffs[-1]
-                    
-                    # Extract final approximation coefficients - assign to current point i
-                    if len(coeffs) > 0 and len(coeffs[0]) == 2:
-                        approx_coeffs = coeffs[0][0]  # Approximation coefficients
-                        if len(approx_coeffs) > 0:
-                            wavelet_features[f'{feature_name}_wav_approx_L{levels}'][i] = approx_coeffs[-1]
-                            
-                except Exception as e:
-                    # Keep NaN for failed decompositions
-                    pass
-            
-            # Remove any features that are all NaN
-            wavelet_features = {k: v for k, v in wavelet_features.items() if np.any(~np.isnan(v))}
-            
-            # Apply causality shift correction (ONLY ONCE)
-            wavelet_features = self._apply_causality_shift(wavelet_features, name)
-            
-            # Forward fill NaN values
-            for feature_values in wavelet_features.values():
-                first_valid_idx = None
-                first_valid_value = None
-                
-                for idx in range(len(feature_values)):
-                    if not np.isnan(feature_values[idx]):
-                        first_valid_value = feature_values[idx]
-                        first_valid_idx = idx
-                        break
-                
-                if first_valid_value is not None and first_valid_idx is not None:
-                    feature_values[:first_valid_idx] = first_valid_value
-            
-            return wavelet_features
-            
-        except Exception as e:
-            logger.error(f"Wavelet decomposition error for {feature_name}: {e}")
-            return {}
-    
-    def _compute_mtm_decomposition(self, series: np.ndarray, feature_name: str) -> Dict[str, np.ndarray]:
-        """Compute MTM decomposition with proper causality."""
-        if not HAS_MTM:
-            return {}
-        
-        try:
-            window_len = self.params.get('mtm_window_len', 168)
-            freq_bands = self.params.get('mtm_freq_bands', [(0, 0.01), (0.01, 0.06), (0.06, 0.2), (0.2, 0.5)])
-            
-            n = len(series)
-            mtm_features = {}
-            
-            # Initialize output arrays with NaN values
-            for i, (low_freq, high_freq) in enumerate(freq_bands):
-                band_name = f"{feature_name}_mtm_band_{i+1}_{low_freq:.3f}_{high_freq:.3f}"
-                mtm_features[band_name] = np.full(n, np.nan, dtype=np.float32)
-            
-            # FIXED: Proper causality with correct window definition
-            for i in range(window_len-1, n):  # i is the current point t
-                # Window from (i-window+1) to i (inclusive) - INCLUDES current point t
-                window_data = series[i - window_len + 1: i + 1]
-                
-                try:
-                    # Compute power spectral density using Welch's method
-                    freqs, psd = signal.welch(window_data, nperseg=min(window_len, 256), 
-                                            noverlap=min(window_len//2, 128))
-                    
-                    # Extract power in different frequency bands
-                    for j, (low_freq, high_freq) in enumerate(freq_bands):
-                        band_name = f"{feature_name}_mtm_band_{j+1}_{low_freq:.3f}_{high_freq:.3f}"
-                        
-                        # Find frequency indices for this band
-                        freq_mask = (freqs >= low_freq) & (freqs <= high_freq)
-                        if np.any(freq_mask):
-                            band_power = np.mean(psd[freq_mask])
-                        else:
-                            band_power = 0.0
-                        
-                        # Assign to current point i
-                        mtm_features[band_name][i] = band_power
-                        
-                except Exception as e:
-                    # Keep NaN for failed computations
-                    pass
-            
-            # Forward fill NaN values
-            for band_values in mtm_features.values():
-                first_valid_idx = None
-                first_valid_value = None
-                
-                for idx in range(len(band_values)):
-                    if not np.isnan(band_values[idx]):
-                        first_valid_value = band_values[idx]
-                        first_valid_idx = idx
-                        break
-                
-                if first_valid_value is not None and first_valid_idx is not None:
-                    band_values[:first_valid_idx] = first_valid_value
-            
-            return mtm_features
-            
-        except Exception as e:
-            logger.error(f"MTM decomposition error for {feature_name}: {e}")
-            return {}
-    
-    def _rolling_stl(self, series: np.ndarray, stl_window: int, period: int, trend_smoother: int) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Perform rolling STL decomposition with proper causality."""
         n = len(series)
-        
-        # Initialize output arrays with NaN
-        trend = np.full(n, np.nan)
-        seasonal = np.full(n, np.nan) 
-        resid = np.full(n, np.nan)
-        
-        if trend_smoother is not None:
-            if not isinstance(trend_smoother, int) or trend_smoother <= 0: 
-                trend_smoother = None
-            elif trend_smoother % 2 == 0: 
-                trend_smoother += 1
-        
-        # FIXED: Proper causality with correct window definition
-        for i in tqdm(range(stl_window-1, n), desc="STL", leave=False):
-            # Window from (i-window+1) to i (inclusive) - INCLUDES current point t
-            window = series[i - stl_window + 1: i + 1]
-            current_trend = trend_smoother
-            
-            if current_trend is not None and current_trend >= len(window):
-                current_trend = len(window) - 1 if len(window) > 1 else None
-                if current_trend is not None and current_trend % 2 == 0: 
-                    current_trend = max(1, current_trend - 1)
-            
+        wavelet = pywt.Wavelet(wavelet_name)  # type: ignore
+        min_window = max(2 ** levels, wavelet.dec_len * 2)
+        results: Dict[str, np.ndarray] = {
+            f"wav_detail_L{lvl}": np.full(n, np.nan, dtype=np.float32) for lvl in range(1, levels + 1)
+        }
+        results[f"wav_approx_L{levels}"] = np.full(n, np.nan, dtype=np.float32)
+        for i in range(min_window - 1, n):
+            window = series[i - min_window + 1 : i + 1]
             try:
-                stl = STL(window, period=period, trend=current_trend, robust=True)
-                result = stl.fit()
-                # Assign to current point i
-                trend[i] = result.trend[-1]  # Last value of decomposition
-                seasonal[i] = result.seasonal[-1]
-                resid[i] = result.resid[-1]
-            except Exception as e:
-                # Keep NaN for failed decompositions
+                coeffs = pywt.swt(window, wavelet_name, level=levels, trim_approx=False)  # type: ignore
+                # coeffs: list of (approx, detail) starting at level 1
+                for lvl, (approx_arr, detail_arr) in enumerate(coeffs, start=1):
+                    # Assign last value of detail / approx for causal alignment
+                    results[f"wav_detail_L{lvl}"][i] = detail_arr[-1]
+                    if lvl == levels:
+                        results[f"wav_approx_L{levels}"][i] = approx_arr[-1]
+            except Exception:  # pragma: no cover
                 pass
-        
-        # Forward fill NaN values
-        for component in [trend, seasonal, resid]:
-            first_valid_idx = None
-            first_valid_value = None
-            
-            for idx in range(len(component)):
-                if not np.isnan(component[idx]):
-                    first_valid_value = component[idx]
-                    first_valid_idx = idx
-                    break
-            
-            if first_valid_value is not None and first_valid_idx is not None:
-                component[:first_valid_idx] = first_valid_value
-        
-        return trend, seasonal, resid
-    
-    def _apply_causality_shift(self, features: Dict[str, np.ndarray], wavelet_name: str) -> Dict[str, np.ndarray]:
-        """Apply wavelet-specific causality shift correction."""
-        try:
-            # Determine shift amount based on wavelet type
-            if wavelet_name == 'db1' or wavelet_name == 'haar':
-                shift = 1
-            elif wavelet_name == 'db4':
-                shift = 3
-            elif wavelet_name == 'bior2.2':
-                shift = 2
-            else:
-                shift = 2  # Default shift for unknown wavelets
-            
-            if shift > 0:
-                shifted_features = {}
-                
-                for k, v in features.items():
-                    if len(v) > shift:
-                        # Create shifted array
-                        shifted_v = np.full(len(v), np.nan, dtype=v.dtype)
-                        # Shift the values forward by shift amount
-                        shifted_v[shift:] = v[:-shift]
-                        # Forward fill the initial NaN values
-                        first_valid_value = None
-                        for i in range(shift, len(shifted_v)):
-                            if not np.isnan(shifted_v[i]):
-                                first_valid_value = shifted_v[i]
-                                break
-                        if first_valid_value is not None:
-                            shifted_v[:shift] = first_valid_value
-                        
-                        shifted_features[k] = shifted_v
-                    else:
-                        shifted_features[k] = v
-                
-                return shifted_features
-            else:
-                return features
-                
-        except Exception as e:
-            logger.warning(f"Causality shift failed: {e}. Using original features.")
-            return features
-    
-    def _plot_stl_decomposition(self, series: np.ndarray, trend: np.ndarray, seasonal: np.ndarray, 
-                              resid: np.ndarray, file_path: str, feature_name: str):
-        """Plot STL decomposition results."""
-        try:
-            fig, axes = plt.subplots(4, 1, figsize=(12, 10))
-            
-            # Plot last 480 points for better visualization
-            plot_points = min(480, len(series))
-            start_idx = max(0, len(series) - plot_points)
-            
-            x_series = series[start_idx:]
-            x_trend = trend[start_idx:] if len(trend) >= len(x_series) else trend
-            x_seasonal = seasonal[start_idx:] if len(seasonal) >= len(x_series) else seasonal
-            x_resid = resid[start_idx:] if len(resid) >= len(x_series) else resid
-            
-            axes[0].plot(x_series)
-            axes[0].set_title(f'Original {feature_name} Series')
-            
-            axes[1].plot(x_trend)
-            axes[1].set_title(f'{feature_name} - Trend Component')
-            
-            axes[2].plot(x_seasonal)
-            axes[2].set_title(f'{feature_name} - Seasonal Component')
-            
-            axes[3].plot(x_resid)
-            axes[3].set_title(f'{feature_name} - Residual Component')
-            
-            plt.tight_layout()
-            plt.savefig(file_path)
-            plt.close()
-            
-            logger.info(f"STL decomposition plot saved to {file_path}")
-            
-        except Exception as e:
-            logger.error(f"Failed to save STL plot for {feature_name}: {e}")
-    
-    def get_comprehensive_params(self) -> Dict[str, Any]:
-        """Get comprehensive parameters for perfect replicability."""
-        return self.params.copy()
+        self._forward_fill_first_valid(list(results.values()))
+        return results
 
-    def apply_fe_config(self, fe_config: Dict[str, Any]) -> bool:
-        """Apply feature engineering configuration for perfect replicability."""
-        if 'decomposition_params' in fe_config:
-            decomp_params = fe_config['decomposition_params']
-            self.params.update(decomp_params)
-            self._resolve_stl_params()
-            logger.info(f"Applied decomposition parameters: {decomp_params}")
-            return True
-        return False
+    # ------------------------------------------------------------------
+    # MTM / Welch band power (causal rolling)
+    # ------------------------------------------------------------------
+    def _causal_mtm(self, series: np.ndarray, window_len: int, bands: List[Tuple[float, float]]) -> Dict[str, np.ndarray]:
+        if not HAS_SIGNAL:
+            return {}
+        n = len(series)
+        features: Dict[str, np.ndarray] = {
+            f"mtm_band_{i+1}_{low:.3f}_{high:.3f}": np.full(n, np.nan, dtype=np.float32)
+            for i, (low, high) in enumerate(bands)
+        }
+        for i in range(window_len - 1, n):
+            window = series[i - window_len + 1 : i + 1]
+            try:
+                freqs, psd = signal.welch(window, nperseg=min(len(window), 256))  # type: ignore
+                for (low, high), (feat_name, arr) in zip(bands, features.items()):
+                    mask = (freqs >= low) & (freqs < high)
+                    if mask.any():
+                        arr[i] = float(psd[mask].mean())
+            except Exception:  # pragma: no cover
+                pass
+        self._forward_fill_first_valid(list(features.values()))
+        return features
 
-    def set_params(self, **kwargs):
-        """Set plugin parameters."""
-        for key, value in kwargs.items():
-            if key in self.params:
-                self.params[key] = value
-
-    def get_debug_info(self):
-        """Get debug information for the plugin."""
-        return {var: self.params.get(var) for var in self.plugin_debug_vars}
-
-    def add_debug_info(self, debug_info):
-        """Add debug information to the provided dictionary."""
-        debug_info.update(self.get_debug_info())
+    # ------------------------------------------------------------------
+    # Utilities
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _forward_fill_first_valid(arrays: List[np.ndarray]) -> None:
+        for arr in arrays:
+            if np.isnan(arr).all():
+                continue
+            # find first non-nan
+            idx = np.where(~np.isnan(arr))[0]
+            if len(idx) == 0:
+                continue
+            first = idx[0]
+            arr[:first] = arr[first]
 
 
-# Plugin interface for feature-eng system
-def get_plugin_class():
-    """Return the plugin class for the feature-eng plugin loader."""
-    return DecompositionPostProcessor
+# Plugin interface (if dynamic loader expects these)
+def get_plugin_class():  # noqa: D401
+    return FeaturePlugin
 
 
-def get_plugin_info():
-    """Return plugin information for registration."""
+def get_plugin_info():  # noqa: D401
     return {
-        'name': 'decomposition_post_processor',
-        'version': '2.0.0',
-        'description': 'Post-processor for decomposing features using STL, wavelet, and MTM methods with proper causality',
-        'author': 'Feature Engineering System',
-        'type': 'post_processor',
-        'capabilities': ['stl_decomposition', 'wavelet_decomposition', 'mtm_decomposition'],
-        'dependencies': ['numpy', 'pandas', 'scikit-learn', 'statsmodels', 'matplotlib'],
-        'optional_dependencies': ['pywt', 'scipy']
+        "name": "decomposition_post_processor",
+        "version": "3.0.0",
+        "description": "Causal rolling STL / Wavelet / MTM decompositions",
+        "author": "feature-eng",
+        "type": "post_processor",
+        "capabilities": ["stl", "wavelet", "mtm"],
+        "dependencies": ["numpy", "pandas", "statsmodels"],
+        "optional_dependencies": ["pywt", "scipy", "tqdm"],
     }
