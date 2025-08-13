@@ -17,6 +17,7 @@ Notes:
       plugin_params only supplies default values for the merging system.
 """
 
+
 from __future__ import annotations
 
 import logging
