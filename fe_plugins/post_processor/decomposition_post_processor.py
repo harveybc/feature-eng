@@ -50,7 +50,7 @@ except Exception:  # pragma: no cover
     logger.warning("scipy.signal not installed; MTM/Welch decomposition disabled.")
 
 
-class FeaturePlugin:  # Consistent naming with other plugins
+class DecompositionPostProcessor:  # Consistent naming with other plugins
     """Causal rolling decomposition post-processor."""
 
     # ------------------------------------------------------------------
