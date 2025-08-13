@@ -43,6 +43,18 @@ class BaseFeaturePlugin:
     "date_time_dayfirst_fallback": True,
     "date_time_additional_formats": ["%Y.%m.%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"],
     "date_time_fail_fast": True,
+        # Flexible resolution of datetime column name (case/underscore/punctuation-insensitive)
+        "date_time_synonyms": [
+            "DATE_TIME",
+            "DATETIME",
+            "date_time",
+            "datetime",
+            "timestamp",
+            "time",
+            "date",
+            "date time",
+            "date/time",
+        ],
         "open_col": "OPEN",
         "high_col": "HIGH",
         "low_col": "LOW",
@@ -132,11 +144,32 @@ class BaseFeaturePlugin:
         # -----------------------------------------------------------------
         lower_map = {c.lower(): c for c in df.columns}
 
+        def _norm(name: str) -> str:
+            return "".join(ch for ch in name.lower() if ch.isalnum())
+
+        norm_map = {_norm(c): c for c in df.columns}
+
         def resolve(col_name: str) -> Optional[str]:
             return lower_map.get(col_name.lower())
 
+        # Resolve DATE_TIME flexibly (handles 'datetime', 'date_time', 'timestamp', etc.)
+        dt_resolved = resolve(date_time_col)
+        if dt_resolved is None:
+            # Try synonyms with normalization
+            synonyms: List[str] = [date_time_col] + (params.get("date_time_synonyms", []) or [])
+            for syn in synonyms:
+                cand = norm_map.get(_norm(syn))
+                if cand is not None:
+                    dt_resolved = cand
+                    break
+        if dt_resolved is None:
+            # Fallback: any column containing 'date' or 'time'
+            candidates = [c for c in df.columns if ("date" in c.lower() or "time" in c.lower())]
+            if candidates:
+                dt_resolved = candidates[0]
+
         mapped_cols = {
-            "date_time": resolve(date_time_col),
+            "date_time": dt_resolved,
             "open": resolve(open_col),
             "high": resolve(high_col),
             "low": resolve(low_col),
@@ -189,7 +222,15 @@ class BaseFeaturePlugin:
                     f"base_features: invalid timestamp at index {bad_idx} raw_value={raw_dt.iloc[bad_idx]!r} row={df.iloc[bad_idx].to_dict()}"
                 )
 
+            # Always standardize the output column name to params['date_time_col'] (e.g., 'DATE_TIME')
             selected_frames.append(dt_series.to_frame(name=date_time_col))
+        else:
+            # No datetime-like column found; fail early with context to help debugging
+            available_cols = list(df.columns)
+            raise ValueError(
+                "BaseFeaturePlugin: Could not resolve a datetime column. Looked for '%s' and synonyms %s. Available columns: %s"
+                % (date_time_col, params.get("date_time_synonyms", []), available_cols)
+            )
 
         if close_only:
             selected_frames.append(df[[mapped_cols["close"]]].rename(columns={mapped_cols["close"]: close_col}))
