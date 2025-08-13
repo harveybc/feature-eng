@@ -28,7 +28,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-class FeaturePlugin:
+class BaseFeaturePlugin:
     """Base feature extraction plugin (OHLC + optional candlestick differentials)."""
 
     # ---------------------------------------------------------------------

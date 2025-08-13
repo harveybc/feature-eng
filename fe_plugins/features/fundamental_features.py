@@ -33,7 +33,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class FeaturePlugin:
+class FundamentalFeaturePlugin:
     """Fundamental feature extraction plugin (SP500 + VIX hourly alignment)."""
 
     # ---------------------------------------------------------------------

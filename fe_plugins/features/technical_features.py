@@ -28,7 +28,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-class FeaturePlugin:  # Consistent plugin class name
+class TechnicalFeaturePlugin:  # Consistent plugin class name
     """Technical indicator feature plugin."""
 
     # ------------------------------------------------------------------

@@ -34,7 +34,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-class FeaturePlugin:  # Consistent naming pattern
+class HighFreqFeaturePlugin:  # Consistent naming pattern
     """High-frequency lag feature construction plugin."""
 
     # ------------------------------------------------------------------

@@ -14,11 +14,11 @@ setup(
         ],
         'feature_eng.features': [
             'default=fe_plugins.features.base_features:FeaturePlugin',
-            'base_features=fe_plugins.features.base_features:FeaturePlugin',
-            'technical_features=fe_plugins.features.technical_features:FeaturePlugin',
-            'fundamental_features=fe_plugins.features.fundamental_features:FeaturePlugin',
-            'seasonal_features=fe_plugins.features.seasonal_features:FeaturePlugin',
-            'high_frequency_features=fe_plugins.features.high_frequency_features:FeaturePlugin'
+            'base_features=fe_plugins.features.base_features:BaseFeaturePlugin',
+            'technical_features=fe_plugins.features.technical_features:TechnicalFeaturePlugin',
+            'fundamental_features=fe_plugins.features.fundamental_features:FundamentalFeaturePlugin',
+            'seasonal_features=fe_plugins.features.seasonal_features:SeasonalFeaturePlugin',
+            'high_frequency_features=fe_plugins.features.high_frequency_features:HighFreqFeaturePlugin'
         ],
         'feature_eng.aligner': [
             'default=fe_plugins.aligner.default_aligner:AlignerPlugin'

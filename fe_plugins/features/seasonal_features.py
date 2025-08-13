@@ -31,7 +31,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class FeaturePlugin:  # Name expected by loader
+class SeasonalFeaturePlugin:  # Name expected by loader
     # ------------------------------------------------------------------
     # Default parameters (merged during second pass)
     # ------------------------------------------------------------------
