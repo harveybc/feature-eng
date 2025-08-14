@@ -158,8 +158,8 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
             logger.info("No decomp_features specified; returning data unchanged.")
             return data.copy()
 
-        # Output structure
-        out = pd.DataFrame(index=data.index)
+        # Output starts as a copy of the aligned data; we append new components
+        out = data.copy()
         components_generated: List[str] = []
 
         # 3) Log return (optional)
@@ -203,16 +203,16 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
                 for k, v in mtm_dict.items():
                     feat_components[f"{feat}_{k}"] = v
 
-            # Assign to output
+            # Assign new component columns to output
             for comp_name, comp_vals in feat_components.items():
                 out[comp_name] = comp_vals
                 components_generated.append(comp_name)
 
-            # Keep or replace original feature
-            if p.get("keep_original", True):
-                out[feat] = series
-            elif p.get("replace_original"):
-                pass
+            # Optionally replace original feature (default is keep)
+            if p.get("replace_original") and not p.get("keep_original", True):
+                # Drop original feature column if requested
+                if feat in out.columns:
+                    out = out.drop(columns=[feat])
 
         # 5) Enforce column cap if configured
         max_cols = p.get("max_output_columns")
