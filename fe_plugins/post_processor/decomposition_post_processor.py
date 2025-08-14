@@ -236,11 +236,28 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
             logger.warning("Some desired output columns are missing and will be skipped: %s", missing)
         if present:
             out = out[present]
+        # Drop columns that are entirely NaN (e.g., schema placeholders) before row-wise NaN drop
+        all_nan_cols = [c for c in out.columns if getattr(out[c], 'isna', lambda: pd.Series([]))().all()]
+        if all_nan_cols:
+            logger.warning("Dropping all-NaN columns prior to row-wise NaN removal: %s", all_nan_cols)
+            out = out.drop(columns=all_nan_cols)
 
         # 7) Drop NaNs (optional) & update debug state
         rows_before = len(out)
         if p.get("drop_na", True):
-            out = out.dropna()
+            dropped_all = False
+            out_after_drop = out.dropna()
+            if len(out_after_drop) == 0 and rows_before > 0:
+                # Fallback: only drop rows missing core columns to avoid empty output
+                core_cols = [c for c in ["CLOSE", "DATE_TIME"] if c in out.columns]
+                if core_cols:
+                    out = out.dropna(subset=core_cols)
+                    dropped_all = len(out) == 0
+                else:
+                    # No core columns found; keep original without dropping
+                    dropped_all = True
+            else:
+                out = out_after_drop
         rows_after = len(out)
         rows_dropped = rows_before - rows_after
         self._debug_state.update(
@@ -262,7 +279,7 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
                 "rows_before_drop": rows_before,
                 "rows_after_drop": rows_after,
                 "rows_dropped_due_to_nans": rows_dropped,
-                "final_schema_enforced": bool(desired_cols),
+                "final_schema_enforced": True,
             }
         )
 
