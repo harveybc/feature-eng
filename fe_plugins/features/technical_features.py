@@ -336,6 +336,9 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
             init_slot("STOCH_D")
         if "adx" in want:
             init_slot("ADX")
+            # Also export directional indicators explicitly so the aligner can map to DI+ and DI-
+            init_slot("DI_PLUS")
+            init_slot("DI_MINUS")
         if "atr" in want:
             init_slot("ATR")
         if "cci" in want:
@@ -492,6 +495,9 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
                 if "adx" in want and i >= adx_period:
                     plus_di = 100 * (plus_dm14 / tr14 if tr14 else 0)
                     minus_di = 100 * (minus_dm14 / tr14 if tr14 else 0)
+                    # Save DI+ / DI- for this tick
+                    data_store["DI_PLUS"][i] = plus_di
+                    data_store["DI_MINUS"][i] = minus_di
                     denom = plus_di + minus_di
                     dx_val = 0 if denom == 0 else (100 * abs(plus_di - minus_di) / denom)
                     adx_list.append(dx_val)
@@ -598,6 +604,10 @@ class TechnicalFeaturePlugin:  # Consistent plugin class name
                 out[f"STOCH_D_{stoch_d_period}"] = values
             elif col_key == "ADX":
                 out[f"ADX_{adx_period}"] = values
+            elif col_key == "DI_PLUS":
+                out["DI_PLUS"] = values
+            elif col_key == "DI_MINUS":
+                out["DI_MINUS"] = values
             elif col_key == "ATR":
                 out[f"ATR_{atr_period}"] = values
             elif col_key == "CCI":

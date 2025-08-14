@@ -79,7 +79,7 @@ class SeasonalFeaturePlugin:  # Name expected by loader
             2. Load data from CSV (if configured) or provided DataFrame.
             3. Parse timestamps (explicit format if provided, else generic).
             4. Derive base seasonal integers (day_of_week/day_of_month/hour_of_day).
-            5. Optionally perform cyclic encoding and drop raw integer columns.
+            5. Optionally perform cyclic encoding (sin/cos) while keeping raw integer columns.
             6. Update debug info & return final seasonal feature DataFrame.
         """
 
@@ -189,18 +189,18 @@ class SeasonalFeaturePlugin:  # Name expected by loader
             if params.get("date_time_fail_fast_invalid", True):
                 raise RuntimeError(msg)
             logger.warning(msg)
-            ts = ts[valid_mask]
-        work_df = pd.DataFrame({date_time_col: ts[valid_mask]})
+        ts_valid = ts[valid_mask]
+        work_df = pd.DataFrame({date_time_col: ts_valid})
 
         # -----------------------------------------------------------------
         # 5. Derive raw seasonal integer components
         # -----------------------------------------------------------------
-        work_df["day_of_week"] = ts.dt.dayofweek  # 0=Mon
-        work_df["day_of_month"] = ts.dt.day
-        work_df["hour_of_day"] = ts.dt.hour
+        work_df["day_of_week"] = ts_valid.dt.dayofweek  # 0=Mon
+        work_df["day_of_month"] = ts_valid.dt.day
+        work_df["hour_of_day"] = ts_valid.dt.hour
 
         # -----------------------------------------------------------------
-        # 6. Optional cyclic encoding (replace raw ints with sin/cos pairs)
+        # 6. Optional cyclic encoding (add sin/cos pairs; keep raw ints)
         # -----------------------------------------------------------------
         if generate_cyclic:
             def add_cyclic(src_col: str, period: int, prefix: str) -> None:
@@ -211,9 +211,7 @@ class SeasonalFeaturePlugin:  # Name expected by loader
             add_cyclic("day_of_week", 7, "dow")
             add_cyclic("day_of_month", 31, "dom")  # 31 for stable periodic frame
             add_cyclic("hour_of_day", 24, "hod")
-
-            # Remove raw integer columns to return only transformed features plus timestamp
-            work_df = work_df.drop(columns=["day_of_week", "day_of_month", "hour_of_day"])
+            # Keep raw integer columns as canonical fields expected by aligner
 
         # -----------------------------------------------------------------
         # 7. Finalize & debug tracking
