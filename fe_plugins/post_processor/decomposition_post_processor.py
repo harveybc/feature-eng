@@ -223,7 +223,21 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
             keep = list(out.columns)[: int(max_cols)]
             out = out[keep]
 
-        # 6) Drop NaNs (optional) & update debug state
+        # 6) Restrict to desired final schema (strip decomposition columns)
+        # Prefer explicit list if provided; otherwise default to the original aligned columns
+        if isinstance(config.get("postproc_keep_only_columns"), list):
+            desired_cols = [c for c in config.get("postproc_keep_only_columns") if isinstance(c, str)]
+        else:
+            desired_cols = list(data.columns)
+
+        present = [c for c in desired_cols if c in out.columns]
+        missing = [c for c in desired_cols if c not in out.columns]
+        if missing:
+            logger.warning("Some desired output columns are missing and will be skipped: %s", missing)
+        if present:
+            out = out[present]
+
+        # 7) Drop NaNs (optional) & update debug state
         rows_before = len(out)
         if p.get("drop_na", True):
             out = out.dropna()
@@ -248,6 +262,7 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
                 "rows_before_drop": rows_before,
                 "rows_after_drop": rows_after,
                 "rows_dropped_due_to_nans": rows_dropped,
+                "final_schema_enforced": bool(desired_cols),
             }
         )
 
