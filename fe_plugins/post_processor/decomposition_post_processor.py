@@ -223,19 +223,19 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
             keep = list(out.columns)[: int(max_cols)]
             out = out[keep]
 
-        # 6) Restrict to desired final schema (strip decomposition columns)
-        # Prefer explicit list if provided; otherwise default to the original aligned columns
+        # 6) Optional schema restriction
+        # If the pipeline provides an explicit keep-only list, enforce it.
+        # Otherwise, retain all columns (including decomposition components).
+        final_schema_enforced = False
         if isinstance(config.get("postproc_keep_only_columns"), list):
             desired_cols = [c for c in config.get("postproc_keep_only_columns") if isinstance(c, str)]
-        else:
-            desired_cols = list(data.columns)
-
-        present = [c for c in desired_cols if c in out.columns]
-        missing = [c for c in desired_cols if c not in out.columns]
-        if missing:
-            logger.warning("Some desired output columns are missing and will be skipped: %s", missing)
-        if present:
-            out = out[present]
+            present = [c for c in desired_cols if c in out.columns]
+            missing = [c for c in desired_cols if c not in out.columns]
+            if missing:
+                logger.warning("Some desired output columns are missing and will be skipped: %s", missing)
+            if present:
+                out = out[present]
+                final_schema_enforced = True
         # Drop columns that are entirely NaN (e.g., schema placeholders) before row-wise NaN drop
         all_nan_cols = [c for c in out.columns if getattr(out[c], 'isna', lambda: pd.Series([]))().all()]
         if all_nan_cols:
@@ -279,7 +279,7 @@ class DecompositionPostProcessor:  # Consistent naming with other plugins
                 "rows_before_drop": rows_before,
                 "rows_after_drop": rows_after,
                 "rows_dropped_due_to_nans": rows_dropped,
-                "final_schema_enforced": True,
+                "final_schema_enforced": final_schema_enforced,
             }
         )
 

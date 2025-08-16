@@ -38,11 +38,11 @@ class BaseFeaturePlugin:
         "base_features_input_file": "tests/data/eurusd_hour_2005_2020_ohlc.csv",  # Default path (can be overridden)
         "base_features_max_rows": 1000000,
         "date_time_col": "DATE_TIME",
-    "date_time_format": None,  # Optional explicit datetime format for parsing
-    # Datetime parsing controls
-    "date_time_dayfirst_fallback": True,
-    "date_time_additional_formats": ["%Y.%m.%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"],
-    "date_time_fail_fast": True,
+        "date_time_format": None,  # Optional explicit datetime format for parsing
+        # Datetime parsing controls
+        "date_time_dayfirst_fallback": True,
+        "date_time_additional_formats": ["%Y.%m.%d %H:%M:%S", "%Y-%m-%d %H:%M:%S", "%d/%m/%Y %H:%M"],
+        "date_time_fail_fast": True,
         # Flexible resolution of datetime column name (case/underscore/punctuation-insensitive)
         "date_time_synonyms": [
             "DATE_TIME",
