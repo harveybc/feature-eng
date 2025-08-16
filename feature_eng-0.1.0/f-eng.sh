@@ -1,4 +1,0 @@
-export PREV_PYTHONPATH=$PYTHONPATH
-export PYTHONPATH=./:$PYTHONPATH
-python app/main.py "$@"
-export PYTHONPATH=$PREV_PYTHONPATH
