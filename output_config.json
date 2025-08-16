@@ -1,0 +1,6 @@
+{
+    "aligner_enforce_output_schema": false,
+    "aligner_strict_schema": false,
+    "aligner_add_missing_columns": false,
+    "use_candlestick": false
+}

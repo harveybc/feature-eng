@@ -157,7 +157,8 @@ def main() -> None:
     if config.get('save_config'):
         try:
             save_path = config['save_config']
-            save_config(config, save_path)
+            active_plugins = [pipeline_plugin, aligner_plugin, post_processor_plugin, *feature_plugins_instances]
+            save_config(config, save_path, active_plugins=active_plugins)
             print(f"[6/7] Configuration saved locally to: {save_path}")
         except Exception as exc:  # noqa: BLE001
             print(f"Failed to save configuration locally: {exc}")
@@ -166,11 +167,13 @@ def main() -> None:
         remote_target = config['remote_save_config']
         print(f"[7/7] Saving configuration remotely to: {remote_target}")
         try:
+            active_plugins = [pipeline_plugin, aligner_plugin, post_processor_plugin, *feature_plugins_instances]
             remote_save_config(
                 config,
                 remote_target,
                 config.get('username'),
                 config.get('password'),
+                active_plugins=active_plugins,
             )
             print("Remote configuration saved.")
         except Exception as exc:  # noqa: BLE001

@@ -1,7 +1,7 @@
 {
   "pipeline": {
     "pipeline_mode": "standard",
-    "execution_seconds": 1.2123
+    "execution_seconds": 0.9761
   },
   "features": {
     "BaseFeaturePlugin": {
@@ -16,7 +16,7 @@
     "input_datasets": 1,
     "rows_input_total": 93084,
     "rows_aligned": 93084,
-    "columns_exported": 44,
+    "columns_exported": 4,
     "start_timestamp": "2005-05-02T00:00:00",
     "end_timestamp": "2020-04-29T22:00:00",
     "dropped_empty_or_invalid": {
@@ -25,48 +25,7 @@
     "per_dataset_row_counts": {
       "BaseFeaturePlugin": 93084
     },
-    "missing_output_columns": [
-      "RSI",
-      "MACD",
-      "MACD_Histogram",
-      "MACD_Signal",
-      "EMA",
-      "Stochastic_%K",
-      "Stochastic_%D",
-      "ADX",
-      "DI+",
-      "DI-",
-      "ATR",
-      "CCI",
-      "WilliamsR",
-      "Momentum",
-      "ROC",
-      "BC-BO",
-      "BH-BL",
-      "BH-BO",
-      "BO-BL",
-      "S&P500_Close",
-      "vix_close",
-      "CLOSE_15m_tick_1",
-      "CLOSE_15m_tick_2",
-      "CLOSE_15m_tick_3",
-      "CLOSE_15m_tick_4",
-      "CLOSE_15m_tick_5",
-      "CLOSE_15m_tick_6",
-      "CLOSE_15m_tick_7",
-      "CLOSE_15m_tick_8",
-      "CLOSE_30m_tick_1",
-      "CLOSE_30m_tick_2",
-      "CLOSE_30m_tick_3",
-      "CLOSE_30m_tick_4",
-      "CLOSE_30m_tick_5",
-      "CLOSE_30m_tick_6",
-      "CLOSE_30m_tick_7",
-      "CLOSE_30m_tick_8",
-      "day_of_month",
-      "hour_of_day",
-      "day_of_week"
-    ],
+    "missing_output_columns": [],
     "extra_columns_dropped": []
   },
   "post_processor": {
