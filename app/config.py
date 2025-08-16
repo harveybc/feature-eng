@@ -10,6 +10,11 @@ DEFAULT_VALUES = {
     'aligner_plugin': 'default',
     'post_processor_plugin': 'decomposition',
 
+    # Aligner behavior: only keep columns actually produced (don't enforce a global schema)
+    'aligner_enforce_output_schema': False,
+    'aligner_add_missing_columns': False,
+    'aligner_strict_schema': False,
+
     #'correlation_analysis': False,
     #'distribution_plot': True,
     'quiet_mode': False,

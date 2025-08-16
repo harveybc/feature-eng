@@ -1,0 +1,91 @@
+{
+  "pipeline": {
+    "pipeline_mode": "standard",
+    "execution_seconds": 1.2123
+  },
+  "features": {
+    "BaseFeaturePlugin": {
+      "rows_read": 93084,
+      "features_read": 7,
+      "rows_exported": 93084,
+      "features_exported": 5,
+      "data_source": "file"
+    }
+  },
+  "aligner": {
+    "input_datasets": 1,
+    "rows_input_total": 93084,
+    "rows_aligned": 93084,
+    "columns_exported": 44,
+    "start_timestamp": "2005-05-02T00:00:00",
+    "end_timestamp": "2020-04-29T22:00:00",
+    "dropped_empty_or_invalid": {
+      "BaseFeaturePlugin": 0
+    },
+    "per_dataset_row_counts": {
+      "BaseFeaturePlugin": 93084
+    },
+    "missing_output_columns": [
+      "RSI",
+      "MACD",
+      "MACD_Histogram",
+      "MACD_Signal",
+      "EMA",
+      "Stochastic_%K",
+      "Stochastic_%D",
+      "ADX",
+      "DI+",
+      "DI-",
+      "ATR",
+      "CCI",
+      "WilliamsR",
+      "Momentum",
+      "ROC",
+      "BC-BO",
+      "BH-BL",
+      "BH-BO",
+      "BO-BL",
+      "S&P500_Close",
+      "vix_close",
+      "CLOSE_15m_tick_1",
+      "CLOSE_15m_tick_2",
+      "CLOSE_15m_tick_3",
+      "CLOSE_15m_tick_4",
+      "CLOSE_15m_tick_5",
+      "CLOSE_15m_tick_6",
+      "CLOSE_15m_tick_7",
+      "CLOSE_15m_tick_8",
+      "CLOSE_30m_tick_1",
+      "CLOSE_30m_tick_2",
+      "CLOSE_30m_tick_3",
+      "CLOSE_30m_tick_4",
+      "CLOSE_30m_tick_5",
+      "CLOSE_30m_tick_6",
+      "CLOSE_30m_tick_7",
+      "CLOSE_30m_tick_8",
+      "day_of_month",
+      "hour_of_day",
+      "day_of_week"
+    ],
+    "extra_columns_dropped": []
+  },
+  "post_processor": {
+    "features_requested": null,
+    "features_processed": null,
+    "use_stl": null,
+    "use_wavelet": null,
+    "use_mtm": null,
+    "stl_period": null,
+    "stl_window": null,
+    "stl_trend": null,
+    "wavelet_name": null,
+    "wavelet_levels": null,
+    "mtm_window_len": null,
+    "mtm_freq_bands": null,
+    "components_generated": null,
+    "output_columns": null,
+    "rows_before_drop": null,
+    "rows_after_drop": null,
+    "rows_dropped_due_to_nans": null
+  }
+}

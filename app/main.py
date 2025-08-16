@@ -136,7 +136,7 @@ def main() -> None:
     config = merge_config(config, post_processor_plugin.plugin_params, {}, file_config, cli_args, unknown_args_dict)
 
     # ---------------------------------------------------------------------
-    # 6. Execute pipeline (single consolidated action – no optimizer stage)
+    # 6. Execute pipeline 
     # ---------------------------------------------------------------------
     print("[5/7] Executing feature engineering pipeline...")
     try:
