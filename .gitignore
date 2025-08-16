@@ -138,5 +138,5 @@ logs/
 # Others
 secrets.py
 credentials.ini
-feature-eng-*/
+feature_eng-*/
 
