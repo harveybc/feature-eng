@@ -21,7 +21,7 @@
     "save_config": "./output_config.json",
     "headers": true,
     
-    "use_candlestick": false
+    "use_candlestick": true
 
     
     
