@@ -9,6 +9,7 @@ DEFAULT_VALUES = {
     'pipeline_plugin': 'default',
     'aligner_plugin': 'default',
     'post_processor_plugin': 'decomposition',
+    'trim_starting': 200,
 
     # Aligner behavior: only keep columns actually produced (don't enforce a global schema)
     'aligner_enforce_output_schema': False,

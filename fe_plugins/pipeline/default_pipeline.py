@@ -128,6 +128,10 @@ class PipelinePlugin:
         except Exception as exc:  # noqa: BLE001
             print(f"Post-processing failed: {exc}")
             raise
+        print("[PIPELINE 3/6] Removing the starting config[trim_starting] rows...")
+        trim_starting = config.get("trim_starting", 0)
+        if trim_starting > 0:
+            post_processed_data = post_processed_data[trim_starting:]
 
         # ---------------------------------------------------------------------
         # 4. Save Output: write final artifact to configured destination
