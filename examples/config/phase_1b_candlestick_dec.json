@@ -1,0 +1,30 @@
+{
+    "output_file": "./examples/data/phase_1b_candlestick_dec.csv",
+    "include_original_5": true,
+    "feature_plugins": ["base_features"],
+    "pipeline_plugin": "default",
+    "aligner_plugin": "default",
+    "post_processor_plugin": "decomposition",
+
+    "aligner_enforce_output_schema": false,
+    "aligner_add_missing_columns": false,
+    "aligner_strict_schema": false,
+
+    "quiet_mode": false,
+    "save_log": "./debug_log.json",
+    "username": null,
+    "password": null,
+    "remote_save_config": null,
+    "remote_load_config": null,
+    "remote_log": null,
+    "load_config": null,
+    "save_config": "./output_config.json",
+    "headers": true,
+    
+    "use_candlestick": true,
+    "decomp_features": ["CLOSE"]
+
+
+    
+    
+}
