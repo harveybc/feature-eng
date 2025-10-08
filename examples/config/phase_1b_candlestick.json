@@ -1,5 +1,5 @@
 {
-    "output_file": "./examples/data/phase_1b_candlestick.csv",
+    "output_file": "./examples/data/phase_1.csv",
     "include_original_5": true,
     "feature_plugins": ["base_features"],
     "pipeline_plugin": "default",
