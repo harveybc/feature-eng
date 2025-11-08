@@ -166,7 +166,7 @@ def permutation_entropy_weighted(r: pd.Series, m: int = 5, tau: int = 1,
 
 def lz_entropy_rate_sign(r: pd.Series,
                          method: str = 'lz76',
-                         max_samples: int = 200_000) -> float:
+                         max_samples: int = 100_000) -> float:
     """
     Tasa de entropía estilo LZ con dos modos:
       - 'lz76': Lempel–Ziv 76 sobre signo(r_t) con submuestreo temporal
