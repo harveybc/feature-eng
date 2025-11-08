@@ -11,6 +11,7 @@ Benchmark de modelos de regresión por periodicidad y horizonte.
 - Ventana de entrada = número de barras equivalente al horizonte.
 - Train/valid: 2 años para train, 1 año para valid (time-based split).
 - Métrica: MAE sobre precio futuro close_{t+h}.
+- Baseline: NAIVE (persistencia) = predecir y_hat como el último valor de la ventana.
 
 Uso:
     python periodicity_benchmark.py path/to/data_5m.csv \
@@ -177,7 +178,7 @@ def time_based_train_valid_split(index: pd.DatetimeIndex,
     return np.asarray(is_train, dtype=bool), np.asarray(is_valid, dtype=bool)
 
 # ------------------------------
-# Entrenamiento y evaluación de modelos
+# Entrenamiento y evaluación de modelos + baseline
 # ------------------------------
 def fit_and_eval_models(X: np.ndarray,
                         y: np.ndarray,
@@ -188,35 +189,46 @@ def fit_and_eval_models(X: np.ndarray,
                         quiet: bool = False) -> Dict[str, float]:
     """
     Entrena y evalúa LR, MLP(2 capas) y XGBoost (si está disponible),
-    usando split temporal (2y train, 1y valid). Retorna dict con MAEs por modelo.
+    usando split temporal (2y train, 1y valid). Además calcula baseline NAIVE
+    (persistencia) en train y valid. Retorna dict con MAEs por modelo y baseline.
     """
     # Obtiene máscaras de train/valid basadas en tiempo
     is_train, is_valid = time_based_train_valid_split(idx, years_train=2, years_valid=1)
     # Verifica que haya muestras en ambos conjuntos
     if is_train.sum() == 0 or is_valid.sum() == 0:
         warn("Split temporal produjo conjuntos vacíos. Saltando evaluación en este caso.")
-        return {'LR_MAE': np.nan, 'MLP_MAE': np.nan, 'XGB_MAE': np.nan if XGB_AVAILABLE else np.nan}
+        return {
+            'NAIVE_TRAIN_MAE': np.nan, 'NAIVE_VALID_MAE': np.nan,
+            'LR_MAE': np.nan, 'MLP_MAE': np.nan,
+            'XGB_MAE': np.nan if XGB_AVAILABLE else np.nan
+        }
+
     # Extrae subconjuntos
     Xtr, ytr = X[is_train], y[is_train]                   # Conjunto de entrenamiento
     Xva, yva = X[is_valid], y[is_valid]                   # Conjunto de validación
 
-    # Pipeline común: escalado + modelo lineal
+    # ---------------- Baseline NAIVE (persistencia) ----------------
+    # Predice el futuro como el último valor de la ventana de entrada
+    yhat_naive_tr = Xtr[:, -1]                            # Persistencia en train
+    yhat_naive_va = Xva[:, -1]                            # Persistencia en valid
+    naive_train_mae = mean_absolute_error(ytr, yhat_naive_tr)  # MAE train baseline
+    naive_valid_mae = mean_absolute_error(yva, yhat_naive_va)  # MAE valid baseline
+
+    # ---------------- Linear Regression (LR) ----------------
     lr_pipe = Pipeline(steps=[
         ('scaler', StandardScaler(with_mean=True, with_std=True)),   # Estandarización
-        ('lr', LinearRegression(n_jobs=None))                        # Regresión lineal
+        ('lr', LinearRegression())                                   # Regresión lineal
     ])
-    # Entrena LR
-    lr_pipe.fit(Xtr, ytr)
-    # Predice y calcula MAE
-    yhat_lr = lr_pipe.predict(Xva)
-    mae_lr = mean_absolute_error(yva, yhat_lr)
+    lr_pipe.fit(Xtr, ytr)                                            # Entrena LR
+    yhat_lr = lr_pipe.predict(Xva)                                   # Predice
+    mae_lr = mean_absolute_error(yva, yhat_lr)                       # MAE valid
 
-    # Pipeline para MLP: escalado + MLP dos capas
+    # ---------------- MLP (2 capas) ----------------
     mlp = MLPRegressor(hidden_layer_sizes=(mlp_width, mlp_second),   # Dos capas ocultas
                        activation='relu',                            # Activación ReLU
                        solver='adam',                                # Optimizador Adam
                        alpha=1e-4,                                   # Regularización L2
-                       batch_size='auto',                            # Tamaño de batch automático
+                       batch_size='auto',                            # Tamaño de batch
                        learning_rate='adaptive',                     # LR adaptativo
                        learning_rate_init=1e-3,                      # LR inicial
                        max_iter=200,                                 # Iteraciones máximas
@@ -229,15 +241,12 @@ def fit_and_eval_models(X: np.ndarray,
         ('scaler', StandardScaler(with_mean=True, with_std=True)),   # Estandarización
         ('mlp', mlp)                                                 # MLP
     ])
-    # Entrena MLP
-    mlp_pipe.fit(Xtr, ytr)
-    # Predice y calcula MAE
-    yhat_mlp = mlp_pipe.predict(Xva)
-    mae_mlp = mean_absolute_error(yva, yhat_mlp)
+    mlp_pipe.fit(Xtr, ytr)                                           # Entrena MLP
+    yhat_mlp = mlp_pipe.predict(Xva)                                 # Predice
+    mae_mlp = mean_absolute_error(yva, yhat_mlp)                     # MAE valid
 
-    # XGBoost si está disponible; si no, retorna NaN
+    # ---------------- XGBoost (opcional) ----------------
     if XGB_AVAILABLE:
-        # Configuración razonable y rápida para series
         xgb = XGBRegressor(
             n_estimators=300,              # N árboles
             max_depth=6,                   # Profundidad
@@ -250,17 +259,21 @@ def fit_and_eval_models(X: np.ndarray,
             n_jobs=0,                      # Usa todos los cores
             tree_method='hist',            # Rápido y memoria eficiente
         )
-        # XGBoost no requiere escalado; lo usamos directo
-        xgb.fit(Xtr, ytr, eval_set=[(Xva, yva)], verbose=False)
-        # Predice y calcula MAE
-        yhat_xgb = xgb.predict(Xva)
-        mae_xgb = mean_absolute_error(yva, yhat_xgb)
+        xgb.fit(Xtr, ytr, eval_set=[(Xva, yva)], verbose=False)      # Entrena XGB
+        yhat_xgb = xgb.predict(Xva)                                  # Predice
+        mae_xgb = mean_absolute_error(yva, yhat_xgb)                 # MAE valid
     else:
         warn("XGBoost no está disponible. Se omitirá este modelo.")
         mae_xgb = np.nan
 
-    # Retorna los MAE de cada modelo
-    return {'LR_MAE': float(mae_lr), 'MLP_MAE': float(mae_mlp), 'XGB_MAE': float(mae_xgb)}
+    # Retorna MAEs incluyendo baseline
+    return {
+        'NAIVE_TRAIN_MAE': float(naive_train_mae),
+        'NAIVE_VALID_MAE': float(naive_valid_mae),
+        'LR_MAE': float(mae_lr),
+        'MLP_MAE': float(mae_mlp),
+        'XGB_MAE': float(mae_xgb)
+    }
 
 
 # ------------------------------
@@ -278,7 +291,7 @@ def evaluate_periodicity_and_horizon(df5m: pd.DataFrame,
     Para una periodicidad y un horizonte:
     - Downsamplea (si aplica).
     - Construye dataset con ventana = #barras del horizonte y target = close futuro a h barras.
-    - Entrena/evalúa LR, MLP y XGB (si disponible).
+    - Entrena/evalúa LR, MLP y XGB (si disponible) y baseline NAIVE.
     - Retorna dict con métricas y metadatos.
     """
     # Muestra qué se está evaluando
@@ -297,6 +310,7 @@ def evaluate_periodicity_and_horizon(df5m: pd.DataFrame,
             'horizon_hours': horizon_hours,
             'window_bars': np.nan,
             'n_samples': 0,
+            'NAIVE_TRAIN_MAE': np.nan, 'NAIVE_VALID_MAE': np.nan,
             'LR_MAE': np.nan, 'MLP_MAE': np.nan, 'XGB_MAE': np.nan
         }
 
@@ -312,10 +326,11 @@ def evaluate_periodicity_and_horizon(df5m: pd.DataFrame,
             'horizon_hours': horizon_hours,
             'window_bars': int(window),
             'n_samples': 0,
+            'NAIVE_TRAIN_MAE': np.nan, 'NAIVE_VALID_MAE': np.nan,
             'LR_MAE': np.nan, 'MLP_MAE': np.nan, 'XGB_MAE': np.nan
         }
 
-    # Ajusta y evalúa modelos
+    # Ajusta y evalúa modelos + baseline
     metrics = fit_and_eval_models(X, y, idx, seed=seed, mlp_width=mlp_width, mlp_second=mlp_second, quiet=quiet)
     # Construye fila de resultados
     out = {
@@ -336,7 +351,7 @@ def main():
     """Punto de entrada principal del script CLI."""
     # Define argumentos CLI
     ap = argparse.ArgumentParser(
-        description="Benchmark de LR/MLP/XGBoost por periodicidad y horizonte (3h y 3d)."
+        description="Benchmark de LR/MLP/XGBoost por periodicidad y horizonte (3h y 3d) con baseline NAIVE (persistencia)."
     )
     ap.add_argument('csv', type=str, help='Ruta al CSV base (periodicidad 5T).')
     ap.add_argument('--time-col', type=str, default=None, help='Nombre de la columna temporal.')
@@ -349,9 +364,10 @@ def main():
     ap.add_argument('--quiet', action='store_true', help='Reduce verbosidad de impresión.')
     args = ap.parse_args()
 
-    # Imprime leyenda de acrónimos una sola vez
+    # Imprime leyenda de acrónimos una sola vez (incluye NAIVE)
     info("[LEGEND] LR=Linear Regression; MLP=Multi-Layer Perceptron; XGB=XGBoost; "
-         "MAE=Mean Absolute Error.", args.quiet)
+         "MAE=Mean Absolute Error; NAIVE=Persistence baseline (predict next price = last observed in window).",
+         args.quiet)
 
     # Carga CSV
     info("[INIT] Cargando CSV base (5T)…", args.quiet)
@@ -413,9 +429,12 @@ def main():
     # Ordena para mejor lectura
     dfr = dfr.sort_values(by=['horizon_hours', 'periodicity']).reset_index(drop=True)
 
-    # Imprime resumen formateado
-    info("\n=== RESUMEN DE MAE POR MODELO / PERIODICIDAD / HORIZONTE ===", False)
-    show_cols = ['horizon_hours', 'periodicity', 'window_bars', 'n_samples', 'LR_MAE', 'MLP_MAE', 'XGB_MAE']
+    # Imprime resumen formateado (incluye baseline NAIVE)
+    info("\n=== RESUMEN DE MAE POR MODELO / PERIODICIDAD / HORIZONTE (incluye NAIVE baseline) ===", False)
+    show_cols = [
+        'horizon_hours', 'periodicity', 'window_bars', 'n_samples',
+        'NAIVE_TRAIN_MAE', 'NAIVE_VALID_MAE', 'LR_MAE', 'MLP_MAE', 'XGB_MAE'
+    ]
     # Función de formateo segura
     def _fmt(v):
         try:
