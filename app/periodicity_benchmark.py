@@ -90,48 +90,38 @@ def train_xgb_core_with_es(Xtr: np.ndarray,
                            seed: int):
     """
     Entrena XGBoost usando la core API (xgb.train) con early stopping en MAE,
-    con parámetros conservadores para reducir overfitting en ventanas de lags.
+    y predice usando iteration_range (fallback a ntree_limit para builds antiguas).
 
     Retorna: (yhat_tr, yhat_va)
     """
     if not XGB_CORE_AVAILABLE:
         raise RuntimeError("XGBoost core API no disponible.")
 
-    # DMatrix para eficiencia
     dtr = xgb.DMatrix(Xtr, label=ytr)
     dva = xgb.DMatrix(Xva, label=yva)
 
-    # Anti-overfitting por diseño
     base_params = {
-        # Intentamos optimizar MAE; si la build no soporta 'reg:absoluteerror',
-        # reintentaremos con 'reg:squarederror' más abajo.
-        "objective": "reg:absoluteerror",
+        "objective": "reg:absoluteerror",  # fallback a reg:squarederror si falla
         "eval_metric": "mae",
         "seed": seed,
         "tree_method": "hist",
-        # Capacidad muy limitada
         "max_depth": 3,
         "grow_policy": "lossguide",
         "max_leaves": 64,
         "min_child_weight": 10.0,
         "gamma": 1.0,
-        # Regularización fuerte
         "reg_lambda": 5.0,
         "reg_alpha": 0.5,
-        # Submuestreo estocástico
         "subsample": 0.6,
         "colsample_bytree": 0.6,
         "colsample_bylevel": 0.6,
-        # Paso pequeño para permitir early stopping
         "learning_rate": 0.03,
     }
-
     num_boost_round = 5000
     early_stopping_rounds = 200
     evals = [(dva, "valid")]
 
     try:
-        # Primer intento con 'reg:absoluteerror'
         bst = xgb.train(
             params=base_params,
             dtrain=dtr,
@@ -141,7 +131,7 @@ def train_xgb_core_with_es(Xtr: np.ndarray,
             verbose_eval=False,
         )
     except Exception:
-        # Fallback para builds antiguas sin 'reg:absoluteerror'
+        # fallback para builds sin 'reg:absoluteerror'
         base_params["objective"] = "reg:squarederror"
         bst = xgb.train(
             params=base_params,
@@ -152,16 +142,24 @@ def train_xgb_core_with_es(Xtr: np.ndarray,
             verbose_eval=False,
         )
 
-    # Predicciones usando las iteraciones hasta best_iteration
     best_it = getattr(bst, "best_iteration", None)
-    if best_it is None:
-        yhat_tr = bst.predict(dtr)
-        yhat_va = bst.predict(dva)
-    else:
-        # iteration_range solo está en versiones recientes; usamos ntree_limit para compatibilidad
-        yhat_tr = bst.predict(dtr, ntree_limit=best_it + 1)
-        yhat_va = bst.predict(dva, ntree_limit=best_it + 1)
+    # Predicción robusta a versiones: preferir iteration_range; fallback a ntree_limit
+    def _predict(dm):
+        if best_it is None:
+            return bst.predict(dm)
+        # Preferencia: APIs nuevas
+        try:
+            return bst.predict(dm, iteration_range=(0, int(best_it) + 1))
+        except TypeError:
+            # Fallback: APIs antiguas (algunas aún aceptan ntree_limit)
+            try:
+                return bst.predict(dm, ntree_limit=int(best_it) + 1)
+            except TypeError:
+                # Último recurso: predecir con todos los árboles entrenados
+                return bst.predict(dm)
 
+    yhat_tr = _predict(dtr)
+    yhat_va = _predict(dva)
     return yhat_tr, yhat_va
 
 # ------------------------------
@@ -197,12 +195,23 @@ def ensure_datetime_index(df: pd.DataFrame, time_col: str) -> pd.DataFrame:
     df = df[~df.index.duplicated(keep='last')]            # Quita duplicados en índice
     return df                                             # Retorna DataFrame normalizado
 
+def _normalize_rule(rule: str) -> str:
+    """Normaliza alias de frecuencia deprecated: 'T'→'min', 'H'→'h'."""
+    mapping = {
+        '5T': '5min', '15T': '15min',
+        '1H': '1h',   '4H': '4h',
+        '1D': '1D'
+    }
+    return mapping.get(rule, rule)
+
+
 def resample_close(df: pd.DataFrame, close_col: str, rule: str) -> pd.DataFrame:
     """
-    Realiza downsample sin look-ahead: toma el último close del intervalo (label/right).
-    Esto replica la política del selector de periodicidad.
+    Downsample sin look-ahead: último close del intervalo (label/right).
+    Normaliza alias de frecuencia para evitar FutureWarning de pandas.
     """
-    out = df[[close_col]].resample(rule, label='right', closed='right').last().dropna()
+    norm_rule = _normalize_rule(rule)
+    out = df[[close_col]].resample(norm_rule, label='right', closed='right').last().dropna()
     return out
 
 
