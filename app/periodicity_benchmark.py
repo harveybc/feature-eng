@@ -48,10 +48,14 @@ from sklearn.metrics import mean_absolute_error             # MAE
 
 # XGBoost opcional
 try:
-    from xgboost import XGBRegressor                        # Regressor XGBoost
-    XGB_AVAILABLE = True                                    # Flag si XGBoost está disponible
+    from xgboost import XGBRegressor  # puede existir, pero no lo usaremos si el wrapper es viejo
+    import xgboost as xgb             # core API (preferida para compatibilidad y early stopping)
+    XGB_AVAILABLE = True
+    XGB_CORE_AVAILABLE = True
 except Exception:
-    XGB_AVAILABLE = False                                   # Si no se puede importar, se desactiva
+    XGB_AVAILABLE = False
+    XGB_CORE_AVAILABLE = False
+                           # Si no se puede importar, se desactiva
 
 # Keras/TensorFlow opcional (para MLP con early stopping sobre val_mae)
 try:
@@ -78,6 +82,87 @@ def error(msg: str) -> None:
     """Imprime errores a stderr con flush inmediato."""
     print(f"[ERROR] {msg}", file=sys.stderr, flush=True)
 
+
+def train_xgb_core_with_es(Xtr: np.ndarray,
+                           ytr: np.ndarray,
+                           Xva: np.ndarray,
+                           yva: np.ndarray,
+                           seed: int):
+    """
+    Entrena XGBoost usando la core API (xgb.train) con early stopping en MAE,
+    con parámetros conservadores para reducir overfitting en ventanas de lags.
+
+    Retorna: (yhat_tr, yhat_va)
+    """
+    if not XGB_CORE_AVAILABLE:
+        raise RuntimeError("XGBoost core API no disponible.")
+
+    # DMatrix para eficiencia
+    dtr = xgb.DMatrix(Xtr, label=ytr)
+    dva = xgb.DMatrix(Xva, label=yva)
+
+    # Anti-overfitting por diseño
+    base_params = {
+        # Intentamos optimizar MAE; si la build no soporta 'reg:absoluteerror',
+        # reintentaremos con 'reg:squarederror' más abajo.
+        "objective": "reg:absoluteerror",
+        "eval_metric": "mae",
+        "seed": seed,
+        "tree_method": "hist",
+        # Capacidad muy limitada
+        "max_depth": 3,
+        "grow_policy": "lossguide",
+        "max_leaves": 64,
+        "min_child_weight": 10.0,
+        "gamma": 1.0,
+        # Regularización fuerte
+        "reg_lambda": 5.0,
+        "reg_alpha": 0.5,
+        # Submuestreo estocástico
+        "subsample": 0.6,
+        "colsample_bytree": 0.6,
+        "colsample_bylevel": 0.6,
+        # Paso pequeño para permitir early stopping
+        "learning_rate": 0.03,
+    }
+
+    num_boost_round = 5000
+    early_stopping_rounds = 200
+    evals = [(dva, "valid")]
+
+    try:
+        # Primer intento con 'reg:absoluteerror'
+        bst = xgb.train(
+            params=base_params,
+            dtrain=dtr,
+            num_boost_round=num_boost_round,
+            evals=evals,
+            early_stopping_rounds=early_stopping_rounds,
+            verbose_eval=False,
+        )
+    except Exception:
+        # Fallback para builds antiguas sin 'reg:absoluteerror'
+        base_params["objective"] = "reg:squarederror"
+        bst = xgb.train(
+            params=base_params,
+            dtrain=dtr,
+            num_boost_round=num_boost_round,
+            evals=evals,
+            early_stopping_rounds=early_stopping_rounds,
+            verbose_eval=False,
+        )
+
+    # Predicciones usando las iteraciones hasta best_iteration
+    best_it = getattr(bst, "best_iteration", None)
+    if best_it is None:
+        yhat_tr = bst.predict(dtr)
+        yhat_va = bst.predict(dva)
+    else:
+        # iteration_range solo está en versiones recientes; usamos ntree_limit para compatibilidad
+        yhat_tr = bst.predict(dtr, ntree_limit=best_it + 1)
+        yhat_va = bst.predict(dva, ntree_limit=best_it + 1)
+
+    return yhat_tr, yhat_va
 
 # ------------------------------
 # Mapeos y conversiones de periodicidad
@@ -309,69 +394,21 @@ def fit_and_eval_models(X: np.ndarray,
         mae_mlp_va = mean_absolute_error(yva, yhat_mlp_va)               # MAE valid
 
     # ---------------- XGBoost (opcional) ----------------
-        # -------- XGBoost (regularizado + objective MAE + strong early stopping) --------
-        # ---------------- XGBoost (robust to old wrappers; MAE objective; early stop) ----------------
-    if XGB_AVAILABLE:
-        # Conservative, regularized config to cut overfitting on lag windows.
-        xgb = XGBRegressor(
-            # Objective: prefer absolute error; fallback to squared error if not supported.
-            objective='reg:absoluteerror',   # try MAE objective first
-            # Capacity controls:
-            max_depth=3,                     # shallow trees generalize better on collinear lags
-            grow_policy='lossguide',
-            max_leaves=64,
-            min_child_weight=10.0,
-            gamma=1.0,
-            # Regularization:
-            reg_lambda=5.0,
-            reg_alpha=0.5,
-            # Stochastic subsampling:
-            subsample=0.6,
-            colsample_bytree=0.6,
-            colsample_bylevel=0.6,
-            # Schedule:
-            learning_rate=0.03,
-            n_estimators=5000,               # many rounds; early stopping will truncate
-            random_state=seed,
-            n_jobs=0,
-            tree_method='hist',
-        )
-
-        # Some older XGB sklearn wrappers don't accept eval_metric in fit(...)
-        fit_kwargs = dict(
-            eval_set=[(Xva, yva)],
-            verbose=False,
-            early_stopping_rounds=200
-        )
-
-        # 1) Try MAE objective + eval_metric in fit
+        # ---------------- XGBoost (core API con early stopping y parámetros anti-overfitting) ----------------
+    if XGB_AVAILABLE and XGB_CORE_AVAILABLE:
         try:
-            xgb.fit(Xtr, ytr, eval_metric='mae', **fit_kwargs)
-        except TypeError:
-            # 2) Older wrapper: push eval_metric via set_params, then fit without it
-            xgb.set_params(eval_metric='mae')
-            try:
-                xgb.fit(Xtr, ytr, **fit_kwargs)
-            except Exception as e:
-                # 3) Some very old versions also lack 'reg:absoluteerror'
-                #    -> fallback to squared error objective with MAE eval metric
-                from xgboost.core import XGBoostError
-                try:
-                    xgb.set_params(objective='reg:squarederror')
-                except Exception:
-                    pass
-                # re-fit with fallback objective
-                xgb.fit(Xtr, ytr, **fit_kwargs)
-
-        # Predictions (best_iteration_ is respected by wrapper after early stopping)
-        yhat_xgb_tr = xgb.predict(Xtr)
-        yhat_xgb_va = xgb.predict(Xva)
-        mae_xgb_tr = mean_absolute_error(ytr, yhat_xgb_tr)
-        mae_xgb_va = mean_absolute_error(yva, yhat_xgb_va)
+            yhat_xgb_tr, yhat_xgb_va = train_xgb_core_with_es(Xtr, ytr, Xva, yva, seed=seed)
+            mae_xgb_tr = mean_absolute_error(ytr, yhat_xgb_tr)
+            mae_xgb_va = mean_absolute_error(yva, yhat_xgb_va)
+        except Exception as e:
+            warn(f"XGBoost (core) falló: {e}. Se omitirá XGB para este caso.")
+            mae_xgb_tr = np.nan
+            mae_xgb_va = np.nan
     else:
-        warn("XGBoost no está disponible. Se omite este modelo.")
+        warn("XGBoost no disponible. Se omite XGB.")
         mae_xgb_tr = np.nan
         mae_xgb_va = np.nan
+
 
 
 
