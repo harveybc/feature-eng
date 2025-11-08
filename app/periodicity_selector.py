@@ -164,19 +164,61 @@ def permutation_entropy_weighted(r: pd.Series, m: int = 5, tau: int = 1,
     wpe = float(np.clip(Hw / np.log(K), 0.0, 1.0))
     return wpe
 
-def lz_entropy_rate_sign(r: pd.Series) -> float:
-    """Tasa LZ sobre signo de retornos (rápido y sin progreso necesario)."""
+def lz_entropy_rate_sign(r: pd.Series,
+                         method: str = 'lz76',
+                         max_samples: int = 200_000) -> float:
+    """
+    Tasa de entropía estilo LZ con dos modos:
+      - 'lz76': Lempel–Ziv 76 sobre signo(r_t) con submuestreo temporal
+                para acotar coste (default max_samples=200k).
+      - 'zlib': aproximación ultrarrápida: tasa de compresión de zlib
+                sobre la secuencia binaria; devuelve (len(compress)/n) * log(256)
+                normalizado a bits/símbolo.
+
+    Notas:
+      * El submuestreo preserva el orden y reduce la complejidad drásticamente.
+      * 'zlib' no es LZ76 exacto, pero es un buen proxy de complejidad/aleatoriedad.
+
+    :param r: Serie de retornos sin NaNs.
+    :param method: 'lz76' o 'zlib'.
+    :param max_samples: tope de símbolos tras thinning para 'lz76'.
+    :return: Tasa relativa (más alto = más aleatorio/menos predecible).
+    """
     x = np.asarray(r.dropna(), dtype=float)
     if x.size < 256:
         return np.nan
-    s = (x > 0).astype(np.uint8).tolist()
-    n = len(s)
+
+    # Secuencia binaria por signo
+    s = (x > 0).astype(np.uint8)
+
+    if method == 'zlib':
+        # Aproximación muy rápida por compresión (proxy)
+        import zlib
+        # Empaqueta bits a bytes para alimentar zlib de forma eficiente
+        # Convertimos 0/1 a bytes '0'/'1' por simplicidad y portabilidad
+        b = bytes(s.tolist())
+        comp = zlib.compress(b, level=6)
+        n = len(b)
+        if n == 0:
+            return np.nan
+        # Tasa en bits/símbolo (aprox): (bytes_comprimidos * 8) / n
+        rate_bits_per_symbol = (len(comp) * 8.0) / n
+        return float(rate_bits_per_symbol)
+
+    # Método 'lz76' con thinning para acotar coste
+    s_thin = _thin_binary_sequence(s, max_samples=max_samples)
+    n = int(s_thin.size)
+    if n < 256:
+        return np.nan
+
+    # Implementación LZ76 (conteo de frases) sobre s_thin
+    seq = s_thin.tolist()
     i, k, l, c = 0, 1, 1, 1
     while True:
         if i + k > n:
             c += 1
             break
-        if s[i:i+k] == s[l:l+k]:
+        if seq[i:i+k] == seq[l:l+k]:
             k += 1
             if l + k > n:
                 c += 1
@@ -190,8 +232,11 @@ def lz_entropy_rate_sign(r: pd.Series) -> float:
                     break
                 l = 0
                 k = 1
+
+    # Tasa clásica aproximada
     rate = (c * math.log(n)) / n
     return float(rate)
+
 
 def _thin_series_for_mi(x: np.ndarray, max_samples: int) -> np.ndarray:
     """Submuestreo temporal uniforme para MI si la serie es masiva."""
@@ -199,6 +244,18 @@ def _thin_series_for_mi(x: np.ndarray, max_samples: int) -> np.ndarray:
         return x
     step = int(np.ceil(x.size / max_samples))
     return x[::step]
+
+def _thin_binary_sequence(s: np.ndarray, max_samples: int) -> np.ndarray:
+    """
+    Submuestreo temporal uniforme para secuencias binarias (mantiene orden).
+    Retorna s[::step] con step=ceil(len(s)/max_samples).
+    """
+    n = s.size
+    if n <= max_samples:
+        return s
+    step = int(np.ceil(n / max_samples))
+    return s[::step]
+
 
 def mutual_information_horizon(r: pd.Series, horizon_bars: int, k: int = 5,
                                max_samples: int = 800_000,
@@ -270,7 +327,9 @@ def snr_smoothing_returns(r: pd.Series, smooth_window: int) -> float:
 # ---------------------------------------------------------------------------
 def evaluate_periodicity(df_close: pd.DataFrame, rule: str,
                          mi_k: int, max_mi_samples: int,
-                         use_tqdm: bool, quiet: bool) -> Dict[str, float]:
+                         use_tqdm: bool, quiet: bool,
+                         lz_method: str, max_lz_samples: int) -> Dict[str, float]:
+
     """Calcula todas las métricas para una periodicidad y reporta progreso."""
     info(f"[{rule}] Preparando serie y retornos…", quiet)
     if rule != '5T':
@@ -288,8 +347,9 @@ def evaluate_periodicity(df_close: pd.DataFrame, rule: str,
     info(f"[{rule}] Cálculo WPE (puede tardar, depende de N)…", quiet)
     wpe = permutation_entropy_weighted(r, m=5, tau=1, use_tqdm=use_tqdm, quiet=quiet)
 
-    info(f"[{rule}] Cálculo tasa LZ (signo retornos)…", quiet)
-    lz_rate = lz_entropy_rate_sign(r)
+    info(f"[{rule}] Cálculo tasa LZ (signo retornos, método={lz_method})…", quiet)
+    lz_rate = lz_entropy_rate_sign(r, method=lz_method, max_samples=max_lz_samples)
+
 
     info(f"[{rule}] Cálculo MI 6h (h={int(h_s)} barras)…", quiet)
     mi_6h = mutual_information_horizon(r, horizon_bars=int(h_s), k=mi_k,
@@ -356,6 +416,10 @@ def main():
     ap.add_argument('--no-tqdm', action='store_true', help="Desactivar barras tqdm.")
     ap.add_argument('--progress', action='store_true',
                     help="Forzar tqdm incluso en datasets pequeños (por defecto se decide automáticamente).")
+    ap.add_argument('--max-lz-samples', type=int, default=200_000,
+                    help="Máximo de símbolos binarios para LZ tras thinning (default=200k).")
+    ap.add_argument('--lz-method', type=str, default='lz76', choices=['lz76', 'zlib'],
+                    help="Método para tasa LZ: 'lz76' exacto (thinning) o 'zlib' (aprox. muy rápida).")
     args = ap.parse_args()
 
     # Lectura del CSV con informe
@@ -409,7 +473,9 @@ def main():
                 mi_k=args.mi_nneighbors,
                 max_mi_samples=args.max_mi_samples,
                 use_tqdm=use_tqdm,
-                quiet=args.quiet
+                quiet=args.quiet,
+                lz_method=args.lz_method,
+                max_lz_samples=args.max_lz_samples
             )
         except Exception as e:
             error(f"Falló evaluación en {rule}: {e}")
