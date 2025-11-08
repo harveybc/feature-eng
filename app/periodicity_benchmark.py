@@ -151,32 +151,30 @@ def time_based_train_valid_split(index: pd.DatetimeIndex,
                                  years_train: int = 2,
                                  years_valid: int = 1) -> Tuple[np.ndarray, np.ndarray]:
     """
-    Crea máscaras booleanas de train/valid basadas en tiempo:
-    - Validación: últimos 'years_valid' años completos si es posible.
-    - Entrenamiento: los 'years_train' años previos a validación.
-
-    Si no hay longitud suficiente, ajusta el rango pero mantiene la separación temporal.
+    Masks for time-based split. Returns NumPy boolean arrays.
     """
-    if index.size == 0:                                   # Si no hay muestras, retorna máscaras vacías
+    if index.size == 0:
         return np.zeros((0,), dtype=bool), np.zeros((0,), dtype=bool)
-    end = index.max()                                     # Fecha máxima = final del periodo
-    # Define inicio de validación y entrenamiento
-    valid_start = end - pd.Timedelta(days=365 * years_valid)  # Inicio de validación
-    train_start = valid_start - pd.Timedelta(days=365 * years_train)  # Inicio de entrenamiento
-    # Ajusta si el índice no cubre tanto tiempo
-    min_time = index.min()                                # Fecha mínima disponible
-    if train_start < min_time:                            # Si el inicio de train cae fuera
-        train_start = min_time                            # Recorta al mínimo disponible
-    # Construye máscaras booleanas
-    is_valid = (index > valid_start) & (index <= end)     # Ventana de validación
-    is_train = (index > train_start) & (index <= valid_start)  # Ventana de entrenamiento
-    # Verifica tamaños y avisa si son pequeños
-    if is_train.sum() < 100:                              # Si hay muy pocas muestras de train
-        warn("Conjunto de entrenamiento resultó pequeño (<100 muestras). Los resultados pueden ser inestables.")
-    if is_valid.sum() < 50:                               # Si hay muy pocas muestras de valid
-        warn("Conjunto de validación resultó pequeño (<50 muestras). Los resultados pueden ser ruidosos.")
-    return is_train.values, is_valid.values               # Retorna máscaras como arrays numpy
 
+    end = index.max()
+    valid_start = end - pd.Timedelta(days=365 * years_valid)
+    train_start = valid_start - pd.Timedelta(days=365 * years_train)
+
+    min_time = index.min()
+    if train_start < min_time:
+        train_start = min_time
+
+    # boolean numpy arrays (no .values needed)
+    is_valid = (index > valid_start) & (index <= end)
+    is_train = (index > train_start) & (index <= valid_start)
+
+    if is_train.sum() < 100:
+        warn("Conjunto de entrenamiento resultó pequeño (<100 muestras). Los resultados pueden ser inestables.")
+    if is_valid.sum() < 50:
+        warn("Conjunto de validación resultó pequeño (<50 muestras). Los resultados pueden ser ruidosos.")
+
+    # Return directly; they are already np.ndarray[bool]
+    return np.asarray(is_train, dtype=bool), np.asarray(is_valid, dtype=bool)
 
 # ------------------------------
 # Entrenamiento y evaluación de modelos
