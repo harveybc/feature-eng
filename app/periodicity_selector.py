@@ -170,7 +170,7 @@ def lz_entropy_rate_sign(r: pd.Series,
     """
     Tasa de entropía estilo LZ con dos modos:
       - 'lz76': Lempel–Ziv 76 sobre signo(r_t) con submuestreo temporal
-                para acotar coste (default max_samples=200k).
+                para acotar coste (default max_samples=100k).
       - 'zlib': aproximación ultrarrápida: tasa de compresión de zlib
                 sobre la secuencia binaria; devuelve (len(compress)/n) * log(256)
                 normalizado a bits/símbolo.
@@ -416,8 +416,8 @@ def main():
     ap.add_argument('--no-tqdm', action='store_true', help="Desactivar barras tqdm.")
     ap.add_argument('--progress', action='store_true',
                     help="Forzar tqdm incluso en datasets pequeños (por defecto se decide automáticamente).")
-    ap.add_argument('--max-lz-samples', type=int, default=200_000,
-                    help="Máximo de símbolos binarios para LZ tras thinning (default=200k).")
+    ap.add_argument('--max-lz-samples', type=int, default=100_000,
+                    help="Máximo de símbolos binarios para LZ tras thinning (default=100k).")
     ap.add_argument('--lz-method', type=str, default='lz76', choices=['lz76', 'zlib'],
                     help="Método para tasa LZ: 'lz76' exacto (thinning) o 'zlib' (aprox. muy rápida).")
     args = ap.parse_args()
@@ -453,7 +453,7 @@ def main():
         warn("Pocos puntos de 5m; las métricas pueden ser inestables.")
 
     # Selección de si usar tqdm
-    auto_use_tqdm = (df.shape[0] > 200_000) or args.progress
+    auto_use_tqdm = (df.shape[0] > 100_000) or args.progress
     use_tqdm = False if args.no_tqdm else auto_use_tqdm
 
     # Periodicidades a evaluar
