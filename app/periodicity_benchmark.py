@@ -29,6 +29,8 @@ import argparse                   # Manejo de argumentos CLI
 import sys                        # Salida estándar y errores
 import math                       # Utilidades matemáticas
 from typing import Dict, List, Tuple  # Tipado estático opcional
+import os  # add near top
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")  # silence TF INFO logs
 
 # ------------------------------
 # Paquetes científicos
@@ -308,54 +310,69 @@ def fit_and_eval_models(X: np.ndarray,
 
     # ---------------- XGBoost (opcional) ----------------
         # -------- XGBoost (regularizado + objective MAE + strong early stopping) --------
+        # ---------------- XGBoost (robust to old wrappers; MAE objective; early stop) ----------------
     if XGB_AVAILABLE:
-        # Configure a conservative, regularized setup to reduce overfitting.
+        # Conservative, regularized config to cut overfitting on lag windows.
         xgb = XGBRegressor(
-            objective='reg:absoluteerror',  # Optimize MAE directly to match the reported metric
+            # Objective: prefer absolute error; fallback to squared error if not supported.
+            objective='reg:absoluteerror',   # try MAE objective first
             # Capacity controls:
-            max_depth=3,                   # Shallow trees generalize better on collinear lag features
-            grow_policy='lossguide',       # Leaf-wise growth with explicit leaf cap
-            max_leaves=64,                 # Upper bound on leaves for additional capacity control
-            min_child_weight=10.0,         # Require more sample weight before a split
-            gamma=1.0,                     # Minimum loss reduction required to make a split
-
-            # Regularization (stronger than before):
-            reg_lambda=5.0,                # L2 regularization
-            reg_alpha=0.5,                 # L1 regularization (feature-level sparsity)
-
-            # Stochasticity (feature & row subsampling):
-            subsample=0.6,                 # Row subsampling per tree
-            colsample_bytree=0.6,          # Feature subsampling per tree
-            colsample_bylevel=0.6,         # Feature subsampling per tree level
-
-            # Optimization schedule:
-            learning_rate=0.03,            # Smaller step size
-            n_estimators=5000,             # Many trees; early stopping will truncate
-            random_state=seed,             # Reproducibility
-            n_jobs=0,                      # Use all cores
-            tree_method='hist',            # Fast & memory efficient histogram algorithm
+            max_depth=3,                     # shallow trees generalize better on collinear lags
+            grow_policy='lossguide',
+            max_leaves=64,
+            min_child_weight=10.0,
+            gamma=1.0,
+            # Regularization:
+            reg_lambda=5.0,
+            reg_alpha=0.5,
+            # Stochastic subsampling:
+            subsample=0.6,
+            colsample_bytree=0.6,
+            colsample_bylevel=0.6,
+            # Schedule:
+            learning_rate=0.03,
+            n_estimators=5000,               # many rounds; early stopping will truncate
+            random_state=seed,
+            n_jobs=0,
+            tree_method='hist',
         )
 
-        # Fit with early stopping on the held-out VALID split we created
-        xgb.fit(
-            Xtr, ytr,
+        # Some older XGB sklearn wrappers don't accept eval_metric in fit(...)
+        fit_kwargs = dict(
             eval_set=[(Xva, yva)],
-            eval_metric='mae',             # Match objective/metric to MAE
             verbose=False,
-            early_stopping_rounds=200      # Stop if no val improvement for 200 rounds
+            early_stopping_rounds=200
         )
 
-        # Predictions on train/valid using the best_iteration_ picked by early stopping
+        # 1) Try MAE objective + eval_metric in fit
+        try:
+            xgb.fit(Xtr, ytr, eval_metric='mae', **fit_kwargs)
+        except TypeError:
+            # 2) Older wrapper: push eval_metric via set_params, then fit without it
+            xgb.set_params(eval_metric='mae')
+            try:
+                xgb.fit(Xtr, ytr, **fit_kwargs)
+            except Exception as e:
+                # 3) Some very old versions also lack 'reg:absoluteerror'
+                #    -> fallback to squared error objective with MAE eval metric
+                from xgboost.core import XGBoostError
+                try:
+                    xgb.set_params(objective='reg:squarederror')
+                except Exception:
+                    pass
+                # re-fit with fallback objective
+                xgb.fit(Xtr, ytr, **fit_kwargs)
+
+        # Predictions (best_iteration_ is respected by wrapper after early stopping)
         yhat_xgb_tr = xgb.predict(Xtr)
         yhat_xgb_va = xgb.predict(Xva)
-
-        # Compute MAE for both splits
         mae_xgb_tr = mean_absolute_error(ytr, yhat_xgb_tr)
         mae_xgb_va = mean_absolute_error(yva, yhat_xgb_va)
     else:
-        warn("XGBoost no disponible; se omite.")
+        warn("XGBoost no está disponible. Se omite este modelo.")
         mae_xgb_tr = np.nan
         mae_xgb_va = np.nan
+
 
 
     # Retorna MAEs incluyendo baseline y train/valid por modelo
