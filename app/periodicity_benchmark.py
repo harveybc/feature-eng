@@ -307,28 +307,56 @@ def fit_and_eval_models(X: np.ndarray,
         mae_mlp_va = mean_absolute_error(yva, yhat_mlp_va)               # MAE valid
 
     # ---------------- XGBoost (opcional) ----------------
+        # -------- XGBoost (regularizado + objective MAE + strong early stopping) --------
     if XGB_AVAILABLE:
+        # Configure a conservative, regularized setup to reduce overfitting.
         xgb = XGBRegressor(
-            n_estimators=300,              # N árboles
-            max_depth=6,                   # Profundidad
-            learning_rate=0.05,            # Eta
-            subsample=0.8,                 # Submuestreo filas
-            colsample_bytree=0.8,          # Submuestreo columnas
-            reg_lambda=1.0,                # L2
-            reg_alpha=0.0,                 # L1
-            random_state=seed,             # Semilla
-            n_jobs=0,                      # Usa todos los cores
-            tree_method='hist',            # Rápido y memoria eficiente
+            objective='reg:absoluteerror',  # Optimize MAE directly to match the reported metric
+            # Capacity controls:
+            max_depth=3,                   # Shallow trees generalize better on collinear lag features
+            grow_policy='lossguide',       # Leaf-wise growth with explicit leaf cap
+            max_leaves=64,                 # Upper bound on leaves for additional capacity control
+            min_child_weight=10.0,         # Require more sample weight before a split
+            gamma=1.0,                     # Minimum loss reduction required to make a split
+
+            # Regularization (stronger than before):
+            reg_lambda=5.0,                # L2 regularization
+            reg_alpha=0.5,                 # L1 regularization (feature-level sparsity)
+
+            # Stochasticity (feature & row subsampling):
+            subsample=0.6,                 # Row subsampling per tree
+            colsample_bytree=0.6,          # Feature subsampling per tree
+            colsample_bylevel=0.6,         # Feature subsampling per tree level
+
+            # Optimization schedule:
+            learning_rate=0.03,            # Smaller step size
+            n_estimators=5000,             # Many trees; early stopping will truncate
+            random_state=seed,             # Reproducibility
+            n_jobs=0,                      # Use all cores
+            tree_method='hist',            # Fast & memory efficient histogram algorithm
         )
-        xgb.fit(Xtr, ytr, eval_set=[(Xva, yva)], verbose=False)      # Entrena XGB
-        yhat_xgb_tr = xgb.predict(Xtr)                               # Pred train
-        yhat_xgb_va = xgb.predict(Xva)                               # Pred valid
-        mae_xgb_tr = mean_absolute_error(ytr, yhat_xgb_tr)           # MAE train
-        mae_xgb_va = mean_absolute_error(yva, yhat_xgb_va)           # MAE valid
+
+        # Fit with early stopping on the held-out VALID split we created
+        xgb.fit(
+            Xtr, ytr,
+            eval_set=[(Xva, yva)],
+            eval_metric='mae',             # Match objective/metric to MAE
+            verbose=False,
+            early_stopping_rounds=200      # Stop if no val improvement for 200 rounds
+        )
+
+        # Predictions on train/valid using the best_iteration_ picked by early stopping
+        yhat_xgb_tr = xgb.predict(Xtr)
+        yhat_xgb_va = xgb.predict(Xva)
+
+        # Compute MAE for both splits
+        mae_xgb_tr = mean_absolute_error(ytr, yhat_xgb_tr)
+        mae_xgb_va = mean_absolute_error(yva, yhat_xgb_va)
     else:
-        warn("XGBoost no está disponible. Se omitirá este modelo.")
+        warn("XGBoost no disponible; se omite.")
         mae_xgb_tr = np.nan
         mae_xgb_va = np.nan
+
 
     # Retorna MAEs incluyendo baseline y train/valid por modelo
     return {
