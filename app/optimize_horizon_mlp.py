@@ -276,8 +276,8 @@ def main():
     info(f"[INIT] Serie 5T lista: n={df.shape[0]} puntos.", args.quiet)
 
     # Fixed windows (mapped by equivalent time span from previous winners)
-    window_short_1H = 24   # ≈ 24 hours (was 288@5T)
-    window_long_4H  = 30   # ≈ 120 hours total (was 120@1H)
+    window_short_1H = 120   # ≈ 24 hours (was 288@5T)
+    window_long_4H  = 60   # ≈ 120 hours total (was 120@1H)
 
     horizons_short_1H = [12, 24, 36, 48, 60, 72]       # 1-hour bars
     horizons_long_4H  = [18, 24, 30, 36, 42, 48]       # 4-hour bars
