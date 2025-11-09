@@ -450,21 +450,45 @@ def main():
     print(dfr[base_cols+delta_cols].to_string(index=False, float_format=_fmt), flush=True)
 
     # leaderboards
-    def best_row_for_periodicity(sub):
-        models = ['LR','MLP','XGB']
-        arr = np.vstack([sub[f'{m}_VALID_MAE'].values for m in models])
-        ridx = int(np.nanargmin(arr.min(axis=0)))
-        midx = int(np.nanargmin(arr[:,ridx]))
-        return sub.iloc[ridx], models[midx]
+        # leaderboards (robust to NaNs and empty/unsupported combos)
+    def best_row_for_periodicity(sub: pd.DataFrame):
+        models = ['LR', 'MLP', 'XGB']
+        model_cols = [f'{m}_VALID_MAE' for m in models]
+
+        # keep only rows that have samples and at least one finite model MAE
+        mask_ok = (sub['n_samples'] > 0) & np.isfinite(sub[model_cols]).any(axis=1)
+        sub_ok = sub.loc[mask_ok].copy()
+        if sub_ok.empty:
+            return None, None
+
+        # per-row best (ignore NaNs)
+        row_best_vals = np.nanmin(sub_ok[model_cols].values, axis=1)  # shape: [n_rows]
+        # pick the row with smallest best-val
+        ridx_ok = int(np.nanargmin(row_best_vals))
+        best_row = sub_ok.iloc[ridx_ok]
+
+        # which model won on that row?
+        vals_this = [best_row[c] for c in model_cols]
+        m_idx = int(np.nanargmin(vals_this))
+        return best_row, models[m_idx]
+
     for H in horizons:
         print(f"\n=== LEADERBOARD — VALID (H={H}h) ===", flush=True)
-        rows=[]
+        rows = []
         for rule in periodicities:
-            sub = dfr[(dfr['horizon_hours']==H) & (dfr['periodicity']==rule)]
-            if sub.empty: continue
+            sub = dfr[(dfr['horizon_hours'] == H) & (dfr['periodicity'] == rule)]
             best, best_model = best_row_for_periodicity(sub)
-            naive = float(np.nanmedian(sub['NAIVE_VALID_MAE']))
-            imp = (naive - float(best[f'{best_model}_VALID_MAE']))/naive*100.0
+            if best is None:
+                print(f"- {rule}: sin muestras representables o todos los modelos NaN.")
+                continue
+
+            # NAIVE of that periodicity/H: use the median NAIVE_VALID_MAE across the remaining usable rows
+            usable = sub[(sub['n_samples'] > 0)]
+            naive = float(np.nanmedian(usable['NAIVE_VALID_MAE']))
+
+            best_valid = float(best[f'{best_model}_VALID_MAE'])
+            imp = (naive - best_valid) / naive * 100.0
+
             rows.append({
                 'periodicity': rule,
                 'best_model': best_model,
@@ -472,16 +496,25 @@ def main():
                 'target_mode': best['target_mode'],
                 'window_bars': int(best['window_bars']),
                 'n_samples': int(best['n_samples']),
-                'best_valid_mae': float(best[f'{best_model}_VALID_MAE']),
+                'best_valid_mae': best_valid,
                 'naive_valid_mae': naive,
                 'vs_naive_improv_pct': imp
             })
+
         if rows:
-            ldf = pd.DataFrame(rows).sort_values(by=['best_valid_mae','vs_naive_improv_pct'], ascending=[True,False])
-            cols = ['periodicity','best_model','feature_mode','target_mode','window_bars','n_samples','best_valid_mae','naive_valid_mae','vs_naive_improv_pct']
+            ldf = (pd.DataFrame(rows)
+                     .sort_values(by=['best_valid_mae','vs_naive_improv_pct'],
+                                  ascending=[True, False]))
+            def _fmt(v):
+                try: return f"{v:,.6f}"
+                except Exception: return str(v)
+            cols = ['periodicity','best_model','feature_mode','target_mode',
+                    'window_bars','n_samples','best_valid_mae',
+                    'naive_valid_mae','vs_naive_improv_pct']
             print(ldf[cols].to_string(index=False, float_format=_fmt), flush=True)
         else:
-            print("(sin filas)")
+            print("(sin filas útiles)", flush=True)
+
 
     info(f"\n[PIPE] Guardando resultados en: {args.out}", args.quiet)
     try:
