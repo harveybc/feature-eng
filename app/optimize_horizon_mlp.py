@@ -291,8 +291,8 @@ def main():
     info(f"[INIT] Serie 5T lista: n={df.shape[0]} puntos.", args.quiet)
 
     # Fixed windows chosen by improvement vs NAIVE:
-    window_short_5T = 288        # 5T
-    window_long_1H  = 144        # 1H
+    window_short_5T = 48        # 5T
+    window_long_1H  = 120        # 1H
 
     horizons_short_5T = [12, 24, 36, 48, 60, 72, 144, 288]
     horizons_long_1H  = [24, 48, 72, 96, 120, 144, 288]
