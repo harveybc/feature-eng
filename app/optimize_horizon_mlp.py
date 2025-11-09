@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-horizon_search_fixed_window.py
+horizon_search_fixed_window_1H_4H.py
 
-Search the best predictive horizon for two fixed-window setups:
-
-Short-term  (5T):
-  - periodicity='5T'
-  - window_bars=288
+Short-term sweep (1H):
+  - periodicity='1H'
+  - fixed window_bars = 24  (≈ 24 hours, mapped from 288 bars @ 5T)
   - feature_mode='lognorm_close'
   - target_mode='logret_h'
-  - horizons_short_5T = [12, 24, 36, 48, 60, 72, 144, 288]
+  - horizons_short_1H = [12, 24, 36, 48, 60, 72]  # 1-hour bars
 
-Long-term   (1H):
-  - periodicity='1H'
-  - window_bars=120
+Long-term sweep (4H):
+  - periodicity='4H'
+  - fixed window_bars = 30  (≈ 120 hours total, mapped from 120 bars @ 1H)
   - feature_mode='raw_close'
   - target_mode='logret_h'
-  - horizons_long_1H = [24, 48, 72, 96, 120, 144, 288]
+  - horizons_long_4H = [18, 24, 30, 36, 42, 48]   # 4-hour bars
 
-MAE is computed in PRICE space (model preds are inverse-transformed).
+Loads 5-minute CSV, downsamples to 1H/4H as needed,
+trains MLP exactly like the benchmark, and reports MAE in PRICE space
+(with Δ vs NAIVE and % improvement). Saves results to CSV.
 """
 
 import argparse, sys, os, time, warnings
 os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -35,7 +35,6 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LinearRegression  # not used, but handy for quick checks
 
 # Optional Keras
 try:
@@ -46,10 +45,9 @@ try:
 except Exception:
     KERAS_AVAILABLE = False
 
-# ---------- small helpers ----------
+# ---------- helpers ----------
 def info(msg: str, quiet: bool=False):
-    if not quiet:
-        print(msg, flush=True)
+    if not quiet: print(msg, flush=True)
 def warn(msg: str):
     print(f"[ADVERTENCIA] {msg}", file=sys.stderr, flush=True)
 def error(msg: str):
@@ -79,11 +77,7 @@ def make_views(close: pd.Series, window: int, horizon: int,
                feature_mode: str, target_mode: str):
     """
     Returns:
-      X_view (m, window)    - features (zero-copy or small transform)
-      y_target (m,)         - model target (price or logret_h)
-      y_price  (m,)         - true future price
-      last_c   (m,)         - last price in window (C_t)
-      idx_y    (m,)         - timestamps for each sample
+      X_view (m, window), y_target (m,), y_price (m,), last_c (m,), idx_y (m,)
     """
     c = close.values.astype(float)
     n = c.shape[0]
@@ -130,7 +124,7 @@ def time_based_train_valid_split(index: pd.DatetimeIndex, years_train=2, years_v
     if is_valid.sum() < 50:  warn("Valid muy pequeño (<50).")
     return np.asarray(is_train), np.asarray(is_valid)
 
-# ---------- MLP fit/eval (PRICE space MAE) ----------
+# ---------- MLP fit/eval (PRICE space) ----------
 def fit_eval_mlp(X_view, y_target, y_price, last_c, idx,
                  target_mode: str, seed: int, mlp_width: int, mlp_second: int,
                  quiet: bool=False) -> Dict[str, float]:
@@ -153,10 +147,9 @@ def fit_eval_mlp(X_view, y_target, y_price, last_c, idx,
     def inv_price(yhat, lastv):
         return yhat if target_mode=='price' else (lastv * np.exp(yhat))
 
-    # Baseline (NAIVE = persist last price)
-    yhat_naive_tr, yhat_naive_va = last_tr, last_va
-    mae_naive_tr = mean_absolute_error(ypr_tr, yhat_naive_tr)
-    mae_naive_va = mean_absolute_error(ypr_va, yhat_naive_va)
+    # NAIVE
+    mae_naive_tr = mean_absolute_error(ypr_tr, last_tr)
+    mae_naive_va = mean_absolute_error(ypr_va, last_va)
     info(f"  [NAIVE] train={mae_naive_tr:.6f}, valid={mae_naive_va:.6f} (elapsed={tsecs(t0)})", quiet)
 
     # MLP
@@ -203,7 +196,7 @@ def fit_eval_mlp(X_view, y_target, y_price, last_c, idx,
         "MLP_VALID_MAE": float(mae_mlp_va),
     }
 
-# ---------- run one periodicity with fixed window ----------
+# ---------- evaluate one periodicity with fixed window ----------
 def evaluate_fixed_window(df5m: pd.DataFrame, rule: str, window_bars: int,
                           horizons: List[int], feature_mode: str, target_mode: str,
                           seed: int, mlp_width: int, mlp_second: int,
@@ -232,9 +225,7 @@ def evaluate_fixed_window(df5m: pd.DataFrame, rule: str, window_bars: int,
                        NAIVE_TRAIN_MAE=np.nan, NAIVE_VALID_MAE=np.nan,
                        MLP_TRAIN_MAE=np.nan, MLP_VALID_MAE=np.nan,
                        MLP_VALID_DeltaMAE_vs_NAIVE=np.nan, MLP_VALID_ImprovPct_vs_NAIVE=np.nan)
-            out_rows.append(row)
-            pbar.update(1)
-            continue
+            out_rows.append(row); pbar.update(1); continue
 
         mets = fit_eval_mlp(X_view, y_t, y_p, last_c, idx,
                             target_mode, seed, mlp_width, mlp_second, quiet)
@@ -246,19 +237,18 @@ def evaluate_fixed_window(df5m: pd.DataFrame, rule: str, window_bars: int,
                    **mets,
                    MLP_VALID_DeltaMAE_vs_NAIVE=float(d_mae),
                    MLP_VALID_ImprovPct_vs_NAIVE=float(imp_pct))
-        out_rows.append(row)
-        pbar.update(1)
+        out_rows.append(row); pbar.update(1)
     pbar.close()
     info(f"{hdr} DONE", quiet)
     return out_rows
 
 # ---------- main ----------
 def main():
-    ap = argparse.ArgumentParser(description="Horizon search with fixed windows for short/long setups (MLP).")
-    ap.add_argument('csv', type=str)
+    ap = argparse.ArgumentParser(description="Horizon sweep with fixed windows for 1H (short) and 4H (long).")
+    ap.add_argument('csv', type=str, help='5-minute base CSV')
     ap.add_argument('--time-col', type=str, default=None)
     ap.add_argument('--close-col', type=str, default='close')
-    ap.add_argument('--out', type=str, default='horizon_fixed_window.csv')
+    ap.add_argument('--out', type=str, default='horizons_1H_4H_fixed_window.csv')
     ap.add_argument('--mlp-width', type=int, default=128)
     ap.add_argument('--mlp-second', type=int, default=64)
     ap.add_argument('--seed', type=int, default=42)
@@ -269,67 +259,57 @@ def main():
     try:
         df = pd.read_csv(args.csv)
     except Exception as e:
-        error(f"No se pudo leer el CSV: {e}")
-        sys.exit(1)
+        error(f"No se pudo leer el CSV: {e}"); sys.exit(1)
     info(f"[INIT] CSV shape={df.shape}", args.quiet)
 
     time_col = args.time_col
     if time_col is None:
         cands = [c for c in df.columns if c.lower() in ('time','timestamp','datetime','date')]
-        if not cands:
-            error("No se encontró columna temporal. Use --time-col.")
-            sys.exit(1)
-        time_col = cands[0]
-        info(f"[INIT] Columna temporal detectada: {time_col}", args.quiet)
+        if not cands: error("No se encontró columna temporal. Use --time-col."); sys.exit(1)
+        time_col = cands[0]; info(f"[INIT] Columna temporal detectada: {time_col}", args.quiet)
 
     if args.close_col not in df.columns:
-        error(f"No existe la columna '{args.close_col}'. Use --close-col.")
-        sys.exit(1)
+        error(f"No existe la columna '{args.close_col}'. Use --close-col."); sys.exit(1)
 
     info("[INIT] Normalizando índice temporal…", args.quiet)
     df = ensure_datetime_index(df[[time_col, args.close_col]].rename(columns={args.close_col:'close'}), time_col)
     info(f"[INIT] Serie 5T lista: n={df.shape[0]} puntos.", args.quiet)
 
-    # Fixed windows chosen by improvement vs NAIVE:
-    window_short_5T = 48        # 5T
-    window_long_1H  = 120        # 1H
+    # Fixed windows (mapped by equivalent time span from previous winners)
+    window_short_1H = 24   # ≈ 24 hours (was 288@5T)
+    window_long_4H  = 30   # ≈ 120 hours total (was 120@1H)
 
-    horizons_short_5T = [12, 24, 36, 48, 60, 72, 144, 288]
-    horizons_long_1H  = [24, 48, 72, 96, 120, 144, 288]
+    horizons_short_1H = [12, 24, 36, 48, 60, 72]       # 1-hour bars
+    horizons_long_4H  = [18, 24, 30, 36, 42, 48]       # 4-hour bars
 
-    # Short-term setup
+    # Short-term (1H)
     res_short = evaluate_fixed_window(
         df5m=df,
-        rule='5T',
-        window_bars=window_short_5T,
-        horizons=horizons_short_5T,
+        rule='1H',
+        window_bars=window_short_1H,
+        horizons=horizons_short_1H,
         feature_mode='lognorm_close',
         target_mode='logret_h',
-        seed=args.seed,
-        mlp_width=args.mlp_width,
-        mlp_second=args.mlp_second,
+        seed=args.seed, mlp_width=args.mlp_width, mlp_second=args.mlp_second,
         quiet=args.quiet
     )
 
-    # Long-term setup
+    # Long-term (4H)
     res_long = evaluate_fixed_window(
         df5m=df,
-        rule='1H',
-        window_bars=window_long_1H,
-        horizons=horizons_long_1H,
+        rule='4H',
+        window_bars=window_long_4H,
+        horizons=horizons_long_4H,
         feature_mode='raw_close',
         target_mode='logret_h',
-        seed=args.seed,
-        mlp_width=args.mlp_width,
-        mlp_second=args.mlp_second,
+        seed=args.seed, mlp_width=args.mlp_width, mlp_second=args.mlp_second,
         quiet=args.quiet
     )
 
-    # Compile & print
-    results = pd.DataFrame(res_short + res_long)
-    results = results.sort_values(by=['periodicity','horizon_bars']).reset_index(drop=True)
+    results = pd.DataFrame(res_short + res_long).sort_values(
+        by=['periodicity','horizon_bars']).reset_index(drop=True)
 
-    info("\n=== RESULTS (MLP, MAE in PRICE) ===", False)
+    info("\n=== RESULTS (MLP, MAE in PRICE) — fixed windows ===", False)
     cols = ['periodicity','feature_mode','target_mode','window_bars','horizon_bars','n_samples',
             'NAIVE_TRAIN_MAE','NAIVE_VALID_MAE','MLP_TRAIN_MAE','MLP_VALID_MAE',
             'MLP_VALID_DeltaMAE_vs_NAIVE','MLP_VALID_ImprovPct_vs_NAIVE']
@@ -338,8 +318,8 @@ def main():
         except Exception: return str(v)
     print(results[cols].to_string(index=False, float_format=_fmt), flush=True)
 
-    # Leaderboards by periodicity
-    for rule in ['5T','1H']:
+    # Quick leaderboards
+    for rule in ['1H','4H']:
         sub = results[results['periodicity']==rule]
         if sub.empty: continue
         best = sub.sort_values(by=['MLP_VALID_MAE','MLP_VALID_ImprovPct_vs_NAIVE'],
@@ -354,8 +334,7 @@ def main():
     out = args.out
     info(f"\n[PIPE] Guardando resultados en: {out}", args.quiet)
     try:
-        results.to_csv(out, index=False)
-        info("[OK] Archivo escrito correctamente.", False)
+        results.to_csv(out, index=False); info("[OK] Archivo escrito correctamente.", False)
     except Exception as e:
         error(f"No se pudo guardar {out}: {e}")
 
