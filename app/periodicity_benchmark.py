@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Fast periodicity_benchmark.py
+Fast periodicity_benchmark.py  (ALL METRICS IN PRICE SPACE)
 - Vectorized sliding windows (no Python loops, no giant copies)
 - Honest, single progress bar + per-stage timing logs
 - Budget-aware thinning (stride/cap) applied AFTER time split (no leakage)
+- Log-return targets use log1p/exp(m1) with stable inverse, so comparisons vs NAIVE are on the SAME PRICE SCALE.
 """
 
 import argparse, sys, math, os, time, warnings
@@ -39,11 +40,11 @@ except Exception:
     KERAS_AVAILABLE = False
 
 # ---------- small print helpers ----------
-def info(msg: str, quiet: bool=False): 
+def info(msg: str, quiet: bool=False):
     if not quiet: print(msg, flush=True)
-def warn(msg: str): 
+def warn(msg: str):
     print(f"[ADVERTENCIA] {msg}", file=sys.stderr, flush=True)
-def error(msg: str): 
+def error(msg: str):
     print(f"[ERROR] {msg}", file=sys.stderr, flush=True)
 
 # ---------- time utilities ----------
@@ -80,15 +81,15 @@ def make_supervised_views(close: pd.Series, window: int, horizon: int,
                           feature_mode: str, target_mode: str):
     """
     Returns:
-      W_view: view of shape (n-window+1, window) over close (zero-copy)
+      X_view: view of shape (m, window)
       y_target (len m), y_price (len m), last_c (len m), idx_y (len m)
     where m = n - window - horizon + 1
     """
-    c = close.values.astype(float)
+    c = close.values.astype(np.float64)
     n = c.shape[0]
     if n < (window + horizon):
-        return (np.empty((0, window), float), np.empty((0,), float),
-                np.empty((0,), float), np.empty((0,), float),
+        return (np.empty((0, window), np.float64), np.empty((0,), np.float64),
+                np.empty((0,), np.float64), np.empty((0,), np.float64),
                 close.index[:0])
 
     # Sliding window (zero-copy view)
@@ -96,8 +97,8 @@ def make_supervised_views(close: pd.Series, window: int, horizon: int,
 
     # Align target so that sample i predicts c[i + window + horizon - 1]
     m = n - window - horizon + 1
-    Wm = W[:m]                       # keep only those that have a target m
-    last_c = c[window-1: window-1+m] # C_t
+    Wm = W[:m]                             # keep only those that have a target m
+    last_c = c[window-1: window-1+m]       # C_t
     y_price = c[window+horizon-1: window+horizon-1+m]  # C_{t+h}
 
     # features
@@ -114,7 +115,10 @@ def make_supervised_views(close: pd.Series, window: int, horizon: int,
     if target_mode == 'price':
         y_target = y_price.copy()
     elif target_mode == 'logret_h':
-        y_target = np.log(y_price) - np.log(last_c)
+        # stable log-return via log1p(simple_return)
+        # r = (C_{t+h}/C_t) - 1  =>  logret = log1p(r)
+        simple_r = (y_price / last_c) - 1.0
+        y_target = np.log1p(simple_r)  # == log(C_{t+h}/C_t) but numerically nicer
     else:
         raise ValueError(f"target_mode desconocido: {target_mode}")
 
@@ -175,7 +179,7 @@ def train_xgb_core_with_es(Xtr, ytr, Xva, yva, seed, num_boost_round, es_rounds)
         "reg_lambda":5.0, "reg_alpha":0.5,
         "subsample":0.6, "colsample_bytree":0.6, "colsample_bylevel":0.6,
         "learning_rate":0.03,
-        "booster":"gbtree"  # dart can be slower; keep lean here
+        "booster":"gbtree"
     }
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=FutureWarning)
@@ -202,7 +206,6 @@ def fit_eval_modes(X_view, y_target, y_price, last_c, idx,
     n_tr = int(is_tr.sum()); n_va=int(is_va.sum())
     info(f"  [split] train={n_tr:,}, valid={n_va:,} (elapsed={tsecs(t0)})", quiet)
 
-    # Build index positions for the view (we never materialize full X)
     tr_pos = np.flatnonzero(is_tr)
     va_pos = np.flatnonzero(is_va)
 
@@ -218,11 +221,16 @@ def fit_eval_modes(X_view, y_target, y_price, last_c, idx,
     ypr_tr = y_price[tr_idx]; ypr_va = y_price[va_idx]
     last_tr = last_c[tr_idx];  last_va = last_c[va_idx]
 
-    # Helper to inverse-target to PRICE space
+    # Helper to inverse-target to PRICE space (stable)
     def inv_price(yhat, lastv):
-        return yhat if target_mode=='price' else (lastv*np.exp(yhat))
+        if target_mode=='price':
+            return yhat
+        # yhat = log1p(simple_return) -> C_{t+h} = C_t * (1 + expm1(yhat))
+        # clip yhat to avoid overflow in expm1 on pathological values
+        yhat = np.clip(yhat, -40.0, 40.0)
+        return lastv * (1.0 + np.expm1(yhat))
 
-    # Baseline
+    # Baseline (persistence) — already in PRICE space
     yhat_naive_tr = last_tr
     yhat_naive_va = last_va
     naive_tr = mean_absolute_error(ypr_tr, yhat_naive_tr)
@@ -257,8 +265,8 @@ def fit_eval_modes(X_view, y_target, y_price, last_c, idx,
                                            restore_best_weights=True, mode='min', verbose=0)
         model.fit(Xtr_s, ytr, validation_data=(Xva_s, yva),
                   epochs=200, batch_size=256, shuffle=True, verbose=0, callbacks=[es])
-        yhat_tr = model.predict(Xtr_s, verbose=0).ravel()
-        yhat_va = model.predict(Xva_s, verbose=0).ravel()
+        yhat_tr = model.predict(Xtr_s, verbose=0).ravel().astype(np.float64)
+        yhat_va = model.predict(Xva_s, verbose=0).ravel().astype(np.float64)
     else:
         mlp = MLPRegressor(hidden_layer_sizes=(mlp_width, mlp_second),
                            activation='relu', solver='adam', alpha=1e-4,
@@ -267,7 +275,8 @@ def fit_eval_modes(X_view, y_target, y_price, last_c, idx,
                            early_stopping=True, n_iter_no_change=20, tol=1e-4, verbose=False)
         pipe = Pipeline([('sc', StandardScaler()), ('mlp', mlp)])
         pipe.fit(Xtr, ytr)
-        yhat_tr = pipe.predict(Xtr); yhat_va = pipe.predict(Xva)
+        yhat_tr = pipe.predict(Xtr).astype(np.float64)
+        yhat_va = pipe.predict(Xva).astype(np.float64)
 
     mae_mlp_tr = mean_absolute_error(ypr_tr, inv_price(yhat_tr, last_tr))
     mae_mlp_va = mean_absolute_error(ypr_va, inv_price(yhat_va, last_va))
@@ -322,13 +331,13 @@ def run_combo(df5m: pd.DataFrame, rule: str, H: float,
 
     info(f"{hdr} building views (window={int(window)})…", quiet)
     X_view, y_t, y_p, last_c, idx = make_supervised_views(
-        df_rule['close'].astype(float), window=int(window), horizon=int(window),
+        df_rule['close'].astype(np.float64), window=int(window), horizon=int(window),
         feature_mode=feature_mode, target_mode=target_mode
     )
     m = y_t.shape[0]
     info(f"{hdr} m={m:,} muestras (elapsed={tsecs(t0)})", quiet)
     if m==0:
-        warn(f"{hdr} sin muestras suficientes."); 
+        warn(f"{hdr} sin muestras suficientes.")
         return {'periodicity':rule,'horizon_hours':H,'feature_mode':feature_mode,'target_mode':target_mode,
                 'window_bars':int(window),'n_samples':0,
                 'NAIVE_TRAIN_MAE':np.nan,'NAIVE_VALID_MAE':np.nan,
@@ -361,7 +370,7 @@ def run_combo(df5m: pd.DataFrame, rule: str, H: float,
 
 # ---------- main ----------
 def main():
-    ap = argparse.ArgumentParser(description="Fast LR/MLP/XGB benchmark with views + budgeted thinning.")
+    ap = argparse.ArgumentParser(description="Fast LR/MLP/XGB benchmark with views + budgeted thinning (ALL PRICE-SPACE MAEs).")
     ap.add_argument('csv', type=str)
     ap.add_argument('--time-col', type=str, default=None)
     ap.add_argument('--close-col', type=str, default='close')
@@ -379,7 +388,7 @@ def main():
     args = ap.parse_args()
 
     info("[LEGEND] LR=Linear Regression; MLP=Multi-Layer Perceptron; XGB=XGBoost; "
-         "MAE=Mean Absolute Error; NAIVE=persistencia (C_t).", args.quiet)
+         "MAE=Mean Absolute Error; NAIVE=persistencia (C_t). TODOS los MAE en ESCALA DE PRECIO.", args.quiet)
 
     info("[INIT] Cargando CSV base (5T)…", args.quiet)
     try:
@@ -405,7 +414,7 @@ def main():
     periodicities = ['5T','15T','1H','4H','1D']
     horizons = [3.0, 72.0]
     feature_modes = ['raw_close','lognorm_close']
-    target_modes  = ['price','logret_h']
+    target_modes  = ['price','logret_h']  # logret_h uses log1p/exp(m1) & eval MAE in PRICE
 
     # single overall progress bar
     combos = [(r,H,f,t) for r in periodicities for H in horizons for f in feature_modes for t in target_modes]
@@ -429,7 +438,7 @@ def main():
            .sort_values(by=['horizon_hours','periodicity','feature_mode','target_mode'])
            .reset_index(drop=True))
 
-    # deltas vs naive
+    # deltas vs naive (ALL in PRICE space)
     for model in ['LR','MLP','XGB']:
         dfr[f'{model}_VALID_DeltaMAE_vs_NAIVE']  = dfr[f'{model}_VALID_MAE'] - dfr['NAIVE_VALID_MAE']
         dfr[f'{model}_VALID_ImprovPct_vs_NAIVE'] = (dfr['NAIVE_VALID_MAE'] - dfr[f'{model}_VALID_MAE'])/dfr['NAIVE_VALID_MAE']*100.0
@@ -443,31 +452,23 @@ def main():
     delta_cols = ['LR_VALID_DeltaMAE_vs_NAIVE','LR_VALID_ImprovPct_vs_NAIVE',
                   'MLP_VALID_DeltaMAE_vs_NAIVE','MLP_VALID_ImprovPct_vs_NAIVE',
                   'XGB_VALID_DeltaMAE_vs_NAIVE','XGB_VALID_ImprovPct_vs_NAIVE']
-    def _fmt(v): 
+    def _fmt(v):
         try: return f"{v:,.6f}"
         except Exception: return str(v)
-    info("\n=== RESUMEN DE MAE (train/valid) + Δ vs NAIVE ===", False)
+    info("\n=== RESUMEN DE MAE (train/valid) + Δ vs NAIVE (TODO en PRECIO) ===", False)
     print(dfr[base_cols+delta_cols].to_string(index=False, float_format=_fmt), flush=True)
 
-    # leaderboards
-        # leaderboards (robust to NaNs and empty/unsupported combos)
+    # leaderboards (robust to NaNs and empty/unsupported combos)
     def best_row_for_periodicity(sub: pd.DataFrame):
         models = ['LR', 'MLP', 'XGB']
         model_cols = [f'{m}_VALID_MAE' for m in models]
-
-        # keep only rows that have samples and at least one finite model MAE
         mask_ok = (sub['n_samples'] > 0) & np.isfinite(sub[model_cols]).any(axis=1)
         sub_ok = sub.loc[mask_ok].copy()
         if sub_ok.empty:
             return None, None
-
-        # per-row best (ignore NaNs)
-        row_best_vals = np.nanmin(sub_ok[model_cols].values, axis=1)  # shape: [n_rows]
-        # pick the row with smallest best-val
+        row_best_vals = np.nanmin(sub_ok[model_cols].values, axis=1)
         ridx_ok = int(np.nanargmin(row_best_vals))
         best_row = sub_ok.iloc[ridx_ok]
-
-        # which model won on that row?
         vals_this = [best_row[c] for c in model_cols]
         m_idx = int(np.nanargmin(vals_this))
         return best_row, models[m_idx]
@@ -481,14 +482,10 @@ def main():
             if best is None:
                 print(f"- {rule}: sin muestras representables o todos los modelos NaN.")
                 continue
-
-            # NAIVE of that periodicity/H: use the median NAIVE_VALID_MAE across the remaining usable rows
             usable = sub[(sub['n_samples'] > 0)]
             naive = float(np.nanmedian(usable['NAIVE_VALID_MAE']))
-
             best_valid = float(best[f'{best_model}_VALID_MAE'])
             imp = (naive - best_valid) / naive * 100.0
-
             rows.append({
                 'periodicity': rule,
                 'best_model': best_model,
@@ -505,16 +502,15 @@ def main():
             ldf = (pd.DataFrame(rows)
                      .sort_values(by=['best_valid_mae','vs_naive_improv_pct'],
                                   ascending=[True, False]))
-            def _fmt(v):
+            def _fmt2(v):
                 try: return f"{v:,.6f}"
                 except Exception: return str(v)
             cols = ['periodicity','best_model','feature_mode','target_mode',
                     'window_bars','n_samples','best_valid_mae',
                     'naive_valid_mae','vs_naive_improv_pct']
-            print(ldf[cols].to_string(index=False, float_format=_fmt), flush=True)
+            print(ldf[cols].to_string(index=False, float_format=_fmt2), flush=True)
         else:
             print("(sin filas útiles)", flush=True)
-
 
     info(f"\n[PIPE] Guardando resultados en: {args.out}", args.quiet)
     try:
