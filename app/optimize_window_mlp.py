@@ -185,7 +185,7 @@ def build_conv_model(window: int, feature_dim: int) -> keras.Model:
         keras.layers.LSTM(32, return_sequences=False),
         merge_mode="concat",
     )(x)
-    x = keras.layers.Dense(64, activation="relu")(x)
+    x = keras.layers.Dense(16, activation="relu")(x)
     out = keras.layers.Dense(1)(x)
 
     model = keras.Model(inputs=inp, outputs=out)
