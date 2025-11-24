@@ -49,13 +49,6 @@ def parse_args() -> argparse.Namespace:
         default="optimize_window_mlp_results.csv",
         help="Destination CSV file for aggregated metrics",
     )
-    # Legacy compatibility: older scripts expected --train-ratio, so keep a dummy argument
-    parser.add_argument(
-        "--train-ratio",
-        type=float,
-        default=0.7,
-        help="(Ignored) legacy parameter maintained for CLI compatibility",
-    )
     return parser.parse_args()
 
 
