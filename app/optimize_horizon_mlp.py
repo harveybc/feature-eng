@@ -280,7 +280,7 @@ def main():
     window_long_4H  = 60   # ≈ 120 hours total (was 120@1H)
 
     horizons_short_1H = [12, 24, 36, 48, 60, 72]       # 1-hour bars
-    horizons_long_4H  = [12,18, 24, 30, 36, 42, 48]       # 4-hour bars
+    horizons_long_4H  = [6,12,18, 24, 30, 36, 42, 48]       # 4-hour bars
 
     # Short-term (1H)
     res_short = evaluate_fixed_window(
