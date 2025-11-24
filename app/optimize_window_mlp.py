@@ -4,8 +4,8 @@
 This script replaces the old horizon optimizer with a focused experiment that:
   * Loads a high-frequency OHLC CSV (default: 5-minute bars)
   * Builds the typical price ( (HIGH + LOW + CLOSE) / 3 )
-  * Resamples the series to 1H and 4H tracks and evaluates fixed horizons
-    * Trains a TensorFlow/Keras Conv1D stack for each window size per track
+    * Resamples the series to 1H and 4H tracks and evaluates fixed horizons
+        * Trains a TensorFlow/Keras Conv1D stack for each window size per track (with positional encodings)
   * Compares the learned model against a naive ``last value`` baseline using MAE
 
 CLI usage is intentionally simple: provide the path to the source CSV and (optionally)
@@ -157,18 +157,38 @@ def split_train_val_test(idx: pd.DatetimeIndex, X: np.ndarray, y: np.ndarray, na
     }
 
 
-def build_conv_model(window: int) -> keras.Model:
-    model = keras.Sequential(
-        [
-            keras.layers.Input(shape=(window, 1)),
-            keras.layers.Conv1D(128, kernel_size=3, activation="relu", padding="causal"),
-            keras.layers.Conv1D(64, kernel_size=3, activation="relu", padding="causal"),
-            keras.layers.Conv1D(32, kernel_size=3, activation="relu", padding="causal"),
-            keras.layers.Flatten(),
-            keras.layers.Dense(64, activation="relu"),
-            keras.layers.Dense(1),
-        ]
-    )
+def positional_encoding(window: int, d_model: int = 8) -> np.ndarray:
+    """Create sinusoidal positional encodings of shape (window, d_model)."""
+    positions = np.arange(window, dtype=np.float32)[:, np.newaxis]
+    dims = np.arange(d_model, dtype=np.float32)[np.newaxis, :]
+    angle_rates = 1.0 / np.power(10000.0, (2 * (np.floor(dims / 2)) / d_model))
+    angle_rads = positions * angle_rates
+    pe = np.empty_like(angle_rads)
+    pe[:, 0::2] = np.sin(angle_rads[:, 0::2])
+    pe[:, 1::2] = np.cos(angle_rads[:, 1::2])
+    return pe.astype(np.float32)
+
+
+def append_positional_channels(seq: np.ndarray, pe: np.ndarray) -> np.ndarray:
+    """Concatenate positional encodings as extra channels to a (N, window, C) tensor."""
+    if seq.ndim != 3:
+        raise ValueError("Sequence tensor must be 3-dimensional (samples, window, channels)")
+    broadcast = np.broadcast_to(pe, (seq.shape[0], pe.shape[0], pe.shape[1]))
+    return np.concatenate([seq, broadcast], axis=2)
+
+
+def build_conv_model(window: int, feature_dim: int) -> keras.Model:
+    inp = keras.layers.Input(shape=(window, feature_dim))
+    x = keras.layers.Conv1D(128, kernel_size=3, activation="relu", padding="causal")(inp)
+    x = keras.layers.Conv1D(64, kernel_size=3, activation="relu", padding="causal")(x)
+    x = keras.layers.Bidirectional(
+        keras.layers.LSTM(32, return_sequences=False),
+        merge_mode="concat",
+    )(x)
+    x = keras.layers.Dense(64, activation="relu")(x)
+    out = keras.layers.Dense(1)(x)
+
+    model = keras.Model(inputs=inp, outputs=out)
     model.compile(
         optimizer=keras.optimizers.Adam(learning_rate=1e-3),
         loss="mse",
@@ -205,7 +225,13 @@ def evaluate_window(
     y_val = splits["y_val"].astype(np.float32)
     y_test = splits["y_test"].astype(np.float32)
 
-    model = build_conv_model(window)
+    pe = positional_encoding(window)
+
+    X_train_seq = append_positional_channels(X_train_seq, pe)
+    X_val_seq = append_positional_channels(X_val_seq, pe)
+    X_test_seq = append_positional_channels(X_test_seq, pe)
+
+    model = build_conv_model(window, X_train_seq.shape[2])
     callbacks = [
         keras.callbacks.EarlyStopping(monitor="val_mae", patience=15, restore_best_weights=True)
     ]
