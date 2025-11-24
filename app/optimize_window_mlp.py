@@ -1,398 +1,261 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-optimize_horizon_mlp.py
-- Finds best predictive horizons for the two winning MLP configs:
-  * Short-term: 5T, feature_mode=lognorm_close,  target_mode=logret_h, horizons in 5T bars
-  * Long-term: 1H, feature_mode=raw_close,      target_mode=logret_h, horizons in 1H bars
-- Loads 5T CSV, resamples to 1H for long-term.
-- Uses same training method/metrics as the last benchmark:
-  * Time split: 2y train, 1y valid (time-based)
-  * MLP (Keras if available, else sklearn), StandardScaler, regularization, early stopping
-  * MAE computed strictly in PRICE space (all models + NAIVE on the same scale)
-- Prints detailed progress and saves CSV with the same metric columns + deltas vs NAIVE.
+"""Benchmark sliding-window sizes for MLP regressors on hourly data.
+
+This script replaces the old horizon optimizer with a focused experiment that:
+  * Loads a high-frequency OHLC CSV (default: 5-minute bars)
+  * Builds the typical price ( (HIGH + LOW + CLOSE) / 3 )
+  * Resamples the series to 1H and 4H tracks and evaluates fixed horizons
+  * Trains an sklearn ``MLPRegressor`` for each window size per track
+  * Compares the learned model against a naive ``last value`` baseline using MAE
+
+CLI usage is intentionally simple: provide the path to the source CSV and (optionally)
+an output CSV destination. Results are printed to stdout and saved for downstream
+analysis in the same format as the legacy benchmark.
 """
 
-import argparse, sys, os, time, warnings
-os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
-from typing import Dict, List, Tuple
+from __future__ import annotations
+
+import argparse
+import sys
+import time
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-from numpy.lib.stride_tricks import sliding_window_view
-
 from sklearn.metrics import mean_absolute_error
-from sklearn.preprocessing import StandardScaler
 from sklearn.neural_network import MLPRegressor
-from sklearn.pipeline import Pipeline
-from sklearn.linear_model import LinearRegression  # not used, imported to keep parity if needed
+from sklearn.preprocessing import StandardScaler
 
-# Optional Keras
-try:
-    import tensorflow as tf
-    from tensorflow import keras
-    from tensorflow.keras import regularizers
-    KERAS_AVAILABLE = True
-except Exception:
-    KERAS_AVAILABLE = False
+WINDOW_SIZES: List[int] = [3, 6, 12, 24, 48, 96]
+TRAIN_RATIO: float = 0.7
 
-# ---------- small print helpers ----------
-def info(msg: str, quiet: bool=False):
-    if not quiet: print(msg, flush=True)
-def warn(msg: str):
-    print(f"[ADVERTENCIA] {msg}", file=sys.stderr, flush=True)
-def error(msg: str):
-    print(f"[ERROR] {msg}", file=sys.stderr, flush=True)
+TRACKS: Dict[str, Dict[str, int | str]] = {
+    "1H": {"freq": "1H", "horizon": 24},   # predict 24 hours ahead
+    "4H": {"freq": "4H", "horizon": 30},   # predict 30×4H bars (~5 days)
+}
 
-# ---------- timing helpers ----------
-def tnow(): return time.perf_counter()
-def tsecs(t0): return f"{time.perf_counter()-t0:,.2f}s"
 
-# ---------- resampling & time index ----------
-def _normalize_rule(rule: str) -> str:
-    return {'5T':'5min','15T':'15min','1H':'1h','4H':'4h','1D':'1D'}.get(rule, rule)
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Evaluate sliding-window sizes for hourly / 4-hour MLP regressors.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "csv",
+        help="Path to the source OHLC CSV (must contain DATE_TIME, HIGH, LOW, CLOSE columns)",
+    )
+    parser.add_argument(
+        "--output",
+        default="optimize_window_mlp_results.csv",
+        help="Destination CSV file for aggregated metrics",
+    )
+    parser.add_argument(
+        "--train-ratio",
+        type=float,
+        default=TRAIN_RATIO,
+        help="Proportion of samples to keep in the training split (time-ordered)",
+    )
+    return parser.parse_args()
 
-def ensure_datetime_index(df: pd.DataFrame, time_col: str) -> pd.DataFrame:
-    df = df.copy()
-    df[time_col] = pd.to_datetime(df[time_col], errors='coerce', utc=False)
-    df = df.dropna(subset=[time_col]).sort_values(time_col).set_index(time_col)
-    df = df[~df.index.duplicated(keep='last')]
-    return df
 
-def resample_close(df: pd.DataFrame, close_col: str, rule: str) -> pd.DataFrame:
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=FutureWarning)
-        return df[[close_col]].resample(_normalize_rule(rule), label='right', closed='right').last().dropna()
+def read_source_csv(csv_path: Path) -> pd.DataFrame:
+    if not csv_path.exists():
+        raise FileNotFoundError(f"CSV not found: {csv_path}")
 
-# ---------- dataset views ----------
-def make_supervised_views(close: pd.Series, window: int, horizon: int,
-                          feature_mode: str, target_mode: str):
-    """
-    Build zero-copy sliding windows and aligned targets.
+    df = pd.read_csv(csv_path)
+    df.columns = [col.strip().upper() for col in df.columns]
+    if "DATE_TIME" not in df.columns:
+        raise ValueError("CSV must include a DATE_TIME column")
 
-    Returns:
-      X_view    : (m, window) view
-      y_target  : length m   (logret_h or price)
-      y_price   : true future price C_{t+h} (length m)
-      last_c    : last price in each window C_t (length m)
-      idx       : DatetimeIndex aligned to y (length m)
-    """
-    c = close.values.astype(float)
-    n = c.shape[0]
-    if n < (window + horizon):
-        return (np.empty((0, window), float), np.empty((0,), float),
-                np.empty((0,), float), np.empty((0,), float),
-                close.index[:0])
+    df["DATE_TIME"] = pd.to_datetime(df["DATE_TIME"], utc=True, errors="coerce")
+    df = df.dropna(subset=["DATE_TIME"]).sort_values("DATE_TIME")
+    df = df.set_index("DATE_TIME")
 
-    W = sliding_window_view(c, window_shape=window)  # (n - window + 1, window)
-    m = n - window - horizon + 1
-    Wm = W[:m]
-    last_c = c[window-1: window-1+m]                     # C_t
-    y_price = c[window + horizon - 1: window + horizon - 1 + m]  # C_{t+h}
+    required = {"OPEN", "HIGH", "LOW", "CLOSE"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"Missing required OHLC columns: {sorted(missing)}")
 
-    # features
-    if feature_mode == 'raw_close':
-        X_view = Wm
-    elif feature_mode == 'lognorm_close':
-        logW = np.log(Wm)
-        X_view = logW - logW[:, [-1]]   # normalize by last (stationary-ish)
-    else:
-        raise ValueError(f"feature_mode desconocido: {feature_mode}")
+    return df[list(required)].astype(float)
 
-    # targets
-    if target_mode == 'price':
-        y_target = y_price.copy()
-    elif target_mode == 'logret_h':
-        # log-return to horizon: log(C_{t+h}) - log(C_t)
-        y_target = np.log(y_price) - np.log(last_c)
-    else:
-        raise ValueError(f"target_mode desconocido: {target_mode}")
 
-    idx = close.index[window + horizon - 1: window + horizon - 1 + m]
-    return X_view, y_target, y_price, last_c, idx
+def resample_ohlc(df: pd.DataFrame, freq: str) -> pd.DataFrame:
+    ohlc = df.resample(freq).agg(
+        {
+            "OPEN": "first",
+            "HIGH": "max",
+            "LOW": "min",
+            "CLOSE": "last",
+        }
+    )
+    return ohlc.dropna()
 
-# ---------- time split ----------
-def time_based_train_valid_split(index: pd.DatetimeIndex, years_train=2, years_valid=1):
-    if index.size == 0:
-        return np.zeros((0,), bool), np.zeros((0,), bool)
-    end = index.max()
-    valid_start = end - pd.Timedelta(days=365*years_valid)
-    train_start = valid_start - pd.Timedelta(days=365*years_train)
-    if train_start < index.min():
-        train_start = index.min()
-    is_valid = (index > valid_start) & (index <= end)
-    is_train = (index > train_start) & (index <= valid_start)
-    if is_train.sum() < 100: warn("Train muy pequeño (<100).")
-    if is_valid.sum() < 50:  warn("Valid muy pequeño (<50).")
-    return np.asarray(is_train), np.asarray(is_valid)
 
-# ---------- optional thinning (keeps compute sane) ----------
-def apply_stride_cap_indices(idx_len, stride=None, cap=None):
-    all_idx = np.arange(idx_len, dtype=np.int64)
-    if cap is not None and cap > 0 and idx_len > cap:
-        all_idx = all_idx[-cap:]
-    s = max(1, int(stride)) if stride is not None else 1
-    if s > 1: all_idx = all_idx[::s]
-    return all_idx
+def typical_price(ohlc: pd.DataFrame) -> pd.Series:
+    return ((ohlc["HIGH"] + ohlc["LOW"] + ohlc["CLOSE"]) / 3.0).rename("TYPICAL_PRICE")
 
-def auto_budget_for(rule: str, window_bars: int, mode: str):
-    """
-    Simple heuristic to keep runs fast.
-    Returns stride_tr, stride_va, cap_tr, cap_va.
-    """
-    if mode == 'short':  # 5T, lognorm_close/logret_h
-        # many samples; thin moderately
-        return 8, 8, 250_000, 150_000
-    else:                # long 1H, raw_close/logret_h
-        # fewer rows; light/no thinning
-        return 1, 1, None, None
 
-# ---------- MLP train/eval (MAE in price space) ----------
-def fit_eval_mlp(X_view, y_target, y_price, last_c, idx,
-                 seed, mlp_width, mlp_second,
-                 target_mode, stride_tr, stride_va, cap_tr, cap_va,
-                 quiet=False) -> Dict[str, float]:
+def make_supervised(series: pd.Series, window: int, horizon: int) -> Optional[Dict[str, np.ndarray]]:
+    values = series.to_numpy(dtype=np.float64)
+    samples = len(values) - window - horizon + 1
+    if samples <= 0:
+        return None
 
-    t0 = tnow()
-    is_tr, is_va = time_based_train_valid_split(idx, 2, 1)
-    n_tr, n_va = int(is_tr.sum()), int(is_va.sum())
-    info(f"  [split] train={n_tr:,}, valid={n_va:,} (elapsed={tsecs(t0)})", quiet)
-    if n_tr == 0 or n_va == 0:
-        return {k: np.nan for k in ['NAIVE_TRAIN_MAE','NAIVE_VALID_MAE',
-                                    'MLP_TRAIN_MAE','MLP_VALID_MAE']}
+    X = np.empty((samples, window), dtype=np.float64)
+    y = np.empty(samples, dtype=np.float64)
+    naive = np.empty(samples, dtype=np.float64)
 
-    tr_pos = np.flatnonzero(is_tr)
-    va_pos = np.flatnonzero(is_va)
-    tr_idx = tr_pos[apply_stride_cap_indices(tr_pos.size, stride_tr, cap_tr)]
-    va_idx = va_pos[apply_stride_cap_indices(va_pos.size, stride_va, cap_va)]
-    info(f"  [thinning] train_kept={tr_idx.size:,}, valid_kept={va_idx.size:,} (elapsed={tsecs(t0)})", quiet)
+    for i in range(samples):
+        start = i
+        end = start + window
+        target_idx = end - 1 + horizon
+        X[i] = values[start:end]
+        y[i] = values[target_idx]
+        naive[i] = values[end - 1]
 
-    Xtr = X_view[tr_idx]; Xva = X_view[va_idx]
-    ytr = y_target[tr_idx]; yva = y_target[va_idx]
-    ypr_tr = y_price[tr_idx]; ypr_va = y_price[va_idx]
-    last_tr = last_c[tr_idx];  last_va = last_c[va_idx]
+    return {"X": X, "y": y, "naive": naive}
 
-    # inverse to price
-    def inv_price(yhat, lastv):
-        return yhat if target_mode == 'price' else (lastv * np.exp(yhat))
 
-    # NAIVE baseline in price space
-    yhat_naive_tr = last_tr
-    yhat_naive_va = last_va
-    naive_tr = mean_absolute_error(ypr_tr, yhat_naive_tr)
-    naive_va = mean_absolute_error(ypr_va, yhat_naive_va)
-    info(f"  [NAIVE] train={naive_tr:.6f}, valid={naive_va:.6f} (elapsed={tsecs(t0)})", quiet)
-
-    # MLP
-    if KERAS_AVAILABLE:
-        sc = StandardScaler()
-        Xtr_s = sc.fit_transform(Xtr); Xva_s = sc.transform(Xva)
-        model = keras.Sequential([
-            keras.layers.Input(shape=(Xtr_s.shape[1],)),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(mlp_width, activation='relu',
-                               kernel_regularizer=regularizers.l2(1e-4)),
-            keras.layers.Dropout(0.2),
-            keras.layers.BatchNormalization(),
-            keras.layers.Dense(mlp_second, activation='relu',
-                               kernel_regularizer=regularizers.l2(1e-4)),
-            keras.layers.Dropout(0.2),
-            keras.layers.Dense(1, activation='linear')
-        ])
-        model.compile(optimizer=keras.optimizers.Adam(1e-3), loss='mae', metrics=['mae'])
-        es = keras.callbacks.EarlyStopping(monitor='val_mae', patience=20,
-                                           restore_best_weights=True, mode='min', verbose=0)
-        model.fit(Xtr_s, ytr, validation_data=(Xva_s, yva),
-                  epochs=200, batch_size=256, shuffle=True, verbose=0, callbacks=[es])
-        yhat_tr = model.predict(Xtr_s, verbose=0).ravel()
-        yhat_va = model.predict(Xva_s, verbose=0).ravel()
-    else:
-        mlp = MLPRegressor(hidden_layer_sizes=(mlp_width, mlp_second),
-                           activation='relu', solver='adam', alpha=1e-4,
-                           learning_rate='adaptive', learning_rate_init=1e-3,
-                           max_iter=400, shuffle=True, random_state=seed,
-                           early_stopping=True, n_iter_no_change=20, tol=1e-4, verbose=False)
-        pipe = Pipeline([('sc', StandardScaler()), ('mlp', mlp)])
-        pipe.fit(Xtr, ytr)
-        yhat_tr = pipe.predict(Xtr); yhat_va = pipe.predict(Xva)
-
-    mae_mlp_tr = mean_absolute_error(ypr_tr, inv_price(yhat_tr, last_tr))
-    mae_mlp_va = mean_absolute_error(ypr_va, inv_price(yhat_va, last_va))
-    info(f"  [MLP]   train={mae_mlp_tr:.6f}, valid={mae_mlp_va:.6f} (elapsed={tsecs(t0)})", quiet)
+def split_train_val(X: np.ndarray, y: np.ndarray, naive: np.ndarray, train_ratio: float) -> Optional[Dict[str, np.ndarray]]:
+    split_idx = int(len(X) * train_ratio)
+    if split_idx < 2 or len(X) - split_idx < 2:
+        return None
 
     return {
-        'NAIVE_TRAIN_MAE': float(naive_tr),
-        'NAIVE_VALID_MAE': float(naive_va),
-        'MLP_TRAIN_MAE': float(mae_mlp_tr),
-        'MLP_VALID_MAE': float(mae_mlp_va),
+        "X_train": X[:split_idx],
+        "X_val": X[split_idx:],
+        "y_train": y[:split_idx],
+        "y_val": y[split_idx:],
+        "naive_train": naive[:split_idx],
+        "naive_val": naive[split_idx:],
     }
 
-# ---------- runner for a single (periodicity, window/horizon) ----------
-def run_one(df5m: pd.DataFrame, rule: str, window_bars: int,
-            feature_mode: str, target_mode: str,
-            seed: int, mlp_width: int, mlp_second: int, quiet: bool):
 
-    hdr = f"[{rule}][{feature_mode}/{target_mode}][window={window_bars}]"
-    t0 = tnow()
-    info(f"{hdr} preparar serie/resample…", quiet)
-    if rule == '5T':
-        df_rule = df5m
-    elif rule == '1H':
-        df_rule = resample_close(df5m, 'close', '1H')
-    else:
-        raise ValueError("This program supports only 5T and 1H for the requested experiment.")
-
-    # Build views (horizon_bars = window_bars)
-    info(f"{hdr} building views…", quiet)
-    Xv, y_t, y_p, last_c, idx = make_supervised_views(
-        df_rule['close'].astype(float),
-        window=window_bars,
-        horizon=window_bars,
-        feature_mode=feature_mode,
-        target_mode=target_mode
+def build_regressor(random_state: int = 42) -> MLPRegressor:
+    return MLPRegressor(
+        hidden_layer_sizes=(128, 64),
+        activation="relu",
+        solver="adam",
+        learning_rate_init=1e-3,
+        batch_size=64,
+        max_iter=400,
+        early_stopping=True,
+        n_iter_no_change=15,
+        validation_fraction=0.1,
+        random_state=random_state,
+        verbose=False,
     )
-    m = y_t.shape[0]
-    info(f"{hdr} m={m:,} muestras (elapsed={tsecs(t0)})", quiet)
-    if m == 0:
-        warn(f"{hdr} sin muestras suficientes.")
-        return {
-            'periodicity': rule, 'feature_mode': feature_mode, 'target_mode': target_mode,
-            'window_bars': int(window_bars), 'n_samples': 0,
-            'NAIVE_TRAIN_MAE': np.nan, 'NAIVE_VALID_MAE': np.nan,
-            'MLP_TRAIN_MAE': np.nan,   'MLP_VALID_MAE': np.nan
-        }
 
-    # Thinning heuristic per track
-    mode = 'short' if rule == '5T' else 'long'
-    stride_tr, stride_va, cap_tr, cap_va = auto_budget_for(rule, window_bars, mode)
-    info(f"{hdr} fit/eval (stride_tr={stride_tr}, stride_va={stride_va}, cap_tr={cap_tr}, cap_va={cap_va})…", quiet)
 
-    metrics = fit_eval_mlp(Xv, y_t, y_p, last_c, idx,
-                           seed=seed, mlp_width=mlp_width, mlp_second=mlp_second,
-                           target_mode=target_mode,
-                           stride_tr=stride_tr, stride_va=stride_va,
-                           cap_tr=cap_tr, cap_va=cap_va,
-                           quiet=quiet)
+def evaluate_window(
+    track: str,
+    series: pd.Series,
+    window: int,
+    horizon: int,
+    train_ratio: float,
+) -> Optional[Dict[str, float]]:
+    supervised = make_supervised(series, window, horizon)
+    if supervised is None:
+        print(f"[SKIP] {track} window={window}: insufficient history for horizon {horizon}")
+        return None
 
-    out = {
-        'periodicity': rule,
-        'feature_mode': feature_mode,
-        'target_mode': target_mode,
-        'window_bars': int(window_bars),
-        'n_samples': int(m),
-        **metrics
+    splits = split_train_val(supervised["X"], supervised["y"], supervised["naive"], train_ratio)
+    if splits is None:
+        print(f"[SKIP] {track} window={window}: split yielded fewer than 2 samples per set")
+        return None
+
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(splits["X_train"])
+    X_val_scaled = scaler.transform(splits["X_val"])
+
+    model = build_regressor()
+    start_time = time.time()
+    model.fit(X_train_scaled, splits["y_train"])
+    fit_seconds = time.time() - start_time
+
+    pred_train = model.predict(X_train_scaled)
+    pred_val = model.predict(X_val_scaled)
+
+    mae_train = mean_absolute_error(splits["y_train"], pred_train)
+    mae_val = mean_absolute_error(splits["y_val"], pred_val)
+    naive_mae_train = mean_absolute_error(splits["y_train"], splits["naive_train"])
+    naive_mae_val = mean_absolute_error(splits["y_val"], splits["naive_val"])
+
+    print(
+        f"[TRACK {track}] window={window:>3} | samples train/val={len(splits['X_train'])}/{len(splits['X_val'])} "
+        f"| MAE_val={mae_val:.6f} vs naive {naive_mae_val:.6f} (Δ={naive_mae_val - mae_val:.6f})"
+    )
+
+    return {
+        "track": track,
+        "frequency": track,
+        "window": window,
+        "horizon": horizon,
+        "train_samples": len(splits["X_train"]),
+        "val_samples": len(splits["X_val"]),
+        "mae_train": mae_train,
+        "mae_val": mae_val,
+        "naive_mae_train": naive_mae_train,
+        "naive_mae_val": naive_mae_val,
+        "mae_gain_val": naive_mae_val - mae_val,
+        "fit_seconds": fit_seconds,
     }
-    info(f"{hdr} DONE (total={tsecs(t0)})", quiet)
-    return out
 
-# ---------- main ----------
-def main():
-    ap = argparse.ArgumentParser(description="Optimize horizons for the two winning MLP configs (short 5T, long 1H).")
-    ap.add_argument('csv', type=str, help='Ruta al CSV base (5T).')
-    ap.add_argument('--time-col', type=str, default=None)
-    ap.add_argument('--close-col', type=str, default='close')
-    ap.add_argument('--out', type=str, default='opt_horizon_mlp.csv')
-    ap.add_argument('--mlp-width', type=int, default=128)
-    ap.add_argument('--mlp-second', type=int, default=64)
-    ap.add_argument('--seed', type=int, default=42)
-    ap.add_argument('--no-tqdm', action='store_true')
-    ap.add_argument('--quiet', action='store_true')
-    args = ap.parse_args()
 
-    info("[INIT] Cargando CSV base (5T)…", args.quiet)
-    try:
-        df = pd.read_csv(args.csv)
-    except Exception as e:
-        error(f"No se pudo leer el CSV: {e}"); sys.exit(1)
-    info(f"[INIT] CSV cargado: shape={df.shape}", args.quiet)
-
-    time_col = args.time_col
-    if time_col is None:
-        cands = [c for c in df.columns if c.lower() in ('time','timestamp','datetime','date')]
-        if not cands:
-            error("No se encontró columna temporal. Use --time-col."); sys.exit(1)
-        time_col = cands[0]
-        info(f"[INIT] Columna temporal detectada: {time_col}", args.quiet)
-
-    if args.close_col not in df.columns:
-        error(f"No existe la columna '{args.close_col}'. Use --close-col."); sys.exit(1)
-
-    info("[INIT] Normalizando índice temporal…", args.quiet)
-    df = ensure_datetime_index(df[[time_col, args.close_col]].rename(columns={args.close_col:'close'}), time_col)
-    info(f"[INIT] Serie 5T lista: n={df.shape[0]} puntos.", args.quiet)
-
-    # Horizon sets (as bars)
-    horizons_short_5T = [12, 24, 36, 48, 60, 72, 144, 288]         # 5-minute bars
-    horizons_long_1H  = [24, 48, 72, 96, 120, 144, 288]            # 1-hour bars
-
-    combos: List[Tuple[str, str, str, int]] = []
-    # Short-term track (5T)
-    for hb in horizons_short_5T:
-        combos.append(('5T', 'lognorm_close', 'logret_h', hb))
-    # Long-term track (1H)
-    for hb in horizons_long_1H:
-        combos.append(('1H', 'raw_close', 'logret_h', hb))
-
-    progress = tqdm(total=len(combos), disable=args.no_tqdm, desc="Horizons progress", miniters=1)
-    results: List[Dict[str, float]] = []
-    for (rule, fmode, tmode, window_bars) in combos:
-        info(f"\n=== RUN {progress.n+1}/{len(combos)}: {rule} | window={window_bars} | {fmode}/{tmode} ===", args.quiet)
-        row = run_one(df, rule, window_bars, fmode, tmode,
-                      seed=args.seed, mlp_width=args.mlp_width, mlp_second=args.mlp_second,
-                      quiet=args.quiet)
-        results.append(row)
-        progress.update(1)
-    progress.close()
-
-    info("[PIPE] Compilando resultados…", args.quiet)
-    dfr = (pd.DataFrame(results)
-           .sort_values(by=['periodicity','window_bars'])
-           .reset_index(drop=True))
-
-    # deltas vs NAIVE (valid)
-    dfr['MLP_VALID_DeltaMAE_vs_NAIVE']  = dfr['MLP_VALID_MAE'] - dfr['NAIVE_VALID_MAE']
-    dfr['MLP_VALID_ImprovPct_vs_NAIVE'] = (dfr['NAIVE_VALID_MAE'] - dfr['MLP_VALID_MAE'])/dfr['NAIVE_VALID_MAE']*100.0
-
-    # pretty print
-    base_cols = ['periodicity','feature_mode','target_mode','window_bars','n_samples',
-                 'NAIVE_TRAIN_MAE','NAIVE_VALID_MAE',
-                 'MLP_TRAIN_MAE','MLP_VALID_MAE']
-    delta_cols = ['MLP_VALID_DeltaMAE_vs_NAIVE','MLP_VALID_ImprovPct_vs_NAIVE']
-
-    def _fmt(v):
-        try: return f"{v:,.6f}"
-        except Exception: return str(v)
-
-    info("\n=== OPTIMIZACIÓN DE HORIZONTE — MLP (todo en PRECIO) ===", False)
-    print(dfr[base_cols + delta_cols].to_string(index=False, float_format=_fmt), flush=True)
-
-    # leaderboards per periodicity
-    for rule in ['5T','1H']:
-        sub = dfr[(dfr['periodicity']==rule) & (dfr['n_samples']>0)]
-        if sub.empty:
-            print(f"\n=== LEADERBOARD — {rule} ===\n(sin filas útiles)", flush=True)
+def summarize_results(results: List[Dict[str, float]]) -> pd.DataFrame:
+    df = pd.DataFrame(results)
+    print("\n================ SUMMARY ================")
+    for track in df["track"].unique():
+        track_df = df[df["track"] == track].sort_values("mae_val")
+        if track_df.empty:
             continue
-        # pick smallest valid MLP MAE (break ties by larger improvement vs NAIVE)
-        sub = sub.copy()
-        sub['rank_key'] = list(zip(sub['MLP_VALID_MAE'].values, -sub['MLP_VALID_ImprovPct_vs_NAIVE'].values))
-        best = sub.sort_values(by=['rank_key']).iloc[0]
-        print(f"\n=== LEADERBOARD — {rule} ===", flush=True)
-        print(pd.DataFrame([{
-            'periodicity': rule,
-            'best_window_bars': int(best['window_bars']),
-            'best_valid_mae': float(best['MLP_VALID_MAE']),
-            'naive_valid_mae': float(best['NAIVE_VALID_MAE']),
-            'vs_naive_improv_pct': float(best['MLP_VALID_ImprovPct_vs_NAIVE'])
-        }]).to_string(index=False, float_format=_fmt), flush=True)
+        best = track_df.iloc[0]
+        print(
+            f"Best {track}: window={int(best['window'])} | MAE_val={best['mae_val']:.6f} | "
+            f"naive={best['naive_mae_val']:.6f} | gain={best['mae_gain_val']:.6f}"
+        )
+    print("========================================\n")
+    return df.sort_values(["track", "window"]).reset_index(drop=True)
 
-    # save
-    info(f"\n[PIPE] Guardando resultados en: {args.out}", args.quiet)
+
+def run(args: argparse.Namespace) -> None:
+    csv_path = Path(args.csv)
+    data = read_source_csv(csv_path)
+
+    results: List[Dict[str, float]] = []
+    for track_name, cfg in TRACKS.items():
+        freq = str(cfg["freq"])
+        horizon = int(cfg["horizon"])
+        track_ohlc = resample_ohlc(data, freq)
+        series = typical_price(track_ohlc)
+
+        if series.empty:
+            print(f"[WARN] Track {track_name} produced no data after resampling")
+            continue
+
+        for window in WINDOW_SIZES:
+            result = evaluate_window(track_name, series, window, horizon, args.train_ratio)
+            if result:
+                results.append(result)
+
+    if not results:
+        raise RuntimeError("No results were produced. Check input data and parameters.")
+
+    summary = summarize_results(results)
+    output_path = Path(args.output)
+    summary.to_csv(output_path, index=False)
+    print(f"Saved metrics to {output_path.resolve()}")
+
+
+def main() -> None:
+    args = parse_args()
     try:
-        dfr.drop(columns=['rank_key'], errors='ignore').to_csv(args.out, index=False)
-        info("[OK] Archivo escrito correctamente.", False)
-    except Exception as e:
-        error(f"No se pudo guardar {args.out}: {e}")
+        run(args)
+    except Exception as exc:  # noqa: BLE001 - surfacing full context to CLI
+        print(f"[ERROR] {exc}")
+        sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
