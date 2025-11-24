@@ -179,10 +179,10 @@ def append_positional_channels(seq: np.ndarray, pe: np.ndarray) -> np.ndarray:
 
 def build_conv_model(window: int, feature_dim: int) -> keras.Model:
     inp = keras.layers.Input(shape=(window, feature_dim))
-    x = keras.layers.Conv1D(128, kernel_size=3, activation="relu", padding="causal")(inp)
-    x = keras.layers.Conv1D(64, kernel_size=3, activation="relu", padding="causal")(x)
+    x = keras.layers.Conv1D(64, kernel_size=3, activation="relu", padding="causal")(inp)
+    x = keras.layers.Conv1D(32, kernel_size=3, activation="relu", padding="causal")(x)
     x = keras.layers.Bidirectional(
-        keras.layers.LSTM(32, return_sequences=False),
+        keras.layers.LSTM(16, return_sequences=False),
         merge_mode="concat",
     )(x)
     x = keras.layers.Dense(16, activation="relu")(x)
