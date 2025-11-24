@@ -43,18 +43,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "csv",
-        help="Path to the source OHLC CSV (must contain DATE_TIME, HIGH, LOW, CLOSE columns)",
+        help="Path to the source OHLC CSV (must contain datetime/open/high/low/close columns)",
     )
     parser.add_argument(
         "--output",
         default="optimize_window_mlp_results.csv",
         help="Destination CSV file for aggregated metrics",
-    )
-    parser.add_argument(
-        "--train-ratio",
-        type=float,
-        default=TRAIN_RATIO,
-        help="Proportion of samples to keep in the training split (time-ordered)",
     )
     return parser.parse_args()
 
@@ -62,22 +56,37 @@ def parse_args() -> argparse.Namespace:
 def read_source_csv(csv_path: Path) -> pd.DataFrame:
     if not csv_path.exists():
         raise FileNotFoundError(f"CSV not found: {csv_path}")
-
     df = pd.read_csv(csv_path)
-    df.columns = [col.strip().upper() for col in df.columns]
-    if "DATE_TIME" not in df.columns:
-        raise ValueError("CSV must include a DATE_TIME column")
+    # Normalize column names to upper-case to be forgiving with casing, but accept both
+    # 'DATE_TIME' and 'DATETIME' as the datetime column name.
+    cols_map = {c: c.strip() for c in df.columns}
+    df.columns = [c.strip() for c in df.columns]
 
-    df["DATE_TIME"] = pd.to_datetime(df["DATE_TIME"], utc=True, errors="coerce")
-    df = df.dropna(subset=["DATE_TIME"]).sort_values("DATE_TIME")
-    df = df.set_index("DATE_TIME")
+    # Accept either 'DATE_TIME' or 'datetime' (any case). We'll check both variants.
+    columns_upper = [c.upper() for c in df.columns]
+    if 'DATE_TIME' in columns_upper:
+        dt_col = df.columns[columns_upper.index('DATE_TIME')]
+    elif 'DATETIME' in columns_upper:
+        dt_col = df.columns[columns_upper.index('DATETIME')]
+    else:
+        raise ValueError("CSV must include a 'datetime' or 'DATE_TIME' column")
 
-    required = {"OPEN", "HIGH", "LOW", "CLOSE"}
-    missing = required - set(df.columns)
+    df[dt_col] = pd.to_datetime(df[dt_col], errors='coerce')
+    df = df.dropna(subset=[dt_col]).sort_values(dt_col)
+    df = df.set_index(dt_col)
+
+    # required OHLC names (case-insensitive)
+    col_upper_map = {c.upper(): c for c in df.columns}
+    required_upper = {'OPEN', 'HIGH', 'LOW', 'CLOSE'}
+    missing = required_upper - set(col_upper_map.keys())
     if missing:
         raise ValueError(f"Missing required OHLC columns: {sorted(missing)}")
 
-    return df[list(required)].astype(float)
+    # return a DataFrame with standard column names
+    std_cols = {u: col_upper_map[u] for u in required_upper}
+    out = df[[std_cols[u] for u in ['OPEN', 'HIGH', 'LOW', 'CLOSE']]].copy()
+    out.columns = ['OPEN', 'HIGH', 'LOW', 'CLOSE']
+    return out.astype(float)
 
 
 def resample_ohlc(df: pd.DataFrame, freq: str) -> pd.DataFrame:
@@ -98,13 +107,15 @@ def typical_price(ohlc: pd.DataFrame) -> pd.Series:
 
 def make_supervised(series: pd.Series, window: int, horizon: int) -> Optional[Dict[str, np.ndarray]]:
     values = series.to_numpy(dtype=np.float64)
-    samples = len(values) - window - horizon + 1
+    n = len(values)
+    samples = n - window - horizon + 1
     if samples <= 0:
         return None
 
     X = np.empty((samples, window), dtype=np.float64)
     y = np.empty(samples, dtype=np.float64)
     naive = np.empty(samples, dtype=np.float64)
+    idx = []
 
     for i in range(samples):
         start = i
@@ -113,22 +124,32 @@ def make_supervised(series: pd.Series, window: int, horizon: int) -> Optional[Di
         X[i] = values[start:end]
         y[i] = values[target_idx]
         naive[i] = values[end - 1]
+        idx.append(series.index[end - 1])
 
-    return {"X": X, "y": y, "naive": naive}
+    return {"X": X, "y": y, "naive": naive, "idx": pd.DatetimeIndex(idx)}
 
 
-def split_train_val(X: np.ndarray, y: np.ndarray, naive: np.ndarray, train_ratio: float) -> Optional[Dict[str, np.ndarray]]:
-    split_idx = int(len(X) * train_ratio)
-    if split_idx < 2 or len(X) - split_idx < 2:
+def split_train_val_by_years(idx: pd.DatetimeIndex, X: np.ndarray, y: np.ndarray, naive: np.ndarray) -> Optional[Dict[str, np.ndarray]]:
+    # validation = last year, training = previous 4 years
+    last_date = idx.max()
+    if pd.isnull(last_date):
+        return None
+    val_start = last_date - pd.DateOffset(years=1)
+    train_start = last_date - pd.DateOffset(years=5)
+
+    mask_val = idx > val_start
+    mask_train = (idx <= val_start) & (idx > train_start)
+
+    if mask_train.sum() < 2 or mask_val.sum() < 2:
         return None
 
     return {
-        "X_train": X[:split_idx],
-        "X_val": X[split_idx:],
-        "y_train": y[:split_idx],
-        "y_val": y[split_idx:],
-        "naive_train": naive[:split_idx],
-        "naive_val": naive[split_idx:],
+        "X_train": X[mask_train],
+        "X_val": X[mask_val],
+        "y_train": y[mask_train],
+        "y_val": y[mask_val],
+        "naive_train": naive[mask_train],
+        "naive_val": naive[mask_val],
     }
 
 
@@ -153,14 +174,13 @@ def evaluate_window(
     series: pd.Series,
     window: int,
     horizon: int,
-    train_ratio: float,
 ) -> Optional[Dict[str, float]]:
     supervised = make_supervised(series, window, horizon)
     if supervised is None:
         print(f"[SKIP] {track} window={window}: insufficient history for horizon {horizon}")
         return None
 
-    splits = split_train_val(supervised["X"], supervised["y"], supervised["naive"], train_ratio)
+    splits = split_train_val_by_years(supervised['idx'], supervised["X"], supervised["y"], supervised["naive"])
     if splits is None:
         print(f"[SKIP] {track} window={window}: split yielded fewer than 2 samples per set")
         return None
