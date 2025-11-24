@@ -28,11 +28,10 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.preprocessing import StandardScaler
 
 WINDOW_SIZES: List[int] = [3, 6, 12, 24, 48, 96]
-TRAIN_RATIO: float = 0.7
 
 TRACKS: Dict[str, Dict[str, int | str]] = {
-    "1H": {"freq": "1H", "horizon": 24},   # predict 24 hours ahead
-    "4H": {"freq": "4H", "horizon": 30},   # predict 30×4H bars (~5 days)
+    "1H": {"freq": "1h", "horizon": 24},   # predict 24 hours ahead
+    "4H": {"freq": "4h", "horizon": 30},   # predict 30×4H bars (~5 days)
 }
 
 
@@ -49,6 +48,13 @@ def parse_args() -> argparse.Namespace:
         "--output",
         default="optimize_window_mlp_results.csv",
         help="Destination CSV file for aggregated metrics",
+    )
+    # Legacy compatibility: older scripts expected --train-ratio, so keep a dummy argument
+    parser.add_argument(
+        "--train-ratio",
+        type=float,
+        default=0.7,
+        help="(Ignored) legacy parameter maintained for CLI compatibility",
     )
     return parser.parse_args()
 
@@ -255,7 +261,7 @@ def run(args: argparse.Namespace) -> None:
             continue
 
         for window in WINDOW_SIZES:
-            result = evaluate_window(track_name, series, window, horizon, args.train_ratio)
+            result = evaluate_window(track_name, series, window, horizon)
             if result:
                 results.append(result)
 
