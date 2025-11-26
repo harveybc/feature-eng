@@ -2,6 +2,7 @@
     "output_file": "./examples/data/phase_3b.csv",
     "output_file_downsampled": "./examples/data/phase_3b_downsampled.csv",
     "use_typical_price": true,
+    "use_typical_sd": true,
     "downsample_rate": 4,
     "include_original_5": true,
     "feature_plugins": ["base_features", "technical_features", "fundamental_features", "seasonal_features", "high_frequency_features"],

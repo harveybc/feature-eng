@@ -62,6 +62,7 @@ class BaseFeaturePlugin:
         "use_candlestick": True,
         "close_only": False,
         "use_typical_price": True,
+        "use_typical_sd": True,
     }
 
     # Debug vars to expose via get_debug_info
@@ -118,6 +119,7 @@ class BaseFeaturePlugin:
         use_candlestick = params["use_candlestick"]
         close_only = params["close_only"]
         use_typical_price = params["use_typical_price"]
+        use_typical_sd = params["use_typical_sd"]
 
         # -----------------------------------------------------------------
         # 2. Load data (file OR provided DataFrame)
@@ -240,6 +242,11 @@ class BaseFeaturePlugin:
                 df[mapped_cols["high"]] + df[mapped_cols["low"]] + df[mapped_cols["close"]]
             ) / 3.0
             selected_frames.append(tp_series.to_frame(name="typical_price"))
+
+            if use_typical_sd:
+                # Calculate typical sd: std(High, Low, Close)
+                sd_series = df[[mapped_cols["high"], mapped_cols["low"], mapped_cols["close"]]].std(axis=1)
+                selected_frames.append(sd_series.to_frame(name="typical_sd"))
         elif close_only:
             selected_frames.append(df[[mapped_cols["close"]]].rename(columns={mapped_cols["close"]: close_col}))
         else:
