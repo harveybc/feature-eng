@@ -1,6 +1,8 @@
 import json
 import time
+import os
 from typing import Any, Dict, List
+import pandas as pd
 
 # Lightweight JSON serializer to handle pandas.Timestamp, datetime, numpy types, sets, etc.
 def _json_default(o):  # noqa: D401
@@ -147,6 +149,46 @@ class PipelinePlugin:
                 raise
         else:
             print("  No output_file specified in configuration; skipping save.")
+
+        # ---------------------------------------------------------------------
+        # 4b. Save Downsampled Output (Optional)
+        # ---------------------------------------------------------------------
+        try:
+            downsample_rate = int(config.get("downsample_rate", 4))
+        except (ValueError, TypeError):
+            downsample_rate = 4
+
+        output_path_downsampled = config.get("output_file_downsampled")
+        if not output_path_downsampled and output_path:
+            base, ext = os.path.splitext(output_path)
+            output_path_downsampled = f"{base}_downsampled{ext}"
+
+        if output_path_downsampled and downsample_rate > 1:
+            print(f"[PIPELINE 4b/6] Generating and saving downsampled output (rate={downsample_rate})...")
+            try:
+                # Ensure we are working with a pandas DataFrame for downsampling
+                if isinstance(post_processed_data, pd.DataFrame):
+                    df_to_downsample = post_processed_data.copy()
+                else:
+                    df_to_downsample = pd.DataFrame(post_processed_data)
+
+                # Identify numeric columns for averaging
+                numeric_cols = df_to_downsample.select_dtypes(include=['number']).columns
+
+                # Calculate rolling mean for numeric columns
+                # This puts the average of [t-(N-1) ... t] at index t
+                df_to_downsample[numeric_cols] = df_to_downsample[numeric_cols].rolling(window=downsample_rate).mean()
+
+                # Slice with stride, starting at the first full window
+                # index: rate-1, 2*rate-1, ...
+                downsampled_data = df_to_downsample.iloc[downsample_rate-1::downsample_rate]
+
+                self._save_output(downsampled_data, output_path_downsampled, config)
+                print(f"  Downsampled output saved to: {output_path_downsampled}")
+
+            except Exception as exc:
+                print(f"Failed to save downsampled output to '{output_path_downsampled}': {exc}")
+                raise
 
         # ---------------------------------------------------------------------
         # 5. Debug Logging: aggregate plugin + pipeline execution metrics
