@@ -1,13 +1,14 @@
 {
     "output_file": "./examples/data/phase_1.csv",
     "output_file_downsampled": "./examples/data/phase_1_downsampled.csv",
+    "use_typical_price": true,
+    "downsample_rate": 4,
     "include_original_5": true,
     "feature_plugins": ["base_features"],
     "pipeline_plugin": "default",
     "aligner_plugin": "default",
     "post_processor_plugin": "decomposition",
-    "use_typical_price": true,
-    "downsample_rate": 4,
+
     
     "aligner_enforce_output_schema": false,
     "aligner_add_missing_columns": false,
