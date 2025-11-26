@@ -61,6 +61,7 @@ class BaseFeaturePlugin:
         "close_col": "CLOSE",
         "use_candlestick": True,
         "close_only": False,
+        "use_typical_price": True,
     }
 
     # Debug vars to expose via get_debug_info
@@ -116,6 +117,7 @@ class BaseFeaturePlugin:
         close_col = params["close_col"]
         use_candlestick = params["use_candlestick"]
         close_only = params["close_only"]
+        use_typical_price = params["use_typical_price"]
 
         # -----------------------------------------------------------------
         # 2. Load data (file OR provided DataFrame)
@@ -232,7 +234,13 @@ class BaseFeaturePlugin:
                 % (date_time_col, params.get("date_time_synonyms", []), available_cols)
             )
 
-        if close_only:
+        if use_typical_price:
+            # Calculate typical price: (High + Low + Close) / 3
+            tp_series = (
+                df[mapped_cols["high"]] + df[mapped_cols["low"]] + df[mapped_cols["close"]]
+            ) / 3.0
+            selected_frames.append(tp_series.to_frame(name="typical_price"))
+        elif close_only:
             selected_frames.append(df[[mapped_cols["close"]]].rename(columns={mapped_cols["close"]: close_col}))
         else:
             ohlc_map = {
@@ -249,7 +257,11 @@ class BaseFeaturePlugin:
         # 5. Candlestick differential features (optional)
         # -----------------------------------------------------------------
         if use_candlestick:
-            if not close_only:  # All OHLC available
+            if use_typical_price:
+                logger.warning(
+                    "Candlestick features requested but use_typical_price=True; skipping candlestick generation."
+                )
+            elif not close_only:  # All OHLC available
                 base_df["BC-BO"] = base_df[close_col] - base_df[open_col]
                 base_df["BH-BL"] = base_df[high_col] - base_df[low_col]
                 base_df["BH-BO"] = base_df[high_col] - base_df[open_col]

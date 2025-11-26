@@ -5,6 +5,7 @@
     "pipeline_plugin": "default",
     "aligner_plugin": "default",
     "post_processor_plugin": "decomposition",
+    "use_typical_price": true,
 
     "aligner_enforce_output_schema": false,
     "aligner_add_missing_columns": false,
