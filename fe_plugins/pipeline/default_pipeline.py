@@ -177,7 +177,8 @@ class PipelinePlugin:
 
                 # Calculate rolling mean for numeric columns
                 # This puts the average of [t-(N-1) ... t] at index t
-                df_to_downsample[numeric_cols] = df_to_downsample[numeric_cols].rolling(window=downsample_rate).mean()
+                # min_periods=1 ensures we get values even at the start where we have fewer than 'window' ticks
+                df_to_downsample[numeric_cols] = df_to_downsample[numeric_cols].rolling(window=downsample_rate, min_periods=1).mean()
 
                 # Filter rows where hour is a multiple of downsample_rate (e.g., 0, 4, 8...)
                 # First, attempt to identify the datetime column
