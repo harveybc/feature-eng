@@ -179,9 +179,32 @@ class PipelinePlugin:
                 # This puts the average of [t-(N-1) ... t] at index t
                 df_to_downsample[numeric_cols] = df_to_downsample[numeric_cols].rolling(window=downsample_rate).mean()
 
-                # Slice with stride, starting at the first full window
-                # index: rate-1, 2*rate-1, ...
-                downsampled_data = df_to_downsample.iloc[downsample_rate-1::downsample_rate]
+                # Filter rows where hour is a multiple of downsample_rate (e.g., 0, 4, 8...)
+                # First, attempt to identify the datetime column
+                dt_col = None
+                for col in df_to_downsample.columns:
+                    if pd.api.types.is_datetime64_any_dtype(df_to_downsample[col]):
+                        dt_col = col
+                        break
+                
+                # Fallback: look for column names containing 'date' or 'time' and try conversion
+                if not dt_col:
+                    for col in df_to_downsample.columns:
+                        if "date" in col.lower() or "time" in col.lower():
+                            try:
+                                df_to_downsample[col] = pd.to_datetime(df_to_downsample[col])
+                                dt_col = col
+                                break
+                            except Exception:
+                                pass
+
+                if dt_col:
+                    # Select rows where hour is a multiple of the rate
+                    condition = (df_to_downsample[dt_col].dt.hour % downsample_rate == 0)
+                    downsampled_data = df_to_downsample[condition].copy()
+                else:
+                    print(f"[PIPELINE 4b/6] Warning: No datetime column found for hour-aligned downsampling. Falling back to stride slicing.")
+                    downsampled_data = df_to_downsample.iloc[downsample_rate-1::downsample_rate]
 
                 self._save_output(downsampled_data, output_path_downsampled, config)
                 print(f"  Downsampled output saved to: {output_path_downsampled}")
