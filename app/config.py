@@ -1,5 +1,5 @@
 DEFAULT_VALUES = {
-    'input_file': 'tests/data/eurusd_hour_2005_2020_ohlc.csv',
+    'input_file': 'tests/data/EURUSD_ForexTrading_4hrs_05.05.2003_to_16.10.2021.csv',
     'output_file': './indicators_output.csv',
     'include_original_5': True,
     'plugin': 'tech_indicator',
@@ -33,7 +33,7 @@ DEFAULT_VALUES = {
 
     # General configurations
     'sub_periodicity_window_size': 8,  # Default window size for sub-periodicities
-    'output_resample_frequency': '1H',  # Target frequency for resampling
+    'output_resample_frequency': '4H',  # Target frequency for resampling
     'ohlc_columns': ['open', 'high', 'low', 'close'],
 
     # Header mappings for each dataset type
