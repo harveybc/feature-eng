@@ -244,6 +244,74 @@ def classify_regime_v2(features: pd.DataFrame,
     return regime
 
 
+# ─── V3: GMM Cluster-Based Classification ─────────────────────────
+# Centroids from K=9 GMM fitted on 15yr EURUSD (24K 4h bars).
+# Features: [bb_position, atr_ratio, ema_alignment] (standardised).
+# Scaler params from StandardScaler fit on same data.
+
+_GMM_SCALER_MEAN = np.array([0.4920, 1.0196, 0.0049])
+_GMM_SCALER_SCALE = np.array([0.2780, 0.1823, 2.9037])
+
+# Raw centroids (unscaled) for each of the 9 GMM clusters
+_GMM_CENTROIDS_RAW = np.array([
+    [0.784, 0.996, 3.494],   # C0: overbought + bullish EMA
+    [0.224, 0.937, -1.501],  # C1: low BB + bearish
+    [0.757, 0.846, -0.736],  # C2: overbought + mild bearish
+    [0.797, 1.079, -1.564],  # C3: overbought + vol + bearish
+    [0.381, 0.872, -5.722],  # C4: mid BB + deeply bearish
+    [0.160, 1.133, 1.921],   # C5: oversold + bullish EMA
+    [0.823, 1.363, 1.323],   # C6: overbought + high vol
+    [0.238, 1.230, -3.610],  # C7: oversold + high vol + bearish → BEST BUY
+    [0.277, 0.877, 3.004],   # C8: low BB + bullish EMA
+])
+
+# Map GMM cluster → regime label (1-based)
+# Based on forward-return analysis from clustering study:
+#   Only C7 is actionable BUY (Sharpe=+0.085, WR=54.6%)
+#   C4 has SELL signal but we know sell doesn't work
+_GMM_CLUSTER_TO_REGIME = {
+    0: 4,   # NEUTRAL (overbought + bullish → no edge)
+    1: 2,   # BEARISH_CONTINUATION (low BB + bearish)
+    2: 4,   # NEUTRAL (overbought + mild bearish)
+    3: 3,   # VOLATILE_OVERBOUGHT (high BB + vol + bearish)
+    4: 4,   # NEUTRAL (mid BB + deeply bearish → sell edge but not trading)
+    5: 5,   # PULLBACK_IN_UPTREND (oversold + bullish EMA)
+    6: 3,   # VOLATILE_OVERBOUGHT (very high BB + very high vol)
+    7: 1,   # VOLATILE_OVERSOLD → BUY (oversold + high vol + bearish = reversal)
+    8: 6,   # BULLISH_DRIFT (low BB + bullish EMA)
+}
+
+def classify_regime_v3(features: pd.DataFrame) -> pd.Series:
+    """
+    Classify each bar using GMM cluster centroids (nearest centroid).
+    
+    V3 uses data-driven cluster boundaries from 15yr EURUSD GMM analysis
+    instead of hand-tuned or GA-optimized thresholds.
+    
+    No optimizable parameters — regime boundaries are fixed from unsupervised
+    clustering on the full historical dataset.
+    
+    Returns Series of regime labels (int 1-6).
+    """
+    X_raw = features[['bb_position', 'atr_ratio', 'ema_alignment']].values
+    
+    # Standardise using the same scaler as the GMM was fitted with
+    X_scaled = (X_raw - _GMM_SCALER_MEAN) / (_GMM_SCALER_SCALE + 1e-10)
+    
+    # Scaled centroids
+    centroids_scaled = (_GMM_CENTROIDS_RAW - _GMM_SCALER_MEAN) / (_GMM_SCALER_SCALE + 1e-10)
+    
+    # Nearest centroid assignment (Euclidean in scaled space)
+    # Shape: (n_bars, 9)
+    dists = np.sqrt(((X_scaled[:, None, :] - centroids_scaled[None, :, :]) ** 2).sum(axis=2))
+    cluster_labels = dists.argmin(axis=1)
+    
+    # Map cluster → regime
+    regime_labels = np.array([_GMM_CLUSTER_TO_REGIME[c] for c in cluster_labels])
+    
+    return pd.Series(regime_labels, index=features.index, dtype=int)
+
+
 REGIME_NAMES = {
     1: "VOLATILE_OVERSOLD",
     2: "BEARISH_CONTINUATION",
@@ -307,7 +375,7 @@ if __name__ == "__main__":
         }).dropna()
 
     features = compute_regime_features(df)
-    regimes = classify_regime_v2(features)
+    regimes = classify_regime_v3(features)
     features['regime'] = regimes
     
     valid = features.dropna(subset=['bb_position'])
