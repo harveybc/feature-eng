@@ -3,15 +3,24 @@
 Regime Detector Module
 ======================
 Classifies each 4h bar into a market regime based on technical indicators.
-Uses thresholds derived from hierarchical clustering of 15 years of EURUSD data.
 
-Regimes (from K=6 clustering):
-  1 - HIGH_VOL_BEARISH_FADING:  High ATR, bearish DI, oversold → reversal zone
-  2 - STRONG_DOWNTREND:         High ADX, very bearish DI, low RSI → persistent decline
-  3 - STRONG_UPTREND:           High ADX, very bullish DI, high RSI → persistent rally
-  4 - MILD_BULLISH_RANGE:       Low ADX, mild bullish, mid volatility → flat/choppy
-  5 - LOW_VOL_BEARISH_PULLBACK: Low ADX, slight bearish in uptrend EMA → mean-revert buy
-  6 - LOW_VOL_BULLISH_DRIFT:    Low ADX, mild bullish, low vol → trend-follow buy
+V2 (Causal-Evidence Based):
+  Uses bb_position (CORE, causal score=5), atr_ratio (CORE, score=4),
+  and ema_alignment (LEADING, only positive Transfer Entropy) as primary
+  classification features — validated by ICP, DoWhy refutation, Causal Forest,
+  and Transfer Entropy analysis on 15yr EURUSD data.
+
+Regimes (V2 — causal evidence):
+  1 - VOLATILE_OVERSOLD:      BB low + high ATR ratio → buy reversal
+  2 - BEARISH_CONTINUATION:   BB low + low ATR ratio + bearish EMA → flat/sell
+  3 - VOLATILE_OVERBOUGHT:    BB high + high ATR ratio → flat (exhaustion)
+  4 - NEUTRAL:                BB mid or no clear signal → flat
+  5 - PULLBACK_IN_UPTREND:    BB low + low ATR ratio + bullish EMA → buy mean-revert
+  6 - BULLISH_DRIFT:          BB high + low ATR ratio + bullish EMA → buy trend
+
+Legacy V1 (Cluster-Based):
+  Uses adx, di_spread, atr_pct thresholds from hierarchical clustering.
+  Kept for backward compatibility.
 """
 
 import numpy as np
@@ -185,7 +194,67 @@ def classify_regime(features: pd.DataFrame,
     return regime
 
 
+def classify_regime_v2(features: pd.DataFrame,
+                       bb_low: float = 0.25,
+                       bb_high: float = 0.75,
+                       atr_ratio_high: float = 1.2,
+                       ema_align_thresh: float = 0.0) -> pd.Series:
+    """
+    Classify each bar into a regime based on causal-evidence features.
+    
+    Uses bb_position (CORE), atr_ratio (CORE), and ema_alignment (LEADING)
+    as validated by causal inference analysis (ICP, DoWhy, Transfer Entropy).
+    
+    Returns Series of regime labels (int 1-6).
+    
+    Decision tree:
+    
+    bb_position < bb_low?  (price near lower BB)
+      ├── YES: atr_ratio > atr_ratio_high?
+      │        ├── YES → 1 (VOLATILE_OVERSOLD → buy reversal)
+      │        └── NO:  ema_alignment > ema_align_thresh?
+      │                 ├── YES → 5 (PULLBACK_IN_UPTREND → buy mean-revert)
+      │                 └── NO  → 2 (BEARISH_CONTINUATION → flat/sell)
+      └── NO:  bb_position > bb_high?  (price near upper BB)
+               ├── YES: atr_ratio > atr_ratio_high?
+               │        ├── YES → 3 (VOLATILE_OVERBOUGHT → flat)
+               │        └── NO:  ema_alignment > ema_align_thresh?
+               │                 ├── YES → 6 (BULLISH_DRIFT → buy trend)
+               │                 └── NO  → 4 (NEUTRAL → flat)
+               └── NO:  → 4 (NEUTRAL → flat)
+    """
+    regime = pd.Series(4, index=features.index, dtype=int)  # default: NEUTRAL
+
+    bb = features['bb_position']
+    atr_r = features['atr_ratio']
+    ema_a = features['ema_alignment']
+
+    # Lower BB zone
+    bb_is_low = bb < bb_low
+    regime[bb_is_low & (atr_r > atr_ratio_high)] = 1  # VOLATILE_OVERSOLD
+    regime[bb_is_low & (atr_r <= atr_ratio_high) & (ema_a > ema_align_thresh)] = 5  # PULLBACK_IN_UPTREND
+    regime[bb_is_low & (atr_r <= atr_ratio_high) & (ema_a <= ema_align_thresh)] = 2  # BEARISH_CONTINUATION
+
+    # Upper BB zone
+    bb_is_high = bb > bb_high
+    regime[bb_is_high & (atr_r > atr_ratio_high)] = 3  # VOLATILE_OVERBOUGHT
+    regime[bb_is_high & (atr_r <= atr_ratio_high) & (ema_a > ema_align_thresh)] = 6  # BULLISH_DRIFT
+    # bb_is_high & low atr_r & bearish ema → stays 4 (NEUTRAL)
+
+    return regime
+
+
 REGIME_NAMES = {
+    1: "VOLATILE_OVERSOLD",
+    2: "BEARISH_CONTINUATION",
+    3: "VOLATILE_OVERBOUGHT",
+    4: "NEUTRAL",
+    5: "PULLBACK_IN_UPTREND",
+    6: "BULLISH_DRIFT",
+}
+
+# Legacy V1 names (for backward compatibility)
+REGIME_NAMES_V1 = {
     1: "HIGH_VOL_BEARISH_FADING",
     2: "STRONG_DOWNTREND",
     3: "STRONG_UPTREND",
@@ -194,14 +263,14 @@ REGIME_NAMES = {
     6: "LOW_VOL_BULLISH_DRIFT",
 }
 
-# Strategy actions per regime (default config)
+# Strategy actions per regime (V2 causal-evidence based)
 REGIME_ACTIONS = {
-    1: "buy_reversal",     # High vol bearish fading → buy reversal (6-bar Sharpe +0.41)
-    2: "sell_trend",       # Strong downtrend → sell with trend (Sharpe -0.85 going long)
-    3: "sell_exhaustion",  # Strong uptrend exhausting → sell (6-bar Sharpe -0.32 going long)
-    4: "flat",             # Mild range → no trade (Sharpe ~0)
-    5: "buy_meanrevert",   # Low vol bearish pullback in uptrend → buy (Sharpe +0.54)
-    6: "buy_trend",        # Low vol bullish drift → buy (Sharpe +0.57)
+    1: "buy_reversal",     # Volatile oversold → buy reversal (bb_position low + high atr_ratio)
+    2: "flat",             # Bearish continuation → no trade (sell edge weak per causal analysis)
+    3: "flat",             # Volatile overbought → no trade (exhaustion zone)
+    4: "flat",             # Neutral → no trade
+    5: "buy_meanrevert",   # Pullback in uptrend → buy (bb low + bullish EMA alignment)
+    6: "buy_trend",        # Bullish drift → buy trend (bb high + bullish EMA + low vol)
 }
 
 
@@ -238,10 +307,10 @@ if __name__ == "__main__":
         }).dropna()
 
     features = compute_regime_features(df)
-    regimes = classify_regime(features)
+    regimes = classify_regime_v2(features)
     features['regime'] = regimes
     
-    valid = features.dropna(subset=['adx'])
+    valid = features.dropna(subset=['bb_position'])
     print(f"\nRegime distribution ({len(valid)} bars):")
     for r in sorted(valid['regime'].unique()):
         n = (valid['regime'] == r).sum()
