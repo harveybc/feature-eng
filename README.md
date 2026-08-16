@@ -16,6 +16,14 @@ compatible with
 0.1.0). Maintained as the feature/label generation stage that feeds the
 predictor training pipeline.
 
+## Run this with an AI agent
+
+Paste this into Claude Code, Cursor, Codex, GitHub Copilot or any coding agent with shell access:
+
+> Read `AGENTS.md` in this repository and follow the **Agent quickstart** section end to end: set up the environment, run the smoke test, execute the example label-generation and regime-analysis run, then tell me the exact file paths where I can see the results and one analysis I should try first.
+
+`AGENTS.md` is the [agents.md](https://agents.md) convention, read natively by most coding agents.
+
 ## Role and non-responsibilities
 
 `feature-eng` does exactly one job: turn a raw OHLC time-series CSV into a CSV
@@ -50,8 +58,8 @@ declared in [`setup.py`](setup.py):
 | `tech_indicator` (also `default`, `technical_indicator`) | [`app/plugins/tech_indicator.py`](app/plugins/tech_indicator.py) | Technical-indicator feature columns (uses `pandas_ta`), optional seasonality features and multi-dataset alignment (sub-periodicities, S&P 500, VIX) |
 | `oracle_labels` | [`app/plugins/oracle_labels.py`](app/plugins/oracle_labels.py) | Binary buy/sell entry and exit labels by scanning future OHLC bars for TP-before-SL within a weekly horizon, plus `bars_to_friday`; matches the `binary_ideal_oracle` logic in prediction_provider |
 | `direction_labels` | [`app/plugins/direction_labels.py`](app/plugins/direction_labels.py) | Binary long/short direction labels via ATR-based TP/SL path scanning; matches the `direction_ideal_oracle` logic in prediction_provider |
-| `ssa` | [`app/plugins/ssa.py`](app/plugins/ssa.py) | Singular Spectrum Analysis decomposition features |
-| `fft` | [`app/plugins/fft.py`](app/plugins/fft.py) | FFT-based spectral features |
+| `ssa` | [`app/plugins/ssa.py`](app/plugins/ssa.py) | Registered but non-functional: the class has no `process()` method (see Limitations) |
+| `fft` | [`app/plugins/fft.py`](app/plugins/fft.py) | Registered but non-functional: the class has no `process()` method (see Limitations) |
 
 Around the core pipeline the repository also carries current working scripts:
 
@@ -88,37 +96,59 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-Verified in the maintainer environment (Python 3.12.13, 2026-08-10):
+Verified in the maintainer environment (Python 3.12.13, 2026-08-16):
 
-- `python -c "import app.plugins.oracle_labels, app.plugins.direction_labels, app.plugins.ssa, app.plugins.fft"`
-  → `label+ssa+fft imports OK`.
+- `python setup.py egg_info` → writes the gitignored `feature_eng.egg-info/`,
+  which is what makes `--plugin <name>` resolvable.
+- `PYTHONPATH=. python -c "import app.plugins.oracle_labels, app.plugins.direction_labels, app.regime_detector"`
+  → imports OK.
 - `PYTHONPATH=. python app/main.py --help` → prints the full CLI usage.
+- `oracle_labels` and `direction_labels` produce their label columns when the
+  plugin classes are used directly on the bundled 4h EUR/USD dataset.
+- `regime_analysis.py` (~11 s) and `app/regime_detector.py` (~5 s) both run to
+  completion on `tests/data/eurusd_hour_2005_2020_ohlc.csv`.
+
+`pip install -e .` also registers the entry points, but `setup.py` uses
+`find_packages()`, which publishes the generic top-level names `app` and
+`tests` into the environment and collides with sibling repositories that ship
+their own `app` package.
 
 ## Quickstart
 
-The supported invocation is the launcher script [`f-eng.sh`](f-eng.sh)
-(or [`f-eng.bat`](f-eng.bat) on Windows), which sets `PYTHONPATH` before
-calling `app/main.py`:
+See [`AGENTS.md`](AGENTS.md) for the full verified sequence. In short: run
+`python setup.py egg_info` once to register the plugin entry points, then use
+the label plugins directly:
 
-```bash
-# Oracle entry/exit labels from a repo-owned dataset
-bash f-eng.sh --plugin oracle_labels \
-  --input_file tests/data/EURUSD_ForexTrading_4hrs_05.05.2003_to_16.10.2021.csv \
-  --output_file labeled_output.csv
+```python
+import pandas as pd
+from app.plugins.oracle_labels import Plugin as OracleLabels
+
+df = pd.read_csv("tests/data/EURUSD_ForexTrading_4hrs_05.05.2003_to_16.10.2021.csv",
+                 nrows=2000)
+df = df.rename(columns={"Gmt time": "DATE_TIME", "open": "OPEN", "high": "HIGH",
+                        "low": "LOW", "close": "CLOSE"})
+df["DATE_TIME"] = pd.to_datetime(df["DATE_TIME"], format="%d.%m.%Y %H:%M:%S.%f")
+labels = OracleLabels().process(df.set_index("DATE_TIME")[["OPEN", "HIGH", "LOW", "CLOSE"]])
 ```
 
+The regime tooling runs as scripts against the bundled hourly dataset:
+
 ```bash
-# Technical-indicator features (requires pandas_ta installed)
-bash f-eng.sh --plugin tech_indicator \
-  --input_file tests/data/EURUSD_ForexTrading_4hrs_05.05.2003_to_16.10.2021.csv \
-  --output_file indicators_output.csv
+PYTHONPATH=. python regime_analysis.py            # ~11 s; writes plots + regime_labeled_data.csv
+PYTHONPATH=. python app/regime_detector.py tests/data/eurusd_hour_2005_2020_ohlc.csv
 ```
 
-Only `--help` execution was verified for this README (see above); full plugin
-runs write output CSVs and were not executed here. Every plugin parameter
-(e.g. `--tp_pips`, `--sl_pips`, `--atr_period`) can be passed as an additional
-CLI flag and is merged into the configuration; `--save_config` persists the
-effective configuration as JSON, and `--load_config` replays it.
+Both write their outputs to the current directory under fixed filenames that
+collide with the committed artifacts at the repository root — run them from a
+scratch directory (see [`AGENTS.md`](AGENTS.md)).
+
+The launcher [`f-eng.sh`](f-eng.sh) (or [`f-eng.bat`](f-eng.bat) on Windows)
+sets `PYTHONPATH` before calling `app/main.py`, but the `app/main.py` pipeline
+currently only works for the `tech_indicator` plugin — see Limitations. Every
+plugin parameter (e.g. `--tp_pips`, `--sl_pips`, `--atr_period`) can be passed
+as an additional CLI flag and is merged into the configuration;
+`--save_config` persists the effective configuration as JSON, and
+`--load_config` replays it.
 
 ## Configuration
 
@@ -139,10 +169,13 @@ role. Its outputs are plain CSVs consumed by other repositories.
 python -m pytest -q --collect-only
 ```
 
-Observed result (2026-08-10, Python 3.12.13): `3 tests collected, 8 errors` —
-the suite under [`tests/`](tests) partially fails to collect (stale imports in
-unit tests). Treat the test suite as needing repair; the CLI checks above are
-the current smoke validation.
+Observed result (2026-08-16, Python 3.12.13): `3 tests collected, 8 errors`,
+and with `--continue-on-collection-errors`, `3 failed, 8 errors` — no test
+passes. The collection errors are stale imports (for example
+`load_encoder_decoder_plugins`, which no longer exists in
+[`app/plugin_loader.py`](app/plugin_loader.py)). Treat the test suite as
+needing repair; the import and `--help` checks above are the current smoke
+validation.
 
 ## Outputs and reproducibility
 
@@ -165,15 +198,30 @@ the current smoke validation.
 
 ## Limitations
 
+- The [`app/main.py`](app/main.py) pipeline only supports `tech_indicator`.
+  `process_data()` in [`app/data_processor.py`](app/data_processor.py) requires
+  the date range returned by `plugin.process_additional_datasets()`, and the
+  label plugins return `(empty, None, None)`, so those runs fail with
+  `TypeError: Invalid comparison between dtype=datetime64[s] and NoneType`
+  (verified). It also requires a `DATE_TIME` column, which the bundled 4h
+  EUR/USD fixture does not have, and writes to the hardcoded filenames
+  `indicators_output.csv` and `technical_indicators_aligned.csv` in the current
+  directory regardless of `--output_file`.
+- `ssa` and `fft` are registered as plugins but have no `process()` method —
+  the classes expose `build_model`/`train`/`predict`/`save`/`load` instead, so
+  the pipeline raises `AttributeError` on them (verified).
 - The `feature_eng` console script installed by `setup.py` fails with
   `ModuleNotFoundError: No module named 'config_merger'` because
   [`app/main.py`](app/main.py) uses a bare `config_merger` import; run via
   [`f-eng.sh`](f-eng.sh) or with `PYTHONPATH=.` as shown above (verified).
-- The test suite has collection errors (see Tests).
+- The test suite does not run at all (see Tests).
 - `tech_indicator` requires `pandas_ta`, which is in `requirements.txt` but not
-  installed by `setup.py`'s `install_requires`.
-- Earlier documentation described SSA and FFT as future work — both are
-  implemented and registered plugins in the current code.
+  installed by `setup.py`'s `install_requires`, and was not installed in the
+  environment used to verify this README — so `tech_indicator`,
+  [`generate_labels.py`](generate_labels.py) and the phase-label drivers are
+  unverified.
+- [`generate_phase1c_labels.py`](generate_phase1c_labels.py) writes into the
+  sibling predictor repository by default (its `OUTPUT_DIR` is hardcoded).
 
 ## Migration notes
 
