@@ -1,7 +1,9 @@
 # Reproducible environment for the governed feature-eng run (GOV-N5), 2026-09-14.
 # Created with: python3 -m venv <env> && pip install setuptools wheel && pip install -r requirements-governed.txt
 # pandas_ta 0.4.x is the only release available for Python 3.12; it needs numpy 2.
-h5py==3.16.0
+# keras (tensorflow-cpu backend) and scikit-learn are imported by app/plugins/tech_indicator.py but absent from requirements.txt.
+h5py==3.14.0
+keras==3.15.1
 llvmlite==0.44.0
 matplotlib==3.11.2
 numba==0.61.2
@@ -10,6 +12,7 @@ pandas==2.3.3
 pandas-ta==0.4.71b0
 pillow==12.3.0
 requests==2.34.2
+scikit-learn==1.9.1
 scipy==1.17.1
 seaborn==0.13.2
 setuptools==84.0.0
