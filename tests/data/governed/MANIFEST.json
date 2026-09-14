@@ -1,0 +1,28 @@
+{
+  "files": [
+    {
+      "completion_lag_max": "1h",
+      "file": "synthetic_ohlc_1h_a.csv",
+      "frequency": "1h",
+      "generator": "governed/make_synthetic_ohlc.py",
+      "label": "WINDOW_START",
+      "rows": 2160,
+      "seed": 20260914,
+      "sha256": "d75ab18c5e94ea10d0594eb7dea8480e6e184350ac423d2c2451448e6a2fb591",
+      "timezone": "NAIVE_WALL_CLOCK (synthetic)"
+    },
+    {
+      "completion_lag_max": "1h",
+      "file": "synthetic_ohlc_1h_b.csv",
+      "frequency": "1h",
+      "generator": "governed/make_synthetic_ohlc.py",
+      "label": "WINDOW_START",
+      "rows": 2160,
+      "seed": 20260915,
+      "sha256": "79e768f6896f1571576997b2c08cb309665b96e9201172620714628a78d3a35c",
+      "timezone": "NAIVE_WALL_CLOCK (synthetic)"
+    }
+  ],
+  "generator_sha256": "4fea428fd05595701fb7da7a3324e051edef2bf5ace20322b52db659924e86e0",
+  "schema": "feature_eng_synthetic_ohlc_fixtures.v1"
+}

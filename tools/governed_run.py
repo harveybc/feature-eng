@@ -51,7 +51,10 @@ PROFILE = {
     "command": [sys.executable, "{repo_root}/app/main.py", "--load_config", "{config}"],
     "cwd": "{out_dir}",
     "metrics": _metrics,
-    "artifacts": {"output": "output_file", "debug_log": "save_log", "effective_config": "save_config"},
+    # every CSV and plot the pipeline writes into the output directory is inventoried,
+    # not only output_file: the default plugin also writes fixed-name files
+    "artifacts": {"output": "output_file", "debug_log": "save_log", "effective_config": "save_config",
+                  "csv": "*.csv", "plot": "*.png"},
     "tags": {"plugin": "tech_indicator"},
 }
 
