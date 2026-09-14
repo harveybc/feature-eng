@@ -47,6 +47,20 @@ def load_csv(file_path, config=None):
             data['date'] = pd.to_datetime(data['date'], errors='coerce')
             data.set_index('date', inplace=True)
 
+        if config is not None:
+            # Declared roles, or an explicit migration: never a heuristic selection. Resolved
+            # BEFORE the coercion below (R1) — coercing first turns a timestamp declared as a
+            # feature into NaN and lets the run continue, which is what the contract exists
+            # to stop. `process_data` checks again; this is the file's own gate.
+            from app.column_roles import resolve as resolve_roles, select_features
+
+            plan = resolve_roles(config, list(data.columns))
+            if plan.migration is None:
+                select_features(data, plan)  # refuses a declared feature that is not numeric
+                keep = ([plan.time] if plan.time else []) + list(plan.features)
+                data = data.loc[:, keep]
+                config.setdefault("column_roles_applied", {})["input_file"] = plan.as_record()
+
         # Convert numeric columns
         for col in data.select_dtypes(include=['object', 'category']).columns:
             data[col] = pd.to_numeric(data[col], errors='coerce')

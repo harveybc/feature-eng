@@ -129,10 +129,12 @@ def process_data(data, plugin, config):
     # Which columns may be transformed is declared, never inferred: an undeclared column is
     # either a new feature, a leak or a timestamp, and the configuration has to say which
     # (predictor incident of 2026-09-14, order P1).
-    from app.column_roles import resolve as resolve_roles
+    from app.column_roles import resolve as resolve_roles, select_features
 
     plan = resolve_roles(config, list(data.columns))
     if plan.migration is None:
+        select_features(data, plan)  # refuses a declared feature that is not numeric, before
+                                     # the OHLC coercion below turns it into 0
         keep = [name for name in (list(plan.features) + ([plan.time] if plan.time else []))
                 if name in data.columns]
         data = data.loc[:, keep]

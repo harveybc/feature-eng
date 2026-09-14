@@ -31,8 +31,14 @@ spec.loader.exec_module(roles)
 
 pd = pytest.importorskip("pandas")
 
+#: CLOSE is both a feature and the target here, so the contract has to say so out loud
+#: (R1: absence is not permission). `WITHOUT_OPT_IN` is the same contract with that
+#: declaration removed, which must now be refused.
 CONTRACT = {"time": "DATE_TIME", "features": ["OPEN", "HIGH", "LOW", "CLOSE"],
-            "targets": ["CLOSE"], "metadata": ["available_time"]}
+            "targets": ["CLOSE"], "metadata": ["available_time"],
+            "allow_target_as_feature": True}
+WITHOUT_OPT_IN = {key: value for key, value in CONTRACT.items()
+                  if key != "allow_target_as_feature"}
 
 
 def frame(columns):
@@ -90,19 +96,77 @@ def test_a_declared_column_that_the_file_lacks_is_refused_by_name():
                       ["DATE_TIME", "OPEN", "HIGH", "CLOSE", "available_time"])
 
 
-def test_a_target_inside_the_feature_list_must_be_declared_on_purpose():
-    """CLOSE is both a feature and the target here: allowed only when said explicitly."""
-    contract = dict(CONTRACT)
-    plan = roles.resolve({"column_roles": contract},
-                         ["DATE_TIME", "OPEN", "HIGH", "LOW", "CLOSE", "available_time"])
-    assert plan.targets == ["CLOSE"]
-    assert "CLOSE" in plan.features
-    assert plan.target_is_feature is True, "the overlap must be visible, not incidental"
+COLUMNS = ["DATE_TIME", "OPEN", "HIGH", "LOW", "CLOSE", "available_time"]
 
-    strict = dict(CONTRACT, allow_target_as_feature=False)
+
+def test_a_target_inside_the_feature_list_must_be_declared_on_purpose():
+    """R1: absence is not permission.
+
+    Musashi's first counterexample: `{"features": ["x", "y"], "targets": ["y"]}` was accepted
+    and `y` reached the model. The default was True, so a contract that never mentions the
+    overlap granted it. The opt-in is now required, and it must be a literal boolean.
+    """
+    with pytest.raises(roles.ColumnRoleError, match="CLOSE"):
+        roles.resolve({"column_roles": dict(WITHOUT_OPT_IN)}, COLUMNS)
+
+    allowed = roles.resolve({"column_roles": dict(CONTRACT)}, COLUMNS)
+    assert allowed.target_is_feature is True, "the overlap must be visible, not incidental"
+    assert "CLOSE" in allowed.features
+
     with pytest.raises(roles.ColumnRoleError, match="target"):
-        roles.resolve({"column_roles": strict},
-                      ["DATE_TIME", "OPEN", "HIGH", "LOW", "CLOSE", "available_time"])
+        roles.resolve({"column_roles": dict(CONTRACT, allow_target_as_feature=False)}, COLUMNS)
+
+
+@pytest.mark.parametrize("value", ["true", "yes", 1, [True], {"ok": True}])
+def test_only_a_literal_boolean_grants_the_overlap(value):
+    """A truthy string or a 1 is a configuration accident, not a declared decision."""
+    with pytest.raises(roles.ColumnRoleError, match="allow_target_as_feature"):
+        roles.resolve({"column_roles": dict(CONTRACT, allow_target_as_feature=value)}, COLUMNS)
+
+
+def test_a_column_cannot_be_metadata_and_a_feature_at_once():
+    """R1, Musashi's second counterexample: `available_time` was declared both and reached
+    the model because it happened to be numeric. Contradictory roles are refused by name."""
+    contract = {"time": "DATE_TIME", "features": ["OPEN", "available_time"],
+                "targets": ["CLOSE"], "metadata": ["available_time"],
+                "allow_target_as_feature": False}
+    with pytest.raises(roles.ColumnRoleError, match="available_time"):
+        roles.resolve({"column_roles": contract}, ["DATE_TIME", "OPEN", "CLOSE",
+                                                   "available_time"])
+
+
+def test_the_time_column_cannot_also_be_a_feature_or_metadata():
+    for contract in ({"time": "DATE_TIME", "features": ["DATE_TIME", "OPEN"]},
+                     {"time": "DATE_TIME", "features": ["OPEN"],
+                      "metadata": ["DATE_TIME"]}):
+        with pytest.raises(roles.ColumnRoleError, match="DATE_TIME"):
+            roles.resolve({"column_roles": contract}, ["DATE_TIME", "OPEN"])
+
+
+def test_a_target_cannot_be_declared_metadata():
+    """Metadata is never model input and a target is an output: the roles contradict."""
+    contract = {"features": ["OPEN"], "targets": ["CLOSE"], "metadata": ["CLOSE"]}
+    with pytest.raises(roles.ColumnRoleError, match="CLOSE"):
+        roles.resolve({"column_roles": contract}, ["OPEN", "CLOSE"])
+
+
+def test_a_repeated_declaration_is_refused_rather_than_deduplicated():
+    """Silently collapsing `["OPEN", "OPEN"]` hides which of two intents was meant."""
+    contract = {"features": ["OPEN", "OPEN"], "targets": ["CLOSE"], "metadata": []}
+    with pytest.raises(roles.ColumnRoleError, match="OPEN"):
+        roles.resolve({"column_roles": contract}, ["OPEN", "CLOSE"])
+
+
+@pytest.mark.parametrize("contract", [
+    {"features": "OPEN"},                                   # a string is not a list of names
+    {"features": ["OPEN", None]},                           # a name that is not a name
+    {"features": ["OPEN", 3]},
+    {"features": ["OPEN"], "metadata": "available_time"},
+    {"features": ["OPEN"], "time": ["DATE_TIME"]},
+])
+def test_a_malformed_role_list_is_refused(contract):
+    with pytest.raises(roles.ColumnRoleError):
+        roles.resolve({"column_roles": contract}, ["DATE_TIME", "OPEN", "available_time"])
 
 
 def test_a_run_without_a_contract_is_refused_unless_the_migration_is_declared():

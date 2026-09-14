@@ -60,6 +60,77 @@ class RolePlan:
         return body
 
 
+def _names(contract: dict, role: str) -> list:
+    """The declared names for one role, refusing anything that is not a list of names.
+
+    A bare string is the usual accident (`"features": "OPEN"` iterates into characters), and a
+    non-string entry cannot be a column. Both are refused here rather than producing a
+    confusing "the file does not carry declared columns: ['O', 'P', 'E', 'N']" later.
+    """
+    value = contract.get(role)
+    if value is None:
+        return []
+    if isinstance(value, str) or not isinstance(value, (list, tuple)):
+        raise ColumnRoleError(
+            f"column_roles: {role!r} must be a list of column names, got {value!r}")
+    names = list(value)
+    bad = [name for name in names if not isinstance(name, str) or not name.strip()]
+    if bad:
+        raise ColumnRoleError(f"column_roles: {role!r} carries entries that are not column "
+                              f"names: {bad}")
+    repeated = sorted({name for name in names if names.count(name) > 1})
+    if repeated:
+        raise ColumnRoleError(
+            f"column_roles: {role!r} declares {repeated} more than once. A repeated "
+            "declaration is refused rather than deduplicated: which of the two intents was "
+            "meant cannot be recovered from the file")
+    return names
+
+
+def _refuse_contradictions(features, targets, metadata, time, contract) -> None:
+    """A column has one role, except the target/feature overlap the contract may declare.
+
+    Metadata is never model input, so a column declared metadata *and* feature contradicts
+    itself; it reached the model before only because it happened to be numeric. The time
+    column is the run's clock and cannot also be an input or a label.
+    """
+    clash = [name for name in features if name in metadata]
+    if clash:
+        raise ColumnRoleError(
+            f"contradictory roles for {clash}: declared both a feature and metadata. Metadata "
+            "never reaches the model; a value that must reach it is a feature under its own "
+            "name, including a calendar feature derived on purpose")
+    clash = [name for name in targets if name in metadata]
+    if clash:
+        raise ColumnRoleError(
+            f"contradictory roles for {clash}: declared both a target and metadata. A target "
+            "is what the run predicts and metadata is what it never reads")
+    if time is not None:
+        where = [role for role, names in (("features", features), ("targets", targets),
+                                          ("metadata", metadata)) if time in names]
+        if where:
+            raise ColumnRoleError(
+                f"contradictory roles for {time!r}: it is the time column and is also declared "
+                f"in {where}. Availability or event time does not become model input by being "
+                "declared twice; derive an explicit calendar feature under its own name")
+
+
+def _opt_in(contract: dict) -> bool:
+    """Whether the contract *declares* the target/feature overlap.
+
+    Only a literal boolean counts: `"true"`, `1` or `["yes"]` are configuration accidents that
+    a truthiness test would silently read as a decision.
+    """
+    if "allow_target_as_feature" not in contract:
+        return False
+    value = contract["allow_target_as_feature"]
+    if not isinstance(value, bool):
+        raise ColumnRoleError(
+            f"column_roles: allow_target_as_feature must be a literal true or false, got "
+            f"{value!r}. A truthy value is not a declaration")
+    return value
+
+
 def resolve(config: dict, columns) -> RolePlan:
     """Build the plan for these file columns, or refuse with the column that is wrong."""
     columns = list(columns)
@@ -73,12 +144,17 @@ def resolve(config: dict, columns) -> RolePlan:
             f"and metadata, or declare column_roles_migration: {LEGACY!r} to keep the old "
             "behaviour deliberately")
 
-    features = list(contract.get("features") or [])
-    targets = list(contract.get("targets") or [])
+    features = _names(contract, "features")
+    targets = _names(contract, "targets")
+    metadata = _names(contract, "metadata")
     time = contract.get("time")
-    metadata = list(contract.get("metadata") or [])
+    if time is not None and (not isinstance(time, str) or not time.strip()):
+        raise ColumnRoleError(
+            f"column_roles: 'time' must be a single column name, got {time!r}")
     if not features:
         raise ColumnRoleError("column_roles declares no feature")
+
+    _refuse_contradictions(features, targets, metadata, time, contract)
 
     declared = [*features, *targets, *metadata] + ([time] if time else [])
     seen, ordered = set(), []
@@ -96,10 +172,15 @@ def resolve(config: dict, columns) -> RolePlan:
             "features, targets or metadata; an undeclared column is not silently dropped and "
             "not silently used")
 
+    declared_opt_in = _opt_in(contract)  # validated even with no overlap: a malformed
+                                         # declaration is a defect wherever it appears
     overlap = [name for name in targets if name in features]
-    if overlap and not contract.get("allow_target_as_feature", True):
-        raise ColumnRoleError(f"a target is also declared a feature: {overlap}; set "
-                              "allow_target_as_feature when that is intended")
+    if overlap and not declared_opt_in:
+        raise ColumnRoleError(
+            f"a target is also declared a feature: {overlap}. This is allowed only when the "
+            "contract says so on purpose: set allow_target_as_feature to true. Its absence is "
+            "not permission, and the declaration alone does not establish that the values fed "
+            "to the model are known at the decision time of their own target")
     return RolePlan(features=features, targets=targets, time=time, metadata=metadata,
                     target_is_feature=bool(overlap), contract=contract)
 
