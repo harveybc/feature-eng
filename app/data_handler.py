@@ -1,5 +1,19 @@
 import pandas as pd
 
+def parse_wall_clock(series):
+    """Timestamps of an input column: ISO 8601 when the whole column parses as such
+    (the form governed deliveries carry), else the legacy day-first parse.
+
+    `dayfirst=True` on ISO strings swaps month and day and turns days above 12 into
+    NaT, which silently emptied every governed run; the two families never mix in
+    one column, so trying ISO first is exact."""
+    text = series.astype(str).str.strip()
+    try:
+        return pd.to_datetime(text, format='ISO8601')
+    except (ValueError, TypeError):
+        return pd.to_datetime(text, dayfirst=True, errors='coerce')
+
+
 def load_csv(file_path, config=None):
     """
     Load a CSV file dynamically based on header mappings and configurations.
@@ -19,8 +33,10 @@ def load_csv(file_path, config=None):
         dataset_type = config.get('dataset_type', 'default') if config else 'default'
         column_map = header_mappings.get(dataset_type, {})
 
-        # Load the CSV file
-        data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+        # Load the CSV file; the first column is the wall clock (ISO 8601 as delivered by
+        # data-gov, or the legacy day-first exports)
+        data = pd.read_csv(file_path, sep=',')
+        data[data.columns[0]] = parse_wall_clock(data[data.columns[0]])
 
         # Apply column mappings
         if column_map:
@@ -183,8 +199,8 @@ def load_and_fix_hourly_data(file_path, config):
         if datetime_col not in data.columns:
             raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the hourly dataset.")
 
-        # Parse and set datetime index
-        data[datetime_col] = pd.to_datetime(data[datetime_col], dayfirst=True, errors='coerce')
+        # Parse and set datetime index (ISO 8601 first, legacy day-first otherwise)
+        data[datetime_col] = parse_wall_clock(data[datetime_col])
         invalid_rows = data[datetime_col].isna().sum()
         if invalid_rows > 0:
             print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
