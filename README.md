@@ -12,6 +12,21 @@ compatible with
 
 ## Status
 
+**Publication update (2026-09-14):** this branch includes the
+[governed-run adapter](tools/governed_run.py) and its profile test. It delegates
+dataset delivery and result accounting to [data-gov](https://github.com/harveybc/data-gov);
+it does not replace the feature-generation plugin. Set `DATA_GOV_CHECKOUT` to
+the matching data-gov checkout when the repositories are not siblings.
+End-to-end adoption and broader artifact capture are still being developed in
+[this research snapshot](https://github.com/harveybc/feature-eng/tree/c0863673daf43bbb60f54ccd6752117328096b49).
+The presence of a wrapper is not proof that every plugin has been validated.
+
+**Input features and targets are different artifacts.** Oracle and direction
+labels deliberately inspect future prices to construct supervised targets;
+they must not be reused as predictor inputs. Per-variable signal processing,
+indicator engineering and learned representations are distinct stages in the
+[research plan](https://github.com/harveybc/predictor/blob/master/docs/RESEARCH_STACK.md).
+
 **Active component** of the harveybc trading stack (package `feature_eng`
 0.1.0). Maintained as the feature/label generation stage that feeds the
 predictor training pipeline.
