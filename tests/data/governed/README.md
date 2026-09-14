@@ -11,6 +11,10 @@ venue.
 |---|---|---|---|
 | `synthetic_ohlc_1h_a.csv` | 20260914 | 2,160 hourly bars from 2013-01-01 00:00 | see `MANIFEST.json` |
 | `synthetic_ohlc_1h_b.csv` | 20260915 | 2,160 hourly bars from 2013-01-01 00:00 | see `MANIFEST.json` |
+| `synthetic_vix_daily.csv` | 20260916 | 104 daily bars from 2012-12-25 (`date,open,high,low,close`, the `vix` header shape; the default pipeline needs one additional dataset to align) | see `MANIFEST.json` |
+
+The daily series is labelled by its date (`WINDOW_START`) and complete one day
+later (`completion_lag_max: 1d`).
 
 Columns `datetime,open,high,low,close` follow the `forex_15m` header mapping of
 `app/config.py`. The resource contract a lake serves them under is factual for

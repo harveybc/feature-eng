@@ -51,9 +51,33 @@ def write(name: str, seed: int, n: int) -> dict:
             "timezone": "NAIVE_WALL_CLOCK (synthetic)", "generator": HERE.name + "/" + Path(__file__).name}
 
 
+def write_daily(name: str, seed: int, days: int) -> dict:
+    """A daily series in the `vix` header shape (date,open,high,low,close): the default
+    pipeline needs at least one additional dataset to align with the main one."""
+    import datetime as dt
+
+    t0 = dt.datetime.strptime(START, "%Y-%m-%d %H:%M:%S") - dt.timedelta(days=7)
+    rng = np.random.Generator(np.random.PCG64(seed))
+    close = 18.0 + np.cumsum(rng.normal(0.0, 0.4, size=days))
+    open_ = np.concatenate([[18.0], close[:-1]])
+    spread = np.abs(rng.normal(0.0, 0.3, size=days))
+    lines = ["date,open,high,low,close"]
+    for i in range(days):
+        stamp = (t0 + dt.timedelta(days=i)).strftime("%Y-%m-%d")
+        lines.append(f"{stamp},{open_[i]:.2f},{max(open_[i], close[i]) + spread[i]:.2f},"
+                     f"{min(open_[i], close[i]) - spread[i]:.2f},{close[i]:.2f}")
+    raw = ("\n".join(lines) + "\n").encode("ascii")
+    (HERE / name).write_bytes(raw)
+    return {"file": name, "seed": seed, "rows": days, "sha256": hashlib.sha256(raw).hexdigest(),
+            "time_column": "date", "label": "WINDOW_START", "completion_lag_max": "1d", "frequency": "1d",
+            "timezone": "NAIVE_WALL_CLOCK (synthetic)", "generator": HERE.name + "/" + Path(__file__).name}
+
+
 def main() -> int:
+    files = [dict(write(name, seed, n), time_column="datetime") for name, (seed, n) in FILES.items()]
+    files.append(write_daily("synthetic_vix_daily.csv", SEED + 2, 7 + 90 + 7))
     manifest = {"schema": "feature_eng_synthetic_ohlc_fixtures.v1", "generator_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                "files": [write(name, seed, n) for name, (seed, n) in FILES.items()]}
+                "files": files}
     (HERE / "MANIFEST.json").write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps(manifest, indent=2, sort_keys=True))
     return 0
