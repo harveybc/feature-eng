@@ -5,8 +5,10 @@ the previous round tested a copied helper. These rules drive `app.data_handler.l
 a file on disk and `app.data_processor.process_data` with a plugin that refuses to be called,
 so a refusal is proven to happen *before* any transformation runs.
 
-Declared scope: the primary input path. `load_additional_csv`, `load_sp500_csv` and the
-hourly/high-frequency loaders are not covered here and still coerce their own columns.
+Declared scope: every loader `app/plugins/tech_indicator.py` actually calls — the primary
+`load_csv`, `load_and_fix_hourly_data` (which re-reads the MAIN input) and
+`load_additional_csv` (vix, forex_15m). `load_high_frequency_data` is covered too, under the
+key `high_frequency`. `load_sp500_csv` is imported but never called, and is left alone.
 """
 
 from __future__ import annotations
@@ -108,3 +110,74 @@ def test_the_declared_legacy_migration_still_loads_everything(tmp_path):
     path = csv_at(tmp_path, ["DATE_TIME", "OPEN"])
     loaded = load_csv(path, {"column_roles_migration": "LEGACY_ALL_COLUMNS_ARE_FEATURES"})
     assert list(loaded.columns) == ["DATE_TIME", "OPEN"]
+
+
+# --- R1: the other loaders this application really uses ----------------------------------
+#
+# `app/plugins/tech_indicator.py` calls load_and_fix_hourly_data (on the MAIN input file),
+# load_additional_csv (vix, forex_15m) and load_high_frequency_data. Each was outside the
+# contract, so a column could reach the run around the primary loader.
+
+from app.data_handler import load_additional_csv, load_and_fix_hourly_data
+
+
+def test_the_hourly_loader_reads_the_main_input_under_the_main_contract(tmp_path):
+    """`load_and_fix_hourly_data(config['input_file'], config)` re-reads the same file."""
+    path = tmp_path / "hourly.csv"
+    pd.DataFrame({"datetime": ["2024-01-01 00:00:00", "2024-01-01 01:00:00"],
+                  "OPEN": [1.0, 2.0], "HIGH": [1.0, 2.0], "LOW": [1.0, 2.0],
+                  "CLOSE": [1.0, 2.0], "available_time": ["2024-01-01 00:00:00",
+                                                          "2024-01-01 01:00:00"],
+                  "LEAK": [9.0, 9.0]}).to_csv(path, index=False)
+    contract = dict(CONTRACT, time="datetime")
+    with pytest.raises(ColumnRoleError, match="LEAK"):
+        load_and_fix_hourly_data(str(path), dict(column_roles=contract))
+
+
+def test_an_auxiliary_dataset_carries_its_own_declaration(tmp_path):
+    path = tmp_path / "vix.csv"
+    pd.DataFrame({"date": ["2024-01-01", "2024-01-02"],
+                  "vix_close": [13.0, 14.0]}).to_csv(path, index=False)
+    config = {"column_roles": CONTRACT,
+              "column_roles_by_file": {"vix": {"time": "date", "features": ["vix_close"]}}}
+    data = load_additional_csv(str(path), dataset_type="vix", config=config)
+    assert list(data.columns) == ["vix_close"]
+    assert config["column_roles_applied"]["vix"]["features"] == ["vix_close"]
+
+
+def test_an_auxiliary_dataset_with_no_declaration_is_refused_by_its_key(tmp_path):
+    """The main contract does not cover a second dataset, and silence is not permission."""
+    path = tmp_path / "vix.csv"
+    pd.DataFrame({"date": ["2024-01-01"], "vix_close": [13.0]}).to_csv(path, index=False)
+    with pytest.raises(ColumnRoleError, match="vix"):
+        load_additional_csv(str(path), dataset_type="vix",
+                            config={"column_roles": CONTRACT})
+
+
+def test_an_undeclared_column_in_an_auxiliary_dataset_is_refused_by_name(tmp_path):
+    path = tmp_path / "vix.csv"
+    pd.DataFrame({"date": ["2024-01-01"], "vix_close": [13.0],
+                  "SURPRISE": [1.0]}).to_csv(path, index=False)
+    config = {"column_roles_by_file": {"vix": {"time": "date", "features": ["vix_close"]}}}
+    with pytest.raises(ColumnRoleError, match="SURPRISE"):
+        load_additional_csv(str(path), dataset_type="vix", config=config)
+
+
+def test_an_auxiliary_loader_without_a_configuration_keeps_working(tmp_path):
+    """These loaders are also called with no configuration; that path is left as it was."""
+    path = tmp_path / "vix.csv"
+    pd.DataFrame({"date": ["2024-01-01"], "vix_close": [13.0]}).to_csv(path, index=False)
+    data = load_additional_csv(str(path), dataset_type="vix", config=None)
+    assert "vix_close" in data.columns
+
+
+def test_the_high_frequency_loader_is_declared_too(tmp_path):
+    from app.data_handler import load_high_frequency_data
+
+    path = tmp_path / "hf.csv"
+    pd.DataFrame({"DATE_TIME": ["2024.01.01 00:00:00", "2024.01.01 00:15:00"],
+                  "OPEN": [1.0, 2.0], "SURPRISE": [9.0, 9.0]}).to_csv(path, index=False)
+    config = {"column_roles_by_file": {"high_frequency": {"time": "DATE_TIME",
+                                                          "features": ["OPEN"]}}}
+    with pytest.raises(ColumnRoleError, match="SURPRISE"):
+        load_high_frequency_data(str(path), config)

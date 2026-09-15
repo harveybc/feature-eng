@@ -14,6 +14,33 @@ def parse_wall_clock(series):
         return pd.to_datetime(text, dayfirst=True, errors='coerce')
 
 
+def apply_file_contract(data, config, file_key, *, main=False):
+    """Keep only what the roles declared **for this file** allow, and record the plan.
+
+    R1: the primary loader was not the only way a column reached the run. The hourly loader
+    re-reads the very same main input, and the auxiliary loaders bring their own files, all of
+    them outside the contract until now. Each file is resolved under its own declaration:
+    the main input under the run's `column_roles`, every other file under
+    `column_roles_by_file[<key>]`, or the explicitly declared legacy migration.
+    """
+    if config is None:
+        return data
+    from app.column_roles import (contract_for, resolve as resolve_roles, select_features)
+
+    declaration = config if main else contract_for(config, file_key)
+    index_name = data.index.name
+    plan = resolve_roles(declaration,
+                         ([index_name] if index_name else []) + list(data.columns))
+    if plan.migration is None:
+        select_features(data, plan)
+        keep = [name for name in
+                (([plan.time] if plan.time else []) + list(plan.features))
+                if name in data.columns]
+        data = data.loc[:, keep]
+    config.setdefault("column_roles_applied", {})[file_key] = plan.as_record()
+    return data
+
+
 def load_csv(file_path, config=None):
     """
     Load a CSV file dynamically based on header mappings and configurations.
@@ -98,6 +125,8 @@ def load_additional_csv(file_path, dataset_type, config=None):
         # Apply column mappings
         if column_map:
             data.rename(columns=column_map, inplace=True)
+
+        data = apply_file_contract(data, config, dataset_type)
 
         # Parse 'DATE_TIME' for Forex datasets
         if 'DATE_TIME' in data.columns:
@@ -213,6 +242,9 @@ def load_and_fix_hourly_data(file_path, config):
         if datetime_col not in data.columns:
             raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the hourly dataset.")
 
+        # the same file the primary loader reads: the same contract governs it
+        data = apply_file_contract(data, config, 'input_file', main=True)
+
         # Parse and set datetime index (ISO 8601 first, legacy day-first otherwise)
         data[datetime_col] = parse_wall_clock(data[datetime_col])
         invalid_rows = data[datetime_col].isna().sum()
@@ -258,6 +290,8 @@ def load_high_frequency_data(file_path, config):
         # Load the CSV file
         data = pd.read_csv(file_path, sep=',', encoding='utf-8')
         print(f"Loaded columns: {list(data.columns)}")
+
+        data = apply_file_contract(data, config, 'high_frequency')
 
         # Check if the datetime column exists
         if datetime_col not in data.columns:
