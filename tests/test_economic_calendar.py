@@ -19,7 +19,9 @@ WEDNESDAY = "2026-03-04T12:00:00Z"
 
 def arrival(kind, observed_at, **over):
     row = {"schema": SCHEMA, "event_key": "US.CPI.2026-02", "kind": kind, "observed_at": observed_at,
-           "event_time": "2026-03-03T13:30:00Z", "unit": "percent_yoy", "period": "2026-02"}
+           "event_time": "2026-03-03T13:30:00Z", "unit": "percent_yoy", "period": "2026-02",
+           # CL16: every arrival declares whether its historical availability was verified; the rule is on the path now
+           "historical_availability": "KNOWN"}
     row.update(over)
     return row
 
@@ -38,7 +40,7 @@ def test_CAL01_tomorrows_schedule_is_available_and_tomorrows_actual_is_not():
     assert view["status"] == "SCHEDULED"
     assert view["event_time"] == "2026-03-03T13:30:00+00:00"
     assert "actual" not in view
-    assert book.surprise("US.CPI.2026-02", MONDAY)["surprise"] is None
+    assert book.surprise("US.CPI.2026-02", MONDAY)["release_surprise"] is None
 
 
 # --- CAL02: published is not received ---------------------------------------------------------------------------------------
@@ -49,9 +51,10 @@ def test_CAL02_a_release_is_not_knowable_between_publication_and_receipt():
                     arrival("ACTUAL", "2026-03-03T13:45:00Z", published_at="2026-03-03T13:30:00Z", actual=2.9))
     between = book.view("US.CPI.2026-02", "2026-03-03T13:35:00Z")
     assert between["status"] == "SCHEDULED", "published 13:30, received 13:45: at 13:35 nobody had it"
-    assert book.surprise("US.CPI.2026-02", "2026-03-03T13:35:00Z")["surprise"] is None
+    assert book.surprise("US.CPI.2026-02", "2026-03-03T13:35:00Z")["release_surprise"] is None
     after = book.surprise("US.CPI.2026-02", "2026-03-03T13:50:00Z")
-    assert after["surprise"] == pytest.approx(0.4)
+    assert after["release_surprise"] == pytest.approx(0.4)
+    assert after["available_surprise"] == pytest.approx(0.4), "nothing arrived between the two boundaries here"
 
 
 def test_CAL02_an_arrival_observed_before_it_was_published_is_refused():
@@ -66,9 +69,9 @@ def test_CAL03_a_later_consensus_cannot_move_the_frozen_surprise():
                     arrival("ACTUAL", "2026-03-03T13:30:00Z", actual=2.9),
                     arrival("CONSENSUS", "2026-03-03T14:00:00Z", consensus=2.9))
     later = book.surprise("US.CPI.2026-02", WEDNESDAY)
-    assert later["consensus"] == 2.5, "the consensus published after the number is not what anyone was surprised against"
-    assert later["surprise"] == pytest.approx(0.4)
-    assert later["consensus_observed_at"] == "2026-03-02T12:00:00+00:00"
+    assert later["release_consensus"] == 2.5, "a consensus published after the number is not what anyone expected"
+    assert later["release_surprise"] == pytest.approx(0.4)
+    assert later["release_consensus_observed_at"] == "2026-03-02T12:00:00+00:00"
 
 
 # --- CAL04: a revision changes later views only -----------------------------------------------------------------------------
@@ -81,8 +84,10 @@ def test_CAL04_a_late_revision_leaves_every_earlier_view_unchanged():
     assert book.view("US.CPI.2026-02", "2026-03-03T18:00:00Z") == before, "the past did not change"
     after = book.view("US.CPI.2026-02", "2026-04-02T00:00:00Z")
     assert after["actual"] == 3.1 and after["revisions_known"] == 1
-    assert book.surprise("US.CPI.2026-02", "2026-03-03T18:00:00Z")["surprise"] == pytest.approx(0.4)
-    assert book.surprise("US.CPI.2026-02", "2026-04-02T00:00:00Z")["surprise"] == pytest.approx(0.6)
+    assert book.surprise("US.CPI.2026-02", "2026-03-03T18:00:00Z")["release_surprise"] == pytest.approx(0.4)
+    # CL16: a revision is named apart from the release it revises, rather than replacing its surprise
+    revised = book.surprise("US.CPI.2026-02", "2026-04-02T00:00:00Z")
+    assert revised["release_surprise"] == pytest.approx(0.4) and revised["revision_surprise"] == pytest.approx(0.6)
 
 
 # --- CAL05: ambiguity, mixed units and incomparable periods refuse ------------------------------------------------------------
@@ -115,9 +120,9 @@ def test_CAL05_a_number_without_its_unit_or_period_is_refused():
 def test_CAL06_a_missing_consensus_gives_no_surprise_and_says_so():
     book = calendar(arrival("ACTUAL", "2026-03-03T13:30:00Z", actual=2.9))
     result = book.surprise("US.CPI.2026-02", WEDNESDAY)
-    assert result["surprise"] is None
-    assert "NO_CONSENSUS_BEFORE_RELEASE" in result["reason"]
-    assert "invented" in result["reason"]
+    assert result["release_surprise"] is None and result["available_surprise"] is None
+    assert "NO_CONSENSUS_BEFORE_THE_BOUNDARY" in result["release_reason"]
+    assert "invented" in result["release_reason"]
 
 
 @pytest.mark.parametrize("scale", [0, 0.0, -1.5])
@@ -125,7 +130,7 @@ def test_CAL06_a_non_positive_residual_scale_is_not_a_standardized_surprise(scal
     book = calendar(arrival("CONSENSUS", MONDAY, consensus=2.5),
                     arrival("ACTUAL", "2026-03-03T13:30:00Z", actual=2.9))
     result = book.surprise("US.CPI.2026-02", WEDNESDAY, scale=scale)
-    assert result["surprise"] == pytest.approx(0.4), "the raw surprise is still reported"
+    assert result["release_surprise"] == pytest.approx(0.4), "the raw surprise is still reported"
     assert result["standardized"] is None
     assert "NON_POSITIVE_RESIDUAL_SCALE" in result["standardized_reason"]
 
@@ -235,5 +240,5 @@ def test_a_price_reaction_is_never_accepted_as_a_surprise():
     """There is deliberately no path from a market move to a `surprise` here: the input is a consensus, or there is none."""
     book = calendar(arrival("ACTUAL", TUESDAY, actual=2.9))
     result = book.surprise("US.CPI.2026-02", WEDNESDAY)
-    assert result["surprise"] is None
+    assert result["release_surprise"] is None and result["available_surprise"] is None
     assert not hasattr(book, "surprise_from_returns")

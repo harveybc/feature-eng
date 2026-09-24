@@ -22,7 +22,8 @@ What it refuses rather than guesses, each because the alternative silently inven
 Nothing here reads the network, scrapes a provider or infers a release calendar from prices.
 """
 
-from datetime import datetime, timedelta, timezone
+import copy
+from datetime import datetime, timezone
 import hashlib
 import json
 import math
@@ -32,8 +33,11 @@ SCHEMA = "economic_calendar_arrival.v1"
 #: an arrival is one of these. They are different facts about an event, not versions of one field.
 ARRIVAL_KINDS = ("SCHEDULE", "CONSENSUS", "ACTUAL", "REVISION", "CANCELLATION", "SCHEDULE_UPDATE")
 
-#: what must be present on every arrival
-REQUIRED = ("schema", "event_key", "kind", "observed_at", "event_time")
+#: what must be present on every arrival. `historical_availability` is here, not in a helper, because a rule a caller can
+#: forget to invoke is not a rule: an UNKNOWN row used to be ingested and produce a number anyway.
+REQUIRED = ("schema", "event_key", "kind", "observed_at", "event_time", "historical_availability")
+
+AVAILABILITY = ("KNOWN", "UNKNOWN")
 
 
 class CalendarRefusal(ValueError):
@@ -79,12 +83,21 @@ def validate_arrival(arrival):
     if not isinstance(arrival, dict):
         raise CalendarRefusal("ARRIVAL_MUST_BE_A_MAPPING")
     missing = [f for f in REQUIRED if not arrival.get(f)]
+    if missing == ["historical_availability"] or "historical_availability" in missing:
+        raise CalendarRefusal(
+            f"AVAILABILITY_MUST_BE_DECLARED: this arrival does not say whether its historical availability is KNOWN or "
+            f"UNKNOWN{'' if missing == ['historical_availability'] else ', and also lacks ' + ', '.join(f for f in missing if f != 'historical_availability')}; "
+            f"using a row as if it had been observable at its timestamp asserts something nobody verified")
     if missing:
         raise CalendarRefusal(f"ARRIVAL_FIELDS_MISSING: {', '.join(missing)}")
     if arrival["schema"] != SCHEMA:
         raise CalendarRefusal(f"UNKNOWN_ARRIVAL_SCHEMA: {arrival['schema']!r}")
     if arrival["kind"] not in ARRIVAL_KINDS:
         raise CalendarRefusal(f"UNKNOWN_ARRIVAL_KIND: {arrival['kind']!r} is not one of {list(ARRIVAL_KINDS)}")
+    if arrival["historical_availability"] not in AVAILABILITY:
+        raise CalendarRefusal(
+            f"AVAILABILITY_MUST_BE_DECLARED: {arrival['historical_availability']!r} is not one of {list(AVAILABILITY)}; "
+            f"using a row as if it had been observable at its timestamp asserts something nobody verified")
     out = dict(arrival)
     out["observed_at"] = instant(arrival["observed_at"], "observed_at")
     out["event_time"] = instant(arrival["event_time"], "event_time")
@@ -117,17 +130,28 @@ class PointInTimeCalendar:
 
     def __init__(self):
         self._arrivals = []
+        self._archive = []
         self._seen = set()
 
     # --- ingestion ----------------------------------------------------------------------------------------------
     def add(self, arrival):
-        """Idempotent by content: the same arrival delivered twice, or out of order, is one arrival."""
+        """Idempotent by content: the same arrival delivered twice, or out of order, is one arrival.
+
+        A row whose historical availability is UNKNOWN is kept as ARCHIVE and never enters a point-in-time view. The refusal
+        is here, on the only path in, rather than in a helper a caller may never call."""
         checked = validate_arrival(arrival)
         if checked["arrival_sha256"] in self._seen:
-            return checked, "DUPLICATE"
+            return copy.deepcopy(checked), "DUPLICATE"
         self._seen.add(checked["arrival_sha256"])
+        if checked["historical_availability"] == "UNKNOWN":
+            self._archive.append(checked)
+            return copy.deepcopy(checked), "ARCHIVED_NOT_POINT_IN_TIME"
         self._arrivals.append(checked)
-        return checked, "ADDED"
+        return copy.deepcopy(checked), "ADDED"
+
+    def archive_rows(self):
+        """Rows retained but refused for point-in-time use, detached so reading them cannot change them."""
+        return copy.deepcopy(self._archive)
 
     def add_all(self, arrivals):
         return [self.add(a) for a in arrivals]
@@ -143,8 +167,11 @@ class PointInTimeCalendar:
         cutoff = instant(as_of, "as_of")
         rows = [a for a in self._arrivals if a["observed_at"] <= cutoff
                 and (event_key is None or a["event_key"] == event_key)]
-        # observed order breaks a tie between two arrivals stamped at the same instant; without one, neither is chosen
-        return sorted(rows, key=lambda a: (a["observed_at"], a["sequence"] if a["sequence"] is not None else -1))
+        # observed order breaks a tie between two arrivals stamped at the same instant; without one, neither is chosen.
+        # The rows are COPIES: a public read must not be a handle on history, or a caller could change a value that has
+        # already been hashed and the vintage identity would not move.
+        return copy.deepcopy(sorted(rows, key=lambda a: (a["observed_at"],
+                                                        a["sequence"] if a["sequence"] is not None else -1)))
 
     def view(self, event_key, as_of):
         """What was known about one event at one instant, with every value's own provenance."""
@@ -197,36 +224,68 @@ class PointInTimeCalendar:
         return out
 
     # --- the surprise -------------------------------------------------------------------------------------------
-    def surprise(self, event_key, as_of, *, scale=None):
-        """The surprise as it stood at `as_of`: actual minus the consensus that was current BEFORE the release.
+    @staticmethod
+    def _published(arrival):
+        """When the world could have known it. A row without its own publication clock falls back to when we received it,
+        which is the conservative direction: never earlier than it truly was."""
+        return arrival.get("published_at") or arrival["observed_at"]
 
-        The consensus is frozen at the last one observed strictly before the actual arrived. A consensus published after the
-        number is not what anybody was surprised against, however much it improves the fit."""
+    def surprise(self, event_key, as_of, *, scale=None):
+        """Two boundaries, reported side by side and never merged.
+
+        `release_surprise` is what the market was surprised by: the actual against the last consensus PUBLISHED before the
+        actual was published. `available_surprise` is what our own system could have computed: the same actual against the
+        last consensus it had RECEIVED by the time the actual reached it.
+
+        They differ exactly when a consensus is published after a release and arrives before we see the number -- and then
+        the difference matters, because treating the later one as the expectation turns a real surprise into zero.
+        """
         view = self.view(event_key, as_of)
         base = {"event_key": event_key, "as_of": view["as_of"], "status": view["status"],
-                "vintage_sha256": view.get("vintage_sha256")}
+                "vintage_sha256": view.get("vintage_sha256"),
+                "boundaries": {
+                    "release": "the consensus last PUBLISHED before the actual was published: what the market expected",
+                    "available": "the consensus last RECEIVED here before the actual arrived here: what we could compute"}}
         if view["status"] != "RELEASED":
-            return {**base, "surprise": None, "reason": f"NO_ACTUAL_YET: the event is {view['status'].lower()}"}
+            return {**base, "release_surprise": None, "available_surprise": None,
+                    "reason": f"NO_ACTUAL_YET: the event is {view['status'].lower()}"}
         rows = self.known_at(as_of, event_key)
         actuals = [r for r in rows if r["kind"] in ("ACTUAL", "REVISION")]
+        consensus_rows = [r for r in rows if r.get("consensus") is not None]
         first_actual = actuals[0]
-        frozen = [r for r in rows if r.get("consensus") is not None and r["observed_at"] < first_actual["observed_at"]]
-        if not frozen:
-            return {**base, "surprise": None,
-                    "reason": ("NO_CONSENSUS_BEFORE_RELEASE: there is no expectation to be surprised against, and reporting "
-                               "zero would put an invented number where a missing one belongs")}
-        expected = frozen[-1]["consensus"]
+        release_pub = self._published(first_actual)
+        before_publication = [r for r in consensus_rows if self._published(r) < release_pub]
+        before_receipt = [r for r in consensus_rows if r["observed_at"] < first_actual["observed_at"]]
+        out = {**base,
+               "release_actual": first_actual["actual"],
+               "release_actual_published_at": release_pub.isoformat(),
+               "unit": first_actual.get("unit"), "period": first_actual.get("period"),
+               "release_surprise": None, "available_surprise": None}
         current = actuals[-1]
-        if frozen[-1].get("unit") != current.get("unit") or frozen[-1].get("period") != current.get("period"):
-            raise CalendarRefusal(
-                f"INCOMPARABLE_SERIES: {event_key} consensus is {frozen[-1].get('unit')}/{frozen[-1].get('period')} and the "
-                f"actual is {current.get('unit')}/{current.get('period')}")
-        raw = current["actual"] - expected
-        out = {**base, "surprise": raw, "actual": current["actual"], "consensus": expected,
-               "consensus_observed_at": frozen[-1]["observed_at"].isoformat(),
-               "actual_kind": current["kind"], "unit": current.get("unit"), "period": current.get("period"),
-               "reading": ("the consensus is the last one observed strictly BEFORE the first actual arrived; a later "
-                           "consensus is not what anyone was surprised against")}
+        if current is not first_actual:
+            # a revision is new information about the same event; it never rewrites what the release surprised anyone by
+            out["revised_actual"] = current["actual"]
+            out["revised_actual_kind"] = current["kind"]
+            out["revised_observed_at"] = current["observed_at"].isoformat()
+        for label, picked in (("release", before_publication), ("available", before_receipt)):
+            if not picked:
+                out[f"{label}_reason"] = ("NO_CONSENSUS_BEFORE_THE_BOUNDARY: there is no expectation to be surprised "
+                                          "against, and reporting zero would put an invented number where a missing one "
+                                          "belongs")
+                continue
+            chosen = picked[-1]
+            if chosen.get("unit") != first_actual.get("unit") or chosen.get("period") != first_actual.get("period"):
+                raise CalendarRefusal(
+                    f"INCOMPARABLE_SERIES: {event_key} consensus is {chosen.get('unit')}/{chosen.get('period')} and the "
+                    f"actual is {first_actual.get('unit')}/{first_actual.get('period')}")
+            out[f"{label}_consensus"] = chosen["consensus"]
+            out[f"{label}_consensus_published_at"] = self._published(chosen).isoformat()
+            out[f"{label}_consensus_observed_at"] = chosen["observed_at"].isoformat()
+            out[f"{label}_surprise"] = first_actual["actual"] - chosen["consensus"]
+        if "revised_actual" in out and out.get("release_consensus") is not None:
+            out["revision_surprise"] = current["actual"] - out["release_consensus"]
+            out["revision_surprise_reading"] = ("the revised value against the SAME pre-release expectation; it is a "
+                                                "different quantity from the release surprise, not an update of it")
         if scale is None:
             out["standardized"] = None
             out["standardized_reason"] = "NO_SCALE_SUPPLIED"
@@ -237,12 +296,15 @@ class PointInTimeCalendar:
             out["standardized_reason"] = ("NON_POSITIVE_RESIDUAL_SCALE: dividing by it would be infinite or negative, and "
                                           "neither is a standardized surprise")
             return out
-        out["standardized"] = raw / scale
         out["scale"] = scale
+        out["standardized"] = (out["release_surprise"] / scale) if out["release_surprise"] is not None else None
+        out["standardized_boundary"] = "release"
         return out
 
 
 def availability_checked(arrival, *, historical_availability):
+    """Kept for callers that ask the question directly. The rule itself now lives on the ingestion path, where it cannot be
+    skipped: `PointInTimeCalendar.add` archives an UNKNOWN row instead of admitting it."""
     """CAL09: point-in-time use requires knowing WHEN this became knowable. Unknown availability keeps the archive row and
     refuses the point-in-time use, rather than assuming the timestamp on the file is when somebody could have seen it."""
     if historical_availability not in ("KNOWN", "UNKNOWN"):
