@@ -9,6 +9,7 @@ from pathlib import Path
 import unicodedata
 import uuid
 
+from . import questions as questions_module
 from .regimes import HierarchicalRegimes, validate_rows
 
 
@@ -42,8 +43,10 @@ REFERENCE_WORDS = ("regimes", "regimenes", "reg\u00edmenes", "hierarchical regim
 
 class Provider:
     name = NAME
+    area = questions_module.AREA
 
     def __init__(self):
+        self._loaded = {}
         paths = []
         demo_dir = os.environ.get("FEATURE_ENG_REGIMES_DEMO_DIR")
         explicit = os.environ.get("FEATURE_ENG_REGIMES_STATE_PATH")
@@ -103,6 +106,38 @@ class Provider:
 
     def chat_examples(self):
         return [example for example in chat_examples() if example["config"]["state"] in self._known_states]
+
+    # --- the workbench's question envelope --------------------------------------------------------------------------
+
+    def question_types(self):
+        return questions_module.question_types()
+
+    def answer_questions(self, state, questions, data, as_of):
+        """Answer named questions about supplied rows under the retained reference; see `questions.py` for the rules.
+
+        The reference is `state['state_ref']` when the caller names one, else the single operator-configured state.
+        Either way it must be a state this provider may load; a request that names another is refused, question by
+        question, rather than served by the reference there happens to be."""
+        try:
+            state_ref = self._state_ref_for(state)
+            loaded = self._loaded.get(state_ref) or self.load(state_ref)
+            self._loaded[state_ref] = loaded
+        except ValueError as exc:
+            return {name: questions_module.refusal(questions_module.STATE_REQUIRED, str(exc), q["type"])
+                    for name, q in questions.items()}
+        return questions_module.answer_questions(loaded["model"], state_ref, state, questions, data, as_of)
+
+    def _state_ref_for(self, state):
+        named = state.get("state_ref") if isinstance(state, dict) else None
+        if named is not None:
+            if not isinstance(named, str) or str(Path(named).expanduser().resolve()) not in self._known_states:
+                raise ValueError(f"state_ref {named!r} is not an operator-configured state; known: "
+                                 f"{list(self._known_states)}")
+            return str(Path(named).expanduser().resolve())
+        if len(self._known_states) != 1:
+            raise ValueError(f"state.state_ref must name one of the operator-configured states "
+                             f"{list(self._known_states)}")
+        return self._known_states[0]
 
     def chat_slots(self):
         """Declare a vocabulary only for a reference this provider is actually allowed to load."""
