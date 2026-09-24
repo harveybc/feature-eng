@@ -5,6 +5,11 @@ number is published, and when it reaches us -- and that later facts about the sa
 built from "the latest value" is built from information nobody had, and it will look excellent in a backtest for exactly that
 reason.
 
+Those clocks also disagree about ORDER, not only about lateness. Delivery order is a property of our plumbing -- a retry, a
+slow feed, a backfill, a revision that overtakes the original on another route -- so anything the source's chronology governs
+(which number was the release, which consensus stood when it came out) is ordered by publication here, and only what WE could
+see is ordered by receipt.
+
 This module stores ARRIVALS and answers questions AS OF a decision clock. Nothing is overwritten: a revision is a new arrival
 that supersedes an earlier one for later views and leaves every earlier view exactly as it was. A surprise computed before a
 release stays frozen at what was known then, however the consensus moves afterwards.
@@ -17,6 +22,8 @@ What it refuses rather than guesses, each because the alternative silently inven
 * a missing consensus, or a historical residual scale of zero -- there is no standardized surprise to report, and reporting
   zero or infinity would put an invented number where a missing one belongs;
 * an event whose historical availability is unknown -- the archive row is kept, and point-in-time use is refused;
+* an arrival with no publication clock -- it is named and excluded from the release boundary, because our receipt is only an
+  upper bound on when its source put it out, and substituting one for the other moves rows in and out of that boundary;
 * a computation that finishes after the decision deadline -- the result is stale, not backdated.
 
 Nothing here reads the network, scrapes a provider or infers a release calendar from prices.
@@ -224,21 +231,46 @@ class PointInTimeCalendar:
         return out
 
     # --- the surprise -------------------------------------------------------------------------------------------
+    #: CL21-b: why a row can be barred from the release boundary. It is named and reported, because a row that disappears
+    #: without a reason is indistinguishable from a row nobody ever sent.
+    MISSING_PUBLICATION_CLOCK = (
+        "MISSING_PUBLICATION_CLOCK: this arrival never declared when its source published it, and our receipt is not that "
+        "instant -- it is only an upper bound on it. Substituting one would place the row inside or outside the release "
+        "window by guesswork, and the guess would be invisible in the number that comes out")
+
     @staticmethod
-    def _published(arrival):
-        """When the world could have known it. A row without its own publication clock falls back to when we received it,
-        which is the conservative direction: never earlier than it truly was."""
-        return arrival.get("published_at") or arrival["observed_at"]
+    def _publication_order(arrival):
+        """Deterministic order for the RELEASE boundary: the source's clock, never ours.
+
+        `sequence` separates two rows published at the same instant; the content digest separates what is left, so that the
+        same facts delivered in two orders cannot produce two different answers. The digest is a tiebreak for
+        reproducibility, not a claim about which of them the source published first.
+        """
+        return (arrival["published_at"],
+                arrival["sequence"] if arrival["sequence"] is not None else -1,
+                arrival["arrival_sha256"])
+
+    def _excluded_from_release(self, rows):
+        """CL21-b: every arrival that carries no publication clock, reported rather than silently skipped."""
+        return [{"arrival_sha256": r["arrival_sha256"], "kind": r["kind"],
+                 "observed_at": r["observed_at"].isoformat(),
+                 "consensus": r.get("consensus"), "actual": r.get("actual"),
+                 "reason": self.MISSING_PUBLICATION_CLOCK}
+                for r in rows if not r.get("published_at")]
 
     def surprise(self, event_key, as_of, *, scale=None):
         """Two boundaries, reported side by side and never merged.
 
-        `release_surprise` is what the market was surprised by: the actual against the last consensus PUBLISHED before the
-        actual was published. `available_surprise` is what our own system could have computed: the same actual against the
-        last consensus it had RECEIVED by the time the actual reached it.
+        `release_surprise` is what the market was surprised by: the first actual its source PUBLISHED, against the last
+        consensus PUBLISHED before it. `available_surprise` is what our own system could have computed: the first actual
+        that REACHED us, against the last consensus it had RECEIVED by then.
 
-        They differ exactly when a consensus is published after a release and arrives before we see the number -- and then
-        the difference matters, because treating the later one as the expectation turns a real surprise into zero.
+        They differ exactly when our plumbing disagrees with the source -- a slow feed, a retry, a backfill, a revision that
+        overtakes the original -- and then the difference matters, because reading one boundary with the other's ordering
+        turns a real surprise into zero, or hands a revision the name of the release.
+
+        The two anchor on different arrivals on purpose. `view` stays ordered by receipt throughout, because it answers what
+        was knowable here; only the release lineage follows publication, because it answers what the source had said.
         """
         view = self.view(event_key, as_of)
         base = {"event_key": event_key, "as_of": view["as_of"], "status": view["status"],
@@ -249,41 +281,66 @@ class PointInTimeCalendar:
         if view["status"] != "RELEASED":
             return {**base, "release_surprise": None, "available_surprise": None,
                     "reason": f"NO_ACTUAL_YET: the event is {view['status'].lower()}"}
-        rows = self.known_at(as_of, event_key)
+        rows = self.known_at(as_of, event_key)                      # sorted by RECEIPT, which is what `known_at` means
         actuals = [r for r in rows if r["kind"] in ("ACTUAL", "REVISION")]
         consensus_rows = [r for r in rows if r.get("consensus") is not None]
-        first_actual = actuals[0]
-        release_pub = self._published(first_actual)
-        before_publication = [r for r in consensus_rows if self._published(r) < release_pub]
-        before_receipt = [r for r in consensus_rows if r["observed_at"] < first_actual["observed_at"]]
+        # CL21-c: the release is the earliest number the SOURCE published; a revision is a later-published one, whatever
+        # order the two reached us. Ordering this lineage by arrival labelled a revision that overtook a delayed original
+        # as the release, and the original as its revision -- the two names swapped, with both values intact.
+        published_actuals = sorted([r for r in actuals if r.get("published_at")], key=self._publication_order)
+        release_actual = published_actuals[0] if published_actuals else None
+        latest_published_actual = published_actuals[-1] if published_actuals else None
+        available_actual = actuals[0]                               # the first one we could see, however late its source
+        reference = release_actual if release_actual is not None else available_actual
         out = {**base,
-               "release_actual": first_actual["actual"],
-               "release_actual_published_at": release_pub.isoformat(),
-               "unit": first_actual.get("unit"), "period": first_actual.get("period"),
-               "release_surprise": None, "available_surprise": None}
-        current = actuals[-1]
-        if current is not first_actual:
+               "release_actual": release_actual["actual"] if release_actual is not None else None,
+               "available_actual": available_actual["actual"],
+               "available_actual_observed_at": available_actual["observed_at"].isoformat(),
+               "unit": reference.get("unit"), "period": reference.get("period"),
+               "release_surprise": None, "available_surprise": None,
+               "release_boundary_excluded": self._excluded_from_release(actuals + consensus_rows)}
+        if release_actual is not None:
+            out["release_actual_published_at"] = release_actual["published_at"].isoformat()
+        else:
+            # CL21-b: with no release instant there is no window to pick an expectation from. Using our receipt would
+            # stretch the window forward and admit a consensus published after the number nobody had seen yet.
+            out["release_reason"] = self.MISSING_PUBLICATION_CLOCK
+        if latest_published_actual is not None and latest_published_actual is not release_actual:
             # a revision is new information about the same event; it never rewrites what the release surprised anyone by
-            out["revised_actual"] = current["actual"]
-            out["revised_actual_kind"] = current["kind"]
-            out["revised_observed_at"] = current["observed_at"].isoformat()
-        for label, picked in (("release", before_publication), ("available", before_receipt)):
+            out["revised_actual"] = latest_published_actual["actual"]
+            out["revised_actual_kind"] = latest_published_actual["kind"]
+            out["revised_published_at"] = latest_published_actual["published_at"].isoformat()
+            out["revised_observed_at"] = latest_published_actual["observed_at"].isoformat()
+        # CL21-a: the release candidates are ordered by PUBLICATION. Taking the last to arrive let a stale consensus
+        # delivered late stand as "what the market expected" over a newer one its source had already published.
+        release_candidates = (sorted([r for r in consensus_rows
+                                      if r.get("published_at") and r["published_at"] < release_actual["published_at"]],
+                                     key=self._publication_order)
+                              if release_actual is not None else [])
+        # the available candidates keep receipt order, and a missing publication clock does not disqualify them: we did
+        # have the row in hand, whenever its source had put it out.
+        available_candidates = [r for r in consensus_rows if r["observed_at"] < available_actual["observed_at"]]
+        for label, picked, anchor in (("release", release_candidates, release_actual),
+                                      ("available", available_candidates, available_actual)):
+            if anchor is None:
+                continue                                            # the reason is already reported, and it is not this one
             if not picked:
                 out[f"{label}_reason"] = ("NO_CONSENSUS_BEFORE_THE_BOUNDARY: there is no expectation to be surprised "
                                           "against, and reporting zero would put an invented number where a missing one "
                                           "belongs")
                 continue
             chosen = picked[-1]
-            if chosen.get("unit") != first_actual.get("unit") or chosen.get("period") != first_actual.get("period"):
+            if chosen.get("unit") != anchor.get("unit") or chosen.get("period") != anchor.get("period"):
                 raise CalendarRefusal(
                     f"INCOMPARABLE_SERIES: {event_key} consensus is {chosen.get('unit')}/{chosen.get('period')} and the "
-                    f"actual is {first_actual.get('unit')}/{first_actual.get('period')}")
+                    f"actual is {anchor.get('unit')}/{anchor.get('period')}")
+            published = chosen.get("published_at")
             out[f"{label}_consensus"] = chosen["consensus"]
-            out[f"{label}_consensus_published_at"] = self._published(chosen).isoformat()
+            out[f"{label}_consensus_published_at"] = published.isoformat() if published else None
             out[f"{label}_consensus_observed_at"] = chosen["observed_at"].isoformat()
-            out[f"{label}_surprise"] = first_actual["actual"] - chosen["consensus"]
+            out[f"{label}_surprise"] = anchor["actual"] - chosen["consensus"]
         if "revised_actual" in out and out.get("release_consensus") is not None:
-            out["revision_surprise"] = current["actual"] - out["release_consensus"]
+            out["revision_surprise"] = latest_published_actual["actual"] - out["release_consensus"]
             out["revision_surprise_reading"] = ("the revised value against the SAME pre-release expectation; it is a "
                                                 "different quantity from the release surprise, not an update of it")
         if scale is None:
@@ -299,8 +356,9 @@ class PointInTimeCalendar:
         out["scale"] = scale
         out["standardized"] = (out["release_surprise"] / scale) if out["release_surprise"] is not None else None
         out["standardized_boundary"] = "release"
+        if out["standardized"] is None:
+            out["standardized_reason"] = "NO_RELEASE_SURPRISE_TO_STANDARDIZE: see release_reason"
         return out
-
 
 def availability_checked(arrival, *, historical_availability):
     """Kept for callers that ask the question directly. The rule itself now lives on the ingestion path, where it cannot be

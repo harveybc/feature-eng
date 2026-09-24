@@ -21,6 +21,10 @@ def arrival(kind, observed_at, **over):
     row = {"schema": SCHEMA, "event_key": "US.CPI.2026-02", "kind": kind, "observed_at": observed_at,
            "event_time": "2026-03-03T13:30:00Z", "unit": "percent_yoy", "period": "2026-02",
            # CL16: every arrival declares whether its historical availability was verified; the rule is on the path now
+           # CL21: and every arrival declares its PUBLICATION clock. These fixtures always meant "published when received";
+           # the module used to infer that for them, which is the guess CL21-b removed, so the fixture states it instead.
+           # A case about publication and receipt differing overrides it, as CAL02 does.
+           "published_at": observed_at,
            "historical_availability": "KNOWN"}
     row.update(over)
     return row
