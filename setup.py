@@ -6,7 +6,11 @@ setup(
     packages=find_packages(),
     entry_points={
         'console_scripts': [
-            'feature_eng=app.main:main'
+            'feature_eng=app.main:main',
+            'feature-eng-regimes=feature_eng_m5phet.cli:main'
+        ],
+        'm5phet.providers': [
+            'feature-eng-hierarchical-regimes=feature_eng_m5phet.provider:Provider'
         ],
         'feature_eng.plugins': [
             'default=app.plugins.tech_indicator:Plugin',
@@ -27,6 +31,7 @@ setup(
             'pytest',
             'pdoc3'
     ],
+    extras_require={'m5phet': ['scikit-learn>=1.5,<2', 'joblib>=1.4,<2']},
     author='Harvey Bastidas',
     author_email='your.email@example.com',
     description='aa.'

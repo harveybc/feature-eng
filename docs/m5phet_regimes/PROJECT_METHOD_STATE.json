@@ -1,0 +1,30 @@
+{
+  "initiative": "m5phet_hierarchical_regimes",
+  "method": "portable test-led-data-centric-development checklist",
+  "current_stage": "S14_RELEASE_OPERATION",
+  "stages": {
+    "S0_DISCOVERY": "passed", "S1_REQUIREMENTS": "passed",
+    "S2_USE_CASES": "passed", "S3_ACCEPTANCE_TEST_DESIGN": "passed",
+    "S4_ARCHITECTURE": "passed", "S5_SYSTEM_TEST_DESIGN": "passed",
+    "S6_COMPONENT_DESIGN": "passed", "S7_INTEGRATION_TEST_DESIGN": "passed",
+    "S8_UNIT_TEST_DESIGN": "passed", "S9_UNIT_IMPLEMENTATION": "passed",
+    "S10_INTEGRATION_VERIFICATION": "passed_provider_hooks_runtime_request_and_entrypoint",
+    "S11_SYSTEM_VERIFICATION": "passed",
+    "S12_ALPHA_ACCEPTANCE": "passed_local_engineering_only", "S13_BETA_ACCEPTANCE": "deferred",
+    "S14_RELEASE_OPERATION": "local_handoff_ready"
+  },
+  "reviewer": "implementation agent; no independent review claimed",
+  "artifacts": ["DESIGN.md", "TRACEABILITY.md", "README.md", "EVIDENCE.md"],
+  "evidence": ["EVIDENCE.md", "../../tests/test_m5phet_regimes.py", "uncommitted agent_out/m5phet-demo"],
+  "accepted_requirements": ["R1", "R2", "R3_provider_scope", "R4", "R5_engineering_only"],
+  "next_allowed_actions": ["M5PHET owner implements hierarchical_regimes validator", "owner verifies web dispatch using explicit pre-fitted development example"],
+  "blocked_actions": ["scientific or market-performance claims", "M5PHET edits", "calendar edits"],
+  "open_decisions": ["M5PHET owner supplies hierarchical_regimes runtime payload validator"],
+  "history": [
+    {"stage": "S8_UNIT_TEST_DESIGN", "event": "Read-only discovery and top-down designs completed before implementation"},
+    {"stage": "S9_UNIT_IMPLEMENTATION", "event": "Observed missing-module red tests; implemented and fixed reload identity via canonical learned values"},
+    {"stage": "S10_INTEGRATION_VERIFICATION", "event": "Installed isolated entrypoint, validated actual draft2 request; runtime payload validator remains main-agent scope"},
+    {"stage": "S12_ALPHA_ACCEPTANCE", "event": "CPU-only real OHLC explicit fit/reload demo completed in 1.015 seconds; chat config aligned to active web engine"},
+    {"stage": "S14_RELEASE_OPERATION", "event": "Local provider ready; scientific beta and runtime/web acceptance not claimed"}
+  ]
+}
