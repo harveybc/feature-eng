@@ -5,6 +5,7 @@ from datetime import datetime
 import json
 import os
 from pathlib import Path
+import unicodedata
 import uuid
 
 from .regimes import HierarchicalRegimes, validate_rows
@@ -13,20 +14,36 @@ from .regimes import HierarchicalRegimes, validate_rows
 NAME = "feature-eng-hierarchical-regimes"
 UNCERTAINTY = "UNCALIBRATED_REFERENCE_DISTANCE"
 SUPPORTED = dict(operation="infer", family="representation_unsupervised", output_kind="hierarchical_regimes")
-PROMPTS = ("assign hierarchical regimes", "assign regimes", "show hierarchical regimes")
+PROMPTS = ("assign hierarchical regimes", "assign regimes", "show hierarchical regimes",
+           "asigna regimenes", "asignar regimenes", "asigna regimenes jerarquicos",
+           "asignar regimenes jerarquicos", "muestra regimenes jerarquicos", "mostrar regimenes jerarquicos")
 
 
 class Provider:
     name = NAME
 
+    def __init__(self):
+        paths = []
+        demo_dir = os.environ.get("FEATURE_ENG_REGIMES_DEMO_DIR")
+        explicit = os.environ.get("FEATURE_ENG_REGIMES_STATE_PATH")
+        if demo_dir:
+            paths.append(Path(demo_dir).expanduser() / "reference.joblib")
+        if explicit:
+            paths.append(Path(explicit).expanduser())
+        # Snapshot operator configuration to agree with the runtime's cached capabilities.
+        self._known_states = tuple(sorted({str(path.resolve()) for path in paths}))
+
     def capabilities(self):
         return dict(provider=self.name, operations=["infer"], families=[SUPPORTED["family"]],
                     output_kinds=[SUPPORTED["output_kind"]], uncertainty_methods=[UNCERTAINTY],
-                    supported=[dict(SUPPORTED)], requires_fitted_state=True,
+                    supported=[dict(SUPPORTED)], requires_fitted_state=True, known_states=list(self._known_states),
                     fit_command="feature-eng-regimes fit", input_schema="flat numeric records with unique row_id",
                     resource_limits={"reference_rows": 2048, "query_rows": 10000, "features": 64})
 
     def load(self, state_ref):
+        if (not isinstance(state_ref, str) or state_ref not in self._known_states
+                or str(Path(state_ref).resolve()) != state_ref):
+            raise ValueError("state_ref must be an operator-configured canonical state path")
         model = HierarchicalRegimes.load(state_ref)
         return dict(state_ref=state_ref, digest=model.model_version, model_sha256=model.model_version,
                     task_id=model.metadata["task_id"], model=model)
@@ -64,12 +81,14 @@ class Provider:
         return chat_request(prompt, data, config)
 
     def chat_examples(self):
-        return chat_examples()
+        return [example for example in chat_examples() if example["config"]["state"] in self._known_states]
 
 
 def chat_request(prompt, data, config):
     """Translate a bounded command to a typed request, without loading or fitting."""
-    if not isinstance(prompt, str) or " ".join(prompt.lower().split()) not in PROMPTS:
+    normalized = "" if not isinstance(prompt, str) else " ".join(
+        "".join(c for c in unicodedata.normalize("NFD", prompt.casefold()) if not unicodedata.combining(c)).split())
+    if normalized not in PROMPTS:
         raise ValueError(f"unsupported prompt; accepted commands: {', '.join(PROMPTS)}")
     required = {"provider", "family", "output_kind", "state", "as_of", "parameters"}
     if not isinstance(config, dict) or not required <= set(config) or set(config) - required - {"input"}:

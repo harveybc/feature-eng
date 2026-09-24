@@ -39,3 +39,18 @@ changed. `git diff --check` passed for the implementation worktree.
 
 Engineering alpha only. No financial performance, causal identification,
 governance acceptance, public confirmation, domain revalidation or broker access.
+
+## Review Hardening
+
+Operator-state allowlist and Spanish command regressions were added first:
+8 failed, 40 passed. After implementation: 48 passed in 2.53 seconds, including
+the explicit demo. Tests replace joblib.load with a failing sentinel to establish
+that rejected paths never reach deserialization. Both configured state sources
+load real fitted state; capability snapshots cannot be expanded by env changes
+or modifying a returned list. A retargeted symlink refuses before loading.
+
+Read-only check against the now-extended active M5PHET runtime: the configured
+demo with Spanish prompt returns OK. Changing fitted_state_ref to an unconfigured
+path returns MODEL_NOT_FITTED before invoking a sentinel provider.load. Thus the
+earlier missing-validator limitation above has been resolved by the M5PHET owner;
+no M5PHET file was edited here. Browser acceptance is still the main agent's lane.

@@ -33,6 +33,20 @@ CUDA_VISIBLE_DEVICES='' OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
 export FEATURE_ENG_REGIMES_DEMO_DIR="$PWD/agent_out/regimes-demo"
 ```
 
+The provider admits only `FEATURE_ENG_REGIMES_DEMO_DIR/reference.joblib` and,
+optionally, one additional operator-configured artifact:
+
+```bash
+export FEATURE_ENG_REGIMES_STATE_PATH=/trusted/local/reference.joblib
+```
+
+Set these variables before provider discovery/service startup. `known_states`
+is a snapshot of their canonical absolute paths; with neither set, it is empty.
+Recreate/register the provider after configuration changes. Requests must use
+exactly one of these advertised paths. `load()` rejects unknown paths and
+retargeted symlinks before invoking joblib, even when called outside the runtime.
+Neither directory-wide trust nor a request parameter can extend this allowlist.
+
 Use a fresh output directory: files are never overwritten. The first 40 rows of
 the existing 4h EURUSD fixture supply real structured measurements. Candle body
 and high-low range are in pipettes (price difference times 100000); no forward
@@ -73,8 +87,11 @@ level; limits are 2048 reference rows, 10000 query rows and 64 features.
 
 ## Chat and Runtime Handoff
 
-Accepted case-insensitive commands (whitespace normalized): `assign hierarchical
-regimes`, `assign regimes`, `show hierarchical regimes`. Unknown language refuses.
+Accepted case-insensitive commands (whitespace/accents normalized): `assign
+hierarchical regimes`, `assign regimes`, `show hierarchical regimes`, `asigna
+regimenes`, `asignar regimenes`, `asigna regimenes jerarquicos`, `asignar regimenes
+jerarquicos`, `muestra regimenes jerarquicos`, `mostrar regimenes jerarquicos`.
+Unknown language and extra instructions refuse.
 Use `Provider().chat_request(prompt, data, config)` with the same rows object and:
 
 ```json
@@ -127,8 +144,10 @@ no automatic abstention threshold. The consumer decides whether distance is
 acceptable. Digest checks are local integrity checks, not authenticated provenance.
 
 State files use joblib/pickle and can execute code during loading. Only an
-operator's trusted, locally generated artifacts may be configured; do not allow
-untrusted uploads or arbitrary chat-controlled artifact paths into a service.
+operator's trusted, locally generated artifacts may be configured. The allowlist
+is not a pickle sandbox: protect admitted files and their directories from
+untrusted writers, replacement races and uploads. Direct standalone CLI/model
+loading remains an explicit trusted-operator operation, not a service endpoint.
 
 ## Verification
 

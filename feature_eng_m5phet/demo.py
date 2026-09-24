@@ -52,6 +52,8 @@ def main(argv=None):
         {"provider": Provider.name, "family": "representation_unsupervised", "output_kind": "hierarchical_regimes",
          "state": receipt["state_ref"], "parameters": {"model_version": receipt["model_version"],
          "task_id": "ohlc-demo-regimes-v1"}, "as_of": (clocks[-1] + timedelta(hours=4)).isoformat()})
+    # This explicit CLI just generated the trusted artifact; admit it for its local check.
+    os.environ["FEATURE_ENG_REGIMES_DEMO_DIR"] = str(output)
     provider = Provider()
     result = provider.infer(request, provider.load(receipt["state_ref"]))
     with (output / "assignments.json").open() as stream:

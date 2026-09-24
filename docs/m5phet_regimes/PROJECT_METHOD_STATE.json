@@ -16,15 +16,17 @@
   "reviewer": "implementation agent; no independent review claimed",
   "artifacts": ["DESIGN.md", "TRACEABILITY.md", "README.md", "EVIDENCE.md"],
   "evidence": ["EVIDENCE.md", "../../tests/test_m5phet_regimes.py", "uncommitted agent_out/m5phet-demo"],
-  "accepted_requirements": ["R1", "R2", "R3_provider_scope", "R4", "R5_engineering_only"],
-  "next_allowed_actions": ["M5PHET owner implements hierarchical_regimes validator", "owner verifies web dispatch using explicit pre-fitted development example"],
+  "accepted_requirements": ["R1", "R2", "R3_provider_scope", "R4", "R5_engineering_only", "R6"],
+  "next_allowed_actions": ["operator configures admitted state paths before provider registration", "owner verifies web dispatch using explicit pre-fitted development example"],
   "blocked_actions": ["scientific or market-performance claims", "M5PHET edits", "calendar edits"],
-  "open_decisions": ["M5PHET owner supplies hierarchical_regimes runtime payload validator"],
+  "open_decisions": ["M5PHET owner verifies browser acceptance in its fresh numerical environment"],
   "history": [
     {"stage": "S8_UNIT_TEST_DESIGN", "event": "Read-only discovery and top-down designs completed before implementation"},
     {"stage": "S9_UNIT_IMPLEMENTATION", "event": "Observed missing-module red tests; implemented and fixed reload identity via canonical learned values"},
     {"stage": "S10_INTEGRATION_VERIFICATION", "event": "Installed isolated entrypoint, validated actual draft2 request; runtime payload validator remains main-agent scope"},
     {"stage": "S12_ALPHA_ACCEPTANCE", "event": "CPU-only real OHLC explicit fit/reload demo completed in 1.015 seconds; chat config aligned to active web engine"},
-    {"stage": "S14_RELEASE_OPERATION", "event": "Local provider ready; scientific beta and runtime/web acceptance not claimed"}
+    {"stage": "S14_RELEASE_OPERATION", "event": "Local provider ready; scientific beta and runtime/web acceptance not claimed"},
+    {"stage": "S8_UNIT_TEST_DESIGN", "event": "Review R6: allowlist/Spanish regression tests run red (8 failed, 40 passed) before changes"},
+    {"stage": "S14_RELEASE_OPERATION", "event": "R6 implemented: 48 tests pass; active runtime returns OK for configured state and MODEL_NOT_FITTED before load for foreign state"}
   ]
 }

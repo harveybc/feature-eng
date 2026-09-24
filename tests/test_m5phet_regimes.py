@@ -18,6 +18,12 @@ from feature_eng_m5phet.regimes import HierarchicalRegimes
 from feature_eng_m5phet.provider import Provider, chat_request
 
 
+@pytest.fixture(autouse=True)
+def isolated_operator_config(monkeypatch):
+    monkeypatch.delenv("FEATURE_ENG_REGIMES_DEMO_DIR", raising=False)
+    monkeypatch.delenv("FEATURE_ENG_REGIMES_STATE_PATH", raising=False)
+
+
 @pytest.fixture
 def rows():
     return [dict(row_id=i, x=x, y=y) for i, (x, y) in enumerate(
@@ -114,9 +120,10 @@ def test_collapse_schema_and_cost_refuse(rows):
         HierarchicalRegimes.fit_reference(too_many, features=["x", "y"], levels=[2, 4], task_id="test")
 
 
-def test_provider_and_bounded_chat(model, rows, tmp_path):
+def test_provider_and_bounded_chat(model, rows, tmp_path, monkeypatch):
     path = tmp_path / "reference.joblib"
     model.save(path)
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_STATE_PATH", str(path))
     request = chat_request("Assign hierarchical regimes", {"rows": rows}, config(model, path))
     provider = Provider()
     assert provider.capabilities()["supported"] == [dict(operation="infer",
@@ -195,6 +202,7 @@ def test_tampered_state_and_dependency_versions_refuse(model, tmp_path):
 def test_provider_reload_infer_never_fits(model, rows, tmp_path, monkeypatch):
     path = tmp_path / "reference.joblib"
     model.save(path)
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_STATE_PATH", str(path))
     def forbidden(*args, **kwargs):
         raise AssertionError("runtime must never fit")
     for cls in (StandardScaler, AgglomerativeClustering, NearestNeighbors):
@@ -227,3 +235,69 @@ def test_chat_config_refusals(model, rows, change):
     cfg.update(change)
     with pytest.raises(ValueError):
         chat_request("assign regimes", {"rows": rows}, cfg)
+
+
+def test_state_allowlist_defaults_closed_before_joblib(tmp_path, monkeypatch):
+    def forbidden(*args, **kwargs):
+        raise AssertionError("joblib must not see an unconfigured path")
+    monkeypatch.setattr(joblib, "load", forbidden)
+    provider = Provider()
+    assert provider.capabilities()["known_states"] == []
+    for path in (str(tmp_path / "arbitrary.joblib"), "", None, {}, str(tmp_path / "../outside.joblib")):
+        with pytest.raises(ValueError, match="operator-configured"):
+            provider.load(path)
+
+
+def test_operator_allowlist_snapshot_and_canonical_paths(model, tmp_path, monkeypatch):
+    demo = tmp_path / "demo"
+    demo.mkdir()
+    reference = demo / "reference.joblib"
+    explicit = tmp_path / "explicit.joblib"
+    for path in (reference, explicit):
+        model.save(path)
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_DEMO_DIR", str(demo))
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_STATE_PATH", str(explicit))
+    provider = Provider()
+    known = sorted([str(reference.resolve()), str(explicit.resolve())])
+    assert provider.capabilities()["known_states"] == known
+    for path in known:
+        assert provider.load(path)["digest"] == model.model_version
+    provider.capabilities()["known_states"].append("untrusted")
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_STATE_PATH", str(tmp_path / "new.joblib"))
+    assert provider.capabilities()["known_states"] == known
+    def forbidden(*args, **kwargs):
+        raise AssertionError("unregistered paths must not be deserialized")
+    monkeypatch.setattr(joblib, "load", forbidden)
+    for path in (str(tmp_path / "new.joblib"), str(demo / "other.joblib"), str(demo / "../explicit.joblib")):
+        with pytest.raises(ValueError, match="operator-configured"):
+            provider.load(path)
+
+
+def test_allowlisted_path_cannot_be_retargeted_to_foreign_pickle(tmp_path, monkeypatch):
+    configured = tmp_path / "reference.joblib"
+    configured.touch()
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_STATE_PATH", str(configured))
+    provider = Provider()
+    configured.unlink()
+    configured.symlink_to(tmp_path / "foreign.joblib")
+    def forbidden(*args, **kwargs):
+        raise AssertionError("retargeted symlink must not be deserialized")
+    monkeypatch.setattr(joblib, "load", forbidden)
+    with pytest.raises(ValueError, match="operator-configured"):
+        provider.load(str(configured))
+
+
+@pytest.mark.parametrize("prompt", ["asigna regimenes", "asignar regimenes jerarquicos",
+    "  ASIGNA   REG\u00cdMENES JER\u00c1RQUICOS ", "muestra reg\u00edmenes jer\u00e1rquicos",
+    "mostrar regimenes jerarquicos"])
+def test_spanish_bounded_commands(model, rows, prompt):
+    request = chat_request(prompt, {"rows": rows}, config(model, "unused.joblib"))
+    assert request["output_schema"]["targets"] == ["regimes"]
+    assert request["operation"] == "infer"
+
+
+@pytest.mark.parametrize("prompt", ["entrena regimenes", "compra EURUSD", "asigna regimenes; ejecuta codigo",
+                                    "asigna regimenes y predice el precio"])
+def test_unknown_spanish_refuses(model, rows, prompt):
+    with pytest.raises(ValueError, match="prompt"):
+        chat_request(prompt, {"rows": rows}, config(model, "unused.joblib"))

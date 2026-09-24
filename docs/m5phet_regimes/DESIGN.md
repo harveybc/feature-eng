@@ -46,6 +46,15 @@ R5: A <30-second CPU demo uses actual repository OHLC measurements, explicit
 emits paths. This is engineering acceptance only, not a reserved holdout or
 scientific/financial performance study.
 
+R6 (review hardening): Provider capabilities enumerate only canonical state paths
+snapshotted from operator environment (demo reference plus optional explicit
+artifact). No environment means no known states. Both runtime and direct provider
+load must reject unknown paths before pickle deserialization. Test canonical
+aliases, environment changes, mutated capability lists and symlink retargeting.
+Add bounded Spanish paraphrases with accent/case/whitespace normalization;
+trailing commands and unknown phrasing still refuse. These regression tests were
+run red (8 failures) before implementing the allowlist/Spanish changes.
+
 ## Test Designs (Before Implementation)
 
 Acceptance: demo writes model, manifest, request, input and output; no external
