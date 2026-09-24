@@ -18,6 +18,12 @@ PROMPTS = ("assign hierarchical regimes", "assign regimes", "show hierarchical r
            "asigna regimenes", "asignar regimenes", "asigna regimenes jerarquicos",
            "asignar regimenes jerarquicos", "muestra regimenes jerarquicos", "mostrar regimenes jerarquicos")
 
+SLOT_NAMES = ("task_id", "model_version")
+
+#: ordinary ways a person names THIS reference, in both languages the bounded commands accept
+REFERENCE_WORDS = ("regimes", "regimenes", "reg\u00edmenes", "hierarchical regimes", "regimenes jerarquicos",
+                   "reg\u00edmenes jer\u00e1rquicos")
+
 
 class Provider:
     name = NAME
@@ -77,20 +83,57 @@ class Provider:
         return {"outputs": {"regimes": {"status": "OK", "uncertainty": UNCERTAINTY, "payload": payload}},
                 "population": population}
 
-    def chat_request(self, prompt, data, config):
-        return chat_request(prompt, data, config)
+    def chat_request(self, prompt, data, config, parameters=None):
+        return chat_request(prompt, data, config, parameters)
 
     def chat_examples(self):
         return [example for example in chat_examples() if example["config"]["state"] in self._known_states]
 
+    def chat_slots(self):
+        """Declare a vocabulary only for a reference this provider is actually allowed to load."""
+        directory = os.environ.get("FEATURE_ENG_REGIMES_DEMO_DIR")
+        if not directory:
+            return []
+        reference = Path(directory).expanduser() / "reference.joblib"
+        if not reference.is_file() or str(reference.resolve()) not in self._known_states:
+            return []
+        return chat_slots()
 
-def chat_request(prompt, data, config):
-    """Translate a bounded command to a typed request, without loading or fitting."""
+
+def _resolve_parameters(declared, resolved):
+    """Combine the operator's declared parameters with what the workbench resolved from a person's words.
+
+    A resolved value that disagrees with the operator's is refused BY NAME. There is one fitted reference here, so the
+    tempting failure is to serve it under whatever task or version was asked for; that would answer a different question
+    under the identity of this one."""
+    if not isinstance(resolved, dict):
+        raise ValueError("parameters must be a mapping of declared parameter names to values")
+    unknown = sorted(set(resolved) - set(SLOT_NAMES))
+    if unknown:
+        raise ValueError(f"undeclared parameters {unknown}; this provider declares {list(SLOT_NAMES)}")
+    merged = dict(declared) if isinstance(declared, dict) else {}
+    for name, value in resolved.items():
+        if name in merged and merged[name] != value:
+            raise ValueError(f"requested {name} {value!r} is not this fitted reference's {name} {merged[name]!r}")
+        merged[name] = value
+    return merged
+
+
+def chat_request(prompt, data, config, parameters=None):
+    """Translate a bounded command to a typed request, without loading or fitting.
+
+    `parameters`, when the workbench passes it, holds the values it resolved from the person's words against what
+    chat_slots declares. They do not override the operator's configuration; they are merged into it and a disagreement
+    is refused. Called without them, this is exactly the previous path."""
     normalized = "" if not isinstance(prompt, str) else " ".join(
         "".join(c for c in unicodedata.normalize("NFD", prompt.casefold()) if not unicodedata.combining(c)).split())
     if normalized not in PROMPTS:
         raise ValueError(f"unsupported prompt; accepted commands: {', '.join(PROMPTS)}")
     required = {"provider", "family", "output_kind", "state", "as_of", "parameters"}
+    if parameters is not None and isinstance(config, dict):
+        # a config that declares no parameters may still be completed by resolved ones; a config that declares them
+        # governs, and the resolved values must agree with it
+        config = {**config, "parameters": _resolve_parameters(config.get("parameters"), parameters)}
     if not isinstance(config, dict) or not required <= set(config) or set(config) - required - {"input"}:
         raise ValueError(f"config must declare {sorted(required)}; only input is additionally accepted")
     if (config["provider"] != NAME or config["family"] != SUPPORTED["family"]
@@ -123,6 +166,42 @@ def chat_request(prompt, data, config):
             "input_schema": {"features": features, "row_id": "unique string or integer"},
             "output_schema": {"targets": ["regimes"], "model_version": version},
             "population": {"row_ids": ids}, "execution_constraints": {"partial_results": False}}
+
+
+def chat_slots():
+    """What the retained reference actually offers, read from its manifest and never by loading the fitted state.
+
+    A fitted reference is one task fitted at one version, so each slot has exactly one admissible value; that is not a
+    poverty of the declaration but the fact of the artifact, and it is what lets any other task or version be refused by
+    name instead of quietly served by this one.
+
+    The hierarchy LEVELS the manifest records (2 and 4 for the demo reference) are deliberately NOT declared. Assignment
+    returns the whole cluster path and there is no parameter that cuts it to one level, so a person who named a level
+    would be told it was understood and then handed every level anyway.
+
+    The manifest is read, not the joblib: declaring a vocabulary must not deserialize a fitted model.
+    """
+    directory = os.environ.get("FEATURE_ENG_REGIMES_DEMO_DIR")
+    if not directory:
+        return []
+    try:
+        manifest = json.loads((Path(directory).expanduser() / "manifest.json").read_text(encoding="utf-8"))
+        task_id = manifest["metadata"]["task_id"]
+        version = manifest["model_version"]
+    except (OSError, ValueError, KeyError, TypeError):
+        return []
+    if (not isinstance(task_id, str) or not task_id.strip() or not isinstance(version, str)
+            or len(version) != 64 or any(c not in "0123456789abcdef" for c in version)):
+        return []
+    spoken = " ".join(part for part in task_id.replace("_", "-").split("-") if part)
+    return [{"name": "task_id", "type": "string", "allowed": [task_id],
+             "aliases": {task_id: [*REFERENCE_WORDS, spoken]}, "number_hints": []},
+            {"name": "model_version", "type": "string", "allowed": [version],
+             # with one fitted reference, naming the reference names the version it was fitted at; a DIFFERENT version
+             # matches nothing here and is refused rather than resolved to this one
+             "aliases": {version: [*REFERENCE_WORDS, version[:12], "model version", "fitted model",
+                                   "version del modelo"]},
+             "number_hints": []}]
 
 
 def chat_examples():
