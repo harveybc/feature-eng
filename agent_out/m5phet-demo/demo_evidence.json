@@ -1,0 +1,12 @@
+{
+  "source": "EURUSD_ForexTrading_4hrs_05.05.2003_to_16.10.2021.csv",
+  "source_rows_sha256": "a48f4c32834225d449a0d2330bcafce422435997ee21a7e10c685c3d1fd56708",
+  "reference_rows": 32,
+  "assignment_rows": 8,
+  "reference_last_bar_open": "2003-05-12T01:00:00+00:00",
+  "query_first_bar_open": "2003-05-12T05:00:00+00:00",
+  "elapsed_seconds": 1.0151775370031828,
+  "feature_units": "pipettes (price difference * 100000)",
+  "availability_assumption": "OHLC bar complete at open + 4h; historical fixture, no vintage certification",
+  "purpose": "engineering execution only; no market-performance or held-out scientific claim"
+}

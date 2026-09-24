@@ -138,3 +138,4 @@ logs/
 # Others
 secrets.py
 credentials.ini
+agent_out/m5phet-venv/

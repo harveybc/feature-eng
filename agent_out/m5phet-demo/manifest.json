@@ -1,0 +1,63 @@
+{
+  "state_ref": "/home/harveybc/Documents/GitHub/.worktrees/feature-eng-m5phet-hierarchical/agent_out/m5phet-demo/reference.joblib",
+  "model_version": "479fdb6e52626442034112bd4fff2e17f16f68e05b0cd05bd354df11466b38a2",
+  "metadata": {
+    "schema": "feature_eng.hierarchical_regimes.v1",
+    "task_id": "ohlc-demo-regimes-v1",
+    "features": [
+      "body_pipettes",
+      "range_pipettes"
+    ],
+    "levels": [
+      2,
+      4
+    ],
+    "reference_rows": 32,
+    "reference_row_ids": [
+      "04.05.2003 21:00:00.000",
+      "05.05.2003 01:00:00.000",
+      "05.05.2003 05:00:00.000",
+      "05.05.2003 09:00:00.000",
+      "05.05.2003 13:00:00.000",
+      "05.05.2003 17:00:00.000",
+      "05.05.2003 21:00:00.000",
+      "06.05.2003 01:00:00.000",
+      "06.05.2003 05:00:00.000",
+      "06.05.2003 09:00:00.000",
+      "06.05.2003 13:00:00.000",
+      "06.05.2003 17:00:00.000",
+      "06.05.2003 21:00:00.000",
+      "07.05.2003 01:00:00.000",
+      "07.05.2003 05:00:00.000",
+      "07.05.2003 09:00:00.000",
+      "07.05.2003 13:00:00.000",
+      "07.05.2003 17:00:00.000",
+      "07.05.2003 21:00:00.000",
+      "08.05.2003 01:00:00.000",
+      "08.05.2003 05:00:00.000",
+      "08.05.2003 09:00:00.000",
+      "08.05.2003 13:00:00.000",
+      "08.05.2003 17:00:00.000",
+      "08.05.2003 21:00:00.000",
+      "09.05.2003 01:00:00.000",
+      "09.05.2003 05:00:00.000",
+      "09.05.2003 09:00:00.000",
+      "09.05.2003 13:00:00.000",
+      "09.05.2003 17:00:00.000",
+      "11.05.2003 21:00:00.000",
+      "12.05.2003 01:00:00.000"
+    ],
+    "reference_sha256": "2cea9197f6d70ee751ccfc9c27eeeaff4131a6c0839dc24d0b6ea627c3fb1f34",
+    "dependencies": {
+      "numpy": "1.26.4",
+      "scipy": "1.13.1",
+      "sklearn": "1.5.1",
+      "joblib": "1.4.2"
+    },
+    "engine": "sklearn.AgglomerativeClustering:ward",
+    "assignment": "sklearn.NearestNeighbors:1-reference-path",
+    "novelty": "uncalibrated Euclidean nearest-reference distance after reference-only StandardScaler",
+    "fit_scope": "explicit reference rows only",
+    "schema_units": "caller-declared; not inferred"
+  }
+}
