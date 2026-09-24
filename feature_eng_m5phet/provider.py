@@ -4,6 +4,7 @@ import copy
 from datetime import datetime
 import json
 import os
+import re
 from pathlib import Path
 import unicodedata
 import uuid
@@ -19,6 +20,20 @@ PROMPTS = ("assign hierarchical regimes", "assign regimes", "show hierarchical r
            "asignar regimenes jerarquicos", "muestra regimenes jerarquicos", "mostrar regimenes jerarquicos")
 
 SLOT_NAMES = ("task_id", "model_version")
+
+#: Words a person adds around a command without asking for anything more: courtesy, articles, and the object being acted
+#: on. Anything outside this list is a second request, and a second request is refused rather than ignored. Conjunctions
+#: are deliberately absent: "and" is exactly how a further instruction arrives.
+FILLER = frozenset("""
+please can you could would kindly now here
+por favor puedes podrias puede quiero necesito ahora aqui
+the a an this that these those my our
+el la los las un una uno este esta estos estas ese esa mi nuestro
+to for on of in with from into over about
+a de en con para sobre del al
+rows row data dataset points observations series table
+filas fila datos dato puntos observaciones serie tabla
+""".split())
 
 #: ordinary ways a person names THIS reference, in both languages the bounded commands accept
 REFERENCE_WORDS = ("regimes", "regimenes", "reg\u00edmenes", "hierarchical regimes", "regimenes jerarquicos",
@@ -127,8 +142,22 @@ def chat_request(prompt, data, config, parameters=None):
     is refused. Called without them, this is exactly the previous path."""
     normalized = "" if not isinstance(prompt, str) else " ".join(
         "".join(c for c in unicodedata.normalize("NFD", prompt.casefold()) if not unicodedata.combining(c)).split())
-    if normalized not in PROMPTS:
-        raise ValueError(f"unsupported prompt; accepted commands: {', '.join(PROMPTS)}")
+    # The sentence, once courtesy and object words are removed, must be EXACTLY one declared command.
+    #
+    # Requiring the raw sentence to equal a command refused every ordinary way of asking -- "assign hierarchical regimes
+    # to these rows" failed while "assign hierarchical regimes" passed -- which reads as a broken product. Merely
+    # CONTAINING a command is worse: "asigna regimenes y predice el precio" would then be accepted, and the second
+    # request would be silently dropped rather than refused. Stripping only a declared filler vocabulary keeps both: an
+    # ordinary phrasing reduces to its command, and anything that asks for something else leaves a word behind.
+    words = [w for w in re.split(r"[^a-z0-9_]+", normalized) if w]
+    remainder = [w for w in words if w not in FILLER]
+    if remainder and " ".join(remainder) not in PROMPTS:
+        extra = [w for w in remainder if w not in " ".join(PROMPTS).split()]
+        raise ValueError(
+            f"unsupported prompt; this adapter performs one operation. Say one of: {', '.join(PROMPTS)}"
+            + (f" -- it does not understand {extra[0]!r}" if extra else ""))
+    if not remainder:
+        raise ValueError(f"unsupported prompt; this adapter performs one operation. Say one of: {', '.join(PROMPTS)}")
     required = {"provider", "family", "output_kind", "state", "as_of", "parameters"}
     if parameters is not None and isinstance(config, dict):
         # a config that declares no parameters may still be completed by resolved ones; a config that declares them

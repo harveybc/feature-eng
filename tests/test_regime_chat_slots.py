@@ -222,3 +222,26 @@ def test_the_declared_values_drive_a_request_the_provider_accepts(demo, model, r
     request = provider.chat_request("assign hierarchical regimes", {"rows": rows}, settings, resolved)
     state = provider.load(str((demo / "reference.joblib").resolve()))
     assert provider.infer(request, state)["outputs"]["regimes"]["payload"] == model.assign(rows)
+
+
+# --- a command must be named, not typed exactly ------------------------------------------------------------------------
+
+@pytest.mark.parametrize("prompt", [
+    "assign hierarchical regimes to these rows",
+    "please assign regimes for this data",
+    "asigna los regimenes jerarquicos a estas filas",
+    "\u00bfpuedes asignar regimenes a estos datos?",
+    "Assign Hierarchical Regimes",
+])
+def test_an_ordinary_sentence_naming_the_command_is_accepted(prompt, demo, model, rows, tmp_path):
+    """Requiring the whole sentence to EQUAL a command refused every ordinary way of asking for the same thing, which
+    reads as a broken product rather than as a boundary."""
+    request = chat_request(prompt, {"rows": rows}, config(model, tmp_path / "regimes" / "reference.joblib"))
+    assert request["operation"] == "infer" and request["output_kind"] == "hierarchical_regimes"
+
+
+@pytest.mark.parametrize("prompt", ["forecast the price tomorrow", "train a new model on this data", "", "   "])
+def test_a_prompt_naming_no_command_is_still_refused(prompt, demo, model, rows, tmp_path):
+    """The boundary this check exists for is untouched: one operation, and a sentence cannot ask for another."""
+    with pytest.raises(ValueError, match="this adapter performs one operation"):
+        chat_request(prompt, {"rows": rows}, config(model, tmp_path / "regimes" / "reference.joblib"))
