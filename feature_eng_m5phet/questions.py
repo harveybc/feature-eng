@@ -81,7 +81,9 @@ def check_features(state, model):
     fitted = list(model.metadata["features"])
     declared = state.get("features") if isinstance(state, dict) else None
     if declared is None:
-        raise _Refuse(STATE_REQUIRED, f"state.features must list the fitted features {fitted}")
+        # Nobody types eighty column names by hand. An absent declaration means the fitted features, which are the only
+        # ones this reference can use anyway; the rule below still bites the moment a caller DECLARES something else.
+        return fitted
     if not isinstance(declared, list) or any(not isinstance(f, str) for f in declared):
         raise _Refuse(STATE_REQUIRED, "state.features must be a list of column names")
     if declared == fitted:

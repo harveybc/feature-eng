@@ -253,3 +253,17 @@ def test_the_catalog_declares_the_two_types(provider):
     assert declared["provider"] == Provider.name
     assert set(declared["question_types"]) == {"clustering", "cluster_description"}
     assert declared["question_types"]["cluster_description"]["required"] == ["target_metric"]
+
+
+def test_an_absent_feature_declaration_means_the_fitted_features(demo, model, rows):
+    """Nobody types eighty column names by hand; a declared list that differs is still refused by name."""
+    from m5phet.questions import run_task
+    from m5phet.runtime import Registry
+    registry = Registry()
+    registry.register(Provider())
+    out = run_task({"area": "unsupervised", "state": {},
+                    "questions": {"seg": {"type": "clustering", "method": "auto"}}}, registry, data={"rows": rows})
+    assert out["answers"]["seg"]["status"] == "OK", out["answers"]["seg"]
+    wrong = run_task({"area": "unsupervised", "state": {"features": ["x"]},
+                      "questions": {"seg": {"type": "clustering", "method": "auto"}}}, registry, data={"rows": rows})
+    assert wrong["answers"]["seg"]["status"] == "REFUSED"
