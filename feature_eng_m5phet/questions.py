@@ -49,8 +49,35 @@ MALFORMED_QUESTION = "MALFORMED_QUESTION"
 
 OPTIMAL_K_BASIS = "fitted, not selected here"
 
-#: what `method` may say and still describe this reference; anything else asks for a different engine
+#: what `method` may say and still describe a WARD reference; anything else asks for a different engine
 METHODS = frozenset({"auto", "ward", "hierarchical", "agglomerative", "hierarchical_ward"})
+
+#: the words each declared method answers to. A reference fitted by WP19's chooser may be k-means, DBSCAN or a
+#: Gaussian mixture, and "the method it was fitted with" is then that one -- not Ward. `auto` always means "as
+#: fitted", and a word belonging to another method stays refused, because naming a method is a check against the
+#: reference and never a control: refitting is not done in chat.
+METHOD_WORDS = {
+    "agglomerative": frozenset({"agglomerative", "hierarchical"}),
+    "kmeans": frozenset({"kmeans", "k-means", "k_means"}),
+    "dbscan": frozenset({"dbscan", "density"}),
+    "gaussian_mixture": frozenset({"gaussian_mixture", "gaussian mixture", "gmm", "mixture"}),
+}
+
+#: linkage words a reference answers to only when it was fitted with that linkage
+LINKAGE_WORDS = {"ward": frozenset({"ward", "hierarchical_ward"})}
+
+
+def accepted_methods(model):
+    """The method words this reference answers to: `auto`, its own method's words, and its linkage's if it has one.
+
+    A reference fitted before a method was declared in its metadata is Ward, and keeps exactly the words it had.
+    """
+    declared = model.metadata.get("method")
+    if declared is None:
+        return METHODS
+    words = {"auto"} | set(METHOD_WORDS.get(declared, {declared}))
+    linkage = (model.metadata.get("parameters") or {}).get("linkage")
+    return frozenset(words | set(LINKAGE_WORDS.get(linkage, ())))
 
 QUESTION_TYPES = {
     "clustering": {"required": [], "optional": ["method", "expected_clusters", "level"]},
@@ -216,7 +243,7 @@ def _silhouette(scaled, labels):
 
 def answer_clustering(question, model, rows, ids, raw, scaled, paths):
     method = question.get("method", "auto")
-    if not isinstance(method, str) or method.strip().lower() not in METHODS:
+    if not isinstance(method, str) or method.strip().lower() not in accepted_methods(model):
         raise _Refuse(NOT_ESTIMABLE, f"method {method!r} is not how this reference was fitted "
                                      f"({model.metadata['engine']}); another method would be a refit, and refitting "
                                      "is not done in chat")

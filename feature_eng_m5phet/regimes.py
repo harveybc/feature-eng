@@ -151,3 +151,94 @@ class HierarchicalRegimes:
         if model._fingerprint() != model.model_version:
             raise ValueError("fitted-state version integrity mismatch")
         return model
+
+
+#: what a fitted method is given beyond its chosen parameters, so two runs of the same spec produce the same reference.
+#: Recorded in the metadata: a seed that is not written down is a seed nobody can reproduce.
+DECLARED_ESTIMATOR_EXTRAS = {
+    "agglomerative": {},
+    "kmeans": {"n_init": 10, "random_state": 0},
+    "dbscan": {},
+    "gaussian_mixture": {"random_state": 0, "covariance_type": "full"},
+}
+
+#: a fit that puts every row in one cluster is not a regime reference; it is a constant, and it is refused by name
+DEGENERATE_FIT = "DEGENERATE_FIT"
+
+
+class SpecRegimes(HierarchicalRegimes):
+    """A reference fitted from a declared `m5phet.regime_spec.v1`: one method, one cut, the same served format.
+
+    `HierarchicalRegimes` is Ward and a tree of cuts. WP19's chooser may pick k-means, DBSCAN or a Gaussian mixture,
+    none of which has a tree, so this subclass carries ONE level -- the clusters the chosen method produced -- and
+    keeps everything else identical: the reference-only `StandardScaler`, the frozen nearest-reference assignment, the
+    `cluster_path` shape, the novelty score, the joblib bundle under the same schema. That is what lets the provider
+    serve a Laya-chosen reference and the demo reference through the same envelope, with no branch in the provider.
+
+    The fingerprint is overridden because there is no tree to hash: it covers the estimator's parameters and the
+    fitted labels instead. `HierarchicalRegimes`' own fingerprint is untouched, so a reference fitted before this
+    class existed still loads and still verifies.
+    """
+
+    @classmethod
+    def fit_spec(cls, rows, *, features, method, parameters, task_id, spec_sha256=None, decisions=None,
+                 estimator_factory=None):
+        from . import regime_space                      # imported here: `regimes` must not require the space to load
+
+        ids, raw = validate_rows(rows, features, limit=MAX_REFERENCE_ROWS)
+        if not isinstance(task_id, str) or not task_id.strip():
+            raise ValueError("a nonempty task_id is required")
+        parameters = regime_space.validate_parameters(method, dict(parameters))
+        estimator_class = estimator_factory or regime_space.estimator_class(method)
+        if estimator_class is None:
+            raise ValueError(f"{regime_space.METHOD_NOT_IMPORTABLE}: {method!r} cannot be constructed here")
+        extras = dict(DECLARED_ESTIMATOR_EXTRAS.get(method, {}))
+
+        model = cls()
+        model.scaler = StandardScaler().fit(raw)
+        scaled = model.scaler.transform(raw)
+        if not np.isfinite(scaled).all():
+            raise ValueError("reference scaling produced nonfinite values")
+        estimator = estimator_class(**parameters, **extras)
+        labels = np.asarray(estimator.fit_predict(scaled), dtype=int)
+        found = sorted({int(label) for label in labels})
+        if len(found) < 2:
+            raise ValueError(f"{DEGENERATE_FIT}: {method} with {parameters} put all {len(ids)} reference rows in "
+                             f"{len(found)} cluster(s); a reference that assigns one regime describes nothing")
+        n = len(ids)
+        model.estimator_params = {"class": f"{type(estimator).__module__}.{type(estimator).__name__}",
+                                  "chosen": dict(parameters), "declared_extras": extras,
+                                  "labels_found": found}
+        model.paths = np.column_stack([np.zeros(n, dtype=int), labels]).astype(int)
+        model.neighbors = NearestNeighbors(n_neighbors=1, algorithm="brute", metric="euclidean", n_jobs=1).fit(scaled)
+        model.metadata = {
+            "schema": SCHEMA, "task_id": task_id, "features": list(features), "levels": [len(found)],
+            "reference_rows": n, "reference_row_ids": ids,
+            "reference_sha256": _digest({"ids": ids, "features": list(features), "values": raw.tolist()}),
+            "dependencies": _versions(),
+            "engine": f"sklearn:{model.estimator_params['class']}:{_compact(parameters)}",
+            "method": method, "parameters": dict(parameters), "declared_extras": extras,
+            "cluster_labels": found,
+            "noise_label": -1 if -1 in found else None,
+            "assignment": "sklearn.NearestNeighbors:1-reference-path",
+            "novelty": "uncalibrated Euclidean nearest-reference distance after reference-only StandardScaler",
+            "fit_scope": "explicit reference rows only", "schema_units": "caller-declared; not inferred",
+            "spec_sha256": spec_sha256,
+            "decisions": dict(decisions or {}),
+            "chosen_by": "m5phet.decide" if decisions else "HAND",
+        }
+        model.model_version = model._fingerprint()
+        return model
+
+    def _fingerprint(self):
+        return _digest({
+            "metadata": self.metadata, "paths": self.paths.tolist(),
+            "scaler": {"params": self.scaler.get_params(), "mean": self.scaler.mean_.tolist(),
+                       "scale": self.scaler.scale_.tolist(), "variance": self.scaler.var_.tolist()},
+            "estimator": self.estimator_params,
+            "neighbors": {"params": self.neighbors.get_params(), "reference": self.neighbors._fit_X.tolist()},
+        })
+
+
+def _compact(mapping):
+    return ",".join(f"{key}={mapping[key]}" for key in sorted(mapping))
