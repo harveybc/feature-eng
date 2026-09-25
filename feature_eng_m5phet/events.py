@@ -42,7 +42,7 @@ import csv
 import json
 import math
 import sys
-from datetime import datetime, timezone as _timezone
+from datetime import datetime, timedelta, timezone as _timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -110,6 +110,36 @@ OPTIONAL_COLUMN_NAMES = {
 }
 
 AVAILABILITY = ("KNOWN", "UNKNOWN")
+
+#: which clock the release boundary is read off. `observed` is the only one that is a measurement: the instants the
+#: dataset itself declares. `scheduled` is an ASSUMPTION a person makes out loud -- that each release was published at
+#: the instant it was scheduled for -- and it exists so that an archive with no publication clock can be worked on at
+#: all. It is never a default, it is written into every artifact it touches, and nothing estimated under it is
+#: identified.
+PUBLICATION_CLOCK_MODES = ("observed", "scheduled")
+
+#: how long before the scheduled instant the consensus is assumed to have stood, under the same declared assumption
+DEFAULT_ASSUMED_TOLERANCE_SECONDS = 60
+
+#: the provenance of the rows, per clock mode. It travels on the document AND on every row, so a row separated from
+#: its document still says what its instants were.
+PROVENANCE = {"observed": "DEVELOPMENT_OBSERVED_CLOCK", "scheduled": "DEVELOPMENT_ASSUMED_CLOCK"}
+
+
+def publication_clock_block(mode, tolerance_seconds):
+    """What a reader must be told about the instants underneath every number in this document."""
+    if mode == "observed":
+        return {"mode": "OBSERVED_PUBLICATION_CLOCK", "tolerance_seconds": None, "declared_by": "the dataset",
+                "identification_caveat": ("the publication instants are the ones the dataset declares; a release that "
+                                          "declares none is excluded MISSING_PUBLICATION_CLOCK and never assumed")}
+    return {"mode": "ASSUMED_SCHEDULED_PUBLICATION",
+            "tolerance_seconds": int(tolerance_seconds),
+            "declared_by": "operator",
+            "identification_caveat": ("the surprise's publication instant is assumed equal to the scheduled instant; "
+                                      "no receipt or publication timestamp was observed; results are DEVELOPMENT and "
+                                      "not identified until a publication clock exists"),
+            "consensus": ("the consensus is taken as published tolerance_seconds before the scheduled instant, under "
+                          "the same declared assumption; no consensus publication timestamp was observed either")}
 
 #: what is written into `unit` and `period` when the dataset declares neither. It is a constant, so the calendar
 #: module's INCOMPARABLE_SERIES check cannot fire -- and the document says exactly that, because a check that cannot
@@ -387,7 +417,8 @@ class CalendarMapping:
 
 
 def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False, columns=None,
-                  historical_availability=None):
+                  historical_availability=None, publication_clock="observed",
+                  assumed_tolerance_seconds=DEFAULT_ASSUMED_TOLERANCE_SECONDS):
     """The releases, as the arrival store's own arrivals. Nothing is computed here; the module does the arithmetic."""
     zone = _zone(timezone_name)
     header, rows = _calendar_rows(path, columns=columns)
@@ -424,6 +455,22 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
                 "nothing here will assume it: declare --historical-availability, or name the column that carries it")
     if historical_availability is not None and historical_availability not in AVAILABILITY:
         _refuse("AVAILABILITY_MUST_BE_DECLARED", f"{historical_availability!r} is not one of {list(AVAILABILITY)}")
+    if publication_clock not in PUBLICATION_CLOCK_MODES:
+        _refuse("UNKNOWN_PUBLICATION_CLOCK_MODE",
+                f"{publication_clock!r} is not one of {list(PUBLICATION_CLOCK_MODES)}")
+    assumed = publication_clock == "scheduled"
+    if assumed:
+        if int(assumed_tolerance_seconds) <= 0:
+            _refuse("BAD_ASSUMED_TOLERANCE",
+                    f"the consensus must be assumed to stand some positive time before the release, got "
+                    f"{assumed_tolerance_seconds}")
+        observed = [role for role in ("published", "consensus_published") if getattr(mapping, role) is not None]
+        if observed:
+            _refuse("PUBLICATION_CLOCK_CONFLICT",
+                    f"this calendar declares an observed publication clock in {observed}, and the scheduled instant "
+                    f"was asked to stand in for it; an assumption does not overwrite a measurement -- drop the "
+                    f"assumption, or drop the column")
+    tolerance = timedelta(seconds=int(assumed_tolerance_seconds)) if assumed else None
 
     releases = []
     unit_declared = mapping.unit is not None
@@ -456,6 +503,10 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         period = _cell(row, mapping.period) if period_declared else UNDECLARED
         if actual is None:
             continue                                        # a scheduled event with no number is not a release yet
+        if assumed:
+            # the ONE place the assumption enters. It moves no value: it declares the instants the dataset never did,
+            # and every artifact downstream carries the block that says so.
+            published, consensus_published = event_time, event_time - tolerance
         arrivals = []
         # one event_key per RELEASE, not per event type: the arrival store models one scheduled release with its own
         # consensus, actual and revisions, and monthly releases of the same indicator are different events in it.
@@ -467,11 +518,15 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             consensus_seen = received or consensus_published or published or event_time
             if consensus_published is not None and consensus_published > consensus_seen:
                 consensus_seen = consensus_published
+            if assumed and received is not None and received < consensus_published:
+                consensus_seen = consensus_published      # our receipt cannot precede an instant we declared
             arrival = {**base, "kind": "CONSENSUS", "consensus": consensus, "observed_at": consensus_seen}
             if consensus_published is not None:
                 arrival["published_at"] = consensus_published
             arrivals.append(arrival)
         actual_seen = received or published or event_time
+        if assumed and received is not None and received < published:
+            actual_seen = published
         arrival = {**base, "kind": "ACTUAL", "actual": actual, "observed_at": actual_seen}
         if published is not None:
             arrival["published_at"] = published
@@ -492,6 +547,7 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             "unit_column": mapping.unit, "period_column": mapping.period,
             "availability_column": mapping.availability, "historical_availability": historical_availability,
             "timezone": timezone_name, "timezone_declared": bool(timezone_declared),
+            "publication_clock": publication_clock_block(publication_clock, assumed_tolerance_seconds),
             "units_declared": unit_declared and period_declared,
             "units_reading": ("the dataset declares unit and period, so the calendar module's INCOMPARABLE_SERIES "
                               "check is live" if unit_declared and period_declared else
@@ -560,7 +616,9 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
           window_hours=DEFAULT_WINDOW_HOURS, pre_event_minutes=DEFAULT_PRE_EVENT_MINUTES,
           min_prior_releases=DEFAULT_MIN_PRIOR_RELEASES, bars_time_column=None, bars_price_column=None,
           bars_timezone="UTC", bars_timezone_declared=False, calendar_timezone="UTC",
-          calendar_timezone_declared=False, calendar_columns=None, historical_availability=None, max_bars=None):
+          calendar_timezone_declared=False, calendar_columns=None, historical_availability=None, max_bars=None,
+          publication_clock="observed", assumed_tolerance_seconds=DEFAULT_ASSUMED_TOLERANCE_SECONDS,
+          max_neighbours_listed=None):
     """One row per (release, horizon), with the releases that did not become rows counted by name."""
     horizons = sorted({int(h) for h in horizons_minutes})
     if not horizons or horizons[0] <= 0:
@@ -588,9 +646,14 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
                 f"a whole number of bars")
     times, log_price = bars["times"], bars["log_price"]
 
+    if max_neighbours_listed is not None and int(max_neighbours_listed) < 0:
+        _refuse("BAD_NEIGHBOUR_CAP", f"the neighbour listing cap must not be negative, got {max_neighbours_listed}")
     calendar = read_calendar(calendar_path, mapping, timezone_name=calendar_timezone,
                              timezone_declared=calendar_timezone_declared, columns=calendar_columns,
-                             historical_availability=historical_availability)
+                             historical_availability=historical_availability, publication_clock=publication_clock,
+                             assumed_tolerance_seconds=assumed_tolerance_seconds)
+    clock = calendar["publication_clock"]
+    provenance = PROVENANCE[publication_clock]
     releases = calendar.pop("releases")
 
     excluded = _Excluded()
@@ -683,6 +746,13 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
                                "surprise": other["standardized"], "surprise_raw": other["release_surprise"],
                                "surprise_status": other["status"]})
         neighbours.sort(key=lambda n: (n["offset_minutes"], n["event_key"]))
+        neighbours_total = len(neighbours)
+        if max_neighbours_listed is not None and neighbours_total > int(max_neighbours_listed):
+            # the nearest by absolute offset survive, and the COUNT above is the exact one either way: a listing that
+            # was cut short says so, and nobody reads its length as the number of releases in the window
+            nearest = sorted(neighbours, key=lambda n: (abs(n["offset_minutes"]), n["event_key"]))
+            keep = {n["event_key"] for n in nearest[:int(max_neighbours_listed)]}
+            neighbours = [n for n in neighbours if n["event_key"] in keep]
         for horizon in horizons:
             if not anchor_ok:
                 excluded.event_horizon("BARS_MISSING_AT_HORIZON", record, horizon,
@@ -720,6 +790,10 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
                 "hour_of_day": t_k.astimezone(_timezone.utc).hour,
                 "day_of_week": t_k.astimezone(_timezone.utc).weekday(),
                 "other_releases_in_window": neighbours,
+                "other_releases_in_window_count": neighbours_total,
+                "other_releases_in_window_listed": len(neighbours),
+                "publication_clock_mode": clock["mode"],
+                "provenance": provenance,
             })
     rows.sort(key=lambda r: (r["published_at"], r["event_key"], r["horizon_minutes"]))
 
@@ -735,11 +809,14 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
 
     return {
         "schema": SCHEMA,
+        "provenance": provenance,
+        "publication_clock": clock,
         "parameters": {
             "horizons_minutes": horizons,
             "window_hours": float(window_hours),
             "pre_event_minutes": int(pre_event_minutes),
             "min_prior_releases": min_prior_releases,
+            "max_neighbours_listed": None if max_neighbours_listed is None else int(max_neighbours_listed),
             "realized_vol_step_seconds": step,
             "realized_vol": f"the sum of squared log returns over consecutive {step}-second bars inside the horizon",
             "surprise": ("app/economic_calendar.py release_surprise, standardized by the dispersion of that event "
@@ -757,7 +834,8 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
         "excluded": excluded.document(),
         "environment": {"python": ".".join(str(part) for part in sys.version_info[:3]), "numpy": np.__version__},
         "fitted": "NOTHING: this job writes the rows an event study is estimated from; no model is fitted here",
-        "reading": ("one row per (release, horizon). `surprise` is a standardized release surprise and `log_return` "
+        "reading": (f"PROVENANCE {provenance}, publication clock {clock['mode']}. {clock['identification_caveat']}. "
+                    "one row per (release, horizon). `surprise` is a standardized release surprise and `log_return` "
                     "and `realized_vol` are the paths that followed it -- an association these rows make measurable, "
                     "not an effect. `other_releases_in_window` with a POSITIVE offset landed AFTER this release and "
                     "is therefore not pre-release information: it is listed so a later stage can control for it or "
@@ -798,6 +876,17 @@ def main(argv=None):
     parser.add_argument("--calendar-timezone", help="the IANA zone naive calendar timestamps are read in")
     parser.add_argument("--historical-availability", choices=list(AVAILABILITY),
                         help="declare it for every row when the dataset carries no column for it")
+    parser.add_argument("--publication-clock", choices=list(PUBLICATION_CLOCK_MODES), default="observed",
+                        help="'observed' reads the instants the dataset declares and excludes a release that "
+                             "declares none; 'scheduled' DECLARES the assumption that each release was published at "
+                             "the instant it was scheduled for, and stamps every artifact with it")
+    parser.add_argument("--assume-publication-tolerance-seconds", type=int,
+                        default=DEFAULT_ASSUMED_TOLERANCE_SECONDS,
+                        help="how long before the scheduled instant the consensus is assumed to have stood; only "
+                             "meaningful with --publication-clock scheduled")
+    parser.add_argument("--max-neighbours-listed", type=int,
+                        help="list at most this many of the other releases in the window, nearest first; the count "
+                             "reported on every row stays exact")
     parser.add_argument("--horizons", type=int, nargs="+", default=list(DEFAULT_HORIZONS_MINUTES),
                         help="the horizons in minutes")
     parser.add_argument("--window-hours", type=float, default=DEFAULT_WINDOW_HOURS)
@@ -822,7 +911,10 @@ def main(argv=None):
                          calendar_timezone=args.calendar_timezone or "UTC",
                          calendar_timezone_declared=args.calendar_timezone is not None,
                          calendar_columns=_split(args.calendar_columns),
-                         historical_availability=args.historical_availability, max_bars=args.max_bars)
+                         historical_availability=args.historical_availability, max_bars=args.max_bars,
+                         publication_clock=args.publication_clock,
+                         assumed_tolerance_seconds=args.assume_publication_tolerance_seconds,
+                         max_neighbours_listed=args.max_neighbours_listed)
     except (EventsRefusal, CalendarRefusal) as refusal:
         print(f"REFUSED {refusal}", file=sys.stderr)
         return 2

@@ -197,3 +197,29 @@ def test_the_cli_writes_the_summary_and_refuses_a_missing_file(tmp_path, capsys)
     assert summary["schema"] == association.SCHEMA and summary["groups"]
     assert association.main(["--rows", str(tmp_path / "absent.json"), "--out", str(out)]) == 2
     assert "REFUSED NO_SUCH_FILE" in capsys.readouterr().err
+
+
+def test_the_summary_carries_the_declared_clock_and_repeats_its_caveat(tmp_path):
+    """An association table read on its own must say what the instants under it were, or it will be read as measured."""
+    releases = plan(20)
+    bars, _ = write_inputs(tmp_path, releases)
+    header = "event_type,event_time,actual,consensus,previous,historical_availability"
+    lines = [header]
+    for kind, minute, s in releases:
+        moment = START + timedelta(minutes=minute)
+        lines.append(",".join([kind, moment.isoformat(), repr(100.0 + s), "100.0", "100.0", "KNOWN"]))
+    calendar = tmp_path / "scheduled.csv"
+    calendar.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="scheduled")
+    summary = association.summarise(document)
+    assert summary["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
+    assert summary["publication_clock"] == document["publication_clock"]
+    assert summary["reading"].startswith("PROVENANCE DEVELOPMENT_ASSUMED_CLOCK")
+    assert "not identified until a publication clock exists" in summary["reading"]
+    assert "RUNG 1, ASSOCIATION ONLY" in summary["reading"]
+
+
+def test_a_summary_of_observed_clock_rows_says_so_too(tmp_path):
+    summary = association.summarise(rows_document(tmp_path, plan(20)))
+    assert summary["provenance"] == "DEVELOPMENT_OBSERVED_CLOCK"
+    assert summary["publication_clock"]["mode"] == "OBSERVED_PUBLICATION_CLOCK"

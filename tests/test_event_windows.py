@@ -316,6 +316,9 @@ def test_every_declared_exclusion_code_is_counted_even_when_it_did_not_fire(tmp_
 
 
 def test_the_counts_add_up_to_the_releases_that_were_read(tmp_path):
+    """On this fixture every surviving release keeps at least one horizon, so the release-level arithmetic closes
+    exactly. On a real series some releases lose EVERY horizon to a gap, and then the difference is those releases:
+    the identity below is an arithmetic check of these counts, not a claim that it holds on any archive."""
     document = build(tmp_path)
     counts = document["excluded"]["counts"]
     dropped = sum(counts[code] for code in events.EXCLUSION_CODES if code != "BARS_MISSING_AT_HORIZON")
@@ -354,3 +357,131 @@ def test_the_cli_writes_the_rows_and_refuses_with_a_code(tmp_path, capsys):
     assert document["schema"] == events.SCHEMA and document["rows"]
     assert events.main(["--bars", str(bars), "--calendar", str(tmp_path / "absent.csv"), "--out", str(out)]) == 2
     assert "REFUSED NO_SUCH_FILE" in capsys.readouterr().err
+
+
+# ------------------------------------------------------- the declared assumption, and what it never stops being
+
+SCHEDULED_HEADER = "event_type,event_time,actual,consensus,previous,historical_availability"
+
+
+def write_scheduled_calendar(path, releases, *, consensus=100.0):
+    """An archive shaped like the one this repository actually holds: a scheduled instant, and no clock of any kind
+    saying when anybody published anything."""
+    lines = [SCHEDULED_HEADER]
+    for kind, minute, s in releases:
+        moment = START + timedelta(minutes=minute)
+        lines.append(",".join([kind, moment.isoformat(), repr(consensus + s), repr(consensus), repr(consensus),
+                               "KNOWN"]))
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def scheduled_inputs(tmp_path, releases=None, name=""):
+    releases = plan() if releases is None else releases
+    return (write_bars(tmp_path / f"bars{name}.csv", releases),
+            write_scheduled_calendar(tmp_path / f"scheduled{name}.csv", releases))
+
+
+def test_an_archive_with_no_clock_is_still_refused_by_name_without_the_declared_assumption(tmp_path):
+    bars, calendar = scheduled_inputs(tmp_path)
+    document = events.build(str(bars), str(calendar), events.CalendarMapping())
+    assert document["rows"] == []
+    assert document["excluded"]["counts"]["MISSING_PUBLICATION_CLOCK"] == N_EVENTS
+    assert document["provenance"] == "DEVELOPMENT_OBSERVED_CLOCK"
+    assert document["publication_clock"]["mode"] == "OBSERVED_PUBLICATION_CLOCK"
+    assert document["publication_clock"]["tolerance_seconds"] is None
+
+
+def test_the_declared_assumption_lets_the_same_archive_build_rows_and_stamps_every_one_of_them(tmp_path):
+    bars, calendar = scheduled_inputs(tmp_path)
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", assumed_tolerance_seconds=60)
+    assert document["rows"], "the declared assumption produced no rows at all"
+    assert document["excluded"]["counts"]["MISSING_PUBLICATION_CLOCK"] == 0
+    assert document["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
+    assert document["publication_clock"] == {
+        "mode": "ASSUMED_SCHEDULED_PUBLICATION",
+        "tolerance_seconds": 60,
+        "declared_by": "operator",
+        "identification_caveat": ("the surprise's publication instant is assumed equal to the scheduled instant; no "
+                                  "receipt or publication timestamp was observed; results are DEVELOPMENT and not "
+                                  "identified until a publication clock exists"),
+        "consensus": ("the consensus is taken as published tolerance_seconds before the scheduled instant, under the "
+                      "same declared assumption; no consensus publication timestamp was observed either"),
+    }
+    assert "not identified until a publication clock exists" in document["reading"]
+    assert document["reading"].startswith("PROVENANCE DEVELOPMENT_ASSUMED_CLOCK")
+    for row in document["rows"]:
+        assert row["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
+        assert row["publication_clock_mode"] == "ASSUMED_SCHEDULED_PUBLICATION"
+
+
+def test_under_the_assumption_the_release_instant_is_the_scheduled_one_and_the_consensus_stands_before_it(tmp_path):
+    bars, calendar = scheduled_inputs(tmp_path)
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", assumed_tolerance_seconds=90)
+    assert document["publication_clock"]["tolerance_seconds"] == 90
+    for row in document["rows"]:
+        assert row["published_at"] == row["event_time"]
+        gap = datetime.fromisoformat(row["published_at"]) - datetime.fromisoformat(row["consensus_published_at"])
+        assert gap == timedelta(seconds=90)
+
+
+def test_the_assumption_moves_no_value_only_the_instants(tmp_path):
+    """The planted response must come out of the assumed run exactly as it does out of a run with real clocks."""
+    releases = plan()
+    bars = write_bars(tmp_path / "bars.csv", releases)
+    assumed = events.build(str(bars), str(write_scheduled_calendar(tmp_path / "sched.csv", releases)),
+                           events.CalendarMapping(), publication_clock="scheduled")
+    for row in [r for r in assumed["rows"] if r["event_type"] == "A"]:
+        h = row["horizon_minutes"]
+        assert row["log_return"] == pytest.approx(B_LEVEL * row["surprise_raw"] * min(1.0, h / RAMP_MINUTES),
+                                                  abs=1e-12)
+
+
+def test_the_assumption_refuses_to_overwrite_a_clock_the_dataset_already_declares(tmp_path):
+    releases = plan(12)
+    bars = write_bars(tmp_path / "bars.csv", releases)
+    calendar = write_calendar(tmp_path / "calendar.csv", releases)      # this one DOES carry published_at
+    with pytest.raises(events.EventsRefusal) as refusal:
+        events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="scheduled")
+    assert refusal.value.code == "PUBLICATION_CLOCK_CONFLICT"
+
+
+def test_a_tolerance_that_is_not_a_positive_span_is_refused_by_name(tmp_path):
+    bars, calendar = scheduled_inputs(tmp_path, plan(12))
+    with pytest.raises(events.EventsRefusal) as refusal:
+        events.build(str(bars), str(calendar), events.CalendarMapping(),
+                     publication_clock="scheduled", assumed_tolerance_seconds=0)
+    assert refusal.value.code == "BAD_ASSUMED_TOLERANCE"
+
+
+def test_the_neighbour_listing_can_be_capped_while_its_count_stays_exact(tmp_path):
+    bars, calendar = scheduled_inputs(tmp_path)
+    full = events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="scheduled")
+    capped = events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="scheduled",
+                          max_neighbours_listed=2)
+    assert capped["parameters"]["max_neighbours_listed"] == 2
+    by_key = {(r["event_key"], r["horizon_minutes"]): r for r in full["rows"]}
+    crowded = 0
+    for row in capped["rows"]:
+        reference = by_key[(row["event_key"], row["horizon_minutes"])]
+        assert row["other_releases_in_window_count"] == reference["other_releases_in_window_count"]
+        assert len(row["other_releases_in_window"]) == row["other_releases_in_window_listed"] <= 2
+        if reference["other_releases_in_window_count"] > 2:
+            crowded += 1
+            assert row["other_releases_in_window_listed"] == 2
+    assert crowded, "no row in this fixture had more neighbours than the cap, so the cap was never exercised"
+
+
+def test_the_cli_carries_the_declared_assumption_into_the_file(tmp_path):
+    bars, calendar = scheduled_inputs(tmp_path, plan(20))
+    out = tmp_path / "rows.json"
+    assert events.main(["--bars", str(bars), "--calendar", str(calendar), "--out", str(out),
+                        "--publication-clock", "scheduled",
+                        "--assume-publication-tolerance-seconds", "60",
+                        "--max-neighbours-listed", "4"]) == 0
+    document = json.loads(out.read_text(encoding="utf-8"))
+    assert document["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
+    assert document["publication_clock"]["declared_by"] == "operator"
+    assert document["parameters"]["max_neighbours_listed"] == 4

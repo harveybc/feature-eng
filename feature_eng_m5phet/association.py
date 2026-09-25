@@ -187,8 +187,12 @@ def summarise(document):
             entry["outcomes"][outcome_name] = block
         groups.append(entry)
 
+    clock = document.get("publication_clock") or {}
+    provenance = document.get("provenance")
     return {
         "schema": SCHEMA,
+        "provenance": provenance,
+        "publication_clock": clock,
         "rows_document": {"schema": document.get("schema"),
                           "bars": (document.get("bars") or {}).get("path"),
                           "bars_sha256": (document.get("bars") or {}).get("sha256"),
@@ -205,7 +209,9 @@ def summarise(document):
                    "event_types": sorted({row["event_type"] for row in rows})},
         "environment": {"python": ".".join(str(part) for part in sys.version_info[:3]), "numpy": np.__version__},
         "fitted": "NOTHING: correlations and conditional means; no model is fitted here",
-        "reading": ("RUNG 1, ASSOCIATION ONLY. Every number here is a correlation or a conditional mean over observed "
+        "reading": (f"PROVENANCE {provenance}, publication clock {clock.get('mode')}. "
+                    f"{clock.get('identification_caveat')}. "
+                    "RUNG 1, ASSOCIATION ONLY. Every number here is a correlation or a conditional mean over observed "
                     "events. None of them is an effect, a response, a sensitivity or an impulse: each is open to the "
                     "hour of the day, the regime, the volatility that was already there and the other releases inside "
                     "the same window, none of which is held fixed anywhere in this document. It is the NAIVE "
