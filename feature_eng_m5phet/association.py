@@ -109,10 +109,48 @@ def _cell(values):
     return {"n": int(values.size), "mean": float(np.mean(values)), "median": float(np.median(values))}
 
 
-def _by_sign(surprise, outcome):
+#: the name of the sign bin a surprise falls into. One rule, written once, so the table that is BUILT here and the
+#: prediction that is READ from it downstream can never disagree about where a surprise belongs.
+SIGN_OF = ("negative", "zero", "positive")
+
+
+def sign_bin(surprise):
+    """Which bin of the naive response table a surprise belongs to. Zero is its own bin, never folded into either."""
+    return "negative" if surprise < 0 else ("positive" if surprise > 0 else "zero")
+
+
+def naive_response_by_sign(surprise, outcome):
+    """The naive response table: mean and median outcome in each surprise-sign bin, with the `n` of every cell.
+
+    This is rung 1's whole contribution to a closure table. It is public because step 3 must score its projection
+    against THIS statistic and not against a second implementation of it that happens to look the same -- and
+    because a naive reference computed over different rows than the model was scored on is not a reference at all.
+    """
+    surprise, outcome = np.asarray(surprise, dtype=np.float64), np.asarray(outcome, dtype=np.float64)
     return {"negative": _cell(outcome[surprise < 0]),
             "zero": _cell(outcome[surprise == 0]),
             "positive": _cell(outcome[surprise > 0])}
+
+
+def naive_sign_prediction(table, surprise, *, fallback=None):
+    """What the naive reference predicts for one surprise, or the name of the reason it predicts nothing.
+
+    `table` is a :func:`naive_response_by_sign` table FITTED ON THE ROWS THE MODEL WAS FITTED ON -- a table that has
+    seen the events it is about to be scored on is not a naive reference, it is a look-ahead. When the bin a
+    surprise falls into holds no fitted event, the table has nothing to say about it: the caller's declared
+    `fallback` is used and the reason is returned beside it, so the substitution is visible in the closure table
+    rather than hidden inside a mean.
+    """
+    cell = (table or {}).get(sign_bin(float(surprise))) or {}
+    value = cell.get("mean")
+    if value is None:
+        return fallback, (f"EMPTY_SIGN_BIN: no fitted event had a {sign_bin(float(surprise))} surprise, so the naive "
+                          f"response table says nothing about this event and the declared fallback was used")
+    return float(value), None
+
+
+def _by_sign(surprise, outcome):
+    return naive_response_by_sign(surprise, outcome)
 
 
 def _terciles(values):
