@@ -307,12 +307,16 @@ def build(rows_path, *, event_types=None, horizons=None, holdout_fraction=DEFAUL
         # path identifies a design (which columns, which window); the bars identify the labels, and a later stage
         # that seals a corpus of these rows must name the second, not the first.
         "bars": header.get("bars"),
+        "expectation": header.get("expectation"),
         "treatment": TREATMENT,
         "treatment_kind": "continuous",
         "outcomes": list(OUTCOMES),
         "columns": columns,
         "column_readings": {
-            "surprise": "the standardized release surprise (actual - consensus) / scale, continuous; the treatment",
+            "surprise": (("the standardized release surprise (actual - MODEL_BASED_EXPECTATION) / scale, "
+                          "continuous; the treatment. " + str((header.get("expectation") or {}).get("reading")))
+                         if (header.get("expectation") or {}).get("kind") == "MODEL_BASED_EXPECTATION" else
+                         "the standardized release surprise (actual - consensus) / scale, continuous; the treatment"),
             "log_return": "the log return from the release instant to the horizon",
             "realized_vol": "the realized variance over the horizon, the sum of squared bar log returns",
             "pre_event_realized_vol": "the realized variance over the declared pre-event span, before the release",

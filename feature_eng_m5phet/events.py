@@ -25,6 +25,15 @@ The whole difficulty is that three of those quantities are trivially corruptible
   `BARS_MISSING_AT_HORIZON` and counted. The same rule covers a release that falls into a market closure: there is no
   bar at or before it within one sampling step, so every one of its horizons is refused by that name.
 
+**The number the actual is read against has two possible provenances, and they are never given the same name.**
+A *consensus* is what the market was told to expect and somebody published it. A `MODEL_BASED_EXPECTATION` (WP28,
+`expectations.py`) is what a declared time-series model, fitted on that series' own prior vintages only, would have
+forecast -- nobody published it and nobody is known to have held it. When the calendar declares one of those instead
+of a consensus (`--calendar-expectation-column`), every artifact from here down carries the kind, the model that
+produced each row, that model's own out-of-sample error on the prior releases, and the sentence saying a model's
+expectation is not the market's; the word "consensus" is used for it nowhere, the provenance gains
+`_MODEL_EXPECTATION`, and a release without one is excluded `NO_EXPECTATION` rather than `NO_CONSENSUS`.
+
 Three clock states, not two, and every artifact says which one it was built under. `OBSERVED_PUBLICATION_CLOCK`:
 the dataset declared when its source published both the actual and the consensus, and nothing is assumed.
 `OBSERVED_ACTUAL_PUBLICATION`: the dataset declared when the ACTUAL was published -- the joined calendar of
@@ -59,6 +68,7 @@ import numpy as np
 from app.economic_calendar import SCHEMA as ARRIVAL_SCHEMA, CalendarRefusal, PointInTimeCalendar
 
 from . import calendar_clock as _clock
+from .expectations import EXPECTATION_KIND, EXPECTATION_READING
 from .design import MISSING_TOKENS, TIME_COLUMN_NAMES, _delimiter, _file_digest, _time_parser
 
 SCHEMA = "m5phet.event_rows.v1"
@@ -82,6 +92,7 @@ DEFAULT_MIN_PRIOR_RELEASES = 8
 EXCLUSION_CODES = (
     "MISSING_PUBLICATION_CLOCK",
     "NO_CONSENSUS",
+    "NO_EXPECTATION",
     "INSUFFICIENT_HISTORY",
     "NON_POSITIVE_RESIDUAL_SCALE",
     "BARS_MISSING_AT_HORIZON",
@@ -117,6 +128,9 @@ OPTIONAL_COLUMN_NAMES = {
     "unit": ("unit",),
     "period": ("period",),
     "availability": ("historical_availability",),
+    "expectation_model": ("expectation_model",),
+    "expectation_oos_error": ("expectation_model_oos_mae",),
+    "expectation_oos_n": ("expectation_model_oos_n",),
 }
 
 AVAILABILITY = ("KNOWN", "UNKNOWN")
@@ -477,6 +491,7 @@ def _localize(clock, texts, *, where):
 #: every role a calendar column can play. `event` and `event_time` take a list of column names (a label may be spread
 #: over a country and a description, an instant over a date and a time); the rest take one name or none.
 MAPPING_ROLES = ("event", "event_time", "published", "consensus_published", "received", "actual", "consensus",
+                 "expectation", "expectation_model", "expectation_oos_error", "expectation_oos_n",
                  "previous", "unit", "period", "availability")
 
 
@@ -490,6 +505,15 @@ class CalendarMapping:
                                             f"{list(MAPPING_ROLES)}")
         for role in MAPPING_ROLES:
             setattr(self, role, names.get(role))
+
+
+def _models_used(releases):
+    """How many releases each declared expectation model produced, so a reader sees which one actually ran."""
+    counts = {}
+    for release in releases:
+        name = release.get("expectation_model") or "NOT_DECLARED_BY_THE_CALENDAR"
+        counts[name] = counts.get(name, 0) + 1
+    return dict(sorted(counts.items()))
 
 
 def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False, columns=None,
@@ -511,8 +535,27 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         if name not in header:
             _refuse("COLUMN_NOT_IN_DATASET", f"the event-time column {name!r} is not among {header}")
     actual_column = _pick(header, mapping.actual, ACTUAL_COLUMN_NAMES, what="the calendar's actual column")
-    consensus_column = _pick(header, mapping.consensus, CONSENSUS_COLUMN_NAMES,
-                             what="the calendar's consensus column")
+    # WP28. A calendar may carry a MODEL_BASED_EXPECTATION instead of a consensus: a declared time-series model's
+    # forecast of the release from its own prior vintages. It occupies the same slot in the arithmetic -- the number
+    # the actual is read against -- and it is never given the other one's name in any artifact, because a model's
+    # expectation is not the market's and a reader who confuses them has been told something false.
+    expectation_mode = mapping.expectation is not None
+    if expectation_mode:
+        if mapping.consensus is not None:
+            _refuse("TWO_EXPECTATIONS_DECLARED",
+                    f"this calendar declares both a consensus column ({mapping.consensus!r}) and a "
+                    f"MODEL_BASED_EXPECTATION column ({mapping.expectation!r}); the surprise is read against one "
+                    f"number and choosing between two declarations is not this job's to make")
+        if mapping.consensus_published is not None:
+            _refuse("EXPECTATION_HAS_NO_PUBLICATION_CLOCK",
+                    f"a MODEL_BASED_EXPECTATION was declared together with a consensus publication column "
+                    f"({mapping.consensus_published!r}); nobody published this expectation, so nothing observed when "
+                    f"it became public")
+        consensus_column = _pick(header, mapping.expectation, (),
+                                 what="the calendar's MODEL_BASED_EXPECTATION column")
+    else:
+        consensus_column = _pick(header, mapping.consensus, CONSENSUS_COLUMN_NAMES,
+                                 what="the calendar's consensus column")
     resolved = {}
     lowered = {name.lower(): name for name in header}
     for optional, candidates in OPTIONAL_COLUMN_NAMES.items():
@@ -523,8 +566,9 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         else:
             name = next((lowered[c] for c in candidates if c in lowered), None)
         resolved[optional] = name
+    expectation_column = mapping.expectation
     mapping = CalendarMapping(event=event_columns, event_time=time_columns, actual=actual_column,
-                              consensus=consensus_column, **resolved)
+                              consensus=consensus_column, expectation=expectation_column, **resolved)
     if mapping.availability is None and historical_availability is None:
         _refuse("AVAILABILITY_NOT_DECLARED",
                 "this calendar does not say whether its rows were historically available at their timestamps, and "
@@ -602,8 +646,15 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         received = _parse_instant([_cell(row, mapping.received) or ""], zone,
                                   where=f"calendar row {number} received_at", zone_declared=timezone_declared)
         actual = _float_cell(row, actual_column, where=f"calendar row {number} actual")
-        consensus = _float_cell(row, consensus_column, where=f"calendar row {number} consensus")
+        consensus = _float_cell(row, consensus_column,
+                                where=f"calendar row {number} "
+                                      f"{'MODEL_BASED_EXPECTATION' if expectation_mode else 'consensus'}")
         previous = _float_cell(row, mapping.previous, where=f"calendar row {number} previous")
+        expectation_model = _cell(row, mapping.expectation_model)
+        expectation_oos_error = _float_cell(row, mapping.expectation_oos_error,
+                                            where=f"calendar row {number} expectation out-of-sample error")
+        expectation_oos_n = _float_cell(row, mapping.expectation_oos_n,
+                                        where=f"calendar row {number} expectation out-of-sample count")
         availability = _cell(row, mapping.availability) or historical_availability
         if availability not in AVAILABILITY:
             _refuse("AVAILABILITY_MUST_BE_DECLARED",
@@ -659,6 +710,9 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
                          clock_window["utc_offset_seconds"],
                          "event_time": event_time, "published_at": published, "as_of": actual_seen,
                          "actual": actual, "consensus": consensus, "previous": previous,
+                         "expectation_model": expectation_model,
+                         "expectation_oos_error": expectation_oos_error,
+                         "expectation_oos_n": None if expectation_oos_n is None else int(expectation_oos_n),
                          "unit": unit or UNDECLARED, "period": period or UNDECLARED, "arrivals": arrivals})
     # ordered by the SOURCE's clock where it exists, because that is the order the scale's history is read in; our
     # receipt orders only the rows whose source never declared one, and those can carry no release surprise anyway
@@ -666,7 +720,23 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
     return {"path": str(path), "sha256": _file_digest(path), "columns": header, "rows_read": len(rows),
             "releases_with_an_actual": len(releases), "event_columns": event_columns,
             "event_time_columns": time_columns, "actual_column": actual_column,
-            "consensus_column": consensus_column,
+            **({"expectation": {
+                    "kind": EXPECTATION_KIND,
+                    "column": expectation_column,
+                    "model_column": mapping.expectation_model,
+                    "out_of_sample_error_column": mapping.expectation_oos_error,
+                    "out_of_sample_count_column": mapping.expectation_oos_n,
+                    "reading": EXPECTATION_READING,
+                    "never_called": ("consensus. Nothing in this document, in the rows built from it or in any "
+                                     "answer read out of them calls this number a consensus, because nobody "
+                                     "published one"),
+                    "publication_clock": ("NONE: an expectation nobody published has no publication instant. It is "
+                                          "taken to have stood tolerance_seconds before the OBSERVED release "
+                                          "instant, which a model's forecast satisfies by construction -- every "
+                                          "value it was computed from had already been published -- and which is a "
+                                          "declaration, not a measurement"),
+                    "models_used": _models_used(releases),
+                }} if expectation_mode else {"consensus_column": consensus_column}),
             "published_column": mapping.published, "consensus_published_column": mapping.consensus_published,
             "received_column": mapping.received, "previous_column": mapping.previous,
             "unit_column": mapping.unit, "period_column": mapping.period,
@@ -798,7 +868,10 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
                              historical_availability=historical_availability, publication_clock=publication_clock,
                              assumed_tolerance_seconds=assumed_tolerance_seconds, calendar_clock=calendar_clock)
     clock = calendar["publication_clock"]
-    provenance = PROVENANCE[publication_clock]
+    expectation = calendar.get("expectation")
+    # WP28: the provenance says, in the one string that travels furthest, that the number the actual was read
+    # against came out of a model and not out of a market.
+    provenance = PROVENANCE[publication_clock] + ("_MODEL_EXPECTATION" if expectation else "")
     releases = calendar.pop("releases")
 
     excluded = _Excluded()
@@ -826,7 +899,8 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
         if answer.get("release_actual") is None:
             record["status"], record["why"] = "MISSING_PUBLICATION_CLOCK", answer.get("release_reason")
         elif raw is None:
-            record["status"], record["why"] = "NO_CONSENSUS", answer.get("release_reason")
+            record["status"] = "NO_EXPECTATION" if expectation else "NO_CONSENSUS"
+            record["why"] = answer.get("release_reason")
         else:
             published_epoch = datetime.fromisoformat(answer["release_actual_published_at"]).timestamp()
             # STRICTLY before: a release published at the same instant is not information anyone had beforehand
@@ -923,8 +997,14 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
                 "surprise_raw": record["release_surprise"],
                 "surprise_scale": record["scale"], "surprise_scale_n": record["scale_n"],
                 "surprise_boundary": "release",
-                "consensus": record["release_consensus"],
-                "consensus_published_at": record["release_consensus_published_at"],
+                **({"expectation": record["release_consensus"],
+                    "expectation_kind": EXPECTATION_KIND,
+                    "expectation_stood_from": record["release_consensus_published_at"],
+                    "expectation_model": record["expectation_model"],
+                    "expectation_oos_error": record["expectation_oos_error"],
+                    "expectation_oos_n": record["expectation_oos_n"]} if expectation else
+                   {"consensus": record["release_consensus"],
+                    "consensus_published_at": record["release_consensus_published_at"]}),
                 "actual": record["actual"], "previous": record["previous"],
                 "unit": record["unit"], "period": record["period"],
                 "anchor_time": datetime.fromtimestamp(float(times[anchor]), _timezone.utc).isoformat(),
@@ -968,13 +1048,15 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
             "max_neighbours_listed": None if max_neighbours_listed is None else int(max_neighbours_listed),
             "realized_vol_step_seconds": step,
             "realized_vol": f"the sum of squared log returns over consecutive {step}-second bars inside the horizon",
-            "surprise": ("app/economic_calendar.py release_surprise, standardized by the dispersion of that event "
+            "surprise": (("actual - MODEL_BASED_EXPECTATION, " if expectation else "") +
+                         "app/economic_calendar.py release_surprise, standardized by the dispersion of that event "
                          "type's surprises over releases PUBLISHED STRICTLY BEFORE this one (sample standard "
                          "deviation, ddof=1); no release, and no part of any release, from at or after the instant "
                          "enters the scale"),
             "day_of_week": "Monday is 0, in UTC",
             "hour_of_day": "in UTC",
         },
+        "expectation": expectation,
         "bars": {key: value for key, value in bars.items() if key not in ("times", "log_price")},
         "calendar": calendar,
         "rows": rows,
@@ -984,6 +1066,8 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
         "environment": {"python": ".".join(str(part) for part in sys.version_info[:3]), "numpy": np.__version__},
         "fitted": "NOTHING: this job writes the rows an event study is estimated from; no model is fitted here",
         "reading": (f"PROVENANCE {provenance}, publication clock {clock['mode']}. {clock['identification_caveat']}. "
+                    + (f"The number every actual was read against is a {EXPECTATION_KIND}: {EXPECTATION_READING}. "
+                       if expectation else "") +
                     "one row per (release, horizon). `surprise` is a standardized release surprise and `log_return` "
                     "and `realized_vol` are the paths that followed it -- an association these rows make measurable, "
                     "not an effect. `other_releases_in_window` with a POSITIVE offset landed AFTER this release and "
@@ -1018,6 +1102,18 @@ def main(argv=None):
     parser.add_argument("--calendar-received-column", help="the instant the row reached this system")
     parser.add_argument("--calendar-actual-column")
     parser.add_argument("--calendar-consensus-column")
+    parser.add_argument("--calendar-expectation-column",
+                        help="the column carrying a MODEL_BASED_EXPECTATION -- a declared model's forecast of the "
+                             "release from that series' own prior vintages (feature_eng_m5phet.expectations). It "
+                             "takes the consensus's place in the arithmetic and NEVER its name: every artifact says "
+                             "MODEL_BASED_EXPECTATION, because a model's expectation is not the market's. Declaring "
+                             "it together with --calendar-consensus-column is refused")
+    parser.add_argument("--calendar-expectation-model-column",
+                        help="the column naming which declared model produced each expectation")
+    parser.add_argument("--calendar-expectation-oos-error-column",
+                        help="the column carrying that model's own out-of-sample error on the PRIOR releases")
+    parser.add_argument("--calendar-expectation-oos-n-column",
+                        help="the column carrying how many prior out-of-sample forecasts that error averages")
     parser.add_argument("--calendar-previous-column")
     parser.add_argument("--calendar-unit-column")
     parser.add_argument("--calendar-period-column")
@@ -1056,6 +1152,10 @@ def main(argv=None):
                               consensus_published=args.calendar_consensus_published_column,
                               received=args.calendar_received_column,
                               actual=args.calendar_actual_column, consensus=args.calendar_consensus_column,
+                              expectation=args.calendar_expectation_column,
+                              expectation_model=args.calendar_expectation_model_column,
+                              expectation_oos_error=args.calendar_expectation_oos_error_column,
+                              expectation_oos_n=args.calendar_expectation_oos_n_column,
                               previous=args.calendar_previous_column, unit=args.calendar_unit_column,
                               period=args.calendar_period_column, availability=args.calendar_availability_column)
     try:
