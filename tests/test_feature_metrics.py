@@ -216,3 +216,23 @@ def test_the_cli_writes_the_sheet(tmp_path, capsys):
     metrics.validate(json.loads(out.read_text(encoding="utf-8")))
     assert metrics.main(["--data", path, "--target", "nope", "--out", str(out)]) == 2
     assert "REFUSED TARGET_NOT_IN_DATASET" in capsys.readouterr().err
+
+
+def test_a_constant_column_is_reported_zero_variance_instead_of_breaking_the_stationarity_test(tmp_path):
+    """A real table has constant columns: a release published at the same hour every week has one `hour_of_day`.
+    statsmodels raises `Invalid input, x is constant` on such a series, and a measurement that cannot be taken is
+    reported by name here -- never as a verdict a heuristic would read off a flat line."""
+    from feature_eng_m5phet import metrics
+
+    path = tmp_path / "constant.csv"
+    from datetime import datetime, timedelta, timezone
+    start = datetime(2019, 1, 1, tzinfo=timezone.utc)
+    rows = ["t,moving,flat"] + [f"{(start + timedelta(days=step)).isoformat()},{step * 0.5},13"
+                                for step in range(64)]
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    document = metrics.feature_metrics(str(path), "moving", time_column="t")
+    block = document["features"]["flat"]["stationarity"]
+    assert block["verdict"] == "ZERO_VARIANCE"
+    assert block["adf"]["status"] == "ZERO_VARIANCE" and block["kpss"]["status"] == "ZERO_VARIANCE"
+    assert "single value" in block["adf"]["reason"]
+    metrics.validate(document)
