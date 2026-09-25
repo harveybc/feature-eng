@@ -58,6 +58,7 @@ import numpy as np
 
 from app.economic_calendar import SCHEMA as ARRIVAL_SCHEMA, CalendarRefusal, PointInTimeCalendar
 
+from . import calendar_clock as _clock
 from .design import MISSING_TOKENS, TIME_COLUMN_NAMES, _delimiter, _file_digest, _time_parser
 
 SCHEMA = "m5phet.event_rows.v1"
@@ -84,6 +85,7 @@ EXCLUSION_CODES = (
     "INSUFFICIENT_HISTORY",
     "NON_POSITIVE_RESIDUAL_SCALE",
     "BARS_MISSING_AT_HORIZON",
+    "CLOCK_PERIOD_UNDETERMINED",
 )
 
 #: how many excluded rows are described one by one before the list says it was truncated. The COUNTS are always exact;
@@ -138,7 +140,7 @@ DEFAULT_ASSUMED_TOLERANCE_SECONDS = 60
 PROVENANCE = {"observed": "DEVELOPMENT_OBSERVED_CLOCK", "scheduled": "DEVELOPMENT_ASSUMED_CLOCK"}
 
 
-def publication_clock_block(mode, tolerance_seconds, *, consensus_assumed=False):
+def publication_clock_block(mode, tolerance_seconds, *, consensus_assumed=False, localized=None):
     """What a reader must be told about the instants underneath every number in this document.
 
     Three clocks, not two, because a release has two instants and an archive may observe only one of them. When the
@@ -165,6 +167,22 @@ def publication_clock_block(mode, tolerance_seconds, *, consensus_assumed=False)
         return {"mode": "OBSERVED_PUBLICATION_CLOCK", "tolerance_seconds": None, "declared_by": "the dataset",
                 "identification_caveat": ("the publication instants are the ones the dataset declares; a release that "
                                           "declares none is excluded MISSING_PUBLICATION_CLOCK and never assumed")}
+    if localized is not None:
+        return {"mode": "ASSUMED_SCHEDULED_PUBLICATION_LOCALIZED",
+                "tolerance_seconds": int(tolerance_seconds),
+                "declared_by": "operator, over a clock MEASURED from the archive",
+                "calendar_clock": localized,
+                "identification_caveat": ("the surprise's publication instant is still assumed equal to the "
+                                          "SCHEDULED instant -- nobody observed when anything was published -- but "
+                                          "that scheduled wall clock is no longer read as UTC: it is localized by "
+                                          "the per-period UTC offsets measured in the clock document named here, "
+                                          "and a row in a period the measurement could not determine is excluded "
+                                          "CLOCK_PERIOD_UNDETERMINED rather than localized by a guess. Results are "
+                                          "DEVELOPMENT and NOT identified: a correct anchor for an assumed clock is "
+                                          "still an assumed clock"),
+                "consensus": ("the consensus is taken as published tolerance_seconds before the localized scheduled "
+                              "instant, under the same declared assumption; no consensus publication timestamp was "
+                              "observed either")}
     return {"mode": "ASSUMED_SCHEDULED_PUBLICATION",
             "tolerance_seconds": int(tolerance_seconds),
             "declared_by": "operator",
@@ -431,6 +449,31 @@ def _parse_instant(texts, zone, *, where, zone_declared):
     return _aware(moment, zone, where=where, zone_declared=zone_declared)
 
 
+def _localize(clock, texts, *, where):
+    """One instant from a naive wall clock and the measured period that says what that wall clock meant.
+
+    Returns (instant, period). A row whose date falls in no DETERMINED period comes back as (parsed, None) and is
+    excluded by name upstream: the neighbouring period's offset is never borrowed for it, because an hour borrowed
+    from a neighbour is indistinguishable in the output from an hour that was measured.
+    """
+    joined = " ".join(text for text in texts if text)
+    if not joined:
+        return None, None
+    try:
+        _, parser = _time_parser(joined)
+        moment = parser(joined)
+    except ValueError:
+        _refuse("TIMESTAMP_UNPARSEABLE", f"{where} reads {joined!r}, which no declared format reads")
+    if moment.tzinfo is not None and moment.utcoffset() is not None:
+        _refuse("CLOCK_ON_AN_AWARE_TIMESTAMP",
+                f"{where} reads {joined!r}, which already carries an offset; a measured clock localizes a NAIVE wall "
+                f"clock and does not overwrite an instant that already says what it is")
+    period = _clock.period_of(clock, moment.date())
+    if period is None or period.get("status") != _clock.STATUS_DETERMINED:
+        return moment, None
+    return (moment - timedelta(seconds=int(period["utc_offset_seconds"]))).replace(tzinfo=_timezone.utc), period
+
+
 #: every role a calendar column can play. `event` and `event_time` take a list of column names (a label may be spread
 #: over a country and a description, an instant over a date and a time); the rest take one name or none.
 MAPPING_ROLES = ("event", "event_time", "published", "consensus_published", "received", "actual", "consensus",
@@ -451,7 +494,7 @@ class CalendarMapping:
 
 def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False, columns=None,
                   historical_availability=None, publication_clock="observed",
-                  assumed_tolerance_seconds=DEFAULT_ASSUMED_TOLERANCE_SECONDS):
+                  assumed_tolerance_seconds=DEFAULT_ASSUMED_TOLERANCE_SECONDS, calendar_clock=None):
     """The releases, as the arrival store's own arrivals. Nothing is computed here; the module does the arithmetic."""
     zone = _zone(timezone_name)
     header, rows = _calendar_rows(path, columns=columns)
@@ -512,7 +555,24 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
                     f"assumption, or drop the column")
     tolerance = timedelta(seconds=int(assumed_tolerance_seconds)) if (assumed or assumed_consensus) else None
 
-    releases = []
+    clock = None
+    if calendar_clock is not None:
+        # a measured clock localizes a SCHEDULED wall clock. It is not a publication clock and does not pretend to
+        # be one: it says what the archive's naive timestamps mean, and nothing about when anybody published.
+        if not assumed:
+            _refuse("CLOCK_NEEDS_THE_SCHEDULED_ASSUMPTION",
+                    "a measured calendar clock localizes the archive's SCHEDULED wall clock, so it is only "
+                    "meaningful with --publication-clock scheduled; under an observed clock the instants are the "
+                    "dataset's own and nothing localizes them")
+        if timezone_declared:
+            _refuse("TWO_CLOCKS_DECLARED",
+                    f"a zone ({timezone_name!r}) and a measured per-period clock were both declared for the same "
+                    f"archive; one wall clock has one meaning, and choosing between two declarations is not this "
+                    f"job's to make")
+        clock = calendar_clock if isinstance(calendar_clock, dict) and "periods" in calendar_clock \
+            else _clock.load(calendar_clock)
+
+    releases, clock_excluded = [], []
     unit_declared = mapping.unit is not None
     period_declared = mapping.period is not None
     for row in rows:
@@ -520,8 +580,18 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         event_type = " | ".join((_cell(row, name) or "") for name in event_columns).strip(" |")
         if not event_type:
             _refuse("EVENT_TYPE_MISSING", f"calendar row {number} has no event-type label in {event_columns}")
-        event_time = _parse_instant([_cell(row, name) or "" for name in time_columns], zone,
-                                    where=f"calendar row {number} event time", zone_declared=timezone_declared)
+        clock_missing = False
+        if clock is None:
+            event_time = _parse_instant([_cell(row, name) or "" for name in time_columns], zone,
+                                        where=f"calendar row {number} event time", zone_declared=timezone_declared)
+            clock_window = None
+        else:
+            event_time, clock_window = _localize(clock, [_cell(row, name) or "" for name in time_columns],
+                                                 where=f"calendar row {number} event time")
+            # the row is NOT dropped here: a scheduled row with no number never becomes a release, and counting it
+            # as one would make CLOCK_PERIOD_UNDETERMINED an overcount of what the clock actually cost. The drop
+            # happens below, once this row is known to be a release.
+            clock_missing = event_time is not None and clock_window is None
         if event_time is None:
             _refuse("EVENT_TIME_MISSING", f"calendar row {number} has no event time in {time_columns}")
         published = _parse_instant([_cell(row, mapping.published) or ""], zone,
@@ -543,6 +613,12 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         period = _cell(row, mapping.period) if period_declared else UNDECLARED
         if actual is None:
             continue                                        # a scheduled event with no number is not a release yet
+        if clock_missing:
+            clock_excluded.append({"row_number": number, "event_type": event_type,
+                                   "why": "no DETERMINED period of the measured clock covers this release's date, "
+                                          "so what its wall clock meant was not established and it is not "
+                                          "localized by a neighbouring period's offset"})
+            continue
         if assumed:
             # the ONE place the assumption enters. It moves no value: it declares the instants the dataset never did,
             # and every artifact downstream carries the block that says so.
@@ -577,6 +653,10 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             arrival["published_at"] = published
         arrivals.append(arrival)
         releases.append({"row_number": number, "event_key": event_key, "event_type": event_type,
+                         "clock_period": None if clock_window is None else
+                         f"{clock_window['start_date']}..{clock_window['end_date']}",
+                         "clock_utc_offset_seconds": None if clock_window is None else
+                         clock_window["utc_offset_seconds"],
                          "event_time": event_time, "published_at": published, "as_of": actual_seen,
                          "actual": actual, "consensus": consensus, "previous": previous,
                          "unit": unit or UNDECLARED, "period": period or UNDECLARED, "arrivals": arrivals})
@@ -592,8 +672,16 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             "unit_column": mapping.unit, "period_column": mapping.period,
             "availability_column": mapping.availability, "historical_availability": historical_availability,
             "timezone": timezone_name, "timezone_declared": bool(timezone_declared),
-            "publication_clock": publication_clock_block(publication_clock, assumed_tolerance_seconds,
-                                                          consensus_assumed=assumed_consensus),
+            "publication_clock": publication_clock_block(
+                publication_clock, assumed_tolerance_seconds, consensus_assumed=assumed_consensus,
+                localized=None if clock is None else
+                {"path": clock["path"], "sha256": clock["sha256"], "schema": _clock.SCHEMA,
+                 "periods": len(clock["periods"]),
+                 "periods_determined": sum(1 for entry in clock["periods"]
+                                           if entry.get("status") == _clock.STATUS_DETERMINED),
+                 "offsets": sorted({entry["utc_offset"] for entry in clock["periods"]
+                                    if entry.get("status") == _clock.STATUS_DETERMINED})}),
+            "clock_excluded": clock_excluded,
             "units_declared": unit_declared and period_declared,
             "units_reading": ("the dataset declares unit and period, so the calendar module's INCOMPARABLE_SERIES "
                               "check is live" if unit_declared and period_declared else
@@ -621,6 +709,16 @@ class _Excluded:
         else:
             self.truncated[code] += 1
 
+    def calendar_row(self, code, entry):
+        """A row refused before it ever became a release: it is counted here, where every other refusal is."""
+        self.counts[code] += 1
+        if len(self.releases) < MAX_EXCLUDED_DETAIL:
+            self.releases.append({"event_key": None, "event_type": entry.get("event_type"),
+                                  "as_of": None, "calendar_row": entry.get("row_number"),
+                                  "code": code, "why": entry.get("why")})
+        else:
+            self.truncated[code] += 1
+
     def event_horizon(self, code, release, horizon, why):
         self.counts[code] += 1
         if len(self.event_horizons) < MAX_EXCLUDED_DETAIL:
@@ -632,9 +730,10 @@ class _Excluded:
 
     def document(self):
         return {"counts": self.counts,
-                "counts_reading": ("MISSING_PUBLICATION_CLOCK, NO_CONSENSUS, INSUFFICIENT_HISTORY and "
-                                   "NON_POSITIVE_RESIDUAL_SCALE count RELEASES; BARS_MISSING_AT_HORIZON counts "
-                                   "(release, horizon) pairs, because a gap refuses one horizon and not the release"),
+                "counts_reading": ("MISSING_PUBLICATION_CLOCK, NO_CONSENSUS, INSUFFICIENT_HISTORY, "
+                                   "NON_POSITIVE_RESIDUAL_SCALE and CLOCK_PERIOD_UNDETERMINED count RELEASES; "
+                                   "BARS_MISSING_AT_HORIZON counts (release, horizon) pairs, because a gap refuses "
+                                   "one horizon and not the release"),
                 "releases": self.releases, "event_horizons": self.event_horizons,
                 "examples_truncated_at": MAX_EXCLUDED_DETAIL,
                 "examples_not_listed": {code: n for code, n in self.truncated.items() if n}}
@@ -664,7 +763,7 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
           bars_timezone="UTC", bars_timezone_declared=False, calendar_timezone="UTC",
           calendar_timezone_declared=False, calendar_columns=None, historical_availability=None, max_bars=None,
           publication_clock="observed", assumed_tolerance_seconds=DEFAULT_ASSUMED_TOLERANCE_SECONDS,
-          max_neighbours_listed=None):
+          max_neighbours_listed=None, calendar_clock=None):
     """One row per (release, horizon), with the releases that did not become rows counted by name."""
     horizons = sorted({int(h) for h in horizons_minutes})
     if not horizons or horizons[0] <= 0:
@@ -697,12 +796,14 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
     calendar = read_calendar(calendar_path, mapping, timezone_name=calendar_timezone,
                              timezone_declared=calendar_timezone_declared, columns=calendar_columns,
                              historical_availability=historical_availability, publication_clock=publication_clock,
-                             assumed_tolerance_seconds=assumed_tolerance_seconds)
+                             assumed_tolerance_seconds=assumed_tolerance_seconds, calendar_clock=calendar_clock)
     clock = calendar["publication_clock"]
     provenance = PROVENANCE[publication_clock]
     releases = calendar.pop("releases")
 
     excluded = _Excluded()
+    for entry in calendar.pop("clock_excluded", ()):
+        excluded.calendar_row("CLOCK_PERIOD_UNDETERMINED", entry)
     # pass 1: the surprise of every release, from the calendar module's own release boundary, and the scale that the
     # information published before it -- and nothing else -- supports.
     history, computed = {}, []
@@ -839,6 +940,8 @@ def build(bars_path, calendar_path, mapping, *, horizons_minutes=DEFAULT_HORIZON
                 "other_releases_in_window_count": neighbours_total,
                 "other_releases_in_window_listed": len(neighbours),
                 "publication_clock_mode": clock["mode"],
+                "clock_period": record.get("clock_period"),
+                "clock_utc_offset_seconds": record.get("clock_utc_offset_seconds"),
                 "provenance": provenance,
             })
     rows.sort(key=lambda r: (r["published_at"], r["event_key"], r["horizon_minutes"]))
@@ -934,6 +1037,10 @@ def main(argv=None):
                         help="how long before the release instant the consensus is assumed to have stood; used by "
                              "--publication-clock scheduled, and by 'observed' on a calendar that declares no "
                              "consensus publication column")
+    parser.add_argument("--calendar-clock",
+                        help="a m5phet.calendar_clock.v1 document (feature_eng_m5phet.calendar_clock) whose measured "
+                             "per-period UTC offsets localize this archive's naive wall clock; only with "
+                             "--publication-clock scheduled, and never together with --calendar-timezone")
     parser.add_argument("--max-neighbours-listed", type=int,
                         help="list at most this many of the other releases in the window, nearest first; the count "
                              "reported on every row stays exact")
@@ -964,8 +1071,9 @@ def main(argv=None):
                          historical_availability=args.historical_availability, max_bars=args.max_bars,
                          publication_clock=args.publication_clock,
                          assumed_tolerance_seconds=args.assume_publication_tolerance_seconds,
-                         max_neighbours_listed=args.max_neighbours_listed)
-    except (EventsRefusal, CalendarRefusal) as refusal:
+                         max_neighbours_listed=args.max_neighbours_listed,
+                         calendar_clock=args.calendar_clock)
+    except (EventsRefusal, CalendarRefusal, _clock.ClockRefusal) as refusal:
         print(f"REFUSED {refusal}", file=sys.stderr)
         return 2
     text = json.dumps(document, indent=2, sort_keys=False, allow_nan=False)

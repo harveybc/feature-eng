@@ -723,7 +723,10 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
 
     clock = header.get("publication_clock") or {}
     reasons = []
-    if clock.get("mode") == "ASSUMED_SCHEDULED_PUBLICATION":
+    # every ASSUMED_SCHEDULED_PUBLICATION mode, localized or not. Measuring what the archive's wall clock MEANT
+    # repairs the anchor; it does not turn a scheduled instant into an observed one, and a study that read the
+    # localized mode as observed would claim identification from a correction.
+    if str(clock.get("mode") or "").startswith("ASSUMED_SCHEDULED_PUBLICATION"):
         reasons.append("ASSUMED_PUBLICATION_CLOCK: " + str(clock.get("identification_caveat")))
     if placebo.get("status") != "OK":
         reasons.append(f"PLACEBO_NOT_RUN: {placebo.get('status')}")

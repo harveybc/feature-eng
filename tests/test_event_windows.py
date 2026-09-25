@@ -610,3 +610,141 @@ def test_the_cli_builds_the_joined_calendar_under_the_observed_clock(tmp_path):
     assert document["provenance"] == "DEVELOPMENT_OBSERVED_CLOCK"
     assert document["publication_clock"]["mode"] == "OBSERVED_ACTUAL_PUBLICATION"
     assert document["publication_clock"]["consensus_clock"] == "ASSUMED_BEFORE_RELEASE"
+
+
+# ------------------------------------------- the localized clock: a measured anchor under the same old assumption
+
+def _clock_document(periods):
+    """A clock document in the shape `calendar_clock` writes, with exactly the periods a test needs."""
+    return {"schema": "m5phet.calendar_clock.v1", "provenance": "TEST", "periods": list(periods)}
+
+
+def _period(start, end, offset_seconds=None, status="DETERMINED", reason=None):
+    return {"start_date": start, "end_date": end, "status": status,
+            "utc_offset_seconds": offset_seconds,
+            "utc_offset": None if offset_seconds is None else f"UTC{'-' if offset_seconds < 0 else '+'}"
+                                                              f"{abs(offset_seconds) // 3600:02d}:00",
+            "reason": reason, "n": 100, "confidence": 1.0, "months": ["x"], "reading": "test"}
+
+
+def write_clock(path, periods):
+    path.write_text(json.dumps(_clock_document(periods)), encoding="utf-8")
+    return path
+
+
+#: the offset the synthetic archive's wall clock is written in: its rows are UTC-5 wall clocks of UTC instants
+LOCALIZED_OFFSET = -5 * 3600
+
+
+def write_offset_calendar(path, releases, *, consensus=100.0, offset_seconds=LOCALIZED_OFFSET):
+    """The archive shaped like the real one: a scheduled instant written in a wall clock hours from UTC, no zone."""
+    lines = [SCHEDULED_HEADER]
+    for kind, minute, s in releases:
+        wall = START + timedelta(minutes=minute) + timedelta(seconds=offset_seconds)
+        lines.append(",".join([kind, wall.replace(tzinfo=None).isoformat(), repr(consensus + s), repr(consensus),
+                               repr(consensus), "KNOWN"]))
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def localized_inputs(tmp_path, releases=None, name="", **kwargs):
+    releases = plan() if releases is None else releases
+    return (write_bars(tmp_path / f"bars{name}.csv", releases),
+            write_offset_calendar(tmp_path / f"offset{name}.csv", releases, **kwargs))
+
+
+def test_the_measured_clock_puts_the_release_where_the_response_actually_is(tmp_path):
+    """The archive's wall clock is five hours from UTC. Read as UTC the planted response is not there at all; read
+    through the measured clock it comes back exactly."""
+    bars, calendar = localized_inputs(tmp_path)
+    clock = write_clock(tmp_path / "clock.json", [_period("2023-01-01", "2025-12-31", LOCALIZED_OFFSET)])
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", calendar_clock=str(clock))
+    assert document["rows"], "the localized clock produced no rows at all"
+    assert document["publication_clock"]["mode"] == "ASSUMED_SCHEDULED_PUBLICATION_LOCALIZED"
+    assert document["publication_clock"]["calendar_clock"]["sha256"]
+    assert document["publication_clock"]["calendar_clock"]["offsets"] == ["UTC-05:00"]
+    for row in [r for r in document["rows"] if r["event_type"] == "A"]:
+        h = row["horizon_minutes"]
+        assert row["log_return"] == pytest.approx(B_LEVEL * row["surprise_raw"] * min(1.0, h / RAMP_MINUTES),
+                                                  abs=1e-12)
+        assert row["clock_utc_offset_seconds"] == LOCALIZED_OFFSET
+        assert row["clock_period"] == "2023-01-01..2025-12-31"
+        assert row["publication_clock_mode"] == "ASSUMED_SCHEDULED_PUBLICATION_LOCALIZED"
+        assert row["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
+
+
+def test_read_as_utc_the_same_archive_puts_every_release_in_the_wrong_place(tmp_path):
+    """The control for the test above: the defect the measured clock repairs is worth the whole response."""
+    bars, calendar = localized_inputs(tmp_path, name="wrong")
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", calendar_timezone="UTC", calendar_timezone_declared=True)
+    planted = [row for row in document["rows"] if row["event_type"] == "A" and row["horizon_minutes"] == 30]
+    assert planted, "the UTC reading produced no rows to compare"
+    assert not any(row["log_return"] == pytest.approx(B_LEVEL * row["surprise_raw"], abs=1e-12) for row in planted)
+
+
+def test_a_row_in_an_undetermined_period_is_excluded_by_name_and_counted(tmp_path):
+    bars, calendar = localized_inputs(tmp_path, name="undet")
+    half = (START + timedelta(minutes=FIRST_EVENT_MINUTE + (N_EVENTS // 2) * SPACING_MINUTES)).date().isoformat()
+    clock = write_clock(tmp_path / "clock_undet.json",
+                        [_period("2023-01-01", half, LOCALIZED_OFFSET),
+                         _period((datetime.fromisoformat(half) + timedelta(days=1)).date().isoformat(),
+                                 "2025-12-31", None, status="UNDETERMINED", reason="ESTIMATES_DISAGREE")])
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", calendar_clock=str(clock))
+    assert document["excluded"]["counts"]["CLOCK_PERIOD_UNDETERMINED"] > 0
+    named = [entry for entry in document["excluded"]["releases"]
+             if entry["code"] == "CLOCK_PERIOD_UNDETERMINED"]
+    assert named and "not localized by a neighbouring period" in named[0]["why"]
+    assert all(row["clock_period"] == f"2023-01-01..{half}" for row in document["rows"])
+
+
+def test_a_date_outside_every_period_is_excluded_rather_than_localized_by_the_nearest_one(tmp_path):
+    bars, calendar = localized_inputs(tmp_path, name="outside")
+    clock = write_clock(tmp_path / "clock_short.json", [_period("2019-01-01", "2019-12-31", LOCALIZED_OFFSET)])
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", calendar_clock=str(clock))
+    assert document["rows"] == []
+    assert document["excluded"]["counts"]["CLOCK_PERIOD_UNDETERMINED"] == N_EVENTS
+
+
+def test_a_measured_clock_and_a_declared_zone_are_not_both_accepted(tmp_path):
+    bars, calendar = localized_inputs(tmp_path, plan(12), name="two")
+    clock = write_clock(tmp_path / "clock_two.json", [_period("2023-01-01", "2025-12-31", LOCALIZED_OFFSET)])
+    with pytest.raises(events.EventsRefusal) as refusal:
+        events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="scheduled",
+                     calendar_timezone="America/New_York", calendar_timezone_declared=True,
+                     calendar_clock=str(clock))
+    assert refusal.value.code == "TWO_CLOCKS_DECLARED"
+
+
+def test_a_measured_clock_is_refused_under_an_observed_publication_clock(tmp_path):
+    bars, calendar = localized_inputs(tmp_path, plan(12), name="obs")
+    clock = write_clock(tmp_path / "clock_obs.json", [_period("2023-01-01", "2025-12-31", LOCALIZED_OFFSET)])
+    with pytest.raises(events.EventsRefusal) as refusal:
+        events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="observed",
+                     calendar_clock=str(clock))
+    assert refusal.value.code == "CLOCK_NEEDS_THE_SCHEDULED_ASSUMPTION"
+
+
+def test_the_localized_clock_is_still_an_assumed_clock_and_says_so(tmp_path):
+    bars, calendar = localized_inputs(tmp_path, plan(20), name="caveat")
+    clock = write_clock(tmp_path / "clock_caveat.json", [_period("2023-01-01", "2025-12-31", LOCALIZED_OFFSET)])
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="scheduled", calendar_clock=str(clock))
+    caveat = document["publication_clock"]["identification_caveat"]
+    assert "still assumed equal to the SCHEDULED instant" in caveat
+    assert "NOT identified" in caveat
+    assert document["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
+
+
+def test_the_cli_carries_the_measured_clock_into_the_file(tmp_path):
+    bars, calendar = localized_inputs(tmp_path, plan(20), name="cli2")
+    clock = write_clock(tmp_path / "clock_cli.json", [_period("2023-01-01", "2025-12-31", LOCALIZED_OFFSET)])
+    out = tmp_path / "localized_rows.json"
+    assert events.main(["--bars", str(bars), "--calendar", str(calendar), "--out", str(out),
+                        "--publication-clock", "scheduled", "--calendar-clock", str(clock)]) == 0
+    document = json.loads(out.read_text(encoding="utf-8"))
+    assert document["publication_clock"]["mode"] == "ASSUMED_SCHEDULED_PUBLICATION_LOCALIZED"
+    assert document["publication_clock"]["calendar_clock"]["path"].endswith("clock_cli.json")
