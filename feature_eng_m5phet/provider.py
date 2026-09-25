@@ -10,6 +10,7 @@ import unicodedata
 import uuid
 
 from . import questions as questions_module
+from . import regime_space
 from .regimes import HierarchicalRegimes, validate_rows
 
 
@@ -134,7 +135,11 @@ class Provider:
                     output_kinds=[SUPPORTED["output_kind"]], uncertainty_methods=[UNCERTAINTY],
                     supported=[dict(SUPPORTED)], requires_fitted_state=True, known_states=list(self._known_states),
                     fit_command="feature-eng-regimes fit", input_schema="flat numeric records with unique row_id",
-                    resource_limits={"reference_rows": 2048, "query_rows": 10000, "features": 64})
+                    resource_limits={"reference_rows": 2048, "query_rows": 10000, "features": 64},
+                    # WP19: the methods and parameter grids a reference MAY be fitted with, declared by this package
+                    # and read-only here -- a caller's copy is its own, and no capability of this provider fits
+                    # anything. The explicit job `python -m feature_eng_m5phet.fit_regimes` does.
+                    regime_space=regime_space.as_capability())
 
     def load(self, state_ref):
         if (not isinstance(state_ref, str) or state_ref not in self._known_states
