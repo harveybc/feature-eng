@@ -15,7 +15,8 @@ from pathlib import Path
 import joblib
 import pytest
 
-from feature_eng_m5phet.provider import Provider, chat_request, chat_slots
+from feature_eng_m5phet.provider import (NO_DESCRIPTION, Provider, chat_request, chat_slots,
+                                        metric_value, metric_vocabulary)
 from feature_eng_m5phet.regimes import HierarchicalRegimes
 
 TASK_ID = "test-regimes"
@@ -73,10 +74,30 @@ def interpreter():
 
 def test_it_declares_the_task_and_version_the_manifest_records(demo, model):
     slots = chat_slots()
-    assert [slot["name"] for slot in slots] == ["task_id", "model_version"]
+    assert [slot["name"] for slot in slots] == ["task_id", "model_version", "target_metric"]
     assert slots[0]["allowed"] == [TASK_ID]
     assert slots[1]["allowed"] == [model.model_version]
     assert all(slot["type"] == "string" for slot in slots)
+
+
+def test_it_declares_a_metric_for_every_fitted_feature_in_the_forms_the_engine_reads(demo, model):
+    """The person never types a column expression, so every admissible one is declared -- and only those."""
+    from feature_eng_m5phet.questions import metric_problem
+    metric = chat_slots()[-1]
+    assert metric["name"] == "target_metric" and metric["required"] is False
+    features = list(model.metadata["features"])
+    assert metric["allowed"] == [NO_DESCRIPTION] + [metric_value(f, form) for f in features
+                                                    for form in ("highest", "lowest", "> 0", "< 0")]
+    for value in metric["allowed"][1:]:
+        assert metric_problem(value, features) is None, f"{value!r} is declared but the engine would refuse it"
+    assert metric["aliases"][NO_DESCRIPTION], "an assignment command must settle this slot by its own verb"
+
+
+def test_a_manifest_that_does_not_say_what_was_fitted_declares_no_metric(demo, model):
+    manifest = json.loads((demo / "manifest.json").read_text(encoding="utf-8"))
+    manifest["metadata"] = {k: v for k, v in manifest["metadata"].items() if k != "features"}
+    (demo / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    assert [slot["name"] for slot in chat_slots()] == ["task_id", "model_version"]
 
 
 def test_the_hierarchy_levels_are_not_declared_because_nothing_could_honour_them(demo, model):
@@ -124,11 +145,16 @@ def test_the_declaration_satisfies_the_resolvers_contract(demo):
 @pytest.mark.parametrize("prompt", ["Assign hierarchical regimes", "assign regimes", "asigna regimenes",
                                     "muestra regímenes jerárquicos"])
 def test_the_bounded_commands_resolve_both_slots_without_a_language_model(demo, model, prompt):
-    """Every accepted command names the reference in words, so the deterministic pass settles it and no model is asked."""
+    """Every accepted command names the reference in words, so the deterministic pass settles it and no model is asked.
+
+    `target_metric` is settled too, by the command's own verb, and settled to NO_DESCRIPTION: an assignment asks for no
+    description. Leaving it unresolved would send every one of these sentences to the interpreter, which would then be
+    choosing a metric nobody named."""
     interpret = interpreter()
     report = interpret.interpret(prompt, chat_slots())
     assert report["status"] == interpret.STATUS_OK, report.get("why")
-    assert report["parameters"] == {"task_id": TASK_ID, "model_version": model.model_version}
+    assert report["parameters"] == {"task_id": TASK_ID, "model_version": model.model_version,
+                                   "target_metric": NO_DESCRIPTION}
     assert set(report["sources"].values()) == {"QUESTION_TEXT"}
     assert report["interpreter"] is None
 
@@ -245,3 +271,163 @@ def test_a_prompt_naming_no_command_is_still_refused(prompt, demo, model, rows, 
     """The boundary this check exists for is untouched: one operation, and a sentence cannot ask for another."""
     with pytest.raises(ValueError, match="this adapter performs one operation"):
         chat_request(prompt, {"rows": rows}, config(model, tmp_path / "regimes" / "reference.joblib"))
+
+
+# --- a person's own words, in either language, instead of a column expression ------------------------------------------
+#
+# The product this serves is one sentence long: "describe el grupo de velas con cuerpo alto" must be understood, by the
+# words, without anyone knowing that the column is called `body_pipettes`. So these tests use a reference fitted on the
+# demo's own feature names -- the phrasings are built from THOSE, and a fixture named x and y could not show it.
+
+OHLC_TASK = "ohlc-regimes-words"
+OHLC_FEATURES = ["body_pipettes", "range_pipettes"]
+SPANISH = "describe el grupo de velas con cuerpo alto"
+ENGLISH = "describe the cluster with a large body"
+
+
+@pytest.fixture
+def ohlc_rows():
+    return [dict(row_id=f"r{i}", body_pipettes=body, range_pipettes=span) for i, (body, span) in enumerate(
+        [(-320.0, 700.0), (-280.0, 660.0), (-150.0, 400.0), (-90.0, 360.0),
+         (120.0, 380.0), (180.0, 420.0), (340.0, 690.0), (410.0, 740.0)])]
+
+
+@pytest.fixture
+def ohlc(ohlc_rows, tmp_path, monkeypatch):
+    """A retained reference fitted on the demo's own feature names, with the receipt the declaration is read from."""
+    model = HierarchicalRegimes.fit_reference(ohlc_rows, features=OHLC_FEATURES, levels=[2, 4], task_id=OHLC_TASK)
+    directory = tmp_path / "ohlc-regimes"
+    directory.mkdir()
+    model.save(directory / "reference.joblib")
+    (directory / "manifest.json").write_text(json.dumps(
+        {"state_ref": str((directory / "reference.joblib").resolve()), "model_version": model.model_version,
+         "metadata": model.metadata}), encoding="utf-8")
+    monkeypatch.setenv("FEATURE_ENG_REGIMES_DEMO_DIR", str(directory))
+    return directory, model
+
+
+def ohlc_config(directory, model):
+    return dict(provider=Provider.name, family="representation_unsupervised", output_kind="hierarchical_regimes",
+                state=str((directory / "reference.joblib").resolve()), input="json", as_of="2026-09-24T00:00:00Z",
+                parameters=dict(task_id=OHLC_TASK, model_version=model.model_version))
+
+
+def test_two_wordings_in_two_languages_settle_on_the_same_metric_by_words_alone(ohlc):
+    """The point of the whole package: nobody types `body_pipettes > 0`, and no model is consulted to avoid it."""
+    interpret = interpreter()
+    slots = chat_slots()
+    spanish = interpret.interpret(SPANISH, slots)
+    english = interpret.interpret(ENGLISH, slots)
+    assert spanish["status"] == interpret.STATUS_OK, spanish.get("why")
+    assert english["status"] == interpret.STATUS_OK, english.get("why")
+    assert spanish["parameters"]["target_metric"] == english["parameters"]["target_metric"] == "highest body_pipettes"
+    assert set(spanish["sources"].values()) == {"QUESTION_TEXT"}
+    assert set(english["sources"].values()) == {"QUESTION_TEXT"}
+    assert spanish["interpreter"] is None and english["interpreter"] is None, "a model was consulted for nothing"
+
+
+@pytest.mark.parametrize("prompt,expected", [
+    ("describe el grupo de velas con cuerpo alto", "highest body_pipettes"),
+    ("describe the cluster with a large body", "highest body_pipettes"),
+    ("describe the cluster with the largest body", "highest body_pipettes"),
+    ("describe el grupo con cuerpo bajo", "lowest body_pipettes"),
+    ("describe los grupos con rango amplio", "highest range_pipettes"),
+    ("describe the cluster with the narrowest range", "lowest range_pipettes"),
+    ("describe el grupo con cuerpo positivo", "body_pipettes > 0"),
+    ("describe the cluster with a negative body", "body_pipettes < 0"),
+])
+def test_ordinary_phrasings_resolve_to_the_metric_they_name(ohlc, prompt, expected):
+    interpret = interpreter()
+    report = interpret.interpret(prompt, chat_slots())
+    assert report["status"] == interpret.STATUS_OK, report.get("why")
+    assert report["parameters"]["target_metric"] == expected
+    assert report["interpreter"] is None
+
+
+def test_a_feature_the_reference_was_not_fitted_with_is_refused_by_name(ohlc):
+    """Asked for the volume of a reference fitted on body and range, an interpreter would pick one of the two."""
+    interpret = interpreter()
+    report = interpret.interpret("describe el grupo con mayor volumen", chat_slots())
+    assert report["status"] == interpret.STATUS_UNSUPPORTED
+    assert "volumen" in report["why"] and "body_pipettes" in report["why"]
+
+
+def test_a_metric_naming_a_column_the_rows_do_not_carry_is_refused_while_the_request_is_built(ohlc, ohlc_rows):
+    directory, model = ohlc
+    with pytest.raises(ValueError) as refusal:
+        chat_request("describe cluster", {"rows": ohlc_rows}, ohlc_config(directory, model),
+                     {"task_id": OHLC_TASK, "model_version": model.model_version, "target_metric": "highest volume"})
+    assert "volume" in str(refusal.value) and "body_pipettes" in str(refusal.value)
+
+
+def test_the_resolved_metric_is_used_and_the_engine_answers_it(ohlc, ohlc_rows):
+    """A value resolved from a person's words and then dropped is exactly the quiet mistake this adapter refuses."""
+    directory, model = ohlc
+    provider = Provider()
+    resolved = interpreter().interpret(SPANISH, provider.chat_slots())["parameters"]
+    request = provider.chat_request(SPANISH, {"rows": ohlc_rows}, ohlc_config(directory, model), resolved)
+    assert request["output_schema"]["description"] == {"target_metric": "highest body_pipettes"}
+    state = provider.load(str((directory / "reference.joblib").resolve()))
+    payload = provider.infer(request, state)["outputs"]["regimes"]["payload"]
+    described = payload["cluster_description"]
+    assert described["type"] == "cluster_description" and described["metric_form"] == "highest"
+    assert described["target_metric"] == "highest body_pipettes"
+    assert payload["rows"] == model.assign(ohlc_rows)["rows"], "the assignment is unchanged by the description"
+    from feature_eng_m5phet.questions import describe_cluster
+    assert described == describe_cluster(state["model"], ohlc_rows, "highest body_pipettes")
+
+
+def test_an_assignment_command_is_unchanged_and_carries_no_description(ohlc, ohlc_rows):
+    directory, model = ohlc
+    provider = Provider()
+    resolved = interpreter().interpret("assign hierarchical regimes to these rows", provider.chat_slots())["parameters"]
+    assert resolved["target_metric"] == NO_DESCRIPTION
+    request = provider.chat_request("assign hierarchical regimes to these rows", {"rows": ohlc_rows},
+                                    ohlc_config(directory, model), resolved)
+    assert request["output_schema"] == {"targets": ["regimes"], "model_version": model.model_version}
+    payload = provider.infer(request, provider.load(request["fitted_state_ref"]))["outputs"]["regimes"]["payload"]
+    assert "cluster_description" not in payload
+
+
+def test_a_description_command_with_no_metric_is_refused_rather_than_given_a_metric(ohlc, ohlc_rows):
+    directory, model = ohlc
+    with pytest.raises(ValueError, match="no target_metric was resolved"):
+        chat_request("describe the cluster", {"rows": ohlc_rows}, ohlc_config(directory, model),
+                     {"task_id": OHLC_TASK, "model_version": model.model_version})
+
+
+def test_an_assignment_command_with_a_metric_is_refused_as_two_requests(ohlc, ohlc_rows):
+    directory, model = ohlc
+    with pytest.raises(ValueError) as refusal:
+        chat_request("assign regimes", {"rows": ohlc_rows}, ohlc_config(directory, model),
+                     {"task_id": OHLC_TASK, "model_version": model.model_version,
+                      "target_metric": "highest body_pipettes"})
+    assert "two requests" in str(refusal.value)
+
+
+def test_a_sentence_asking_for_both_is_refused_with_both_candidates_named(ohlc):
+    """"muestra el grupo con cuerpo alto" names an assignment AND a description; the second is not added silently."""
+    interpret = interpreter()
+    report = interpret.interpret("muestra el grupo con cuerpo alto", chat_slots())
+    assert report["status"] == interpret.STATUS_AMBIGUOUS
+    assert NO_DESCRIPTION in report["why"] and "highest body_pipettes" in report["why"]
+
+
+def test_the_words_that_named_the_metric_do_not_make_the_sentence_a_second_request(ohlc, ohlc_rows):
+    """The FILLER rule is untouched: the metric's own words are accounted for, anything else still leaves a word."""
+    directory, model = ohlc
+    identity = {"task_id": OHLC_TASK, "model_version": model.model_version,
+                "target_metric": "highest body_pipettes"}
+    request = chat_request(SPANISH, {"rows": ohlc_rows}, ohlc_config(directory, model), identity)
+    assert request["operation"] == "infer"
+    with pytest.raises(ValueError, match="this adapter performs one operation"):
+        chat_request("describe el grupo con cuerpo alto y predice el precio", {"rows": ohlc_rows},
+                     ohlc_config(directory, model), identity)
+
+
+def test_a_phrasing_that_could_name_two_metrics_is_not_declared_at_all():
+    """Two features sharing a first word keep their full names and lose the short one; a refusal is not a vocabulary."""
+    vocabulary = metric_vocabulary(["body_pipettes", "body_pct"])
+    assert "large body" not in vocabulary["highest body_pipettes"]
+    assert "large body pipettes" in vocabulary["highest body_pipettes"]
+    assert "large body pct" in vocabulary["highest body_pct"]

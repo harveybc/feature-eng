@@ -185,6 +185,43 @@ def test_a_metric_on_a_column_the_rows_do_not_carry_is_refused_by_name(run):
     assert "gasto_anual" in answer["why"]
 
 
+def test_an_extremum_metric_names_the_cluster_sitting_highest_on_that_column(run, model, rows):
+    """"The cluster with the largest body" is a question no threshold expresses; it is answered by the cluster means."""
+    features = model.metadata["features"]
+    level = model.metadata["levels"][-1]
+    labels = labels_at(model, rows, level)
+    raw = np.asarray([[r[f] for f in features] for r in rows], dtype=float)
+    means = {int(c): raw[labels == c, 0].mean() for c in set(labels.tolist())}
+
+    high = run({"p": {"type": "cluster_description", "target_metric": f"highest {features[0]}"}})["answers"]["p"]
+    assert high["status"] == "OK" and high["metric_form"] == "highest" and high["metric_column"] == features[0]
+    assert high["matched_cluster"] == max(means, key=means.get)
+    assert high["cluster_mean"] == pytest.approx(means[high["matched_cluster"]])
+    assert high["mean_by_cluster"] == {str(c): pytest.approx(m) for c, m in means.items()}
+    member = labels == high["matched_cluster"]
+    assert high["centroid_features"][features[0]] == pytest.approx(raw[member, 0].mean())
+    assert "rows_satisfying" not in high and "share_satisfying" not in high, \
+        "no threshold was named, so no count of rows satisfying one may be reported"
+
+    low = run({"p": {"type": "cluster_description", "target_metric": f"lowest {features[0]}"}})["answers"]["p"]
+    assert low["matched_cluster"] == min(means, key=means.get)
+
+
+def test_an_extremum_on_a_column_the_rows_do_not_carry_is_refused_by_name(run):
+    q, _ = workbench()
+    answer = run({"p": {"type": "cluster_description", "target_metric": "highest gasto_anual"}})["answers"]["p"]
+    assert answer["status"] == "REFUSED" and answer["refusal"] == q.NOT_ESTIMABLE and "gasto_anual" in answer["why"]
+
+
+def test_the_same_description_is_returned_to_a_caller_without_an_envelope(run, model, rows):
+    """`describe_cluster` is what the chat adapter's infer path calls; one rule, not a second implementation."""
+    from feature_eng_m5phet.questions import describe_cluster
+    metric = f"highest {model.metadata['features'][0]}"
+    envelope = run({"p": {"type": "cluster_description", "target_metric": metric}})["answers"]["p"]
+    direct = describe_cluster(model, rows, metric)
+    assert direct == envelope
+
+
 def test_a_metric_that_is_not_a_comparison_is_malformed(run):
     q, _ = workbench()
     answer = run({"p": {"type": "cluster_description", "target_metric": "the big spenders"}})["answers"]["p"]

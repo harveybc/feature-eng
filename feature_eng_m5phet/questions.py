@@ -17,9 +17,16 @@ is omitted and the reason stated. `method` and `expected_clusters` are understoo
 not as controls: a method the reference was not fitted with, or a k it has no level for, is refused with the levels
 it does have, since refitting is not done in chat.
 
-`cluster_description` names the cluster whose supplied rows satisfy `target_metric` most, at one fitted level, and
+`cluster_description` names the cluster its supplied rows satisfy `target_metric` most, at one fitted level, and
 reports the centroid of THOSE rows in ORIGINAL units -- the mean of what the caller sent, never the reference's
 scaled coordinates presented as features. A metric naming a column the rows do not carry is refused by that name.
+
+`target_metric` is read in two forms. A COMPARISON (`body_pipettes > 0`) names the cluster with the largest share of
+its supplied rows on one side of a threshold. An EXTREMUM (`highest body_pipettes`, `lowest range_pipettes`) names the
+cluster that sits highest or lowest on that column, by the mean of its own supplied rows. The extremum form exists
+because "the cluster with the largest body" is what a person actually asks, and no threshold expresses it: any number
+picked on the caller's behalf would be a number nobody named. Both forms are computed from the supplied rows under the
+frozen transform; neither refits anything, and a form outside these two is refused as malformed rather than guessed.
 
 `state.features` must equal the reference's fitted features, order included. There is no padding and no reordering:
 a fitted scaler is a positional object, and a caller who lists the same names in another order is describing rows
@@ -54,6 +61,10 @@ _PREDICATE = re.compile(r"^\s*(?P<column>[A-Za-z_][A-Za-z0-9_]*)\s*(?P<op>>=|<=|
                         r"(?P<value>[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*$")
 _OPS = {">": np.greater, ">=": np.greater_equal, "<": np.less, "<=": np.less_equal,
         "==": np.equal, "=": np.equal, "!=": np.not_equal}
+
+#: the two extremum forms, which need no threshold: the cluster sitting highest or lowest on one fitted column
+EXTREMA = ("highest", "lowest")
+_EXTREMUM = re.compile(r"^\s*(?P<op>highest|lowest)\s+(?P<column>[A-Za-z_][A-Za-z0-9_]*)\s*$", re.IGNORECASE)
 
 
 def refusal(kind, why, question_type):
@@ -149,18 +160,37 @@ def pick_level(question, model):
 
 
 def parse_metric(text, features):
-    """`<column> <op> <number>`; the column must be one the supplied rows carry, named in the refusal otherwise."""
+    """`<column> <op> <number>` or `highest|lowest <column>`; the column must be one the supplied rows carry.
+
+    Returns `(column, op, threshold)`, with `op` either a comparison or one of `EXTREMA` and `threshold` None for an
+    extremum. A column the rows do not carry is named in the refusal, never replaced by the nearest one."""
     if not isinstance(text, str):
-        raise _Refuse(MALFORMED_QUESTION, "target_metric must be a string like 'range_pipettes > 500'")
-    m = _PREDICATE.match(text)
+        raise _Refuse(MALFORMED_QUESTION, "target_metric must be a string like 'range_pipettes > 500' or "
+                                          "'highest range_pipettes'")
+    extremum = _EXTREMUM.match(text)
+    m = extremum or _PREDICATE.match(text)
     if not m:
-        raise _Refuse(MALFORMED_QUESTION, f"target_metric {text!r} is not of the form '<column> <op> <number>' with "
-                                          "op in >, >=, <, <=, ==, !=")
+        raise _Refuse(MALFORMED_QUESTION, f"target_metric {text!r} is neither '<column> <op> <number>' with op in "
+                                          "'>, >=, <, <=, ==, !=' nor 'highest <column>' / 'lowest <column>'")
     column = m.group("column")
     if column not in features:
         raise _Refuse(NOT_ESTIMABLE, f"target_metric names column {column!r}, which the supplied rows do not carry; "
                                      f"they carry {features}")
+    if extremum is not None:
+        return column, m.group("op").lower(), None
     return column, m.group("op"), float(m.group("value"))
+
+
+def metric_problem(text, features):
+    """The reason `target_metric` cannot be read against these columns, or None.
+
+    For a caller outside the envelope -- the chat adapter, which refuses with a ValueError where a question is refused
+    with a typed refusal -- so one reading of a metric serves both doors."""
+    try:
+        parse_metric(text, features)
+    except _Refuse as stop:
+        return stop.why
+    return None
 
 
 # --- the answers ---------------------------------------------------------------------------------------------------------
@@ -232,30 +262,64 @@ def answer_description(question, model, rows, ids, raw, scaled, paths):
     column, op, threshold = parse_metric(question["target_metric"], features)
     level = pick_level(question, model)
     labels = _labels_at(model, paths, level)
-    satisfied = _OPS[op](raw[:, features.index(column)], threshold)
-    # The rule: at the chosen level, the cluster with the largest SHARE of its supplied rows satisfying the metric;
-    # a tie goes to the cluster with more satisfying rows, then to the lower cluster id. Share rather than count so a
-    # big cluster does not win by size alone; count as the tie-break so an empty share never beats a full one.
-    ranked = []
-    for label in sorted(set(labels.tolist())):
-        member = labels == label
-        share = float(satisfied[member].mean())
-        ranked.append((-share, -int(satisfied[member].sum()), int(label)))
-    ranked.sort()
-    matched = ranked[0][2]
+    values = raw[:, features.index(column)]
+    if op in EXTREMA:
+        # The rule for an extremum: at the chosen level, the cluster whose own supplied rows have the highest (or
+        # lowest) MEAN on that column; a tie goes to the lower cluster id. The mean of the rows the caller sent, not a
+        # reference centroid: the question is about these rows.
+        ranked = [((-1.0 if op == "highest" else 1.0) * float(values[labels == label].mean()), int(label))
+                  for label in sorted(set(labels.tolist()))]
+        ranked.sort()
+        matched = ranked[0][1]
+        extra = {"cluster_mean": float(values[labels == matched].mean()),
+                 "mean_by_cluster": {str(label): float(values[labels == label].mean())
+                                     for label in sorted(set(labels.tolist()))},
+                 "metric_column": column, "metric_form": op}
+        basis = (f"the cluster whose supplied rows have the {op} mean {column} (ties to the lowest id); centroid is "
+                 "the mean of the supplied rows assigned to it, in the caller's units")
+    else:
+        satisfied = _OPS[op](values, threshold)
+        # The rule: at the chosen level, the cluster with the largest SHARE of its supplied rows satisfying the metric;
+        # a tie goes to the cluster with more satisfying rows, then to the lower cluster id. Share rather than count so a
+        # big cluster does not win by size alone; count as the tie-break so an empty share never beats a full one.
+        ranked = []
+        for label in sorted(set(labels.tolist())):
+            member = labels == label
+            share = float(satisfied[member].mean())
+            ranked.append((-share, -int(satisfied[member].sum()), int(label)))
+        ranked.sort()
+        matched = ranked[0][2]
+        member = labels == matched
+        extra = {"rows_satisfying": int(satisfied[member].sum()),
+                 "share_satisfying": float(satisfied[member].mean()),
+                 "share_by_cluster": {str(label): -share for share, _, label in ranked},
+                 "metric_column": column, "metric_form": op}
+        basis = ("the cluster whose supplied rows satisfy target_metric most (largest share, then count, then "
+                 "lowest id); centroid is the mean of the supplied rows assigned to it, in the caller's units")
     member = labels == matched
     centroid = raw[member].mean(axis=0)
-    return {"type": "cluster_description", "status": "OK", "execution_authorized": False,
-            "basis": "the cluster whose supplied rows satisfy target_metric most (largest share, then count, then "
-                     "lowest id); centroid is the mean of the supplied rows assigned to it, in the caller's units",
+    return {"type": "cluster_description", "status": "OK", "execution_authorized": False, "basis": basis,
             "reference": {"task_id": model.metadata["task_id"], "model_version": model.model_version},
             "level": level, "target_metric": question["target_metric"], "matched_cluster": matched,
-            "rows_in_cluster": int(member.sum()), "rows_satisfying": int(satisfied[member].sum()),
-            "share_satisfying": float(satisfied[member].mean()),
-            "share_by_cluster": {str(label): -share for share, _, label in ranked},
+            "rows_in_cluster": int(member.sum()), **extra,
             "centroid_features": {name: float(value) for name, value in zip(features, centroid)},
             "centroid_units": "original (as supplied); not the reference's scaled coordinates",
             "member_row_ids": [row_id for row_id, inside in zip(ids, member) if inside]}
+
+
+def describe_cluster(model, rows, target_metric, level=None):
+    """The same `cluster_description` answer for a caller holding a model and rows rather than an envelope.
+
+    The chat adapter's sentence path ends in an `infer` request, not in the question envelope, and a person who asked
+    for a cluster to be described must be answered there too -- with this function, so there is one implementation of
+    the rule and not a second one that could drift from it."""
+    ids, raw = validate_rows(rows, model.metadata["features"])
+    assigned = model.assign(rows)
+    paths = np.asarray([row["cluster_path"] for row in assigned["rows"]], dtype=int)
+    question = {"type": "cluster_description", "target_metric": target_metric}
+    if level is not None:
+        question["level"] = level
+    return answer_description(question, model, rows, ids, raw, model.scaler.transform(raw), paths)
 
 
 ANSWERERS = {"clustering": answer_clustering, "cluster_description": answer_description}
