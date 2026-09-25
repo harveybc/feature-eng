@@ -555,7 +555,7 @@ def _naive(fit_rows, holdout_rows, outcome):
 
 
 def prepare(rows_path, *, event_types=None, horizons=None, holdout_fraction=DEFAULT_HOLDOUT_FRACTION,
-            chunk_bytes=1 << 22):
+            window_hours=None, chunk_bytes=1 << 22):
     """The rows, their window surprises and the held-out split -- everything an estimate rests on, and nothing fitted.
 
     It is a function rather than four lines inside `estimate` because a second reader of the same artifacts exists:
@@ -567,7 +567,14 @@ def prepare(rows_path, *, event_types=None, horizons=None, holdout_fraction=DEFA
     loaded = load(rows_path, event_types=event_types, horizons=horizons, chunk_bytes=chunk_bytes)
     header, rows, index = loaded["header"], loaded["rows"], loaded["index"]
     parameters = header.get("parameters") or {}
-    window_seconds = float(parameters.get("window_hours", 24.0)) * 3600.0
+    # the neighbour window is a CHOICE, not a property of the rows: the release index holds every release that
+    # produced a row with its own instant, so the sum over the past half of a window of any length is computable from
+    # the same document. The rows document's own W is the default and the one every artifact written before this
+    # argument existed used; a caller that declares another gets it, and `window_hours_used` says which was applied.
+    declared_window = float(parameters.get("window_hours", 24.0))
+    if window_hours is not None and float(window_hours) <= 0:
+        _refuse("BAD_WINDOW", f"the neighbour window must be positive hours, got {window_hours}")
+    window_seconds = float(declared_window if window_hours is None else window_hours) * 3600.0
     pre_event_minutes = int(parameters.get("pre_event_minutes", 60))
     types = sorted({row["event_type"] for row in rows})
     used_horizons = sorted({row["horizon_minutes"] for row in rows})
@@ -601,7 +608,9 @@ def prepare(rows_path, *, event_types=None, horizons=None, holdout_fraction=DEFA
     splits = {name: _split_by_time([row for row in rows if row["event_type"] == name], holdout_fraction)
               for name in types}
     return {"header": header, "rows": rows, "index": index, "parameters": parameters,
-            "window_seconds": window_seconds, "pre_event_minutes": pre_event_minutes,
+            "window_seconds": window_seconds, "window_hours_used": window_seconds / 3600.0,
+            "window_hours_declared_by_the_rows": declared_window,
+            "pre_event_minutes": pre_event_minutes,
             "types": types, "horizons": used_horizons, "splits": splits,
             "counters": loaded["counters"], "holdout_fraction": float(holdout_fraction)}
 

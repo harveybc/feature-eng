@@ -306,6 +306,18 @@ def stationarity_test(series, statsmodels):
         block["verdict"] = block["heuristic"]["verdict"]
         block["verdict_source"] = "heuristic"
         return block
+    if float(np.ptp(head)) <= 0.0:
+        # a column that takes one value is a real column of a real table -- a release that is always published at
+        # the same hour, on the same weekday. Both tests are about the behaviour of a series over time and neither
+        # is defined on one that has none: statsmodels itself raises "Invalid input, x is constant". So the block
+        # says ZERO_VARIANCE by name, and no verdict is manufactured from a heuristic that would read a flat line
+        # as a very stationary one.
+        reason = ("the series takes a single value, so neither test is defined on it: an augmented Dickey-Fuller "
+                  "regression has no variation to fit and a KPSS statistic divides by a variance of zero")
+        block["adf"] = {"status": "ZERO_VARIANCE", "reason": reason}
+        block["kpss"] = {"status": "ZERO_VARIANCE", "reason": reason}
+        block["verdict"], block["verdict_source"] = "ZERO_VARIANCE", "the series is constant"
+        return block
     try:                                           # statsmodels 0.15 announces a return-type change; ask for today's
         result = statsmodels.adfuller(head, autolag="AIC", result_object=False)
     except TypeError:                              # an older statsmodels has no such argument and already returns it
