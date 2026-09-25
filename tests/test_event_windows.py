@@ -485,3 +485,128 @@ def test_the_cli_carries_the_declared_assumption_into_the_file(tmp_path):
     assert document["provenance"] == "DEVELOPMENT_ASSUMED_CLOCK"
     assert document["publication_clock"]["declared_by"] == "operator"
     assert document["parameters"]["max_neighbours_listed"] == 4
+
+
+# ------------------------------------------- the joined calendar: the actual's instant observed, the consensus's not
+
+JOINED_HEADER = ("event_type,country,currency,event_time,published_at,actual,consensus,previous,"
+                 "historical_availability,match_method,synonym")
+
+#: how far the consensus archive's wall clock sits from the instant the release actually happened. It is here
+#: because that is the real defect an observed clock repairs: the archive this repository holds is hours away from
+#: UTC and says nothing about it, so every response read at its scheduled instant is read in the wrong place.
+WRONG_CLOCK_MINUTES = 240
+
+
+def write_joined_calendar(path, releases, *, consensus=100.0, wrong_by=WRONG_CLOCK_MINUTES, observed=True):
+    """A calendar shaped like `calendar_join.write_csv`: a scheduled instant that is WRONG, and beside it the
+    instant an announcement archive observed."""
+    lines = [JOINED_HEADER]
+    for kind, minute, s in releases:
+        published = START + timedelta(minutes=minute)
+        scheduled = published - timedelta(minutes=wrong_by)
+        lines.append(",".join([kind, "United States", "USD", scheduled.isoformat(),
+                               published.isoformat() if observed else "",
+                               repr(consensus + s), repr(consensus), repr(consensus), "KNOWN", "EXACT", ""]))
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def joined_inputs(tmp_path, releases=None, name="", **kwargs):
+    releases = plan() if releases is None else releases
+    return (write_bars(tmp_path / f"bars{name}.csv", releases),
+            write_joined_calendar(tmp_path / f"joined{name}.csv", releases, **kwargs))
+
+
+def test_the_joined_calendar_says_which_of_the_two_instants_was_observed(tmp_path):
+    bars, calendar = joined_inputs(tmp_path)
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="observed", assumed_tolerance_seconds=60)
+    assert document["rows"], "the joined calendar produced no rows at all"
+    clock = document["publication_clock"]
+    assert clock["mode"] == "OBSERVED_ACTUAL_PUBLICATION"
+    assert clock["consensus_clock"] == "ASSUMED_BEFORE_RELEASE"
+    assert clock["tolerance_seconds"] == 60
+    assert document["provenance"] == "DEVELOPMENT_OBSERVED_CLOCK"
+    assert document["excluded"]["counts"]["MISSING_PUBLICATION_CLOCK"] == 0
+    assert document["excluded"]["counts"]["NO_CONSENSUS"] == 0
+    for row in document["rows"]:
+        assert row["publication_clock_mode"] == "OBSERVED_ACTUAL_PUBLICATION"
+        assert row["provenance"] == "DEVELOPMENT_OBSERVED_CLOCK"
+
+
+def test_the_response_is_read_at_the_observed_instant_and_not_at_the_archives_wrong_one(tmp_path):
+    """The planted response sits at the OBSERVED instant. Reading it there recovers the plant exactly; reading it at
+    the archive's scheduled instant, four hours earlier, cannot."""
+    bars, calendar = joined_inputs(tmp_path)
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="observed")
+    for row in [r for r in document["rows"] if r["event_type"] == "A"]:
+        h = row["horizon_minutes"]
+        assert row["log_return"] == pytest.approx(B_LEVEL * row["surprise_raw"] * min(1.0, h / RAMP_MINUTES),
+                                                  abs=1e-12)
+        published = datetime.fromisoformat(row["published_at"])
+        assert published - datetime.fromisoformat(row["event_time"]) == timedelta(minutes=WRONG_CLOCK_MINUTES)
+
+
+def test_the_consensus_is_assumed_to_stand_a_declared_span_before_the_OBSERVED_instant(tmp_path):
+    bars, calendar = joined_inputs(tmp_path, name="tol")
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(),
+                            publication_clock="observed", assumed_tolerance_seconds=90)
+    assert document["publication_clock"]["tolerance_seconds"] == 90
+    for row in document["rows"]:
+        gap = datetime.fromisoformat(row["published_at"]) - datetime.fromisoformat(row["consensus_published_at"])
+        assert gap == timedelta(seconds=90)
+
+
+def test_a_non_positive_tolerance_is_refused_on_the_joined_calendar_too(tmp_path):
+    bars, calendar = joined_inputs(tmp_path, plan(12), name="bad")
+    with pytest.raises(events.EventsRefusal) as refusal:
+        events.build(str(bars), str(calendar), events.CalendarMapping(),
+                     publication_clock="observed", assumed_tolerance_seconds=0)
+    assert refusal.value.code == "BAD_ASSUMED_TOLERANCE"
+
+
+def test_nothing_is_assumed_when_the_dataset_declares_both_instants(tmp_path):
+    """The calendar that carries consensus_published_at keeps the fully observed mode: an assumption is entered only
+    where a measurement is missing."""
+    document = build(tmp_path, name="both")
+    assert document["publication_clock"]["mode"] == "OBSERVED_PUBLICATION_CLOCK"
+    assert "consensus_clock" not in document["publication_clock"]
+
+
+def test_a_joined_row_whose_announcement_instant_is_absent_is_excluded_by_name(tmp_path):
+    bars, calendar = joined_inputs(tmp_path, name="blind", observed=False)
+    document = events.build(str(bars), str(calendar), events.CalendarMapping(), publication_clock="observed")
+    assert document["rows"] == []
+    assert document["excluded"]["counts"]["MISSING_PUBLICATION_CLOCK"] == N_EVENTS
+    assert document["publication_clock"]["mode"] == "OBSERVED_ACTUAL_PUBLICATION"
+
+
+def test_the_scale_reads_only_releases_published_before_the_row_on_the_observed_clock_too(tmp_path):
+    """The no-look-ahead rule is about the instants the rows are ORDERED by, so it must be re-checked on the clock
+    that reorders them: a huge surprise published after a row must leave that row untouched."""
+    releases = plan()
+    bars = write_bars(tmp_path / "bars_nl.csv", releases)
+    plain = events.build(str(bars), str(write_joined_calendar(tmp_path / "joined_nl.csv", releases)),
+                         events.CalendarMapping(), publication_clock="observed")
+    later = releases + [("A", FIRST_EVENT_MINUTE + (N_EVENTS - 1) * SPACING_MINUTES + 55, 900.0)]
+    contaminated = events.build(str(bars),
+                                str(write_joined_calendar(tmp_path / "joined_nl2.csv", later)),
+                                events.CalendarMapping(), publication_clock="observed")
+    before = {(r["event_key"], r["horizon_minutes"]): (r["surprise"], r["surprise_scale"]) for r in plain["rows"]}
+    after = {(r["event_key"], r["horizon_minutes"]): (r["surprise"], r["surprise_scale"])
+             for r in contaminated["rows"] if (r["event_key"], r["horizon_minutes"]) in before}
+    assert after == before, "a release published later changed the scale of a row published earlier"
+    assert len(contaminated["rows"]) > len(plain["rows"]), "the later release did not become a row at all"
+
+
+def test_the_cli_builds_the_joined_calendar_under_the_observed_clock(tmp_path):
+    bars, calendar = joined_inputs(tmp_path, plan(20), name="cli")
+    out = tmp_path / "joined_rows.json"
+    assert events.main(["--bars", str(bars), "--calendar", str(calendar), "--out", str(out),
+                        "--publication-clock", "observed",
+                        "--assume-publication-tolerance-seconds", "60"]) == 0
+    document = json.loads(out.read_text(encoding="utf-8"))
+    assert document["provenance"] == "DEVELOPMENT_OBSERVED_CLOCK"
+    assert document["publication_clock"]["mode"] == "OBSERVED_ACTUAL_PUBLICATION"
+    assert document["publication_clock"]["consensus_clock"] == "ASSUMED_BEFORE_RELEASE"
