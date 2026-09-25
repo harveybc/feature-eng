@@ -79,6 +79,12 @@ DEFAULT_SEED = 1729
 #: the relative held-out MSE the interaction model must beat the additive one by before it is called an improvement
 DEFAULT_SUPERPOSITION_MARGIN = 0.05
 
+#: the kind an event-rows document declares when the number every actual was read against came out of a model
+MODEL_BASED_EXPECTATION = "MODEL_BASED_EXPECTATION"
+
+#: the identification reason that kind carries, named so a reader can tell it from a missing clock
+MODEL_BASED_EXPECTATION_REASON = "EXPECTATION_IS_MODEL_BASED"
+
 #: fewer fitting events than this and a projection with a dozen seasonal dummies is fitted through its own noise
 MIN_FIT_EVENTS = 20
 
@@ -737,6 +743,19 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
     # localized mode as observed would claim identification from a correction.
     if str(clock.get("mode") or "").startswith("ASSUMED_SCHEDULED_PUBLICATION"):
         reasons.append("ASSUMED_PUBLICATION_CLOCK: " + str(clock.get("identification_caveat")))
+    # WP28. The clock can be observed and the EXPECTATION still be a model's. The surprise is then
+    # (actual - model forecast) = (actual - market consensus) + (market consensus - model forecast), and the second
+    # term is pre-release information: it is a function of exactly the set the identification argument conditions on.
+    # That is measurement error in the treatment correlated with the controls -- attenuation and bias, not noise --
+    # so the reason is named, carried, and it disqualifies. It is also the reason a consensus feed would remove.
+    expectation = header.get("expectation") or {}
+    if expectation.get("kind") == MODEL_BASED_EXPECTATION:
+        reasons.append(
+            f"{MODEL_BASED_EXPECTATION_REASON}: {expectation.get('reading')}. The surprise regressed on here is "
+            f"(actual - a model's forecast), which differs from (actual - the market's consensus) by a quantity that "
+            f"was itself pre-release information; that is measurement error in the treatment correlated with the "
+            f"conditioning set, and it biases every beta below toward zero by an amount nothing in this document "
+            f"measures. A consensus feed covering this span removes this reason and no other")
     if placebo.get("status") != "OK":
         reasons.append(f"PLACEBO_NOT_RUN: {placebo.get('status')}")
     else:
@@ -760,8 +779,13 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
             "type, horizon, outcome) failed it. Under OBSERVED_ACTUAL_PUBLICATION that first reason is gone -- the "
             "instant the actual became public was observed -- and only the consensus's own instant stays assumed, "
             "which is the literature's pre-release information assumption rather than a missing clock. "
+            "EXPECTATION_IS_MODEL_BASED is a THIRD reason, independent of both: the release instant may have been "
+            "observed and the number the actual was read against still be a model's forecast rather than a market "
+            "consensus, and a surprise measured against a model's expectation is not the surprise the market traded "
+            "on. "
             "PLACEBO_CONSISTENT is NOT a claim of identification: it says only that the declared checks in this "
             "document did not refute it, and every coefficient below stays a conditional association"),
+        "expectation": header.get("expectation"),
         "rows_document": {"path": str(rows_path), "schema": header.get("schema"),
                           "bars": (header.get("bars") or {}).get("path"),
                           "bars_sha256": (header.get("bars") or {}).get("sha256"),
