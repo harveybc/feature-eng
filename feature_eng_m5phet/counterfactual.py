@@ -355,7 +355,8 @@ def paths(projections_path, rows_path, *, window, zero_out, outcomes=None, horiz
             entries.append(entry)
 
     clock = document.get("publication_clock") or {}
-    flags = [ASSUMED_CLOCK_FLAG] if clock.get("mode") == "ASSUMED_SCHEDULED_PUBLICATION" else []
+    flags = ([ASSUMED_CLOCK_FLAG]
+             if str(clock.get("mode") or "").startswith("ASSUMED_SCHEDULED_PUBLICATION") else [])
     for entry in entries:
         entry["flags"] = list(flags)
 

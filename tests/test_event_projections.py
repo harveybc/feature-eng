@@ -427,3 +427,14 @@ def test_a_rows_document_with_no_rows_is_refused_by_name_rather_than_failing_ins
         run(tmp_path, document, bars, name="empty")
     assert refusal.value.code == "NO_EVENT_ROWS"
     assert "NO_CONSENSUS" in refusal.value.why
+
+
+def test_a_localized_assumed_clock_is_still_an_assumed_clock_for_identification(tmp_path):
+    """Measuring what the archive's wall clock MEANT repairs the anchor. It does not turn a scheduled instant into
+    an observed one, and the verdict must keep saying so."""
+    document, bars, _calendar = world(tmp_path, planter=additive_planter, name="loc")
+    document["publication_clock"] = {"mode": "ASSUMED_SCHEDULED_PUBLICATION_LOCALIZED",
+                                     "identification_caveat": "the instant is still the scheduled one"}
+    result = run(tmp_path, document, bars, name="loc")
+    assert result["identification"] == "NOT_IDENTIFIED"
+    assert any(reason.startswith("ASSUMED_PUBLICATION_CLOCK") for reason in result["identification_reasons"])
