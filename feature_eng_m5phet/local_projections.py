@@ -43,6 +43,11 @@ document is identified**, however well every check inside it went, because the i
 assumed rather than observed. The top-level `identification` is `NOT_IDENTIFIED` in that case by construction, the
 caveat travels verbatim from the rows, and no sentence anywhere here may be read as a market claim.
 
+Under `OBSERVED_ACTUAL_PUBLICATION` -- the joined calendar, whose release instants an archive actually observed --
+that one reason is gone and the verdict is decided by the checks: the placebo, and whether it ran at all. What stays
+assumed there is only that the consensus stood before the release, which is what the identification argument assumes
+anyway; it is written into the same block so nobody reads `OBSERVED` as covering both instants.
+
 Deterministic, seeded, CPU only: numpy, statsmodels, and the standard library.
 """
 
@@ -549,22 +554,16 @@ def _naive(fit_rows, holdout_rows, outcome):
     return table, np.asarray(predictions, dtype=np.float64), fallbacks, fallback
 
 
-def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
-             holdout_fraction=DEFAULT_HOLDOUT_FRACTION, placebo_n=DEFAULT_PLACEBO_N, seed=DEFAULT_SEED,
-             superposition_margin=DEFAULT_SUPERPOSITION_MARGIN, bars_path=None,
-             placebo_excludes="all_releases", placebo_exclusion_hours=None, chunk_bytes=1 << 22):
-    """The local projections, the closure rows, the superposition verdict and the placebo -- or refusals by name."""
-    if placebo_excludes not in PLACEBO_EXCLUSIONS:
-        _refuse("BAD_PLACEBO_EXCLUSION", f"the placebo exclusion must be one of {list(PLACEBO_EXCLUSIONS)}")
+def prepare(rows_path, *, event_types=None, horizons=None, holdout_fraction=DEFAULT_HOLDOUT_FRACTION,
+            chunk_bytes=1 << 22):
+    """The rows, their window surprises and the held-out split -- everything an estimate rests on, and nothing fitted.
+
+    It is a function rather than four lines inside `estimate` because a second reader of the same artifacts exists:
+    `evaluate_events.py` scores the fitted projections on the held-out events, and a split or a window sum computed
+    a second time, even carefully, is a second definition. There is one here.
+    """
     if not 0.0 < float(holdout_fraction) < 1.0:
         _refuse("BAD_HOLDOUT_FRACTION", f"the held-out fraction must lie in (0, 1), got {holdout_fraction}")
-    if float(superposition_margin) < 0.0:
-        _refuse("BAD_MARGIN", f"the superposition margin must not be negative, got {superposition_margin}")
-    outcomes = tuple(outcomes)
-    unknown = [name for name in outcomes if name not in OUTCOMES]
-    if unknown:
-        _refuse("UNKNOWN_OUTCOME", f"{unknown} is not among the outcomes an event row carries, {list(OUTCOMES)}")
-
     loaded = load(rows_path, event_types=event_types, horizons=horizons, chunk_bytes=chunk_bytes)
     header, rows, index = loaded["header"], loaded["rows"], loaded["index"]
     parameters = header.get("parameters") or {}
@@ -572,7 +571,16 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
     pre_event_minutes = int(parameters.get("pre_event_minutes", 60))
     types = sorted({row["event_type"] for row in rows})
     used_horizons = sorted({row["horizon_minutes"] for row in rows})
-    sm = _statsmodels()
+    if not rows:
+        # a rows document can be empty for an honest reason -- every release excluded by name, or a calendar that
+        # joined nothing -- and the caller must be told that instead of failing somewhere inside the placebo, where
+        # the traceback would say nothing about which input was missing
+        excluded = ((header.get("excluded") or {}).get("counts")) or {}
+        _refuse("NO_EVENT_ROWS",
+                f"{rows_path} carries no (release, horizon) row that survived the row builder, so there is nothing "
+                f"to project. The builder read {(header.get('counts') or {}).get('releases_read', 0)} release(s) and "
+                f"excluded them by name: {excluded}. Nothing is estimated from an empty table, and an empty table is "
+                f"not a result of zero")
 
     # the window surprises, once per release rather than once per row
     per_release = {}
@@ -590,9 +598,37 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
         row["window_surprise"] = {name: float(totals[name] + (own if name == row["event_type"] else 0.0))
                                   for name in types}
 
-    splits = {}
-    for name in types:
-        splits[name] = _split_by_time([row for row in rows if row["event_type"] == name], holdout_fraction)
+    splits = {name: _split_by_time([row for row in rows if row["event_type"] == name], holdout_fraction)
+              for name in types}
+    return {"header": header, "rows": rows, "index": index, "parameters": parameters,
+            "window_seconds": window_seconds, "pre_event_minutes": pre_event_minutes,
+            "types": types, "horizons": used_horizons, "splits": splits,
+            "counters": loaded["counters"], "holdout_fraction": float(holdout_fraction)}
+
+
+def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
+             holdout_fraction=DEFAULT_HOLDOUT_FRACTION, placebo_n=DEFAULT_PLACEBO_N, seed=DEFAULT_SEED,
+             superposition_margin=DEFAULT_SUPERPOSITION_MARGIN, bars_path=None,
+             placebo_excludes="all_releases", placebo_exclusion_hours=None, chunk_bytes=1 << 22):
+    """The local projections, the closure rows, the superposition verdict and the placebo -- or refusals by name."""
+    if placebo_excludes not in PLACEBO_EXCLUSIONS:
+        _refuse("BAD_PLACEBO_EXCLUSION", f"the placebo exclusion must be one of {list(PLACEBO_EXCLUSIONS)}")
+    if not 0.0 < float(holdout_fraction) < 1.0:
+        _refuse("BAD_HOLDOUT_FRACTION", f"the held-out fraction must lie in (0, 1), got {holdout_fraction}")
+    if float(superposition_margin) < 0.0:
+        _refuse("BAD_MARGIN", f"the superposition margin must not be negative, got {superposition_margin}")
+    outcomes = tuple(outcomes)
+    unknown = [name for name in outcomes if name not in OUTCOMES]
+    if unknown:
+        _refuse("UNKNOWN_OUTCOME", f"{unknown} is not among the outcomes an event row carries, {list(OUTCOMES)}")
+
+    prepared = prepare(rows_path, event_types=event_types, horizons=horizons,
+                       holdout_fraction=holdout_fraction, chunk_bytes=chunk_bytes)
+    header, rows, index = prepared["header"], prepared["rows"], prepared["index"]
+    parameters, window_seconds = prepared["parameters"], prepared["window_seconds"]
+    pre_event_minutes = prepared["pre_event_minutes"]
+    types, used_horizons, splits = prepared["types"], prepared["horizons"], prepared["splits"]
+    sm = _statsmodels()
 
     projections, closure, fits = [], [], {}
     for name in types:
@@ -707,10 +743,13 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
         "identification": "NOT_IDENTIFIED" if reasons else "PLACEBO_CONSISTENT",
         "identification_reasons": reasons,
         "identification_reading": (
-            "NOT_IDENTIFIED is the verdict whenever the publication clock was ASSUMED, whenever the placebo could "
-            "not be run, or whenever any tested (event type, horizon, outcome) failed it. PLACEBO_CONSISTENT is NOT "
-            "a claim of identification: it says only that the declared checks in this document did not refute it, "
-            "and every coefficient below stays a conditional association until a publication clock exists"),
+            "NOT_IDENTIFIED is the verdict whenever the release instant was ASSUMED "
+            "(ASSUMED_SCHEDULED_PUBLICATION), whenever the placebo could not be run, or whenever any tested (event "
+            "type, horizon, outcome) failed it. Under OBSERVED_ACTUAL_PUBLICATION that first reason is gone -- the "
+            "instant the actual became public was observed -- and only the consensus's own instant stays assumed, "
+            "which is the literature's pre-release information assumption rather than a missing clock. "
+            "PLACEBO_CONSISTENT is NOT a claim of identification: it says only that the declared checks in this "
+            "document did not refute it, and every coefficient below stays a conditional association"),
         "rows_document": {"path": str(rows_path), "schema": header.get("schema"),
                           "bars": (header.get("bars") or {}).get("path"),
                           "bars_sha256": (header.get("bars") or {}).get("sha256"),
@@ -748,7 +787,7 @@ def estimate(rows_path, *, event_types=None, horizons=None, outcomes=OUTCOMES,
         "closure_table": closure,
         "superposition": superposition,
         "placebo": placebo,
-        "counters": loaded["counters"],
+        "counters": prepared["counters"],
         "seed": int(seed),
         "environment": {"python": ".".join(str(part) for part in sys.version_info[:3]), "numpy": np.__version__},
         "execution_authorized": False,

@@ -25,6 +25,14 @@ The whole difficulty is that three of those quantities are trivially corruptible
   `BARS_MISSING_AT_HORIZON` and counted. The same rule covers a release that falls into a market closure: there is no
   bar at or before it within one sampling step, so every one of its horizons is refused by that name.
 
+Three clock states, not two, and every artifact says which one it was built under. `OBSERVED_PUBLICATION_CLOCK`:
+the dataset declared when its source published both the actual and the consensus, and nothing is assumed.
+`OBSERVED_ACTUAL_PUBLICATION`: the dataset declared when the ACTUAL was published -- the joined calendar of
+`calendar_join.py`, whose instants come from an archive that observed them -- and the consensus is assumed only to
+have stood before the release (`consensus_clock: ASSUMED_BEFORE_RELEASE`), which is the macro-announcement
+literature's own assumption. `ASSUMED_SCHEDULED_PUBLICATION`: nobody observed anything and the operator declared that
+each release was published when it was scheduled; nothing estimated under it is identified.
+
 Everything else is declared rather than defaulted: the horizons, the window `W` in which the other releases are
 listed, the pre-event volatility span, the minimum history, the sampling step the realized volatility is summed over,
 and the zone a naive timestamp is read in. A naive calendar timestamp with no declared zone is refused
@@ -118,6 +126,10 @@ AVAILABILITY = ("KNOWN", "UNKNOWN")
 #: identified.
 PUBLICATION_CLOCK_MODES = ("observed", "scheduled")
 
+#: the clock mode written into the artifacts when the dataset observed the ACTUAL's publication instant but nobody
+#: observed the consensus's. `calendar_join.py` produces exactly that calendar.
+OBSERVED_ACTUAL_PUBLICATION = "OBSERVED_ACTUAL_PUBLICATION"
+
 #: how long before the scheduled instant the consensus is assumed to have stood, under the same declared assumption
 DEFAULT_ASSUMED_TOLERANCE_SECONDS = 60
 
@@ -126,8 +138,29 @@ DEFAULT_ASSUMED_TOLERANCE_SECONDS = 60
 PROVENANCE = {"observed": "DEVELOPMENT_OBSERVED_CLOCK", "scheduled": "DEVELOPMENT_ASSUMED_CLOCK"}
 
 
-def publication_clock_block(mode, tolerance_seconds):
-    """What a reader must be told about the instants underneath every number in this document."""
+def publication_clock_block(mode, tolerance_seconds, *, consensus_assumed=False):
+    """What a reader must be told about the instants underneath every number in this document.
+
+    Three clocks, not two, because a release has two instants and an archive may observe only one of them. When the
+    dataset declares when its source published BOTH the actual and the consensus, nothing here is assumed. When it
+    declares only the actual's -- which is what the join in `calendar_join.py` produces, since no archive on this
+    machine timestamps a consensus -- the actual's instant is a measurement and the consensus is assumed only to
+    have stood before the release: the standard assumption of the macro-announcement literature, and a far weaker
+    one than assuming the release happened when it was scheduled. Both facts are in the same block, because a reader
+    who sees `OBSERVED` must be able to see immediately which of the two instants it refers to.
+    """
+    if mode == "observed" and consensus_assumed:
+        return {"mode": "OBSERVED_ACTUAL_PUBLICATION",
+                "consensus_clock": "ASSUMED_BEFORE_RELEASE",
+                "tolerance_seconds": int(tolerance_seconds),
+                "declared_by": "the dataset for the actual; the operator for the consensus",
+                "identification_caveat": ("the instant the ACTUAL became public is the one the dataset observed; the "
+                                          "instant the consensus became public was observed by nobody here and is "
+                                          "assumed only to precede the release by tolerance_seconds, which is the "
+                                          "standard pre-release information assumption and not a measurement"),
+                "consensus": ("the consensus is taken as published tolerance_seconds before the OBSERVED release "
+                              "instant, so it is pre-release information by construction; no consensus publication "
+                              "timestamp was observed")}
     if mode == "observed":
         return {"mode": "OBSERVED_PUBLICATION_CLOCK", "tolerance_seconds": None, "declared_by": "the dataset",
                 "identification_caveat": ("the publication instants are the ones the dataset declares; a release that "
@@ -459,18 +492,25 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
         _refuse("UNKNOWN_PUBLICATION_CLOCK_MODE",
                 f"{publication_clock!r} is not one of {list(PUBLICATION_CLOCK_MODES)}")
     assumed = publication_clock == "scheduled"
-    if assumed:
+    # the OTHER, much weaker assumption: the dataset observed when the ACTUAL was published and nobody observed when
+    # the consensus was. It is entered only when the calendar names an observed publication column and names no
+    # consensus publication column -- that is the join's calendar -- and it moves no value: it declares that the
+    # consensus stood before the release, which is what a consensus is.
+    assumed_consensus = (publication_clock == "observed" and mapping.published is not None
+                         and mapping.consensus_published is None)
+    if assumed or assumed_consensus:
         if int(assumed_tolerance_seconds) <= 0:
             _refuse("BAD_ASSUMED_TOLERANCE",
                     f"the consensus must be assumed to stand some positive time before the release, got "
                     f"{assumed_tolerance_seconds}")
+    if assumed:
         observed = [role for role in ("published", "consensus_published") if getattr(mapping, role) is not None]
         if observed:
             _refuse("PUBLICATION_CLOCK_CONFLICT",
                     f"this calendar declares an observed publication clock in {observed}, and the scheduled instant "
                     f"was asked to stand in for it; an assumption does not overwrite a measurement -- drop the "
                     f"assumption, or drop the column")
-    tolerance = timedelta(seconds=int(assumed_tolerance_seconds)) if assumed else None
+    tolerance = timedelta(seconds=int(assumed_tolerance_seconds)) if (assumed or assumed_consensus) else None
 
     releases = []
     unit_declared = mapping.unit is not None
@@ -507,6 +547,10 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             # the ONE place the assumption enters. It moves no value: it declares the instants the dataset never did,
             # and every artifact downstream carries the block that says so.
             published, consensus_published = event_time, event_time - tolerance
+        elif assumed_consensus and published is not None:
+            # the actual's instant is the dataset's own and is not touched; only the consensus's is declared, and
+            # only relative to that observed instant, so it cannot be later than the release it preceded
+            consensus_published = published - tolerance
         arrivals = []
         # one event_key per RELEASE, not per event type: the arrival store models one scheduled release with its own
         # consensus, actual and revisions, and monthly releases of the same indicator are different events in it.
@@ -518,7 +562,8 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             consensus_seen = received or consensus_published or published or event_time
             if consensus_published is not None and consensus_published > consensus_seen:
                 consensus_seen = consensus_published
-            if assumed and received is not None and received < consensus_published:
+            if (assumed or assumed_consensus) and received is not None and consensus_published is not None \
+                    and received < consensus_published:
                 consensus_seen = consensus_published      # our receipt cannot precede an instant we declared
             arrival = {**base, "kind": "CONSENSUS", "consensus": consensus, "observed_at": consensus_seen}
             if consensus_published is not None:
@@ -547,7 +592,8 @@ def read_calendar(path, mapping, *, timezone_name="UTC", timezone_declared=False
             "unit_column": mapping.unit, "period_column": mapping.period,
             "availability_column": mapping.availability, "historical_availability": historical_availability,
             "timezone": timezone_name, "timezone_declared": bool(timezone_declared),
-            "publication_clock": publication_clock_block(publication_clock, assumed_tolerance_seconds),
+            "publication_clock": publication_clock_block(publication_clock, assumed_tolerance_seconds,
+                                                          consensus_assumed=assumed_consensus),
             "units_declared": unit_declared and period_declared,
             "units_reading": ("the dataset declares unit and period, so the calendar module's INCOMPARABLE_SERIES "
                               "check is live" if unit_declared and period_declared else
@@ -878,12 +924,16 @@ def main(argv=None):
                         help="declare it for every row when the dataset carries no column for it")
     parser.add_argument("--publication-clock", choices=list(PUBLICATION_CLOCK_MODES), default="observed",
                         help="'observed' reads the instants the dataset declares and excludes a release that "
-                             "declares none; 'scheduled' DECLARES the assumption that each release was published at "
-                             "the instant it was scheduled for, and stamps every artifact with it")
+                             "declares none -- and when the dataset declares the ACTUAL's instant but no consensus "
+                             "instant, as the joined calendar of calendar_join.py does, the mode written into every "
+                             "artifact is OBSERVED_ACTUAL_PUBLICATION with consensus_clock ASSUMED_BEFORE_RELEASE; "
+                             "'scheduled' DECLARES the assumption that each release was published at the instant it "
+                             "was scheduled for, and stamps every artifact with it")
     parser.add_argument("--assume-publication-tolerance-seconds", type=int,
                         default=DEFAULT_ASSUMED_TOLERANCE_SECONDS,
-                        help="how long before the scheduled instant the consensus is assumed to have stood; only "
-                             "meaningful with --publication-clock scheduled")
+                        help="how long before the release instant the consensus is assumed to have stood; used by "
+                             "--publication-clock scheduled, and by 'observed' on a calendar that declares no "
+                             "consensus publication column")
     parser.add_argument("--max-neighbours-listed", type=int,
                         help="list at most this many of the other releases in the window, nearest first; the count "
                              "reported on every row stays exact")

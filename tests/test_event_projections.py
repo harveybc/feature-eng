@@ -414,3 +414,16 @@ def test_a_bad_holdout_fraction_and_an_unknown_outcome_are_refused_by_name(tmp_p
     with pytest.raises(lp.ProjectionRefusal) as refusal:
         lp.estimate(str(path), outcomes=("profit",))
     assert refusal.value.code == "UNKNOWN_OUTCOME"
+
+
+def test_a_rows_document_with_no_rows_is_refused_by_name_rather_than_failing_inside_the_placebo(tmp_path):
+    """A joined calendar that matched nothing produces an empty rows document. The estimator must name that, not
+    raise somewhere in the placebo, where the traceback says nothing about which input was empty."""
+    document, bars, _ = world(tmp_path, planter=additive_planter, name="empty")
+    document["rows"] = []
+    document["counts"] = {"rows": 0, "releases_read": 0}
+    document["excluded"] = {"counts": {"NO_CONSENSUS": 7}}
+    with pytest.raises(lp.ProjectionRefusal) as refusal:
+        run(tmp_path, document, bars, name="empty")
+    assert refusal.value.code == "NO_EVENT_ROWS"
+    assert "NO_CONSENSUS" in refusal.value.why
