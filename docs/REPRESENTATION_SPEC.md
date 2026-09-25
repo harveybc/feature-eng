@@ -106,3 +106,53 @@ stage 4 match on the code.
 
 `spec_id` deliberately ignores `candidate_id`, `why` and `not_decided`: an annotated candidate and the bare spec it
 proposes are the same representation, and a manifest that embeds one must join with the other.
+
+## Stage 2 — where these objects come from
+
+`feature_eng_m5phet/design.py` writes them. It reads one CSV — columns, types, the step its timestamps sit on, the
+row count, what is missing — runs the tests that already exist in this package's installed dependencies, and emits
+candidate specs, each carrying the measurement that motivated its windows and lags. **No model is fitted.**
+
+```bash
+python -m feature_eng_m5phet.design --data X.csv --target COL --out candidates.json
+# optional: --time-column, --timezone, --clock, --holdout-fraction/--holdout-cut, --provenance, --max-rows
+```
+
+The output document is `m5phet.representation_design.v1`: `dataset` (path, sha256, columns, the time column and the
+parser chosen for it), `tests`, `candidates` (each one a spec that `validate_spec` reads), `candidates_skipped`,
+`environment`, and `fitted`, whose value is the sentence saying nothing was trained.
+
+| Test | What it reports | When it cannot run |
+|---|---|---|
+| `sampling` | the modal positive step, `regular_fraction`, gaps, repeated and backwards timestamps, first and last instant | no two rows advance in time → `IRREGULAR_SAMPLING` |
+| `missingness` | per column, cells equal to a declared missing token; the non-numeric columns with the first value that made them so | — |
+| `analysis_segment` | the longest run of the target with no missing cell — the only rows the two tests below read | shorter than 32 rows → `TOO_FEW_FINITE_ROWS` |
+| `stationarity` | ADF and KPSS (statsmodels), each with its statistic, p-value, null hypothesis and rule, plus a named autocorrelation heuristic; `verdict` with `verdict_source` = `adf+kpss agree`, `adf and kpss disagree` → `INCONCLUSIVE`, or `heuristic` | without statsmodels both blocks read `NOT_AVAILABLE` with the reason and the verdict comes from the heuristic, which is reported as a rule over two numbers and never as a test |
+| `seasonality` | autocorrelation by FFT, the ±1.96/√n band, the peaks outside it (one per bump), and the decay lag | fewer than 3 lags or zero variance → `NOT_AVAILABLE` |
+
+Refusals name the file, never guess at it: `NO_TIMESTAMP_COLUMN` (listing the columns and the names it looks for),
+`TIME_COLUMN_NOT_IN_DATASET`, `TIMESTAMP_UNPARSEABLE`, `MISSING_TIMESTAMP`, `RAGGED_ROW`, `DUPLICATE_COLUMN`,
+`TARGET_NOT_IN_DATASET`, `TARGET_IS_THE_TIME_COLUMN`, `TARGET_NOT_NUMERIC`, `TOO_FEW_ROWS`.
+
+The stationarity tests read the **head** of the analysis segment, never its end: the end is where a holdout gets cut.
+
+### Example — the local household-power DEV slice
+
+50 400 one-minute rows, `Global_active_power`, from the same panel rows the dev forecast bundle was fit on:
+
+```
+peaks    lag 74 (rho 0.357), lag 1443 (rho 0.278), lag 2892 (rho 0.244)   band 0.011206, 338 peaks found
+decay    lag 197        adf p 0.0 STATIONARY · kpss p 0.1 STATIONARY → verdict STATIONARY (adf+kpss agree)
+```
+
+produced four candidates, of which the daily one reads:
+
+```json
+{"candidate_id": "seasonal_lag_1443", "windows": [197, 1443], "lags": [1, 1443],
+ "features": ["hour_of_day"],
+ "why": {"windows": "ACF peak at lag 1443 (rho 0.277748, band 0.011206, computed on the levels) -> window 1443; the decay lag 197 is kept as the shorter window",
+         "features": "the peak's period is 86580 s, which is the period hour_of_day encodes -> features ['hour_of_day']"}}
+```
+
+`not_decided` carried `calendar.clock`, `holdout`, `sampling.timezone` and `exogenous` — the four things a CSV cannot
+decide. Stage 3 fits nothing until a person has replaced them.
