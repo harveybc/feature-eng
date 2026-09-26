@@ -246,3 +246,57 @@ def test_a_price_reaction_is_never_accepted_as_a_surprise():
     result = book.surprise("US.CPI.2026-02", WEDNESDAY)
     assert result["release_surprise"] is None and result["available_surprise"] is None
     assert not hasattr(book, "surprise_from_returns")
+
+
+# --- CAL07/CAL08 as a PROPERTY: the as-of view is prefix-invariant ------------------------------------------------------
+#
+# The two cases above each check one counterexample. What they are counterexamples to is a property, and the property is
+# cheap to state: an as-of view is a function of the arrivals observed by the cutoff and of nothing else -- not of how
+# many arrivals came later, and not of the order any of them were delivered in. These two tests quantify over every
+# prefix and every permutation of a small real-shaped sequence, so a future change that makes an answer depend on the
+# tail of the stream fails here even if it happens to preserve the single counterexample.
+
+_SEQUENCE = (
+    ("SCHEDULE", "2026-03-01T00:00:00Z", {}),
+    ("CONSENSUS", "2026-03-02T12:00:00Z", {"consensus": 2.5}),
+    ("CONSENSUS", "2026-03-03T09:00:00Z", {"consensus": 2.6}),
+    ("ACTUAL", "2026-03-03T13:30:00Z", {"actual": 2.9}),
+    ("REVISION", "2026-04-01T13:30:00Z", {"actual": 3.1}),
+)
+
+
+def _sequence_rows():
+    return [arrival(kind, observed_at, **over) for kind, observed_at, over in _SEQUENCE]
+
+
+def test_CAL07_the_as_of_view_is_prefix_invariant_over_every_delivery_prefix():
+    """For every prefix of the stream and every cutoff inside it, the answer is the answer the whole stream gives.
+
+    This is the leak CAL04 and CAL07 each catch once, stated as the rule: the first three arrivals alone must answer a
+    3 March question exactly as all five do, or a feature built on 3 March was built from April's revision.
+    """
+    rows = _sequence_rows()
+    whole = calendar(*rows)
+    for length in range(1, len(rows) + 1):
+        prefix = calendar(*rows[:length])
+        boundary = rows[length - 1]["observed_at"]
+        for cutoff in [r["observed_at"] for r in rows if r["observed_at"] <= boundary]:
+            assert prefix.view("US.CPI.2026-02", cutoff) == whole.view("US.CPI.2026-02", cutoff), (length, cutoff)
+            assert prefix.vintage_identity(cutoff) == whole.vintage_identity(cutoff), (length, cutoff)
+            assert prefix.surprise("US.CPI.2026-02", cutoff) == whole.surprise("US.CPI.2026-02", cutoff), (length, cutoff)
+
+
+def test_CAL08_every_delivery_order_of_one_stream_gives_one_answer_at_every_cutoff():
+    """Delivery order is a property of our plumbing. It must never be a property of an answer."""
+    from itertools import permutations
+
+    rows = _sequence_rows()
+    reference = calendar(*rows)
+    cutoffs = [r["observed_at"] for r in rows] + ["2026-05-01T00:00:00Z"]
+    for order in permutations(range(len(rows))):
+        shuffled = calendar(*[rows[i] for i in order])
+        for cutoff in cutoffs:
+            assert shuffled.vintage_identity(cutoff) == reference.vintage_identity(cutoff), order
+            assert shuffled.view("US.CPI.2026-02", cutoff) == reference.view("US.CPI.2026-02", cutoff), order
+            assert (shuffled.surprise("US.CPI.2026-02", cutoff)
+                    == reference.surprise("US.CPI.2026-02", cutoff)), order

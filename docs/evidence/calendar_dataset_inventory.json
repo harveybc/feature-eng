@@ -1,0 +1,2089 @@
+{
+  "cases_blocked_by_a_missing_field": {
+    "CAL01": [
+      {
+        "missing_role": "schedule_instant",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "schedule_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL02": [
+      {
+        "missing_role": "publication_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "actual",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL03": [
+      {
+        "missing_role": "publication_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "actual",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL04": [
+      {
+        "missing_role": "revision_marker",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "actual",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL05": [
+      {
+        "missing_role": "reference_period",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "unit",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "unit",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "reference_period",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "unit",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "reference_period",
+        "resource": "fred_release_date_proxy"
+      }
+    ],
+    "CAL06": [
+      {
+        "missing_role": "consensus",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "consensus",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL07": [
+      {
+        "missing_role": "receipt_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL08": [
+      {
+        "missing_role": "receipt_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "vintage_version",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL09": [
+      {
+        "missing_role": "historical_availability",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "historical_availability",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "historical_availability",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "historical_availability",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "historical_availability",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL10": [
+      {
+        "missing_role": "revision_marker",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "observed_sequence",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "observed_sequence",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "actual",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "observed_sequence",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "observed_sequence",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "revision_marker",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "publication_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "observed_sequence",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL11": [
+      {
+        "missing_role": "cancellation_state",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "schedule_instant",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "cancellation_state",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "cancellation_state",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "cancellation_state",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "schedule_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      },
+      {
+        "missing_role": "cancellation_state",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ],
+    "CAL12": [
+      {
+        "missing_role": "receipt_instant",
+        "resource": "archive_2011_2021"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_announcements"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fxmacrodata_release_calendar"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_release_date_proxy"
+      },
+      {
+        "missing_role": "receipt_instant",
+        "resource": "fred_cpi_yoy_actuals"
+      }
+    ]
+  },
+  "reading": "a case listed above cannot be evaluated against that resource until the named role exists; the acceptance test for it is present and skipped by name, never quietly absent",
+  "resources": [
+    {
+      "bytes": 28906863,
+      "clock": {
+        "column": "event_date+event_time",
+        "declared_timezone_aware": false,
+        "first_and_last_values_in_file_order": [
+          "2011/01/01 4:00:00",
+          "2021/04/26 23:00:00"
+        ],
+        "measured_timezone_aware": false,
+        "reading": "NAIVE_WALL_CLOCK: these values name no instant on their own. What this archive's wall clock means is measured by feature_eng_m5phet.calendar_clock, not declared here, and app.economic_calendar refuses a naive timestamp at ingestion (AMBIGUOUS_LOCAL_TIME)",
+        "span": [
+          "2011/01/01 4:00:00",
+          "2021/04/26 9:00:00"
+        ],
+        "span_comparison": "lexicographic_over_text",
+        "values_missing": 0
+      },
+      "column_names_declared_by": "feature_eng_m5phet.calendar_join.DEFAULT_ARCHIVE_COLUMNS",
+      "columns": {
+        "actual": {
+          "non_null": 114045,
+          "null_or_empty": 7613,
+          "types": {
+            "str": 114045
+          }
+        },
+        "country": {
+          "non_null": 121658,
+          "null_or_empty": 0,
+          "types": {
+            "str": 121658
+          }
+        },
+        "data_format": {
+          "non_null": 93278,
+          "null_or_empty": 28380,
+          "types": {
+            "str": 93278
+          }
+        },
+        "description": {
+          "non_null": 121658,
+          "null_or_empty": 0,
+          "types": {
+            "str": 121658
+          }
+        },
+        "evaluation": {
+          "non_null": 54191,
+          "null_or_empty": 67467,
+          "types": {
+            "str": 54191
+          }
+        },
+        "event_date": {
+          "non_null": 121658,
+          "null_or_empty": 0,
+          "types": {
+            "str": 121658
+          }
+        },
+        "event_time": {
+          "non_null": 121658,
+          "null_or_empty": 0,
+          "types": {
+            "str": 121658
+          }
+        },
+        "forecast": {
+          "non_null": 54291,
+          "null_or_empty": 67367,
+          "types": {
+            "str": 54291
+          }
+        },
+        "previous": {
+          "non_null": 114047,
+          "null_or_empty": 7611,
+          "types": {
+            "str": 114047
+          }
+        },
+        "volatility": {
+          "non_null": 121658,
+          "null_or_empty": 0,
+          "types": {
+            "str": 121658
+          }
+        }
+      },
+      "field_roles": {
+        "actual": {
+          "cases_it_blocks": [],
+          "column": "actual",
+          "non_null_rows": 114045,
+          "present": true
+        },
+        "cancellation_state": {
+          "cases_it_blocks": [
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "consensus": {
+          "cases_it_blocks": [],
+          "column": "forecast",
+          "non_null_rows": 54291,
+          "present": true
+        },
+        "historical_availability": {
+          "cases_it_blocks": [
+            "CAL09"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "observed_sequence": {
+          "cases_it_blocks": [
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "previous": {
+          "cases_it_blocks": [],
+          "column": "previous",
+          "non_null_rows": 114047,
+          "present": true
+        },
+        "publication_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL03",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "receipt_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL07",
+            "CAL08",
+            "CAL12"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "reference_period": {
+          "cases_it_blocks": [
+            "CAL05"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "revision_marker": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "schedule_instant": {
+          "cases_it_blocks": [],
+          "column": "event_date+event_time",
+          "non_null_rows": 121658,
+          "present": true
+        },
+        "unit": {
+          "cases_it_blocks": [],
+          "column": "data_format",
+          "non_null_rows": 93278,
+          "present": true
+        },
+        "vintage_version": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL07",
+            "CAL08"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        }
+      },
+      "header_row": false,
+      "path": "/home/harveybc/Documents/GitHub/feature-eng/tests/data/economic_calendar_2011_2021.csv",
+      "provenance": {
+        "present": false,
+        "reading": "no provenance.json beside economic_calendar_2011_2021.csv"
+      },
+      "resource": "archive_2011_2021",
+      "rows": 121658,
+      "sha256": "5172b322bfaf7bb568a0bb37cc2f806e8bd18ed51c5703c1098c8609a6249383",
+      "status": "MEASURED",
+      "units": {
+        "column": "data_format",
+        "distinct": 6,
+        "most_common": [
+          [
+            "%",
+            64401
+          ],
+          [
+            "",
+            28380
+          ],
+          [
+            "B",
+            11575
+          ],
+          [
+            "K",
+            11223
+          ],
+          [
+            "M",
+            5596
+          ],
+          [
+            "T",
+            483
+          ]
+        ]
+      },
+      "vintages": {
+        "has_observation_clock": false,
+        "has_version_field": false,
+        "key_ladder": [
+          {
+            "examples": [
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2013/07/23"
+                ],
+                "values": [
+                  "0.4",
+                  "2.4"
+                ]
+              },
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2013/10/22"
+                ],
+                "values": [
+                  "1.2",
+                  "2.2"
+                ]
+              },
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2014/01/21"
+                ],
+                "values": [
+                  "0.8",
+                  "2.7"
+                ]
+              }
+            ],
+            "key": [
+              "country",
+              "description",
+              "event_date"
+            ],
+            "keys": 110748,
+            "keys_whose_rows_disagree_about_the_value": 10451,
+            "keys_with_more_than_one_row": 10759,
+            "most_distinct_values_on_one_key": 4
+          },
+          {
+            "examples": [
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2013/07/23",
+                  "20:30:00"
+                ],
+                "values": [
+                  "0.4",
+                  "2.4"
+                ]
+              },
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2013/10/22",
+                  "19:30:00"
+                ],
+                "values": [
+                  "1.2",
+                  "2.2"
+                ]
+              },
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2014/01/21",
+                  "19:30:00"
+                ],
+                "values": [
+                  "0.8",
+                  "2.7"
+                ]
+              }
+            ],
+            "key": [
+              "country",
+              "description",
+              "event_date",
+              "event_time"
+            ],
+            "keys": 110972,
+            "keys_whose_rows_disagree_about_the_value": 10396,
+            "keys_with_more_than_one_row": 10539,
+            "most_distinct_values_on_one_key": 4
+          },
+          {
+            "examples": [
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2013/07/23",
+                  "20:30:00",
+                  "%"
+                ],
+                "values": [
+                  "0.4",
+                  "2.4"
+                ]
+              },
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2013/10/22",
+                  "19:30:00",
+                  "%"
+                ],
+                "values": [
+                  "1.2",
+                  "2.2"
+                ]
+              },
+              {
+                "key": [
+                  "Australia",
+                  "CPI",
+                  "2014/01/21",
+                  "19:30:00",
+                  "%"
+                ],
+                "values": [
+                  "0.8",
+                  "2.7"
+                ]
+              }
+            ],
+            "key": [
+              "country",
+              "description",
+              "event_date",
+              "event_time",
+              "data_format"
+            ],
+            "keys": 111765,
+            "keys_whose_rows_disagree_about_the_value": 9688,
+            "keys_with_more_than_one_row": 9830,
+            "most_distinct_values_on_one_key": 3
+          },
+          {
+            "examples": [
+              {
+                "key": [
+                  "2011/03/01",
+                  "4:00:00",
+                  "New Zealand",
+                  "Low Volatility Expected",
+                  "REINZ House Price Index",
+                  "",
+                  "%",
+                  "",
+                  "-2.6"
+                ],
+                "values": [
+                  "-0.7",
+                  "2.3"
+                ]
+              },
+              {
+                "key": [
+                  "2014/04/15",
+                  "6:45:00",
+                  "United States",
+                  "Low Volatility Expected",
+                  "Chain Store Sales",
+                  "",
+                  "%",
+                  "",
+                  "1.5"
+                ],
+                "values": [
+                  "-0.3",
+                  "2.3"
+                ]
+              },
+              {
+                "key": [
+                  "2014/07/16",
+                  "16:00:00",
+                  "South Korea",
+                  "Low Volatility Expected",
+                  "PPI",
+                  "",
+                  "%",
+                  "",
+                  "0"
+                ],
+                "values": [
+                  "0",
+                  "0.1"
+                ]
+              }
+            ],
+            "key": [
+              "event_date",
+              "event_time",
+              "country",
+              "volatility",
+              "description",
+              "evaluation",
+              "data_format",
+              "forecast",
+              "previous"
+            ],
+            "keys": 121635,
+            "keys_whose_rows_disagree_about_the_value": 9,
+            "keys_with_more_than_one_row": 23,
+            "most_distinct_values_on_one_key": 2
+          }
+        ],
+        "reading": "9 keys still carry two different values at the finest key this resource offers (event_date, event_time, country, volatility, description, evaluation, data_format, forecast, previous), and the resource carries neither an observation clock nor a version field. Nothing in these bytes can tell a REVISION of one release from two distinct releases sharing a key, so this is reported as undecidable rather than counted as a vintage. How far the count fell between the coarsest and the finest rung is the measure of how much of it was key collision",
+        "value_column": "actual",
+        "verdict": "VINTAGE_UNDECIDABLE"
+      }
+    },
+    {
+      "bytes": 185559,
+      "clock": {
+        "column": "announcement_datetime_utc",
+        "declared_timezone_aware": true,
+        "first_and_last_values_in_file_order": [
+          "2025-03-31 00:30:00+00:00",
+          "2026-04-03 12:30:00+00:00"
+        ],
+        "measured_timezone_aware": true,
+        "span": [
+          "2024-12-12 08:30:00+00:00",
+          "2026-05-01 23:36:47+00:00"
+        ],
+        "span_comparison": "chronological",
+        "values_missing": 132
+      },
+      "columns": {
+        "announcement_datetime": {
+          "non_null": 18015,
+          "null_or_empty": 132,
+          "types": {
+            "float": 18015
+          }
+        },
+        "announcement_datetime_utc": {
+          "non_null": 18015,
+          "null_or_empty": 132,
+          "types": {
+            "Timestamp": 18015
+          }
+        },
+        "currency": {
+          "non_null": 18147,
+          "null_or_empty": 0,
+          "types": {
+            "str": 18147
+          }
+        },
+        "date": {
+          "non_null": 18147,
+          "null_or_empty": 0,
+          "types": {
+            "str": 18147
+          }
+        },
+        "indicator": {
+          "non_null": 18147,
+          "null_or_empty": 0,
+          "types": {
+            "str": 18147
+          }
+        },
+        "pct_change_mom": {
+          "non_null": 1698,
+          "null_or_empty": 16449,
+          "types": {
+            "float": 1698
+          }
+        },
+        "pct_change_qoq": {
+          "non_null": 141,
+          "null_or_empty": 18006,
+          "types": {
+            "float": 141
+          }
+        },
+        "pct_change_yoy": {
+          "non_null": 197,
+          "null_or_empty": 17950,
+          "types": {
+            "float": 197
+          }
+        },
+        "val": {
+          "non_null": 17961,
+          "null_or_empty": 186,
+          "types": {
+            "float": 17961
+          }
+        },
+        "val_mom": {
+          "non_null": 129,
+          "null_or_empty": 18018,
+          "types": {
+            "float": 129
+          }
+        },
+        "value": {
+          "non_null": 13,
+          "null_or_empty": 18134,
+          "types": {
+            "str": 13
+          }
+        }
+      },
+      "field_roles": {
+        "actual": {
+          "cases_it_blocks": [],
+          "column": "val",
+          "non_null_rows": 17961,
+          "present": true
+        },
+        "cancellation_state": {
+          "cases_it_blocks": [
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "consensus": {
+          "cases_it_blocks": [
+            "CAL03",
+            "CAL06"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "historical_availability": {
+          "cases_it_blocks": [
+            "CAL09"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "observed_sequence": {
+          "cases_it_blocks": [
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "previous": {
+          "cases_it_blocks": [],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "publication_instant": {
+          "cases_it_blocks": [],
+          "column": "announcement_datetime_utc",
+          "non_null_rows": 18015,
+          "present": true
+        },
+        "receipt_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL07",
+            "CAL08",
+            "CAL12"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "reference_period": {
+          "cases_it_blocks": [],
+          "column": "date",
+          "non_null_rows": 18147,
+          "present": true
+        },
+        "revision_marker": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "schedule_instant": {
+          "cases_it_blocks": [
+            "CAL01",
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "unit": {
+          "cases_it_blocks": [
+            "CAL05"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "vintage_version": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL07",
+            "CAL08"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        }
+      },
+      "pandas_dtypes": {
+        "announcement_datetime": "float64",
+        "announcement_datetime_utc": "datetime64[ns, UTC]",
+        "currency": "object",
+        "date": "object",
+        "indicator": "object",
+        "pct_change_mom": "float64",
+        "pct_change_qoq": "float64",
+        "pct_change_yoy": "float64",
+        "val": "float64",
+        "val_mom": "float64",
+        "value": "object"
+      },
+      "path": "/home/harveybc/Documents/GitHub/financial-data/economic_calendar/release_actuals/fxmacrodata/announcements.parquet",
+      "provenance": {
+        "declared_digest_matches_these_bytes": true,
+        "declared_sha256": "d8dd8c13ed3cb4dea4265f058ef3020eff2587a3ceb6e9eec743fc5f2ca138a0",
+        "file_grain_receipt_instant": "2026-05-01T23:38:43.550573+00:00",
+        "present": true,
+        "reading": "`acquired_at` is a FILE-grain receipt clock: it dates the download, not any single release, so it cannot order two releases inside the file and is never read as `receipt_instant`",
+        "source": "FXMacroData"
+      },
+      "resource": "fxmacrodata_announcements",
+      "rows": 18147,
+      "sha256": "d8dd8c13ed3cb4dea4265f058ef3020eff2587a3ceb6e9eec743fc5f2ca138a0",
+      "status": "MEASURED",
+      "units": {
+        "column": null,
+        "distinct": 0,
+        "reading": "NO_UNIT_COLUMN: nothing in this resource says what its numbers are measured in"
+      },
+      "vintages": {
+        "has_observation_clock": false,
+        "has_version_field": false,
+        "key_ladder": [
+          {
+            "examples": [
+              {
+                "key": [
+                  "CAD",
+                  "trade_balance",
+                  "2026-02-28"
+                ],
+                "values": [
+                  "-9.0",
+                  "1.0",
+                  "22.7",
+                  "7.9"
+                ]
+              },
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-03-31"
+                ],
+                "values": [
+                  "-4.3",
+                  "-7.0",
+                  "0.2",
+                  "102642463.8",
+                  "12.4",
+                  "1434367498.42",
+                  "211269329.4",
+                  "272967385.4",
+                  "313911793.17",
+                  "5.0",
+                  "5.8",
+                  "525181122.57",
+                  "580700056.53",
+                  "853667441.89"
+                ]
+              },
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-04-30"
+                ],
+                "values": [
+                  "-0.2",
+                  "-5.2",
+                  "1.3",
+                  "1169063320.14",
+                  "1969369494.17",
+                  "219512228.45",
+                  "315692374.99",
+                  "368757146.1",
+                  "4.6",
+                  "535204603.44",
+                  "6.4",
+                  "8.1",
+                  "800306174.04",
+                  "96180146.54"
+                ]
+              }
+            ],
+            "key": [
+              "currency",
+              "indicator",
+              "date"
+            ],
+            "keys": 17580,
+            "keys_whose_rows_disagree_about_the_value": 45,
+            "keys_with_more_than_one_row": 45,
+            "most_distinct_values_on_one_key": 14
+          },
+          {
+            "examples": [
+              {
+                "key": [
+                  "CAD",
+                  "trade_balance",
+                  "2026-02-28",
+                  "2026-02-28 13:30:00+00:00"
+                ],
+                "values": [
+                  "-9.0",
+                  "1.0",
+                  "22.7",
+                  "7.9"
+                ]
+              },
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-03-31",
+                  "2025-03-31 01:00:00+00:00"
+                ],
+                "values": [
+                  "-4.3",
+                  "-7.0",
+                  "0.2",
+                  "102642463.8",
+                  "12.4",
+                  "1434367498.42",
+                  "211269329.4",
+                  "272967385.4",
+                  "313911793.17",
+                  "5.0",
+                  "5.8",
+                  "525181122.57",
+                  "580700056.53",
+                  "853667441.89"
+                ]
+              },
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-04-30",
+                  "2025-04-30 01:00:00+00:00"
+                ],
+                "values": [
+                  "-0.2",
+                  "-5.2",
+                  "1.3",
+                  "1169063320.14",
+                  "1969369494.17",
+                  "219512228.45",
+                  "315692374.99",
+                  "368757146.1",
+                  "4.6",
+                  "535204603.44",
+                  "6.4",
+                  "8.1",
+                  "800306174.04",
+                  "96180146.54"
+                ]
+              }
+            ],
+            "key": [
+              "currency",
+              "indicator",
+              "date",
+              "announcement_datetime_utc"
+            ],
+            "keys": 17580,
+            "keys_whose_rows_disagree_about_the_value": 45,
+            "keys_with_more_than_one_row": 45,
+            "most_distinct_values_on_one_key": 14
+          },
+          {
+            "examples": [
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-03-31",
+                  "1743382800.0",
+                  "2025-03-31 01:00:00+00:00",
+                  "nan",
+                  "nan",
+                  "nan",
+                  "nan",
+                  "None"
+                ],
+                "values": [
+                  "-4.3",
+                  "-7.0",
+                  "0.2",
+                  "102642463.8",
+                  "12.4",
+                  "1434367498.42",
+                  "211269329.4",
+                  "272967385.4",
+                  "313911793.17",
+                  "5.0",
+                  "5.8",
+                  "525181122.57",
+                  "580700056.53",
+                  "853667441.89"
+                ]
+              },
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-04-30",
+                  "1745974800.0",
+                  "2025-04-30 01:00:00+00:00",
+                  "-100.0",
+                  "nan",
+                  "nan",
+                  "nan",
+                  "None"
+                ],
+                "values": [
+                  "-0.2",
+                  "-5.2",
+                  "1.3",
+                  "4.6",
+                  "6.4",
+                  "8.1"
+                ]
+              },
+              {
+                "key": [
+                  "CNY",
+                  "business_confidence",
+                  "2025-05-31",
+                  "1748653200.0",
+                  "2025-05-31 01:00:00+00:00",
+                  "-100.0",
+                  "nan",
+                  "nan",
+                  "nan",
+                  "None"
+                ],
+                "values": [
+                  "-3.4",
+                  "-4.9",
+                  "1.3",
+                  "4.8",
+                  "6.0"
+                ]
+              }
+            ],
+            "key": [
+              "currency",
+              "indicator",
+              "date",
+              "announcement_datetime",
+              "announcement_datetime_utc",
+              "pct_change_mom",
+              "pct_change_yoy",
+              "val_mom",
+              "pct_change_qoq",
+              "value"
+            ],
+            "keys": 17871,
+            "keys_whose_rows_disagree_about_the_value": 44,
+            "keys_with_more_than_one_row": 44,
+            "most_distinct_values_on_one_key": 14
+          }
+        ],
+        "reading": "44 keys still carry two different values at the finest key this resource offers (currency, indicator, date, announcement_datetime, announcement_datetime_utc, pct_change_mom, pct_change_yoy, val_mom, pct_change_qoq, value), and the resource carries neither an observation clock nor a version field. Nothing in these bytes can tell a REVISION of one release from two distinct releases sharing a key, so this is reported as undecidable rather than counted as a vintage. How far the count fell between the coarsest and the finest rung is the measure of how much of it was key collision",
+        "value_column": "val",
+        "verdict": "VINTAGE_UNDECIDABLE"
+      }
+    },
+    {
+      "bytes": 17507,
+      "clock": {
+        "column": "announcement_datetime_utc",
+        "declared_timezone_aware": true,
+        "first_and_last_values_in_file_order": [
+          "2026-05-05 01:30:00+00:00",
+          "2027-07-14 18:00:00+00:00"
+        ],
+        "measured_timezone_aware": true,
+        "span": [
+          "2026-02-05 12:00:00+00:00",
+          "2027-07-14 18:00:00+00:00"
+        ],
+        "span_comparison": "chronological",
+        "values_missing": 0
+      },
+      "columns": {
+        "announcement_datetime": {
+          "non_null": 896,
+          "null_or_empty": 0,
+          "types": {
+            "int": 896
+          }
+        },
+        "announcement_datetime_local": {
+          "non_null": 896,
+          "null_or_empty": 0,
+          "types": {
+            "str": 896
+          }
+        },
+        "announcement_datetime_local_utc": {
+          "non_null": 0,
+          "null_or_empty": 896,
+          "types": {}
+        },
+        "announcement_datetime_utc": {
+          "non_null": 896,
+          "null_or_empty": 0,
+          "types": {
+            "Timestamp": 896
+          }
+        },
+        "currency": {
+          "non_null": 896,
+          "null_or_empty": 0,
+          "types": {
+            "str": 896
+          }
+        },
+        "release": {
+          "non_null": 896,
+          "null_or_empty": 0,
+          "types": {
+            "str": 896
+          }
+        }
+      },
+      "field_roles": {
+        "actual": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL03",
+            "CAL04",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "cancellation_state": {
+          "cases_it_blocks": [
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "consensus": {
+          "cases_it_blocks": [
+            "CAL03",
+            "CAL06"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "historical_availability": {
+          "cases_it_blocks": [
+            "CAL09"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "observed_sequence": {
+          "cases_it_blocks": [
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "previous": {
+          "cases_it_blocks": [],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "publication_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL03",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "receipt_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL07",
+            "CAL08",
+            "CAL12"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "reference_period": {
+          "cases_it_blocks": [
+            "CAL05"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "revision_marker": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "schedule_instant": {
+          "cases_it_blocks": [],
+          "column": "announcement_datetime_utc",
+          "non_null_rows": 896,
+          "present": true
+        },
+        "unit": {
+          "cases_it_blocks": [
+            "CAL05"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "vintage_version": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL07",
+            "CAL08"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        }
+      },
+      "pandas_dtypes": {
+        "announcement_datetime": "int64",
+        "announcement_datetime_local": "object",
+        "announcement_datetime_local_utc": "datetime64[ns, UTC]",
+        "announcement_datetime_utc": "datetime64[ns, UTC]",
+        "currency": "object",
+        "release": "object"
+      },
+      "path": "/home/harveybc/Documents/GitHub/financial-data/economic_calendar/scheduled_events/fxmacrodata/release_calendar.parquet",
+      "provenance": {
+        "declared_digest_matches_these_bytes": true,
+        "declared_sha256": "8a50bf16ef06a423015a67b777a3e5feb961891b3506c39de27535f0471db226",
+        "file_grain_receipt_instant": "2026-05-01T23:38:43.532056+00:00",
+        "present": true,
+        "reading": "`acquired_at` is a FILE-grain receipt clock: it dates the download, not any single release, so it cannot order two releases inside the file and is never read as `receipt_instant`",
+        "source": "FXMacroData"
+      },
+      "resource": "fxmacrodata_release_calendar",
+      "rows": 896,
+      "sha256": "8a50bf16ef06a423015a67b777a3e5feb961891b3506c39de27535f0471db226",
+      "status": "MEASURED",
+      "units": {
+        "column": null,
+        "distinct": 0,
+        "reading": "NO_UNIT_COLUMN: nothing in this resource says what its numbers are measured in"
+      },
+      "vintages": {
+        "key": null,
+        "reading": "this resource carries schedules, not values, so it has no field to revise",
+        "value_column": null,
+        "verdict": "NOT_APPLICABLE_NO_VALUE_COLUMN"
+      }
+    },
+    {
+      "bytes": 29936,
+      "clock": {
+        "column": "scheduled_date_proxy",
+        "declared_timezone_aware": false,
+        "first_and_last_values_in_file_order": [
+          "2016-01-01",
+          "2025-10-01"
+        ],
+        "measured_timezone_aware": false,
+        "reading": "NAIVE_WALL_CLOCK: these values name no instant on their own. What this archive's wall clock means is measured by feature_eng_m5phet.calendar_clock, not declared here, and app.economic_calendar refuses a naive timestamp at ingestion (AMBIGUOUS_LOCAL_TIME)",
+        "span": [
+          "1996-01-01",
+          "2025-12-31"
+        ],
+        "span_comparison": "lexicographic_over_text",
+        "values_missing": 0
+      },
+      "columns": {
+        "actual": {
+          "non_null": 1192,
+          "null_or_empty": 8,
+          "types": {
+            "float": 1192
+          }
+        },
+        "consensus_estimate": {
+          "non_null": 0,
+          "null_or_empty": 1200,
+          "types": {}
+        },
+        "event_name": {
+          "non_null": 1200,
+          "null_or_empty": 0,
+          "types": {
+            "str": 1200
+          }
+        },
+        "event_slug": {
+          "non_null": 1200,
+          "null_or_empty": 0,
+          "types": {
+            "str": 1200
+          }
+        },
+        "fred_series": {
+          "non_null": 1200,
+          "null_or_empty": 0,
+          "types": {
+            "str": 1200
+          }
+        },
+        "index": {
+          "non_null": 1200,
+          "null_or_empty": 0,
+          "types": {
+            "int": 1200
+          }
+        },
+        "scheduled_date_proxy": {
+          "non_null": 1200,
+          "null_or_empty": 0,
+          "types": {
+            "str": 1200
+          }
+        },
+        "source_note": {
+          "non_null": 1200,
+          "null_or_empty": 0,
+          "types": {
+            "str": 1200
+          }
+        },
+        "surprise": {
+          "non_null": 0,
+          "null_or_empty": 1200,
+          "types": {}
+        },
+        "transformed_actual": {
+          "non_null": 1194,
+          "null_or_empty": 6,
+          "types": {
+            "float": 1194
+          }
+        }
+      },
+      "field_roles": {
+        "actual": {
+          "cases_it_blocks": [],
+          "column": "actual",
+          "non_null_rows": 1192,
+          "present": true
+        },
+        "cancellation_state": {
+          "cases_it_blocks": [
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "consensus": {
+          "cases_it_blocks": [
+            "CAL03",
+            "CAL06"
+          ],
+          "column": "consensus_estimate",
+          "non_null_rows": 0,
+          "present": false,
+          "reading": "COLUMN_PRESENT_BUT_EMPTY: the column exists and every row is null, which is the same absence as a missing column for any case that needs a value"
+        },
+        "historical_availability": {
+          "cases_it_blocks": [
+            "CAL09"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "observed_sequence": {
+          "cases_it_blocks": [
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "previous": {
+          "cases_it_blocks": [],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "publication_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL03",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "receipt_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL07",
+            "CAL08",
+            "CAL12"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "reference_period": {
+          "cases_it_blocks": [
+            "CAL05"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "revision_marker": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "schedule_instant": {
+          "cases_it_blocks": [],
+          "column": "scheduled_date_proxy",
+          "non_null_rows": 1200,
+          "present": true
+        },
+        "unit": {
+          "cases_it_blocks": [
+            "CAL05"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "vintage_version": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL07",
+            "CAL08"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        }
+      },
+      "pandas_dtypes": {
+        "actual": "float64",
+        "consensus_estimate": "object",
+        "event_name": "object",
+        "event_slug": "object",
+        "fred_series": "object",
+        "index": "int64",
+        "scheduled_date_proxy": "object",
+        "source_note": "object",
+        "surprise": "object",
+        "transformed_actual": "float64"
+      },
+      "path": "/home/harveybc/Documents/GitHub/financial-data/economic_calendar/scheduled_events/fred_release_date_proxy/scheduled_events.parquet",
+      "provenance": {
+        "declared_digest_matches_these_bytes": true,
+        "declared_sha256": "c683be065f7a0fb3d4bdded8505012edb0301468482e8ded584f91dc0399004b",
+        "file_grain_receipt_instant": "2026-05-01T21:19:26.305849+00:00",
+        "present": true,
+        "reading": "`acquired_at` is a FILE-grain receipt clock: it dates the download, not any single release, so it cannot order two releases inside the file and is never read as `receipt_instant`",
+        "source": "FRED-derived release-date proxy"
+      },
+      "resource": "fred_release_date_proxy",
+      "rows": 1200,
+      "sha256": "c683be065f7a0fb3d4bdded8505012edb0301468482e8ded584f91dc0399004b",
+      "status": "MEASURED",
+      "units": {
+        "column": null,
+        "distinct": 0,
+        "reading": "NO_UNIT_COLUMN: nothing in this resource says what its numbers are measured in"
+      },
+      "vintages": {
+        "has_observation_clock": false,
+        "has_version_field": false,
+        "key_ladder": [
+          {
+            "examples": [],
+            "key": [
+              "event_slug",
+              "scheduled_date_proxy"
+            ],
+            "keys": 1200,
+            "keys_whose_rows_disagree_about_the_value": 0,
+            "keys_with_more_than_one_row": 0,
+            "most_distinct_values_on_one_key": 1
+          },
+          {
+            "examples": [],
+            "key": [
+              "index",
+              "event_slug",
+              "event_name",
+              "scheduled_date_proxy",
+              "fred_series",
+              "transformed_actual",
+              "consensus_estimate",
+              "surprise",
+              "source_note"
+            ],
+            "keys": 1200,
+            "keys_whose_rows_disagree_about_the_value": 0,
+            "keys_with_more_than_one_row": 0,
+            "most_distinct_values_on_one_key": 1
+          }
+        ],
+        "reading": "at the finest key this resource offers (index, event_slug, event_name, scheduled_date_proxy, fred_series, transformed_actual, consensus_estimate, surprise, source_note) every key carries one value, so no earlier version of any field survives here and a point-in-time view cannot be reconstructed from these bytes",
+        "value_column": "actual",
+        "verdict": "NO_VINTAGES"
+      }
+    },
+    {
+      "bytes": 16566,
+      "clock": {
+        "column": "date",
+        "declared_timezone_aware": false,
+        "first_and_last_values_in_file_order": [
+          "1990-01-01 00:00:00",
+          "2025-12-01 00:00:00"
+        ],
+        "measured_timezone_aware": false,
+        "reading": "NAIVE_WALL_CLOCK: these values name no instant on their own. What this archive's wall clock means is measured by feature_eng_m5phet.calendar_clock, not declared here, and app.economic_calendar refuses a naive timestamp at ingestion (AMBIGUOUS_LOCAL_TIME)",
+        "span": [
+          "1990-01-01 00:00:00",
+          "2025-12-01 00:00:00"
+        ],
+        "span_comparison": "chronological",
+        "values_missing": 0
+      },
+      "columns": {
+        "actual": {
+          "non_null": 431,
+          "null_or_empty": 1,
+          "types": {
+            "float": 431
+          }
+        },
+        "consensus_estimate": {
+          "non_null": 0,
+          "null_or_empty": 432,
+          "types": {}
+        },
+        "date": {
+          "non_null": 432,
+          "null_or_empty": 0,
+          "types": {
+            "Timestamp": 432
+          }
+        },
+        "event_name": {
+          "non_null": 432,
+          "null_or_empty": 0,
+          "types": {
+            "str": 432
+          }
+        },
+        "fred_series": {
+          "non_null": 432,
+          "null_or_empty": 0,
+          "types": {
+            "str": 432
+          }
+        },
+        "source_note": {
+          "non_null": 432,
+          "null_or_empty": 0,
+          "types": {
+            "str": 432
+          }
+        },
+        "surprise": {
+          "non_null": 0,
+          "null_or_empty": 432,
+          "types": {}
+        },
+        "transform": {
+          "non_null": 432,
+          "null_or_empty": 0,
+          "types": {
+            "str": 432
+          }
+        },
+        "transformed_actual": {
+          "non_null": 420,
+          "null_or_empty": 12,
+          "types": {
+            "float": 420
+          }
+        }
+      },
+      "field_roles": {
+        "actual": {
+          "cases_it_blocks": [],
+          "column": "actual",
+          "non_null_rows": 431,
+          "present": true
+        },
+        "cancellation_state": {
+          "cases_it_blocks": [
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "consensus": {
+          "cases_it_blocks": [
+            "CAL03",
+            "CAL06"
+          ],
+          "column": "consensus_estimate",
+          "non_null_rows": 0,
+          "present": false,
+          "reading": "COLUMN_PRESENT_BUT_EMPTY: the column exists and every row is null, which is the same absence as a missing column for any case that needs a value"
+        },
+        "historical_availability": {
+          "cases_it_blocks": [
+            "CAL09"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "observed_sequence": {
+          "cases_it_blocks": [
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "previous": {
+          "cases_it_blocks": [],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "publication_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL03",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "receipt_instant": {
+          "cases_it_blocks": [
+            "CAL02",
+            "CAL07",
+            "CAL08",
+            "CAL12"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "reference_period": {
+          "cases_it_blocks": [],
+          "column": "date",
+          "non_null_rows": 432,
+          "present": true
+        },
+        "revision_marker": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL10"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "schedule_instant": {
+          "cases_it_blocks": [
+            "CAL01",
+            "CAL11"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        },
+        "unit": {
+          "cases_it_blocks": [],
+          "column": "transform",
+          "non_null_rows": 432,
+          "present": true
+        },
+        "vintage_version": {
+          "cases_it_blocks": [
+            "CAL04",
+            "CAL07",
+            "CAL08"
+          ],
+          "column": null,
+          "non_null_rows": 0,
+          "present": false
+        }
+      },
+      "pandas_dtypes": {
+        "actual": "float64",
+        "consensus_estimate": "object",
+        "date": "datetime64[ns]",
+        "event_name": "object",
+        "fred_series": "object",
+        "source_note": "object",
+        "surprise": "object",
+        "transform": "object",
+        "transformed_actual": "float64"
+      },
+      "path": "/home/harveybc/Documents/GitHub/financial-data/economic_calendar/release_actuals/cpi_yoy/actuals.parquet",
+      "provenance": {
+        "declared_digest_matches_these_bytes": true,
+        "declared_sha256": "aed1d669ee32b37c202c0c191d45deb3179a64dd33757e4c0c336af093b106fd",
+        "file_grain_receipt_instant": "2026-05-01T16:42:56.525729+00:00",
+        "present": true,
+        "reading": "`acquired_at` is a FILE-grain receipt clock: it dates the download, not any single release, so it cannot order two releases inside the file and is never read as `receipt_instant`",
+        "source": "FRED"
+      },
+      "resource": "fred_cpi_yoy_actuals",
+      "rows": 432,
+      "sha256": "aed1d669ee32b37c202c0c191d45deb3179a64dd33757e4c0c336af093b106fd",
+      "status": "MEASURED",
+      "units": {
+        "column": "transform",
+        "distinct": 1,
+        "most_common": [
+          [
+            "yoy_pct_change",
+            432
+          ]
+        ]
+      },
+      "vintages": {
+        "has_observation_clock": false,
+        "has_version_field": false,
+        "key_ladder": [
+          {
+            "examples": [],
+            "key": [
+              "fred_series",
+              "date"
+            ],
+            "keys": 432,
+            "keys_whose_rows_disagree_about_the_value": 0,
+            "keys_with_more_than_one_row": 0,
+            "most_distinct_values_on_one_key": 1
+          },
+          {
+            "examples": [],
+            "key": [
+              "date",
+              "event_name",
+              "fred_series",
+              "transform",
+              "transformed_actual",
+              "consensus_estimate",
+              "surprise",
+              "source_note"
+            ],
+            "keys": 432,
+            "keys_whose_rows_disagree_about_the_value": 0,
+            "keys_with_more_than_one_row": 0,
+            "most_distinct_values_on_one_key": 1
+          }
+        ],
+        "reading": "at the finest key this resource offers (date, event_name, fred_series, transform, transformed_actual, consensus_estimate, surprise, source_note) every key carries one value, so no earlier version of any field survives here and a point-in-time view cannot be reconstructed from these bytes",
+        "value_column": "actual",
+        "verdict": "NO_VINTAGES"
+      }
+    }
+  ],
+  "root": "/home/harveybc/Documents/GitHub",
+  "schema": "m5phet.calendar_inventory.v1"
+}
