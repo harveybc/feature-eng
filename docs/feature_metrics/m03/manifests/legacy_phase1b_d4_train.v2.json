@@ -1,0 +1,50 @@
+{
+ "schema": "feature_train_manifest.v2",
+ "split": "TRAIN",
+ "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+ "governance": "LOCAL_FILE",
+ "resource_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+ "path": "examples/data_downsampled/phase_1_b/normalized_d4.csv",
+ "path_note": "relative to a predictor checkout; LOCAL, not a governed lake resource",
+ "registered_rows": 7656,
+ "columns_total": 28,
+ "split_rule": "dedicated TRAIN file named as x_train_file by predictor/examples/config/phase_1b_binary/phase_1b_binary_ann_buy_entry_1d_config.json; validation normalized_d5.csv and test normalized_d6.csv are separate files and are NOT OPENED",
+ "boundaries": {
+  "train": [
+   0,
+   7656
+  ]
+ },
+ "timestamp_column": "DATE_TIME",
+ "timestamp_format": "%Y-%m-%d %H:%M:%S",
+ "step_seconds": 3600,
+ "default_role": "feature",
+ "target_channels": [],
+ "declared_periods_rows": {
+  "day_rows_nominal": 24,
+  "trading_week_rows_nominal": 120
+ },
+ "primary_period": "day_rows_nominal",
+ "period_note": "periods are ROWS; the file has weekend/holiday gaps so rows are not hours (sampling check reports it)",
+ "max_missing_fraction": 0.2,
+ "upstream": "already normalized upstream; fit scope of that normalization NOT certified; indicator causality NOT certified",
+ "inherits": "docs/feature_metrics/train_manifest.json sha256 6d5cc9fa781725b8f6252194a156cb164433f598067915931fe29bd56634dbc4 (roles copied)",
+ "columns": {
+  "buy_entry_label": {
+   "role": "target",
+   "reason": "future-derived oracle label; not a feature"
+  },
+  "sell_entry_label": {
+   "role": "target",
+   "reason": "future-derived oracle label; not a feature"
+  },
+  "buy_exit_label": {
+   "role": "target",
+   "reason": "future-derived oracle label; not a feature"
+  },
+  "sell_exit_label": {
+   "role": "target",
+   "reason": "future-derived oracle label; not a feature"
+  }
+ }
+}

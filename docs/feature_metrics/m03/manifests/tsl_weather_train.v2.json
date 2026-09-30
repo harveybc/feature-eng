@@ -1,0 +1,50 @@
+{
+ "schema": "feature_train_manifest.v2",
+ "split": "TRAIN",
+ "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+ "governance": "LAKE_RESOURCE_IDENTITY",
+ "lake": "sota_benchmarks",
+ "resource": "thuml_tsl_weather/weather.csv",
+ "resource_sha256": "34ee981d07313e51da2a50bb600072c8ae4a69cb4b0651f4cb93a069d7a2ba63",
+ "identity_sources": [
+  "predictor docs/contracts/tsl_literature_metrics.v1.json (registered sha256, rows, step)",
+  "predictor docs/TSL_BENCHMARK_LAKE.md (lake registration, VERIFIED_TRANSFER)"
+ ],
+ "path": "thuml_tsl_weather/weather.csv",
+ "path_note": "relative to a local directory holding bytes whose SHA256 equals resource_sha256; the profiler refuses any other bytes",
+ "registered_rows": 52696,
+ "columns_total": 22,
+ "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+ "boundaries": {
+  "train": [
+   0,
+   36887
+  ]
+ },
+ "holdout_not_profiled": {
+  "validation": [
+   36887,
+   42157
+  ],
+  "test": [
+   42157,
+   52696
+  ]
+ },
+ "timestamp_column": "date",
+ "timestamp_format": "%Y-%m-%d %H:%M:%S",
+ "step_seconds": 600,
+ "default_role": "feature",
+ "target_channels": [
+  "OT"
+ ],
+ "target_note": "multivariate (M) protocol: every channel is both an input and a forecast target; OT is the S/MS target. Admissible as a lagged input only",
+ "declared_periods_rows": {
+  "daily": 144,
+  "weekly": 1008
+ },
+ "primary_period": "daily",
+ "max_missing_fraction": 0.2,
+ "availability": "retrospective public benchmark; availability UNDECLARED/UNKNOWN; not point-in-time financial data",
+ "columns": {}
+}

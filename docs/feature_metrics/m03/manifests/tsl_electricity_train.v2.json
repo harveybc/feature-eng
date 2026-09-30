@@ -1,0 +1,50 @@
+{
+ "schema": "feature_train_manifest.v2",
+ "split": "TRAIN",
+ "dataset_id": "sota_benchmarks.thuml_tsl_electricity.train",
+ "governance": "LAKE_RESOURCE_IDENTITY",
+ "lake": "sota_benchmarks",
+ "resource": "thuml_tsl_electricity/electricity.csv",
+ "resource_sha256": "7e45845d54c5219bad0ae6bc1b5316cf8ff9cead5d33fa998a5a51c2e4a497ad",
+ "identity_sources": [
+  "predictor docs/contracts/tsl_literature_metrics.v1.json (registered sha256, rows, step)",
+  "predictor docs/TSL_BENCHMARK_LAKE.md (lake registration, VERIFIED_TRANSFER)"
+ ],
+ "path": "thuml_tsl_electricity/electricity.csv",
+ "path_note": "relative to a local directory holding bytes whose SHA256 equals resource_sha256; the profiler refuses any other bytes",
+ "registered_rows": 26304,
+ "columns_total": 322,
+ "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+ "boundaries": {
+  "train": [
+   0,
+   18412
+  ]
+ },
+ "holdout_not_profiled": {
+  "validation": [
+   18412,
+   21044
+  ],
+  "test": [
+   21044,
+   26304
+  ]
+ },
+ "timestamp_column": "date",
+ "timestamp_format": "%Y-%m-%d %H:%M:%S",
+ "step_seconds": 3600,
+ "default_role": "feature",
+ "target_channels": [
+  "OT"
+ ],
+ "target_note": "multivariate (M) protocol: every channel is both an input and a forecast target; OT is the S/MS target. Admissible as a lagged input only",
+ "declared_periods_rows": {
+  "daily": 24,
+  "weekly": 168
+ },
+ "primary_period": "daily",
+ "max_missing_fraction": 0.2,
+ "availability": "retrospective public benchmark; availability UNDECLARED/UNKNOWN; not point-in-time financial data",
+ "columns": {}
+}
