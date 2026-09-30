@@ -46,6 +46,11 @@ def sha_file(p: Path) -> str:
     return h.hexdigest()
 
 
+def home_relative(p) -> str:
+    """Never write an account's home path into a committed index."""
+    return str(p).replace(str(Path.home()), "~", 1)
+
+
 def c162_family(metric: str):
     for prefix, fam in C162_FAMILY:
         if metric.startswith(prefix) or prefix in metric:
@@ -165,15 +170,15 @@ def main():
         if not ok:
             why = [k for k in ("bytes_ok", "split_ok", "impl_ok") if not v[k]]
             add(**base, status="REUSE_REFUSED_IDENTITY_UNVERIFIED", missing_reason="failed: " + ",".join(why),
-                profile_path=str(v["artifact"]), profile_sha256=v["artifact_sha256"])
+                profile_path=home_relative(v["artifact"]), profile_sha256=v["artifact_sha256"])
             return
         if s is None:
             reason = "SKIPPED_BY_PRODUCER_NONNUMERIC" if name in v["skipped"] else "NO_TRAIN_ROWS_FOR_VARIABLE_IN_ARTIFACT"
-            add(**base, status="NOT_MEASURED", missing_reason=reason, profile_path=str(v["artifact"]),
+            add(**base, status="NOT_MEASURED", missing_reason=reason, profile_path=home_relative(v["artifact"]),
                 profile_sha256=v["artifact_sha256"], implementation_identity=v["impl"])
             return
         present, absent = families(s["completed"])
-        add(**base, status="MEASURED_TRAIN_VERIFIED_REUSED", covered=True, profile_path=str(v["artifact"]),
+        add(**base, status="MEASURED_TRAIN_VERIFIED_REUSED", covered=True, profile_path=home_relative(v["artifact"]),
             profile_sha256=v["artifact_sha256"], implementation_identity=v["impl"],
             families_present=";".join(present), families_absent=";".join(absent),
             missing_reason=("absent families were not produced by the c162 implementation; "

@@ -1,0 +1,51 @@
+{
+ "schema": "m03_admissible_input_set.v1",
+ "rule": "one admissible feature per branch per dataset; all-admissible control = the same list in one arrangement",
+ "declarations": [
+  {
+   "file": "legacy_phase1b_d4.admissible_inputs.v1.json",
+   "file_sha256": "654d14fd699e1b29d4008ee376e5d9875d7c558ee42420a3872be1103d52f9db",
+   "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+   "governance": "LOCAL_FILE",
+   "declaration_sha256": "46646a95f6866cd252254981553f04ba11f8c0df04fcfb996657010cf01766ac",
+   "admissible": 23,
+   "excluded": 5,
+   "quality_flags": 0
+  },
+  {
+   "file": "tsl_electricity.admissible_inputs.v1.json",
+   "file_sha256": "9f344687aa0703d76cc49910ec94dec15f51203d808397617989389e57ab701b",
+   "dataset_id": "sota_benchmarks.thuml_tsl_electricity.train",
+   "governance": "LAKE_RESOURCE_IDENTITY",
+   "declaration_sha256": "ca1098ed94a36b972b06e45f381bd192fbd30c436f60532d8674ef8820c0a62f",
+   "admissible": 321,
+   "excluded": 1,
+   "quality_flags": 0
+  },
+  {
+   "file": "tsl_traffic.admissible_inputs.v1.json",
+   "file_sha256": "5c2e7d0fbb30c7466c0f29a97330cb6cd8c3462d2c450e829911dd7fe58e0e85",
+   "dataset_id": "sota_benchmarks.thuml_tsl_traffic.train",
+   "governance": "LAKE_RESOURCE_IDENTITY",
+   "declaration_sha256": "de71cca20d038ca58c8f221d3b1bca2314de2c99a4677f25afccad8d09f54734",
+   "admissible": 862,
+   "excluded": 1,
+   "quality_flags": 0
+  },
+  {
+   "file": "tsl_weather.admissible_inputs.v1.json",
+   "file_sha256": "0dad37fd7edd9fc8c51507d7b84d2c45e6cf2c3049be2e504bfedb56da73a4d3",
+   "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+   "governance": "LAKE_RESOURCE_IDENTITY",
+   "declaration_sha256": "c7e20f15ee824eb5caf9309cb8af2fc93f6e65fdcbcc83b89cef16b9ec58e27e",
+   "admissible": 21,
+   "excluded": 1,
+   "quality_flags": 3
+  }
+ ],
+ "totals": {
+  "admissible": 1227,
+  "excluded": 8
+ },
+ "set_sha256": "692ae63552081073e65c61656bfebf245e81d095d85d9b0515823bf526f853d8"
+}

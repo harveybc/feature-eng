@@ -1,14 +1,14 @@
 {
  "schema": "m03_inventory_coverage.v1",
- "denominator_rows": 14025,
- "covered_rows": 2228,
+ "denominator_rows": 15256,
+ "covered_rows": 3455,
  "covered_definition": "a feature column with a TRAIN-only profile over its full declared TRAIN population whose bytes, split and implementation identities verify (new or reused); excluded-role and partial-prefix rows are accounted but not covered",
  "by_status": {
   "NOT_MEASURED": 11558,
   "MEASURED_TRAIN_VERIFIED_REUSED": 2228,
-  "EXCLUDED_ROLE": 203,
+  "EXCLUDED_ROLE": 211,
   "EXCLUDED_HOLDOUT_FILE": 9,
-  "NOT_MEASURED_QUEUED": 4,
+  "MEASURED_TRAIN_NEW": 1227,
   "PARTIAL_PREFIX_VERIFIED_REUSED": 23
  },
  "by_source": {
@@ -35,10 +35,12 @@
    "MEASURED_TRAIN_VERIFIED_REUSED": 633
   },
   "m03.local_file": {
-   "NOT_MEASURED_QUEUED": 1
+   "EXCLUDED_ROLE": 5,
+   "MEASURED_TRAIN_NEW": 23
   },
   "m03.lake_resource_identity": {
-   "NOT_MEASURED_QUEUED": 3
+   "EXCLUDED_ROLE": 3,
+   "MEASURED_TRAIN_NEW": 1204
   },
   "inherited.gibbs_dce037b.train_512": {
    "EXCLUDED_ROLE": 5,
