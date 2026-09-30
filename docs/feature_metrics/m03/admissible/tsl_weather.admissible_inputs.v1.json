@@ -1,0 +1,172 @@
+{
+ "schema": "m03_admissible_inputs.v1",
+ "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+ "governance": "LAKE_RESOURCE_IDENTITY",
+ "lake": "sota_benchmarks",
+ "resource": "thuml_tsl_weather/weather.csv",
+ "resource_sha256": "34ee981d07313e51da2a50bb600072c8ae4a69cb4b0651f4cb93a069d7a2ba63",
+ "train_rows": [
+  0,
+  36887
+ ],
+ "train_prefix_sha256": "d4a19f6e5cf26486cc9c1f1da2dcfa47edc57550fc81fb9f923b48c6b104fc46",
+ "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+ "manifest_sha256": "3d9f06f0f6ad35863617a937f1cbaeb37b7b96212e531aecb2b7e7b3b0372502",
+ "profile_sha256": "47e8bed8e2219d7800a0e229a029861fb860b488b04211b5cfe8b0682dd63422",
+ "profiler_sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "verified_step_seconds": null,
+  "median_step_seconds": 600.0
+ },
+ "target_channels": [
+  "OT"
+ ],
+ "admissible_count": 21,
+ "columns_total": 22,
+ "branches_one_feature_each": [
+  {
+   "branch": 0,
+   "feature": "p (mbar)"
+  },
+  {
+   "branch": 1,
+   "feature": "T (degC)"
+  },
+  {
+   "branch": 2,
+   "feature": "Tpot (K)"
+  },
+  {
+   "branch": 3,
+   "feature": "Tdew (degC)"
+  },
+  {
+   "branch": 4,
+   "feature": "rh (%)"
+  },
+  {
+   "branch": 5,
+   "feature": "VPmax (mbar)"
+  },
+  {
+   "branch": 6,
+   "feature": "VPact (mbar)"
+  },
+  {
+   "branch": 7,
+   "feature": "VPdef (mbar)"
+  },
+  {
+   "branch": 8,
+   "feature": "sh (g/kg)"
+  },
+  {
+   "branch": 9,
+   "feature": "H2OC (mmol/mol)"
+  },
+  {
+   "branch": 10,
+   "feature": "rho (g/m**3)"
+  },
+  {
+   "branch": 11,
+   "feature": "wv (m/s)"
+  },
+  {
+   "branch": 12,
+   "feature": "max. wv (m/s)"
+  },
+  {
+   "branch": 13,
+   "feature": "wd (deg)"
+  },
+  {
+   "branch": 14,
+   "feature": "rain (mm)"
+  },
+  {
+   "branch": 15,
+   "feature": "raining (s)"
+  },
+  {
+   "branch": 16,
+   "feature": "SWDR (W/m\ufffd)"
+  },
+  {
+   "branch": 17,
+   "feature": "PAR (\ufffdmol/m\ufffd/s)"
+  },
+  {
+   "branch": 18,
+   "feature": "max. PAR (\ufffdmol/m\ufffd/s)"
+  },
+  {
+   "branch": 19,
+   "feature": "Tlog (degC)"
+  },
+  {
+   "branch": 20,
+   "feature": "OT"
+  }
+ ],
+ "all_admissible_control": [
+  "p (mbar)",
+  "T (degC)",
+  "Tpot (K)",
+  "Tdew (degC)",
+  "rh (%)",
+  "VPmax (mbar)",
+  "VPact (mbar)",
+  "VPdef (mbar)",
+  "sh (g/kg)",
+  "H2OC (mmol/mol)",
+  "rho (g/m**3)",
+  "wv (m/s)",
+  "max. wv (m/s)",
+  "wd (deg)",
+  "rain (mm)",
+  "raining (s)",
+  "SWDR (W/m\ufffd)",
+  "PAR (\ufffdmol/m\ufffd/s)",
+  "max. PAR (\ufffdmol/m\ufffd/s)",
+  "Tlog (degC)",
+  "OT"
+ ],
+ "exclusions": [
+  {
+   "column": "date",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  }
+ ],
+ "admissibility_rule": "role=feature AND every TRAIN cell numeric AND at least one finite value AND not constant on TRAIN AND nonfinite fraction <= manifest max_missing_fraction",
+ "not_established": [
+  "point-in-time availability",
+  "upstream causality of derived columns",
+  "which features or groups help a model (inner validation decides)"
+ ],
+ "authority": "LAKE resource identity verified by digest; local profile, not a governed warehouse metric",
+ "quality_flags": [
+  {
+   "column": "wv (m/s)",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -9999.0,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  },
+  {
+   "column": "max. PAR (\ufffdmol/m\ufffd/s)",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -9999.0,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  },
+  {
+   "column": "OT",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -9999.0,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  }
+ ],
+ "sampling_note": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only",
+ "declaration_sha256": "c7e20f15ee824eb5caf9309cb8af2fc93f6e65fdcbcc83b89cef16b9ec58e27e"
+}

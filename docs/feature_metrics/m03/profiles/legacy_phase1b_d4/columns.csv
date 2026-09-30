@@ -1,0 +1,29 @@
+column,position,role,target_channel,status,exclusion_reason,declared_reason
+DATE_TIME,0,timestamp,False,EXCLUDED,time index; never a branch input,time index; never a branch input
+ATR,1,feature,False,PROFILED_ADMISSIBLE,,
+RSI,2,feature,False,PROFILED_ADMISSIBLE,,
+MACD,3,feature,False,PROFILED_ADMISSIBLE,,
+MACD_Histogram,4,feature,False,PROFILED_ADMISSIBLE,,
+MACD_Signal,5,feature,False,PROFILED_ADMISSIBLE,,
+ADX,6,feature,False,PROFILED_ADMISSIBLE,,
+DI_plus,7,feature,False,PROFILED_ADMISSIBLE,,
+DI_minus,8,feature,False,PROFILED_ADMISSIBLE,,
+Stochastic_K,9,feature,False,PROFILED_ADMISSIBLE,,
+Stochastic_D,10,feature,False,PROFILED_ADMISSIBLE,,
+BB_Width,11,feature,False,PROFILED_ADMISSIBLE,,
+CCI,12,feature,False,PROFILED_ADMISSIBLE,,
+WilliamsR,13,feature,False,PROFILED_ADMISSIBLE,,
+ROC,14,feature,False,PROFILED_ADMISSIBLE,,
+ATR_ratio,15,feature,False,PROFILED_ADMISSIBLE,,
+BB_position,16,feature,False,PROFILED_ADMISSIBLE,,
+rolling_std_24,17,feature,False,PROFILED_ADMISSIBLE,,
+price_minus_ema,18,feature,False,PROFILED_ADMISSIBLE,,
+hod_sin,19,feature,False,PROFILED_ADMISSIBLE,,
+hod_cos,20,feature,False,PROFILED_ADMISSIBLE,,
+dow_sin,21,feature,False,PROFILED_ADMISSIBLE,,
+dow_cos,22,feature,False,PROFILED_ADMISSIBLE,,
+buy_entry_label,23,target,False,EXCLUDED,future-derived oracle label; not a feature,future-derived oracle label; not a feature
+sell_entry_label,24,target,False,EXCLUDED,future-derived oracle label; not a feature,future-derived oracle label; not a feature
+buy_exit_label,25,target,False,EXCLUDED,future-derived oracle label; not a feature,future-derived oracle label; not a feature
+sell_exit_label,26,target,False,EXCLUDED,future-derived oracle label; not a feature,future-derived oracle label; not a feature
+bars_to_friday,27,feature,False,PROFILED_ADMISSIBLE,,

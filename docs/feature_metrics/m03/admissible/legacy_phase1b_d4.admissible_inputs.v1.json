@@ -1,0 +1,181 @@
+{
+ "schema": "m03_admissible_inputs.v1",
+ "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "resource_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+ "train_rows": [
+  0,
+  7656
+ ],
+ "train_prefix_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+ "split_rule": "dedicated TRAIN file named as x_train_file by predictor/examples/config/phase_1b_binary/phase_1b_binary_ann_buy_entry_1d_config.json; validation normalized_d5.csv and test normalized_d6.csv are separate files and are NOT OPENED",
+ "manifest_sha256": "b60c061132d05a14d586a97677ae25227d684861ad04c3c5f0712844b92c05e7",
+ "profile_sha256": "abf585e3bd265225884aa9ffcbbb75bf6d285f77962bd6463aa87b45e3fb24d8",
+ "profiler_sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "verified_step_seconds": null,
+  "median_step_seconds": 14400.0
+ },
+ "target_channels": [],
+ "admissible_count": 23,
+ "columns_total": 28,
+ "branches_one_feature_each": [
+  {
+   "branch": 0,
+   "feature": "ATR"
+  },
+  {
+   "branch": 1,
+   "feature": "RSI"
+  },
+  {
+   "branch": 2,
+   "feature": "MACD"
+  },
+  {
+   "branch": 3,
+   "feature": "MACD_Histogram"
+  },
+  {
+   "branch": 4,
+   "feature": "MACD_Signal"
+  },
+  {
+   "branch": 5,
+   "feature": "ADX"
+  },
+  {
+   "branch": 6,
+   "feature": "DI_plus"
+  },
+  {
+   "branch": 7,
+   "feature": "DI_minus"
+  },
+  {
+   "branch": 8,
+   "feature": "Stochastic_K"
+  },
+  {
+   "branch": 9,
+   "feature": "Stochastic_D"
+  },
+  {
+   "branch": 10,
+   "feature": "BB_Width"
+  },
+  {
+   "branch": 11,
+   "feature": "CCI"
+  },
+  {
+   "branch": 12,
+   "feature": "WilliamsR"
+  },
+  {
+   "branch": 13,
+   "feature": "ROC"
+  },
+  {
+   "branch": 14,
+   "feature": "ATR_ratio"
+  },
+  {
+   "branch": 15,
+   "feature": "BB_position"
+  },
+  {
+   "branch": 16,
+   "feature": "rolling_std_24"
+  },
+  {
+   "branch": 17,
+   "feature": "price_minus_ema"
+  },
+  {
+   "branch": 18,
+   "feature": "hod_sin"
+  },
+  {
+   "branch": 19,
+   "feature": "hod_cos"
+  },
+  {
+   "branch": 20,
+   "feature": "dow_sin"
+  },
+  {
+   "branch": 21,
+   "feature": "dow_cos"
+  },
+  {
+   "branch": 22,
+   "feature": "bars_to_friday"
+  }
+ ],
+ "all_admissible_control": [
+  "ATR",
+  "RSI",
+  "MACD",
+  "MACD_Histogram",
+  "MACD_Signal",
+  "ADX",
+  "DI_plus",
+  "DI_minus",
+  "Stochastic_K",
+  "Stochastic_D",
+  "BB_Width",
+  "CCI",
+  "WilliamsR",
+  "ROC",
+  "ATR_ratio",
+  "BB_position",
+  "rolling_std_24",
+  "price_minus_ema",
+  "hod_sin",
+  "hod_cos",
+  "dow_sin",
+  "dow_cos",
+  "bars_to_friday"
+ ],
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  },
+  {
+   "column": "buy_entry_label",
+   "status": "EXCLUDED",
+   "reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "sell_entry_label",
+   "status": "EXCLUDED",
+   "reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "buy_exit_label",
+   "status": "EXCLUDED",
+   "reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "sell_exit_label",
+   "status": "EXCLUDED",
+   "reason": "future-derived oracle label; not a feature"
+  }
+ ],
+ "admissibility_rule": "role=feature AND every TRAIN cell numeric AND at least one finite value AND not constant on TRAIN AND nonfinite fraction <= manifest max_missing_fraction",
+ "not_established": [
+  "point-in-time availability",
+  "upstream causality of derived columns",
+  "which features or groups help a model (inner validation decides)"
+ ],
+ "authority": "LOCAL development file; not governed",
+ "quality_flags": [],
+ "sampling_note": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only",
+ "declaration_sha256": "46646a95f6866cd252254981553f04ba11f8c0df04fcfb996657010cf01766ac"
+}

@@ -46,6 +46,16 @@ def declare(profile_path: Path) -> dict:
         "authority": ("LAKE resource identity verified by digest; local profile, not a governed warehouse metric"
                       if p["governance"] == "LAKE_RESOURCE_IDENTITY" else "LOCAL development file; not governed"),
     }
+    flags = []
+    mpath = profile_path.parent / "metrics_long.csv"
+    if mpath.is_file():
+        import csv
+        for r in csv.DictReader(mpath.open()):
+            if r["metric"] == "min" and r["value"] and float(r["value"]) <= -9999:
+                flags.append({"column": r["column"], "flag": "SENTINEL_LIKE_MINIMUM", "value": float(r["value"]),
+                              "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"})
+    doc["quality_flags"] = flags
+    doc["sampling_note"] = p["sampling"].get("consequence", "")
     doc["declaration_sha256"] = canonical_sha(doc)
     return doc
 

@@ -1,0 +1,2986 @@
+{
+ "schema": "feature_train_profile.v2",
+ "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+ "split": "TRAIN",
+ "governance": "LAKE_RESOURCE_IDENTITY",
+ "lake": "sota_benchmarks",
+ "resource": "thuml_tsl_weather/weather.csv",
+ "manifest": {
+  "schema": "feature_train_manifest.v2",
+  "split": "TRAIN",
+  "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+  "governance": "LAKE_RESOURCE_IDENTITY",
+  "lake": "sota_benchmarks",
+  "resource": "thuml_tsl_weather/weather.csv",
+  "resource_sha256": "34ee981d07313e51da2a50bb600072c8ae4a69cb4b0651f4cb93a069d7a2ba63",
+  "identity_sources": [
+   "predictor docs/contracts/tsl_literature_metrics.v1.json (registered sha256, rows, step)",
+   "predictor docs/TSL_BENCHMARK_LAKE.md (lake registration, VERIFIED_TRANSFER)"
+  ],
+  "path": "thuml_tsl_weather/weather.csv",
+  "path_note": "relative to a local directory holding bytes whose SHA256 equals resource_sha256; the profiler refuses any other bytes",
+  "registered_rows": 52696,
+  "columns_total": 22,
+  "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+  "boundaries": {
+   "train": [
+    0,
+    36887
+   ]
+  },
+  "holdout_not_profiled": {
+   "validation": [
+    36887,
+    42157
+   ],
+   "test": [
+    42157,
+    52696
+   ]
+  },
+  "timestamp_column": "date",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S",
+  "step_seconds": 600,
+  "default_role": "feature",
+  "target_channels": [
+   "OT"
+  ],
+  "target_note": "multivariate (M) protocol: every channel is both an input and a forecast target; OT is the S/MS target. Admissible as a lagged input only",
+  "declared_periods_rows": {
+   "daily": 144,
+   "weekly": 1008
+  },
+  "primary_period": "daily",
+  "max_missing_fraction": 0.2,
+  "availability": "retrospective public benchmark; availability UNDECLARED/UNKNOWN; not point-in-time financial data",
+  "columns": {}
+ },
+ "manifest_sha256": "3d9f06f0f6ad35863617a937f1cbaeb37b7b96212e531aecb2b7e7b3b0372502",
+ "resource_identity": {
+  "sha256": "34ee981d07313e51da2a50bb600072c8ae4a69cb4b0651f4cb93a069d7a2ba63",
+  "bytes": 7235425,
+  "records": 52696,
+  "verified_against_declared": true,
+  "note": "every byte hashed for identity; no value past the TRAIN boundary parsed"
+ },
+ "train_prefix": {
+  "rows": [
+   0,
+   36887
+  ],
+  "bytes_parsed": 5093304,
+  "prefix_sha256": "d4a19f6e5cf26486cc9c1f1da2dcfa47edc57550fc81fb9f923b48c6b104fc46",
+  "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+  "full_train_coverage": true
+ },
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "invalid_count": 0,
+  "first": "2020-01-01 00:10:00",
+  "last": "2020-09-13 05:10:00",
+  "median_step_seconds": 600.0,
+  "top_steps_seconds": {
+   "600.0": 36884,
+   "0.0": 1,
+   "6000.0": 1
+  },
+  "non_positive_steps": 1,
+  "declared_step_seconds": 600,
+  "verified_step_seconds": null,
+  "consequence": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only"
+ },
+ "columns": [
+  {
+   "column": "date",
+   "position": 0,
+   "role": "timestamp",
+   "declared_reason": "time index; never a branch input",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "time index; never a branch input"
+  },
+  {
+   "column": "p (mbar)",
+   "position": 1,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "T (degC)",
+   "position": 2,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "Tpot (K)",
+   "position": 3,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "Tdew (degC)",
+   "position": 4,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rh (%)",
+   "position": 5,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "VPmax (mbar)",
+   "position": 6,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "VPact (mbar)",
+   "position": 7,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "VPdef (mbar)",
+   "position": 8,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sh (g/kg)",
+   "position": 9,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "H2OC (mmol/mol)",
+   "position": 10,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rho (g/m**3)",
+   "position": 11,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "wv (m/s)",
+   "position": 12,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "max. wv (m/s)",
+   "position": 13,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "wd (deg)",
+   "position": 14,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rain (mm)",
+   "position": 15,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "raining (s)",
+   "position": 16,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "SWDR (W/m\ufffd)",
+   "position": 17,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "PAR (\ufffdmol/m\ufffd/s)",
+   "position": 18,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "max. PAR (\ufffdmol/m\ufffd/s)",
+   "position": 19,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "Tlog (degC)",
+   "position": 20,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "OT",
+   "position": 21,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": true,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  }
+ ],
+ "branches": [
+  {
+   "branch": 0,
+   "columns": [
+    "p (mbar)"
+   ]
+  },
+  {
+   "branch": 1,
+   "columns": [
+    "T (degC)"
+   ]
+  },
+  {
+   "branch": 2,
+   "columns": [
+    "Tpot (K)"
+   ]
+  },
+  {
+   "branch": 3,
+   "columns": [
+    "Tdew (degC)"
+   ]
+  },
+  {
+   "branch": 4,
+   "columns": [
+    "rh (%)"
+   ]
+  },
+  {
+   "branch": 5,
+   "columns": [
+    "VPmax (mbar)"
+   ]
+  },
+  {
+   "branch": 6,
+   "columns": [
+    "VPact (mbar)"
+   ]
+  },
+  {
+   "branch": 7,
+   "columns": [
+    "VPdef (mbar)"
+   ]
+  },
+  {
+   "branch": 8,
+   "columns": [
+    "sh (g/kg)"
+   ]
+  },
+  {
+   "branch": 9,
+   "columns": [
+    "H2OC (mmol/mol)"
+   ]
+  },
+  {
+   "branch": 10,
+   "columns": [
+    "rho (g/m**3)"
+   ]
+  },
+  {
+   "branch": 11,
+   "columns": [
+    "wv (m/s)"
+   ]
+  },
+  {
+   "branch": 12,
+   "columns": [
+    "max. wv (m/s)"
+   ]
+  },
+  {
+   "branch": 13,
+   "columns": [
+    "wd (deg)"
+   ]
+  },
+  {
+   "branch": 14,
+   "columns": [
+    "rain (mm)"
+   ]
+  },
+  {
+   "branch": 15,
+   "columns": [
+    "raining (s)"
+   ]
+  },
+  {
+   "branch": 16,
+   "columns": [
+    "SWDR (W/m\ufffd)"
+   ]
+  },
+  {
+   "branch": 17,
+   "columns": [
+    "PAR (\ufffdmol/m\ufffd/s)"
+   ]
+  },
+  {
+   "branch": 18,
+   "columns": [
+    "max. PAR (\ufffdmol/m\ufffd/s)"
+   ]
+  },
+  {
+   "branch": 19,
+   "columns": [
+    "Tlog (degC)"
+   ]
+  },
+  {
+   "branch": 20,
+   "columns": [
+    "OT"
+   ]
+  }
+ ],
+ "grouping": "one admissible feature per branch; metrics propose, inner validation decides",
+ "redundancy": {
+  "rule": "Pearson on TRAIN rows with every selected column finite; descriptive, never merges",
+  "columns": 21,
+  "rows_used": 36887,
+  "status": "OK",
+  "pairs": 210,
+  "pairs_abs_ge_0_95": 15,
+  "pairs_abs_ge_0_99": 5,
+  "abs_corr_quantiles": {
+   "0.5": 0.1463196066145951,
+   "0.9": 0.8122947142228256,
+   "0.99": 0.9998067352739464
+  },
+  "components_abs_ge_0.95": {
+   "count_multi_member": 3,
+   "largest": 5,
+   "members": [
+    [
+     "T (degC)",
+     "Tpot (K)",
+     "VPmax (mbar)",
+     "rho (g/m**3)",
+     "Tlog (degC)"
+    ],
+    [
+     "Tdew (degC)",
+     "VPact (mbar)",
+     "sh (g/kg)",
+     "H2OC (mmol/mol)"
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "PAR (\ufffdmol/m\ufffd/s)"
+    ]
+   ]
+  },
+  "components_abs_ge_0.99": {
+   "count_multi_member": 3,
+   "largest": 3,
+   "members": [
+    [
+     "VPact (mbar)",
+     "sh (g/kg)",
+     "H2OC (mmol/mol)"
+    ],
+    [
+     "T (degC)",
+     "Tpot (K)"
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "PAR (\ufffdmol/m\ufffd/s)"
+    ]
+   ]
+  },
+  "redundant_pairs_abs_ge_0_95": [
+   [
+    "sh (g/kg)",
+    "H2OC (mmol/mol)",
+    0.9999974733244523
+   ],
+   [
+    "VPact (mbar)",
+    "H2OC (mmol/mol)",
+    0.9998693712341592
+   ],
+   [
+    "VPact (mbar)",
+    "sh (g/kg)",
+    0.999867084587832
+   ],
+   [
+    "SWDR (W/m\ufffd)",
+    "PAR (\ufffdmol/m\ufffd/s)",
+    0.9991965366557689
+   ],
+   [
+    "T (degC)",
+    "Tpot (K)",
+    0.9962276486665501
+   ],
+   [
+    "T (degC)",
+    "Tlog (degC)",
+    0.9810120744612948
+   ],
+   [
+    "Tpot (K)",
+    "rho (g/m**3)",
+    -0.9786913472656087
+   ],
+   [
+    "Tdew (degC)",
+    "VPact (mbar)",
+    0.9768876454831481
+   ],
+   [
+    "Tdew (degC)",
+    "H2OC (mmol/mol)",
+    0.9767592767804698
+   ],
+   [
+    "Tdew (degC)",
+    "sh (g/kg)",
+    0.9763761438368416
+   ],
+   [
+    "Tpot (K)",
+    "Tlog (degC)",
+    0.9730326653551844
+   ],
+   [
+    "T (degC)",
+    "VPmax (mbar)",
+    0.9677653108567471
+   ],
+   [
+    "VPmax (mbar)",
+    "Tlog (degC)",
+    0.9619513778922524
+   ],
+   [
+    "Tpot (K)",
+    "VPmax (mbar)",
+    0.9611635286389695
+   ],
+   [
+    "T (degC)",
+    "rho (g/m**3)",
+    -0.9576974775486963
+   ]
+  ],
+  "lagged": {
+   "status": "OK",
+   "rule": "max |corr(x_i(t), x_j(t-lag))| over lags 1..1008; leader first",
+   "pairs": [
+    [
+     "H2OC (mmol/mol)",
+     "sh (g/kg)",
+     1,
+     0.9992794205010901
+    ],
+    [
+     "sh (g/kg)",
+     "H2OC (mmol/mol)",
+     1,
+     0.9992792958077908
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "VPact (mbar)",
+     1,
+     0.999153419539285
+    ],
+    [
+     "sh (g/kg)",
+     "VPact (mbar)",
+     1,
+     0.9991494834506752
+    ],
+    [
+     "VPact (mbar)",
+     "H2OC (mmol/mol)",
+     1,
+     0.9991457276629389
+    ],
+    [
+     "VPact (mbar)",
+     "sh (g/kg)",
+     1,
+     0.9991419076718475
+    ],
+    [
+     "T (degC)",
+     "Tpot (K)",
+     1,
+     0.9956903585578879
+    ],
+    [
+     "Tpot (K)",
+     "T (degC)",
+     1,
+     0.9955356227891704
+    ],
+    [
+     "T (degC)",
+     "Tlog (degC)",
+     1,
+     0.9813989899419455
+    ],
+    [
+     "Tlog (degC)",
+     "T (degC)",
+     1,
+     0.9801622216559136
+    ],
+    [
+     "Tpot (K)",
+     "rho (g/m**3)",
+     1,
+     -0.978304516614073
+    ],
+    [
+     "rho (g/m**3)",
+     "Tpot (K)",
+     1,
+     -0.9779930745315167
+    ],
+    [
+     "Tdew (degC)",
+     "VPact (mbar)",
+     1,
+     0.9762847331708853
+    ],
+    [
+     "VPact (mbar)",
+     "Tdew (degC)",
+     1,
+     0.976271567530268
+    ],
+    [
+     "Tdew (degC)",
+     "H2OC (mmol/mol)",
+     1,
+     0.9761562605077405
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "Tdew (degC)",
+     1,
+     0.9761496058382241
+    ],
+    [
+     "Tdew (degC)",
+     "sh (g/kg)",
+     1,
+     0.9757726211494475
+    ],
+    [
+     "sh (g/kg)",
+     "Tdew (degC)",
+     1,
+     0.9757656940430051
+    ],
+    [
+     "Tpot (K)",
+     "Tlog (degC)",
+     1,
+     0.97331454869552
+    ],
+    [
+     "Tlog (degC)",
+     "Tpot (K)",
+     1,
+     0.9722871512825285
+    ],
+    [
+     "T (degC)",
+     "VPmax (mbar)",
+     1,
+     0.9671041434303674
+    ],
+    [
+     "VPmax (mbar)",
+     "T (degC)",
+     1,
+     0.9670902518921748
+    ],
+    [
+     "VPmax (mbar)",
+     "Tlog (degC)",
+     1,
+     0.9622695239386353
+    ],
+    [
+     "Tlog (degC)",
+     "VPmax (mbar)",
+     1,
+     0.9611397770630702
+    ],
+    [
+     "VPmax (mbar)",
+     "Tpot (K)",
+     1,
+     0.9605830994088164
+    ],
+    [
+     "Tpot (K)",
+     "VPmax (mbar)",
+     1,
+     0.9604236724089236
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "SWDR (W/m\ufffd)",
+     1,
+     0.9597647130438705
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     0.9596957132095187
+    ],
+    [
+     "T (degC)",
+     "rho (g/m**3)",
+     1,
+     -0.9573756726011795
+    ],
+    [
+     "rho (g/m**3)",
+     "T (degC)",
+     1,
+     -0.9569269068559307
+    ],
+    [
+     "rho (g/m**3)",
+     "Tlog (degC)",
+     1,
+     -0.9233032611977328
+    ],
+    [
+     "Tlog (degC)",
+     "rho (g/m**3)",
+     1,
+     -0.9227750294420128
+    ],
+    [
+     "VPmax (mbar)",
+     "rho (g/m**3)",
+     1,
+     -0.9080457688248782
+    ],
+    [
+     "rho (g/m**3)",
+     "VPmax (mbar)",
+     1,
+     -0.9075635507471106
+    ],
+    [
+     "VPmax (mbar)",
+     "VPdef (mbar)",
+     1,
+     0.8478462554689052
+    ],
+    [
+     "VPdef (mbar)",
+     "VPmax (mbar)",
+     1,
+     0.8476321197843397
+    ],
+    [
+     "VPdef (mbar)",
+     "rh (%)",
+     1,
+     -0.8143729341169365
+    ],
+    [
+     "rh (%)",
+     "VPdef (mbar)",
+     1,
+     -0.814222289777789
+    ],
+    [
+     "Tdew (degC)",
+     "rho (g/m**3)",
+     1,
+     -0.8122198039462866
+    ],
+    [
+     "rho (g/m**3)",
+     "Tdew (degC)",
+     1,
+     -0.8121386198108484
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     0.8012365636428553
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     0.8011133247626488
+    ],
+    [
+     "Tpot (K)",
+     "Tdew (degC)",
+     44,
+     0.8000634042290148
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     0.799446390449238
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "SWDR (W/m\ufffd)",
+     1,
+     0.7990006380977068
+    ],
+    [
+     "Tdew (degC)",
+     "Tpot (K)",
+     4,
+     0.7964188575878421
+    ],
+    [
+     "T (degC)",
+     "Tdew (degC)",
+     48,
+     0.7931903728012897
+    ],
+    [
+     "Tdew (degC)",
+     "T (degC)",
+     4,
+     0.7891862753061049
+    ],
+    [
+     "VPdef (mbar)",
+     "Tlog (degC)",
+     1,
+     0.7866730461741585
+    ],
+    [
+     "Tlog (degC)",
+     "VPdef (mbar)",
+     1,
+     0.78534915399091
+    ],
+    [
+     "rho (g/m**3)",
+     "H2OC (mmol/mol)",
+     47,
+     -0.7811620004729991
+    ],
+    [
+     "rho (g/m**3)",
+     "sh (g/kg)",
+     47,
+     -0.7807158680415681
+    ],
+    [
+     "rho (g/m**3)",
+     "VPact (mbar)",
+     48,
+     -0.778013494468248
+    ],
+    [
+     "Tpot (K)",
+     "H2OC (mmol/mol)",
+     58,
+     0.7761942966486345
+    ],
+    [
+     "Tpot (K)",
+     "VPact (mbar)",
+     59,
+     0.7758764459233652
+    ],
+    [
+     "Tpot (K)",
+     "sh (g/kg)",
+     58,
+     0.7757989006495998
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "rho (g/m**3)",
+     3,
+     -0.774087316211764
+    ],
+    [
+     "sh (g/kg)",
+     "rho (g/m**3)",
+     3,
+     -0.7735442979775514
+    ],
+    [
+     "T (degC)",
+     "VPact (mbar)",
+     62,
+     0.7717222167693718
+    ],
+    [
+     "T (degC)",
+     "H2OC (mmol/mol)",
+     61,
+     0.770816209142481
+    ],
+    [
+     "VPact (mbar)",
+     "rho (g/m**3)",
+     3,
+     -0.7705508997327717
+    ],
+    [
+     "T (degC)",
+     "sh (g/kg)",
+     61,
+     0.7704361256836486
+    ],
+    [
+     "T (degC)",
+     "VPdef (mbar)",
+     1,
+     0.7677856465061017
+    ],
+    [
+     "VPdef (mbar)",
+     "T (degC)",
+     1,
+     0.7675987969521421
+    ],
+    [
+     "Tlog (degC)",
+     "Tdew (degC)",
+     60,
+     0.7617297440550498
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "Tpot (K)",
+     6,
+     0.7598480761861017
+    ],
+    [
+     "sh (g/kg)",
+     "Tpot (K)",
+     6,
+     0.7593245552618477
+    ],
+    [
+     "VPact (mbar)",
+     "Tpot (K)",
+     6,
+     0.7591665815576512
+    ],
+    [
+     "VPdef (mbar)",
+     "Tpot (K)",
+     1,
+     0.754733728432733
+    ],
+    [
+     "Tpot (K)",
+     "VPdef (mbar)",
+     1,
+     0.754654453794463
+    ],
+    [
+     "VPact (mbar)",
+     "T (degC)",
+     7,
+     0.7540153595551004
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "T (degC)",
+     6,
+     0.7533858898695875
+    ],
+    [
+     "sh (g/kg)",
+     "T (degC)",
+     6,
+     0.7528749607228956
+    ],
+    [
+     "VPmax (mbar)",
+     "VPact (mbar)",
+     72,
+     0.7524161928473169
+    ],
+    [
+     "VPmax (mbar)",
+     "H2OC (mmol/mol)",
+     72,
+     0.7511073128157463
+    ],
+    [
+     "VPmax (mbar)",
+     "sh (g/kg)",
+     72,
+     0.7509376208925372
+    ],
+    [
+     "Tdew (degC)",
+     "Tlog (degC)",
+     8,
+     0.7503821614467925
+    ],
+    [
+     "VPmax (mbar)",
+     "Tdew (degC)",
+     67,
+     0.7484779133298978
+    ],
+    [
+     "Tlog (degC)",
+     "VPact (mbar)",
+     69,
+     0.7459725588824828
+    ],
+    [
+     "Tlog (degC)",
+     "H2OC (mmol/mol)",
+     68,
+     0.7444735240894897
+    ],
+    [
+     "Tlog (degC)",
+     "sh (g/kg)",
+     68,
+     0.7441356519346115
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "VPdef (mbar)",
+     18,
+     0.7285334240698716
+    ],
+    [
+     "Tdew (degC)",
+     "VPmax (mbar)",
+     10,
+     0.7227600809711114
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "VPdef (mbar)",
+     18,
+     0.7217941868141108
+    ],
+    [
+     "VPact (mbar)",
+     "Tlog (degC)",
+     11,
+     0.7203118517616464
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "Tlog (degC)",
+     11,
+     0.7189644975641899
+    ],
+    [
+     "sh (g/kg)",
+     "Tlog (degC)",
+     11,
+     0.7185007785182468
+    ],
+    [
+     "VPact (mbar)",
+     "VPmax (mbar)",
+     20,
+     0.7087746786122785
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "VPmax (mbar)",
+     17,
+     0.7076360403905483
+    ],
+    [
+     "sh (g/kg)",
+     "VPmax (mbar)",
+     17,
+     0.7073034883898671
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "rh (%)",
+     17,
+     -0.6991572897872496
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "rh (%)",
+     17,
+     -0.6960663547726844
+    ],
+    [
+     "VPdef (mbar)",
+     "rho (g/m**3)",
+     1,
+     -0.6736516114202151
+    ],
+    [
+     "rho (g/m**3)",
+     "VPdef (mbar)",
+     1,
+     -0.6730564305932323
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "VPdef (mbar)",
+     17,
+     0.6047513752164586
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "Tlog (degC)",
+     16,
+     0.5911785579562849
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "rh (%)",
+     16,
+     -0.5843634986924903
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "Tlog (degC)",
+     16,
+     0.5809539809264997
+    ],
+    [
+     "VPdef (mbar)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     125,
+     0.5773868560112456
+    ],
+    [
+     "VPdef (mbar)",
+     "SWDR (W/m\ufffd)",
+     125,
+     0.5665601785779402
+    ],
+    [
+     "rh (%)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     125,
+     -0.5661337582233545
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "VPmax (mbar)",
+     18,
+     0.5651108314104211
+    ],
+    [
+     "rh (%)",
+     "SWDR (W/m\ufffd)",
+     125,
+     -0.5638869889117609
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "VPmax (mbar)",
+     18,
+     0.553109034432665
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "T (degC)",
+     18,
+     0.5330446564309905
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "T (degC)",
+     18,
+     0.5224211718317755
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "Tpot (K)",
+     18,
+     0.5203447487710872
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "Tpot (K)",
+     18,
+     0.5093429794818601
+    ],
+    [
+     "Tlog (degC)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     126,
+     0.5039069753382723
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "Tlog (degC)",
+     16,
+     0.4984402999904621
+    ],
+    [
+     "Tlog (degC)",
+     "SWDR (W/m\ufffd)",
+     126,
+     0.49155944988360634
+    ],
+    [
+     "rho (g/m**3)",
+     "p (mbar)",
+     10,
+     0.49039373512349654
+    ],
+    [
+     "VPmax (mbar)",
+     "rh (%)",
+     1,
+     -0.49013325354851767
+    ],
+    [
+     "rh (%)",
+     "VPmax (mbar)",
+     1,
+     -0.48981834227939136
+    ],
+    [
+     "VPdef (mbar)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     126,
+     0.48928933588798473
+    ],
+    [
+     "p (mbar)",
+     "rho (g/m**3)",
+     1,
+     0.486394969230335
+    ],
+    [
+     "rh (%)",
+     "Tlog (degC)",
+     1,
+     -0.48352130048407915
+    ],
+    [
+     "Tlog (degC)",
+     "rh (%)",
+     1,
+     -0.48150250476579853
+    ],
+    [
+     "rh (%)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     126,
+     -0.4766737367820461
+    ],
+    [
+     "VPmax (mbar)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     558,
+     0.4723585657258052
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "VPmax (mbar)",
+     17,
+     0.47139672132666904
+    ],
+    [
+     "T (degC)",
+     "rh (%)",
+     1,
+     -0.46414772489492323
+    ],
+    [
+     "rh (%)",
+     "T (degC)",
+     1,
+     -0.46381660594859137
+    ],
+    [
+     "T (degC)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     126,
+     0.46053987300903604
+    ],
+    [
+     "VPmax (mbar)",
+     "SWDR (W/m\ufffd)",
+     558,
+     0.4603377273367004
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "rho (g/m**3)",
+     162,
+     -0.4557284814920947
+    ],
+    [
+     "Tpot (K)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     414,
+     0.4505852989429378
+    ],
+    [
+     "T (degC)",
+     "SWDR (W/m\ufffd)",
+     414,
+     0.4487476954170156
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "T (degC)",
+     17,
+     0.44864604985109713
+    ],
+    [
+     "Tpot (K)",
+     "rh (%)",
+     1,
+     -0.44855022028179287
+    ],
+    [
+     "rh (%)",
+     "Tpot (K)",
+     1,
+     -0.44850255742942546
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "rho (g/m**3)",
+     162,
+     -0.44495936326051144
+    ],
+    [
+     "Tpot (K)",
+     "SWDR (W/m\ufffd)",
+     414,
+     0.43950435524074993
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "Tpot (K)",
+     17,
+     0.43850856007229205
+    ],
+    [
+     "Tlog (degC)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     559,
+     0.4367755379150623
+    ],
+    [
+     "VPmax (mbar)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     558,
+     0.4113184078760941
+    ],
+    [
+     "rho (g/m**3)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     414,
+     -0.4021953164358808
+    ],
+    [
+     "T (degC)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     415,
+     0.4012537487159188
+    ],
+    [
+     "Tpot (K)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     415,
+     0.39421321671377346
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "max. wv (m/s)",
+     83,
+     -0.3923884417310095
+    ],
+    [
+     "VPdef (mbar)",
+     "VPact (mbar)",
+     212,
+     0.39149730934448057
+    ],
+    [
+     "max. wv (m/s)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     60,
+     -0.39140331967283604
+    ],
+    [
+     "rho (g/m**3)",
+     "SWDR (W/m\ufffd)",
+     413,
+     -0.3912377145401298
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "max. wv (m/s)",
+     84,
+     -0.38997682001279244
+    ],
+    [
+     "VPdef (mbar)",
+     "H2OC (mmol/mol)",
+     211,
+     0.3899177612331968
+    ],
+    [
+     "VPdef (mbar)",
+     "sh (g/kg)",
+     211,
+     0.38983130840700275
+    ],
+    [
+     "rain (mm)",
+     "raining (s)",
+     1,
+     0.3889243331138143
+    ],
+    [
+     "max. wv (m/s)",
+     "SWDR (W/m\ufffd)",
+     60,
+     -0.3884434380717211
+    ],
+    [
+     "VPdef (mbar)",
+     "Tdew (degC)",
+     207,
+     0.3872360290630176
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "rho (g/m**3)",
+     162,
+     -0.3845433088671353
+    ],
+    [
+     "max. wv (m/s)",
+     "Tlog (degC)",
+     226,
+     -0.3716271742910693
+    ],
+    [
+     "rh (%)",
+     "rho (g/m**3)",
+     1,
+     0.36919558760373566
+    ],
+    [
+     "rho (g/m**3)",
+     "rh (%)",
+     1,
+     0.36866704843272713
+    ],
+    [
+     "Tlog (degC)",
+     "max. wv (m/s)",
+     782,
+     -0.3639494292875662
+    ],
+    [
+     "rho (g/m**3)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     414,
+     -0.3547772397868351
+    ],
+    [
+     "raining (s)",
+     "rain (mm)",
+     1,
+     0.3539499187343839
+    ],
+    [
+     "VPact (mbar)",
+     "VPdef (mbar)",
+     637,
+     0.3534018542233742
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "VPdef (mbar)",
+     638,
+     0.35172500926373773
+    ],
+    [
+     "sh (g/kg)",
+     "VPdef (mbar)",
+     638,
+     0.3515894990802302
+    ],
+    [
+     "max. wv (m/s)",
+     "VPdef (mbar)",
+     802,
+     -0.35091198080998137
+    ],
+    [
+     "Tdew (degC)",
+     "VPdef (mbar)",
+     637,
+     0.34945659498764015
+    ],
+    [
+     "max. wv (m/s)",
+     "VPmax (mbar)",
+     371,
+     -0.34849694888680793
+    ],
+    [
+     "T (degC)",
+     "max. wv (m/s)",
+     781,
+     -0.34581647269461524
+    ],
+    [
+     "max. wv (m/s)",
+     "rh (%)",
+     4,
+     -0.3443729274168378
+    ],
+    [
+     "max. wv (m/s)",
+     "T (degC)",
+     372,
+     -0.34246667926525176
+    ],
+    [
+     "rh (%)",
+     "max. wv (m/s)",
+     1,
+     -0.33637692586995455
+    ],
+    [
+     "Tpot (K)",
+     "max. wv (m/s)",
+     781,
+     -0.33542977029690885
+    ],
+    [
+     "max. wv (m/s)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     638,
+     -0.3345382044527502
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "max. wv (m/s)",
+     82,
+     -0.33265260288442455
+    ],
+    [
+     "VPmax (mbar)",
+     "max. wv (m/s)",
+     925,
+     -0.3309831005953455
+    ],
+    [
+     "max. wv (m/s)",
+     "Tpot (K)",
+     515,
+     -0.32843930415079264
+    ],
+    [
+     "VPdef (mbar)",
+     "max. wv (m/s)",
+     924,
+     -0.32791315953389993
+    ],
+    [
+     "Tpot (K)",
+     "p (mbar)",
+     14,
+     -0.3084875624448337
+    ],
+    [
+     "p (mbar)",
+     "Tpot (K)",
+     1,
+     -0.3022123282160402
+    ],
+    [
+     "rho (g/m**3)",
+     "max. wv (m/s)",
+     781,
+     0.297418039781481
+    ],
+    [
+     "p (mbar)",
+     "Tdew (degC)",
+     19,
+     -0.2919779780110672
+    ],
+    [
+     "Tdew (degC)",
+     "p (mbar)",
+     1,
+     -0.28935738609156725
+    ],
+    [
+     "max. wv (m/s)",
+     "rho (g/m**3)",
+     515,
+     0.28319652342385526
+    ],
+    [
+     "max. wv (m/s)",
+     "p (mbar)",
+     11,
+     -0.2748230183882134
+    ],
+    [
+     "p (mbar)",
+     "H2OC (mmol/mol)",
+     21,
+     -0.27250619934921344
+    ],
+    [
+     "p (mbar)",
+     "sh (g/kg)",
+     21,
+     -0.2722262701073142
+    ],
+    [
+     "p (mbar)",
+     "max. wv (m/s)",
+     1,
+     -0.270216817934627
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "p (mbar)",
+     1,
+     -0.2697683931503505
+    ],
+    [
+     "sh (g/kg)",
+     "p (mbar)",
+     1,
+     -0.2694798181304521
+    ],
+    [
+     "raining (s)",
+     "rh (%)",
+     4,
+     0.26154822987268983
+    ],
+    [
+     "p (mbar)",
+     "VPact (mbar)",
+     22,
+     -0.25855123874449576
+    ],
+    [
+     "VPact (mbar)",
+     "p (mbar)",
+     1,
+     -0.25548917509905167
+    ],
+    [
+     "rh (%)",
+     "raining (s)",
+     1,
+     0.23516022785218446
+    ],
+    [
+     "T (degC)",
+     "p (mbar)",
+     16,
+     -0.2255883075536028
+    ],
+    [
+     "max. wv (m/s)",
+     "VPact (mbar)",
+     306,
+     -0.22108910726052933
+    ],
+    [
+     "p (mbar)",
+     "wd (deg)",
+     183,
+     -0.218851092250419
+    ],
+    [
+     "max. wv (m/s)",
+     "H2OC (mmol/mol)",
+     305,
+     -0.2185459019356769
+    ],
+    [
+     "max. wv (m/s)",
+     "sh (g/kg)",
+     305,
+     -0.21852077051409008
+    ],
+    [
+     "p (mbar)",
+     "T (degC)",
+     1,
+     -0.2183984430419263
+    ],
+    [
+     "max. wv (m/s)",
+     "Tdew (degC)",
+     307,
+     -0.21680730760537728
+    ],
+    [
+     "rh (%)",
+     "wd (deg)",
+     119,
+     0.20119725615089504
+    ],
+    [
+     "wd (deg)",
+     "rh (%)",
+     166,
+     0.20079395083167184
+    ],
+    [
+     "rh (%)",
+     "sh (g/kg)",
+     1,
+     0.19049145119834218
+    ],
+    [
+     "rh (%)",
+     "H2OC (mmol/mol)",
+     1,
+     0.19021653686002163
+    ],
+    [
+     "sh (g/kg)",
+     "rh (%)",
+     1,
+     0.19017788790074222
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "rh (%)",
+     1,
+     0.18990167833646748
+    ],
+    [
+     "rh (%)",
+     "VPact (mbar)",
+     1,
+     0.18973419843387546
+    ],
+    [
+     "VPact (mbar)",
+     "rh (%)",
+     1,
+     0.18935559310072397
+    ],
+    [
+     "Tdew (degC)",
+     "max. wv (m/s)",
+     802,
+     -0.18385123928096853
+    ],
+    [
+     "VPmax (mbar)",
+     "p (mbar)",
+     16,
+     -0.18380065140457869
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "wd (deg)",
+     137,
+     -0.180681188657308
+    ],
+    [
+     "wd (deg)",
+     "SWDR (W/m\ufffd)",
+     579,
+     -0.17978394218814486
+    ],
+    [
+     "VPact (mbar)",
+     "max. wv (m/s)",
+     851,
+     -0.17970398282945108
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "Tdew (degC)",
+     270,
+     0.17879145971087235
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "wd (deg)",
+     137,
+     -0.17827741844571726
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "max. wv (m/s)",
+     851,
+     -0.17823336298921652
+    ],
+    [
+     "sh (g/kg)",
+     "max. wv (m/s)",
+     851,
+     -0.17811955044900538
+    ],
+    [
+     "wd (deg)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     579,
+     -0.17770776891818835
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "VPact (mbar)",
+     214,
+     0.17761687624061698
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "H2OC (mmol/mol)",
+     214,
+     0.17684938321191623
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "sh (g/kg)",
+     214,
+     0.17678169152770662
+    ],
+    [
+     "p (mbar)",
+     "VPmax (mbar)",
+     1,
+     -0.17580059438555945
+    ],
+    [
+     "Tlog (degC)",
+     "p (mbar)",
+     18,
+     -0.17543385755671106
+    ],
+    [
+     "wd (deg)",
+     "p (mbar)",
+     1,
+     -0.1749883694613911
+    ],
+    [
+     "wd (deg)",
+     "VPdef (mbar)",
+     165,
+     -0.168186478978712
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "Tdew (degC)",
+     350,
+     0.16744761915930342
+    ],
+    [
+     "p (mbar)",
+     "Tlog (degC)",
+     846,
+     -0.1669744917289942
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "VPact (mbar)",
+     214,
+     0.1658924138798452
+    ],
+    [
+     "rh (%)",
+     "Tdew (degC)",
+     1,
+     0.16563561524972328
+    ],
+    [
+     "Tdew (degC)",
+     "rh (%)",
+     1,
+     0.16525070114559456
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "H2OC (mmol/mol)",
+     214,
+     0.16512155716026436
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "sh (g/kg)",
+     214,
+     0.16506055205523545
+    ],
+    [
+     "raining (s)",
+     "VPdef (mbar)",
+     4,
+     -0.16481971843261176
+    ],
+    [
+     "Tdew (degC)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     596,
+     0.16418587593564996
+    ],
+    [
+     "p (mbar)",
+     "raining (s)",
+     15,
+     -0.16159297673299558
+    ],
+    [
+     "VPact (mbar)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     602,
+     0.16050477186609508
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     602,
+     0.1588403006802913
+    ],
+    [
+     "sh (g/kg)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     602,
+     0.158732914020196
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "Tdew (degC)",
+     498,
+     0.15663967708307772
+    ],
+    [
+     "Tdew (degC)",
+     "SWDR (W/m\ufffd)",
+     596,
+     0.15480691136794128
+    ],
+    [
+     "raining (s)",
+     "p (mbar)",
+     1,
+     -0.15313526180664142
+    ],
+    [
+     "VPdef (mbar)",
+     "wd (deg)",
+     122,
+     -0.1530169085645532
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "VPact (mbar)",
+     499,
+     0.1522397325836076
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "H2OC (mmol/mol)",
+     498,
+     0.15181496697272287
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "sh (g/kg)",
+     498,
+     0.151711191085276
+    ],
+    [
+     "VPact (mbar)",
+     "SWDR (W/m\ufffd)",
+     602,
+     0.1509685311104747
+    ],
+    [
+     "p (mbar)",
+     "rh (%)",
+     200,
+     -0.15086824973914745
+    ],
+    [
+     "Tdew (degC)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     597,
+     0.15056362557091174
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "SWDR (W/m\ufffd)",
+     602,
+     0.14928800214498647
+    ],
+    [
+     "sh (g/kg)",
+     "SWDR (W/m\ufffd)",
+     602,
+     0.1491828076660191
+    ],
+    [
+     "VPdef (mbar)",
+     "raining (s)",
+     1,
+     -0.14875633696330715
+    ],
+    [
+     "VPact (mbar)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     605,
+     0.1476813453264069
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     605,
+     0.14634013791514705
+    ],
+    [
+     "sh (g/kg)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     605,
+     0.1462587561161738
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "wd (deg)",
+     138,
+     -0.146133118054162
+    ],
+    [
+     "wd (deg)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     583,
+     -0.14197987497014805
+    ],
+    [
+     "wv (m/s)",
+     "OT",
+     32,
+     0.1410583940277546
+    ],
+    [
+     "OT",
+     "wv (m/s)",
+     1,
+     0.13998498122285516
+    ],
+    [
+     "max. wv (m/s)",
+     "wd (deg)",
+     66,
+     0.13894774030127605
+    ],
+    [
+     "wd (deg)",
+     "VPmax (mbar)",
+     164,
+     -0.12004490555713118
+    ],
+    [
+     "wd (deg)",
+     "max. wv (m/s)",
+     940,
+     0.11851778279505892
+    ],
+    [
+     "wd (deg)",
+     "Tlog (degC)",
+     741,
+     -0.11701223813560359
+    ],
+    [
+     "VPdef (mbar)",
+     "p (mbar)",
+     590,
+     -0.11056092965828962
+    ],
+    [
+     "wd (deg)",
+     "T (degC)",
+     165,
+     -0.10969518015180543
+    ],
+    [
+     "rain (mm)",
+     "rh (%)",
+     5,
+     0.10718019031783146
+    ],
+    [
+     "wd (deg)",
+     "Tpot (K)",
+     1008,
+     -0.10331950251692608
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "raining (s)",
+     1,
+     -0.10296021130618822
+    ],
+    [
+     "raining (s)",
+     "sh (g/kg)",
+     7,
+     0.10126554961384641
+    ],
+    [
+     "raining (s)",
+     "H2OC (mmol/mol)",
+     7,
+     0.10124573443722994
+    ],
+    [
+     "raining (s)",
+     "VPact (mbar)",
+     7,
+     0.09913972950088078
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "raining (s)",
+     1,
+     -0.09845890463036308
+    ],
+    [
+     "raining (s)",
+     "SWDR (W/m\ufffd)",
+     1,
+     -0.0981788238811545
+    ],
+    [
+     "raining (s)",
+     "Tdew (degC)",
+     5,
+     0.09705418382799084
+    ],
+    [
+     "wd (deg)",
+     "rho (g/m**3)",
+     1008,
+     0.09426015831310258
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "raining (s)",
+     1,
+     0.09395590580666034
+    ],
+    [
+     "sh (g/kg)",
+     "raining (s)",
+     1,
+     0.09394996299098916
+    ],
+    [
+     "raining (s)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     -0.09366827009120693
+    ],
+    [
+     "p (mbar)",
+     "SWDR (W/m\ufffd)",
+     28,
+     0.09298139323290823
+    ],
+    [
+     "Tlog (degC)",
+     "wd (deg)",
+     123,
+     -0.09272807663375447
+    ],
+    [
+     "Tdew (degC)",
+     "raining (s)",
+     1,
+     0.09215100906688908
+    ],
+    [
+     "VPact (mbar)",
+     "raining (s)",
+     1,
+     0.09175912459340808
+    ],
+    [
+     "max. wv (m/s)",
+     "OT",
+     569,
+     -0.08947422316639429
+    ],
+    [
+     "max. wv (m/s)",
+     "raining (s)",
+     713,
+     0.0885607360966687
+    ],
+    [
+     "OT",
+     "max. wv (m/s)",
+     293,
+     -0.08673584696003268
+    ],
+    [
+     "VPmax (mbar)",
+     "wd (deg)",
+     121,
+     -0.08616076803517235
+    ],
+    [
+     "p (mbar)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     28,
+     0.08582200386467691
+    ],
+    [
+     "wv (m/s)",
+     "rain (mm)",
+     470,
+     -0.08570798584721848
+    ],
+    [
+     "rh (%)",
+     "p (mbar)",
+     589,
+     0.08527105380166268
+    ],
+    [
+     "T (degC)",
+     "wd (deg)",
+     122,
+     -0.0846769027152788
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "raining (s)",
+     1,
+     -0.08353225754893746
+    ],
+    [
+     "rh (%)",
+     "rain (mm)",
+     1,
+     0.08347196526477255
+    ],
+    [
+     "raining (s)",
+     "wd (deg)",
+     53,
+     0.08162116321996513
+    ],
+    [
+     "p (mbar)",
+     "VPdef (mbar)",
+     199,
+     0.07966189468616708
+    ],
+    [
+     "raining (s)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     -0.0793973727547886
+    ],
+    [
+     "rain (mm)",
+     "sh (g/kg)",
+     5,
+     0.07923994040293464
+    ],
+    [
+     "rain (mm)",
+     "H2OC (mmol/mol)",
+     5,
+     0.07917107444846105
+    ],
+    [
+     "rain (mm)",
+     "VPact (mbar)",
+     5,
+     0.07825441783207282
+    ],
+    [
+     "rho (g/m**3)",
+     "wd (deg)",
+     197,
+     -0.07770380878646822
+    ],
+    [
+     "OT",
+     "VPdef (mbar)",
+     143,
+     -0.07652646466673114
+    ],
+    [
+     "VPdef (mbar)",
+     "OT",
+     1,
+     -0.07608015612613801
+    ],
+    [
+     "OT",
+     "rain (mm)",
+     968,
+     -0.07547839900493711
+    ],
+    [
+     "sh (g/kg)",
+     "rain (mm)",
+     1,
+     0.07356302698870552
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "rain (mm)",
+     1,
+     0.07352249393212376
+    ],
+    [
+     "OT",
+     "p (mbar)",
+     838,
+     0.07293714207971982
+    ],
+    [
+     "wd (deg)",
+     "raining (s)",
+     511,
+     0.07277444108899987
+    ],
+    [
+     "VPact (mbar)",
+     "rain (mm)",
+     1,
+     0.07253270158358037
+    ],
+    [
+     "rain (mm)",
+     "OT",
+     862,
+     -0.07161757785897416
+    ],
+    [
+     "p (mbar)",
+     "rain (mm)",
+     8,
+     -0.07136481087554077
+    ],
+    [
+     "rain (mm)",
+     "Tdew (degC)",
+     5,
+     0.06968227362900768
+    ],
+    [
+     "raining (s)",
+     "Tlog (degC)",
+     10,
+     -0.06819433528725286
+    ],
+    [
+     "rain (mm)",
+     "VPdef (mbar)",
+     5,
+     -0.06718474875452514
+    ],
+    [
+     "rain (mm)",
+     "p (mbar)",
+     1,
+     -0.06699245718786145
+    ],
+    [
+     "raining (s)",
+     "VPmax (mbar)",
+     3,
+     -0.06663084711783748
+    ],
+    [
+     "Tdew (degC)",
+     "rain (mm)",
+     1,
+     0.06640539000259073
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "p (mbar)",
+     605,
+     -0.0654120735217245
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "p (mbar)",
+     605,
+     -0.06377102063969192
+    ],
+    [
+     "Tpot (K)",
+     "wd (deg)",
+     122,
+     -0.0635986451014921
+    ],
+    [
+     "VPmax (mbar)",
+     "raining (s)",
+     1,
+     -0.058532896876427695
+    ],
+    [
+     "T (degC)",
+     "raining (s)",
+     913,
+     -0.058394485708588045
+    ],
+    [
+     "rh (%)",
+     "OT",
+     430,
+     0.058358832549721906
+    ],
+    [
+     "p (mbar)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     27,
+     0.0582968456579866
+    ],
+    [
+     "rho (g/m**3)",
+     "raining (s)",
+     105,
+     -0.05826448757187071
+    ],
+    [
+     "Tlog (degC)",
+     "raining (s)",
+     1008,
+     -0.05808855991963213
+    ],
+    [
+     "raining (s)",
+     "T (degC)",
+     3,
+     -0.05675314847033275
+    ],
+    [
+     "OT",
+     "rh (%)",
+     932,
+     -0.055986099912415384
+    ],
+    [
+     "rho (g/m**3)",
+     "rain (mm)",
+     135,
+     -0.055753148304683656
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "p (mbar)",
+     604,
+     -0.05555899404192958
+    ],
+    [
+     "sh (g/kg)",
+     "wd (deg)",
+     239,
+     0.055152789709253844
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "wd (deg)",
+     239,
+     0.055143978128671355
+    ],
+    [
+     "raining (s)",
+     "Tpot (K)",
+     520,
+     -0.05399415407463383
+    ],
+    [
+     "Tdew (degC)",
+     "wd (deg)",
+     239,
+     0.05389839675139548
+    ],
+    [
+     "VPact (mbar)",
+     "wd (deg)",
+     694,
+     0.05230051602829509
+    ],
+    [
+     "OT",
+     "VPmax (mbar)",
+     1,
+     -0.051941692988792094
+    ],
+    [
+     "VPmax (mbar)",
+     "OT",
+     1,
+     -0.05181128674076926
+    ],
+    [
+     "p (mbar)",
+     "OT",
+     951,
+     0.05154451197328017
+    ],
+    [
+     "Tpot (K)",
+     "raining (s)",
+     1008,
+     -0.05125097642188089
+    ],
+    [
+     "raining (s)",
+     "max. wv (m/s)",
+     176,
+     0.05057384545414451
+    ],
+    [
+     "max. wv (m/s)",
+     "rain (mm)",
+     601,
+     0.05046208623560427
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "OT",
+     92,
+     0.050379976288521575
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "OT",
+     92,
+     0.049912117746049256
+    ],
+    [
+     "OT",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     627,
+     0.04987858282398302
+    ],
+    [
+     "OT",
+     "SWDR (W/m\ufffd)",
+     624,
+     0.04949041220315852
+    ],
+    [
+     "OT",
+     "raining (s)",
+     969,
+     -0.049487169371871996
+    ],
+    [
+     "Tpot (K)",
+     "rain (mm)",
+     135,
+     0.04940109076942152
+    ],
+    [
+     "VPmax (mbar)",
+     "rain (mm)",
+     139,
+     0.049289222131327325
+    ],
+    [
+     "raining (s)",
+     "rho (g/m**3)",
+     516,
+     0.048310004211077784
+    ],
+    [
+     "VPdef (mbar)",
+     "rain (mm)",
+     1,
+     -0.048091585042742156
+    ],
+    [
+     "wd (deg)",
+     "sh (g/kg)",
+     998,
+     -0.04801516450059563
+    ],
+    [
+     "wd (deg)",
+     "H2OC (mmol/mol)",
+     999,
+     -0.04792989906656806
+    ],
+    [
+     "wd (deg)",
+     "VPact (mbar)",
+     999,
+     -0.047890069720811855
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "rain (mm)",
+     1,
+     -0.04728917724000467
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "rain (mm)",
+     1,
+     -0.04584390374163488
+    ],
+    [
+     "T (degC)",
+     "rain (mm)",
+     135,
+     0.045621971756273604
+    ],
+    [
+     "wd (deg)",
+     "Tdew (degC)",
+     596,
+     0.0455698108733349
+    ],
+    [
+     "rain (mm)",
+     "SWDR (W/m\ufffd)",
+     1,
+     -0.04458570531305033
+    ],
+    [
+     "OT",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     627,
+     0.04368360532723303
+    ],
+    [
+     "Tlog (degC)",
+     "rain (mm)",
+     133,
+     0.043169042491337524
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "OT",
+     959,
+     0.043103256617713484
+    ],
+    [
+     "rain (mm)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     1,
+     -0.04308503681501982
+    ],
+    [
+     "wd (deg)",
+     "rain (mm)",
+     519,
+     0.042896136681606106
+    ],
+    [
+     "wd (deg)",
+     "OT",
+     847,
+     -0.04252398691539106
+    ],
+    [
+     "OT",
+     "rho (g/m**3)",
+     708,
+     0.04140111416428258
+    ],
+    [
+     "max. wv (m/s)",
+     "wv (m/s)",
+     487,
+     -0.04107913161522817
+    ],
+    [
+     "rain (mm)",
+     "wd (deg)",
+     25,
+     0.04070487966023437
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "rain (mm)",
+     1,
+     -0.03819733287389681
+    ],
+    [
+     "rain (mm)",
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     273,
+     -0.03735217937789261
+    ],
+    [
+     "OT",
+     "wd (deg)",
+     894,
+     -0.03695541227963422
+    ],
+    [
+     "rho (g/m**3)",
+     "OT",
+     565,
+     0.03672830984497815
+    ],
+    [
+     "Tpot (K)",
+     "OT",
+     566,
+     -0.036200496828556944
+    ],
+    [
+     "rain (mm)",
+     "Tlog (degC)",
+     733,
+     0.03556199193152512
+    ],
+    [
+     "T (degC)",
+     "OT",
+     567,
+     -0.0348837453608479
+    ],
+    [
+     "OT",
+     "Tpot (K)",
+     445,
+     -0.03474070990175227
+    ],
+    [
+     "rain (mm)",
+     "VPmax (mbar)",
+     869,
+     0.03429834535225346
+    ],
+    [
+     "rain (mm)",
+     "Tpot (K)",
+     868,
+     0.03386959103364477
+    ],
+    [
+     "rain (mm)",
+     "T (degC)",
+     868,
+     0.03381219319950183
+    ],
+    [
+     "raining (s)",
+     "OT",
+     153,
+     -0.033780357625751434
+    ],
+    [
+     "rain (mm)",
+     "wv (m/s)",
+     133,
+     -0.03333184261378372
+    ],
+    [
+     "OT",
+     "T (degC)",
+     441,
+     -0.03329749115140222
+    ],
+    [
+     "rain (mm)",
+     "rho (g/m**3)",
+     868,
+     -0.033200157702087875
+    ],
+    [
+     "rain (mm)",
+     "max. wv (m/s)",
+     1,
+     0.0330582632459158
+    ],
+    [
+     "OT",
+     "Tlog (degC)",
+     422,
+     -0.032436082324847244
+    ],
+    [
+     "OT",
+     "Tdew (degC)",
+     472,
+     -0.031624800367471735
+    ],
+    [
+     "Tlog (degC)",
+     "OT",
+     213,
+     0.03146069098421973
+    ],
+    [
+     "OT",
+     "H2OC (mmol/mol)",
+     472,
+     -0.029242833985651792
+    ],
+    [
+     "OT",
+     "sh (g/kg)",
+     472,
+     -0.029195042258293204
+    ],
+    [
+     "wv (m/s)",
+     "raining (s)",
+     505,
+     -0.029113582678964862
+    ],
+    [
+     "OT",
+     "VPact (mbar)",
+     472,
+     -0.028874358863664688
+    ],
+    [
+     "raining (s)",
+     "wv (m/s)",
+     124,
+     -0.028247096746965187
+    ],
+    [
+     "wv (m/s)",
+     "max. wv (m/s)",
+     5,
+     0.027091236164826907
+    ],
+    [
+     "sh (g/kg)",
+     "OT",
+     274,
+     0.020723849784651367
+    ],
+    [
+     "H2OC (mmol/mol)",
+     "OT",
+     273,
+     0.02071150847483951
+    ],
+    [
+     "VPact (mbar)",
+     "OT",
+     274,
+     0.02063100239649462
+    ],
+    [
+     "Tdew (degC)",
+     "OT",
+     271,
+     0.01783829966729629
+    ],
+    [
+     "rh (%)",
+     "wv (m/s)",
+     492,
+     0.016748160978550728
+    ],
+    [
+     "wv (m/s)",
+     "SWDR (W/m\ufffd)",
+     758,
+     -0.01577580937100258
+    ],
+    [
+     "wv (m/s)",
+     "PAR (\ufffdmol/m\ufffd/s)",
+     758,
+     -0.015359056934372822
+    ],
+    [
+     "VPdef (mbar)",
+     "wv (m/s)",
+     492,
+     -0.01496512740705491
+    ],
+    [
+     "SWDR (W/m\ufffd)",
+     "wv (m/s)",
+     104,
+     -0.014155362169565209
+    ],
+    [
+     "PAR (\ufffdmol/m\ufffd/s)",
+     "wv (m/s)",
+     104,
+     -0.01377193913420642
+    ],
+    [
+     "wv (m/s)",
+     "p (mbar)",
+     854,
+     0.01347676975553356
+    ],
+    [
+     "Tpot (K)",
+     "wv (m/s)",
+     491,
+     -0.013417565959576602
+    ],
+    [
+     "T (degC)",
+     "wv (m/s)",
+     491,
+     -0.013158842261852818
+    ],
+    [
+     "rho (g/m**3)",
+     "wv (m/s)",
+     487,
+     0.013097687926034302
+    ],
+    [
+     "wv (m/s)",
+     "rh (%)",
+     8,
+     -0.013020960424271677
+    ],
+    [
+     "max. PAR (\ufffdmol/m\ufffd/s)",
+     "wv (m/s)",
+     107,
+     -0.012539351458481111
+    ]
+   ]
+  }
+ },
+ "implementation": {
+  "tool": "tools/profile_train_wide.py",
+  "sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "versions": {
+   "python": "3.12.13",
+   "numpy": "2.4.3",
+   "scipy": "1.17.1",
+   "pandas": "3.0.1",
+   "statsmodels": "0.14.6"
+  },
+  "limits": {
+   "max_columns": 4096,
+   "max_train_rows": 200000,
+   "max_train_cells": 25000000,
+   "max_resource_bytes": 1073741824,
+   "max_pair_lag_columns": 64
+  }
+ },
+ "assumptions": [
+  "No imputation; temporal metrics use the longest contiguous finite run",
+  "Values are profiled as stored (no scaler); TSL loaders standardize with a TRAIN-fitted scaler later",
+  "ADF/KPSS p-values are descriptive and unadjusted for multiple testing",
+  "Point-in-time availability is not certified by this profile",
+  "No target, no model and no holdout value enters any statistic"
+ ],
+ "wall_seconds": 218.44690023301519
+}

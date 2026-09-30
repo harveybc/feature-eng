@@ -1,0 +1,2975 @@
+{
+ "schema": "feature_train_profile.v2",
+ "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+ "split": "TRAIN",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "manifest": {
+  "schema": "feature_train_manifest.v2",
+  "split": "TRAIN",
+  "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+  "governance": "LOCAL_FILE",
+  "resource_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+  "path": "examples/data_downsampled/phase_1_b/normalized_d4.csv",
+  "path_note": "relative to a predictor checkout; LOCAL, not a governed lake resource",
+  "registered_rows": 7656,
+  "columns_total": 28,
+  "split_rule": "dedicated TRAIN file named as x_train_file by predictor/examples/config/phase_1b_binary/phase_1b_binary_ann_buy_entry_1d_config.json; validation normalized_d5.csv and test normalized_d6.csv are separate files and are NOT OPENED",
+  "boundaries": {
+   "train": [
+    0,
+    7656
+   ]
+  },
+  "timestamp_column": "DATE_TIME",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S",
+  "step_seconds": 3600,
+  "default_role": "feature",
+  "target_channels": [],
+  "declared_periods_rows": {
+   "day_rows_nominal": 24,
+   "trading_week_rows_nominal": 120
+  },
+  "primary_period": "day_rows_nominal",
+  "period_note": "periods are ROWS; the file has weekend/holiday gaps so rows are not hours (sampling check reports it)",
+  "max_missing_fraction": 0.2,
+  "upstream": "already normalized upstream; fit scope of that normalization NOT certified; indicator causality NOT certified",
+  "inherits": "docs/feature_metrics/train_manifest.json sha256 6d5cc9fa781725b8f6252194a156cb164433f598067915931fe29bd56634dbc4 (roles copied)",
+  "columns": {
+   "buy_entry_label": {
+    "role": "target",
+    "reason": "future-derived oracle label; not a feature"
+   },
+   "sell_entry_label": {
+    "role": "target",
+    "reason": "future-derived oracle label; not a feature"
+   },
+   "buy_exit_label": {
+    "role": "target",
+    "reason": "future-derived oracle label; not a feature"
+   },
+   "sell_exit_label": {
+    "role": "target",
+    "reason": "future-derived oracle label; not a feature"
+   }
+  }
+ },
+ "manifest_sha256": "b60c061132d05a14d586a97677ae25227d684861ad04c3c5f0712844b92c05e7",
+ "resource_identity": {
+  "sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+  "bytes": 3551895,
+  "records": 7656,
+  "verified_against_declared": true,
+  "note": "every byte hashed for identity; no value past the TRAIN boundary parsed"
+ },
+ "train_prefix": {
+  "rows": [
+   0,
+   7656
+  ],
+  "bytes_parsed": 3551895,
+  "prefix_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+  "split_rule": "dedicated TRAIN file named as x_train_file by predictor/examples/config/phase_1b_binary/phase_1b_binary_ann_buy_entry_1d_config.json; validation normalized_d5.csv and test normalized_d6.csv are separate files and are NOT OPENED",
+  "full_train_coverage": true
+ },
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "invalid_count": 0,
+  "first": "2012-10-24 09:00:00",
+  "last": "2017-09-19 21:00:00",
+  "median_step_seconds": 14400.0,
+  "top_steps_seconds": {
+   "14400.0": 7391,
+   "187200.0": 238,
+   "86400.0": 6,
+   "183600.0": 5,
+   "190800.0": 4
+  },
+  "non_positive_steps": 0,
+  "declared_step_seconds": 3600,
+  "verified_step_seconds": null,
+  "consequence": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only"
+ },
+ "columns": [
+  {
+   "column": "DATE_TIME",
+   "position": 0,
+   "role": "timestamp",
+   "declared_reason": "time index; never a branch input",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "time index; never a branch input"
+  },
+  {
+   "column": "ATR",
+   "position": 1,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "RSI",
+   "position": 2,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "MACD",
+   "position": 3,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "MACD_Histogram",
+   "position": 4,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "MACD_Signal",
+   "position": 5,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ADX",
+   "position": 6,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "DI_plus",
+   "position": 7,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "DI_minus",
+   "position": 8,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "Stochastic_K",
+   "position": 9,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "Stochastic_D",
+   "position": 10,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "BB_Width",
+   "position": 11,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "CCI",
+   "position": 12,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "WilliamsR",
+   "position": 13,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ROC",
+   "position": 14,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ATR_ratio",
+   "position": 15,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "BB_position",
+   "position": 16,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rolling_std_24",
+   "position": 17,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "price_minus_ema",
+   "position": 18,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "hod_sin",
+   "position": 19,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "hod_cos",
+   "position": 20,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "dow_sin",
+   "position": 21,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "dow_cos",
+   "position": 22,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "buy_entry_label",
+   "position": 23,
+   "role": "target",
+   "declared_reason": "future-derived oracle label; not a feature",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "sell_entry_label",
+   "position": 24,
+   "role": "target",
+   "declared_reason": "future-derived oracle label; not a feature",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "buy_exit_label",
+   "position": 25,
+   "role": "target",
+   "declared_reason": "future-derived oracle label; not a feature",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "sell_exit_label",
+   "position": 26,
+   "role": "target",
+   "declared_reason": "future-derived oracle label; not a feature",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "future-derived oracle label; not a feature"
+  },
+  {
+   "column": "bars_to_friday",
+   "position": 27,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  }
+ ],
+ "branches": [
+  {
+   "branch": 0,
+   "columns": [
+    "ATR"
+   ]
+  },
+  {
+   "branch": 1,
+   "columns": [
+    "RSI"
+   ]
+  },
+  {
+   "branch": 2,
+   "columns": [
+    "MACD"
+   ]
+  },
+  {
+   "branch": 3,
+   "columns": [
+    "MACD_Histogram"
+   ]
+  },
+  {
+   "branch": 4,
+   "columns": [
+    "MACD_Signal"
+   ]
+  },
+  {
+   "branch": 5,
+   "columns": [
+    "ADX"
+   ]
+  },
+  {
+   "branch": 6,
+   "columns": [
+    "DI_plus"
+   ]
+  },
+  {
+   "branch": 7,
+   "columns": [
+    "DI_minus"
+   ]
+  },
+  {
+   "branch": 8,
+   "columns": [
+    "Stochastic_K"
+   ]
+  },
+  {
+   "branch": 9,
+   "columns": [
+    "Stochastic_D"
+   ]
+  },
+  {
+   "branch": 10,
+   "columns": [
+    "BB_Width"
+   ]
+  },
+  {
+   "branch": 11,
+   "columns": [
+    "CCI"
+   ]
+  },
+  {
+   "branch": 12,
+   "columns": [
+    "WilliamsR"
+   ]
+  },
+  {
+   "branch": 13,
+   "columns": [
+    "ROC"
+   ]
+  },
+  {
+   "branch": 14,
+   "columns": [
+    "ATR_ratio"
+   ]
+  },
+  {
+   "branch": 15,
+   "columns": [
+    "BB_position"
+   ]
+  },
+  {
+   "branch": 16,
+   "columns": [
+    "rolling_std_24"
+   ]
+  },
+  {
+   "branch": 17,
+   "columns": [
+    "price_minus_ema"
+   ]
+  },
+  {
+   "branch": 18,
+   "columns": [
+    "hod_sin"
+   ]
+  },
+  {
+   "branch": 19,
+   "columns": [
+    "hod_cos"
+   ]
+  },
+  {
+   "branch": 20,
+   "columns": [
+    "dow_sin"
+   ]
+  },
+  {
+   "branch": 21,
+   "columns": [
+    "dow_cos"
+   ]
+  },
+  {
+   "branch": 22,
+   "columns": [
+    "bars_to_friday"
+   ]
+  }
+ ],
+ "grouping": "one admissible feature per branch; metrics propose, inner validation decides",
+ "redundancy": {
+  "rule": "Pearson on TRAIN rows with every selected column finite; descriptive, never merges",
+  "columns": 23,
+  "rows_used": 7656,
+  "status": "OK",
+  "pairs": 253,
+  "pairs_abs_ge_0_95": 3,
+  "pairs_abs_ge_0_99": 0,
+  "abs_corr_quantiles": {
+   "0.5": 0.04352045439183898,
+   "0.9": 0.813490930107752,
+   "0.99": 0.9437416131546922
+  },
+  "components_abs_ge_0.95": {
+   "count_multi_member": 3,
+   "largest": 2,
+   "members": [
+    [
+     "MACD",
+     "MACD_Signal"
+    ],
+    [
+     "Stochastic_K",
+     "Stochastic_D"
+    ],
+    [
+     "CCI",
+     "BB_position"
+    ]
+   ]
+  },
+  "components_abs_ge_0.99": {
+   "count_multi_member": 0,
+   "largest": 1,
+   "members": []
+  },
+  "redundant_pairs_abs_ge_0_95": [
+   [
+    "CCI",
+    "BB_position",
+    0.9789388041599688
+   ],
+   [
+    "Stochastic_K",
+    "Stochastic_D",
+    0.9602530819116043
+   ],
+   [
+    "MACD",
+    "MACD_Signal",
+    0.9549843972360428
+   ]
+  ],
+  "lagged": {
+   "status": "OK",
+   "rule": "max |corr(x_i(t), x_j(t-lag))| over lags 1..120; leader first",
+   "pairs": [
+    [
+     "Stochastic_K",
+     "Stochastic_D",
+     1,
+     0.9958841762790329
+    ],
+    [
+     "MACD",
+     "MACD_Signal",
+     3,
+     0.9915120046388247
+    ],
+    [
+     "BB_Width",
+     "rolling_std_24",
+     2,
+     0.9686618541931515
+    ],
+    [
+     "WilliamsR",
+     "Stochastic_K",
+     1,
+     0.9625241832349256
+    ],
+    [
+     "WilliamsR",
+     "Stochastic_D",
+     2,
+     0.9610601483811746
+    ],
+    [
+     "MACD_Signal",
+     "MACD",
+     1,
+     0.9287361409305938
+    ],
+    [
+     "price_minus_ema",
+     "MACD",
+     3,
+     0.9187032371521164
+    ],
+    [
+     "BB_position",
+     "CCI",
+     1,
+     0.9075083325197417
+    ],
+    [
+     "ATR",
+     "ATR_ratio",
+     1,
+     -0.8999357673648791
+    ],
+    [
+     "ATR_ratio",
+     "ATR",
+     1,
+     -0.8990022888957213
+    ],
+    [
+     "RSI",
+     "price_minus_ema",
+     1,
+     0.8978261571299764
+    ],
+    [
+     "BB_position",
+     "Stochastic_K",
+     1,
+     0.8904382235226282
+    ],
+    [
+     "BB_position",
+     "Stochastic_D",
+     2,
+     0.8903374744806842
+    ],
+    [
+     "RSI",
+     "MACD",
+     3,
+     0.887241140651686
+    ],
+    [
+     "price_minus_ema",
+     "MACD_Signal",
+     7,
+     0.8852225936084185
+    ],
+    [
+     "rolling_std_24",
+     "BB_Width",
+     1,
+     0.8780162645513132
+    ],
+    [
+     "CCI",
+     "Stochastic_K",
+     1,
+     0.8768026015230707
+    ],
+    [
+     "CCI",
+     "Stochastic_D",
+     2,
+     0.8744488111083527
+    ],
+    [
+     "dow_cos",
+     "dow_sin",
+     7,
+     0.8744409344406491
+    ],
+    [
+     "price_minus_ema",
+     "RSI",
+     1,
+     0.8695929705137158
+    ],
+    [
+     "hod_cos",
+     "hod_sin",
+     2,
+     0.8652461229414876
+    ],
+    [
+     "hod_sin",
+     "hod_cos",
+     1,
+     -0.865025255514851
+    ],
+    [
+     "Stochastic_D",
+     "Stochastic_K",
+     1,
+     0.8648663212286657
+    ],
+    [
+     "dow_sin",
+     "dow_cos",
+     23,
+     0.8642713713765818
+    ],
+    [
+     "RSI",
+     "MACD_Signal",
+     6,
+     0.8611487779592057
+    ],
+    [
+     "RSI",
+     "DI_minus",
+     1,
+     -0.8516692611458055
+    ],
+    [
+     "RSI",
+     "DI_plus",
+     1,
+     0.8386372460285102
+    ],
+    [
+     "CCI",
+     "BB_position",
+     1,
+     0.834636421808888
+    ],
+    [
+     "RSI",
+     "Stochastic_D",
+     2,
+     0.834390139517799
+    ],
+    [
+     "WilliamsR",
+     "CCI",
+     1,
+     0.8329862536021915
+    ],
+    [
+     "ROC",
+     "price_minus_ema",
+     1,
+     0.828850703548594
+    ],
+    [
+     "RSI",
+     "Stochastic_K",
+     1,
+     0.828782330011765
+    ],
+    [
+     "DI_minus",
+     "RSI",
+     1,
+     -0.8235779526422937
+    ],
+    [
+     "BB_position",
+     "price_minus_ema",
+     1,
+     0.8189983112572328
+    ],
+    [
+     "ROC",
+     "MACD_Histogram",
+     1,
+     0.8149038776043059
+    ],
+    [
+     "BB_position",
+     "RSI",
+     1,
+     0.8147755218684026
+    ],
+    [
+     "price_minus_ema",
+     "DI_minus",
+     1,
+     -0.8099384890957695
+    ],
+    [
+     "price_minus_ema",
+     "Stochastic_D",
+     1,
+     0.8092299620248475
+    ],
+    [
+     "DI_plus",
+     "RSI",
+     1,
+     0.8069285907892745
+    ],
+    [
+     "price_minus_ema",
+     "ROC",
+     1,
+     0.8062388890715537
+    ],
+    [
+     "CCI",
+     "price_minus_ema",
+     1,
+     0.8032467121062379
+    ],
+    [
+     "DI_minus",
+     "price_minus_ema",
+     1,
+     -0.8031786067088484
+    ],
+    [
+     "DI_minus",
+     "MACD",
+     2,
+     -0.8021368612861567
+    ],
+    [
+     "price_minus_ema",
+     "DI_plus",
+     1,
+     0.8002436860035365
+    ],
+    [
+     "WilliamsR",
+     "BB_position",
+     1,
+     0.7996820190630578
+    ],
+    [
+     "MACD_Histogram",
+     "ROC",
+     1,
+     0.7986762979813824
+    ],
+    [
+     "price_minus_ema",
+     "Stochastic_K",
+     1,
+     0.7986092967419636
+    ],
+    [
+     "DI_plus",
+     "MACD",
+     2,
+     0.7984847553564223
+    ],
+    [
+     "CCI",
+     "RSI",
+     1,
+     0.7978665788734145
+    ],
+    [
+     "ROC",
+     "Stochastic_D",
+     2,
+     0.7961905642772982
+    ],
+    [
+     "MACD",
+     "price_minus_ema",
+     1,
+     0.795112313495053
+    ],
+    [
+     "DI_plus",
+     "price_minus_ema",
+     1,
+     0.7914124977342079
+    ],
+    [
+     "ROC",
+     "Stochastic_K",
+     1,
+     0.7890048550610324
+    ],
+    [
+     "Stochastic_K",
+     "WilliamsR",
+     1,
+     0.7863883976351046
+    ],
+    [
+     "RSI",
+     "CCI",
+     1,
+     0.7820865241967139
+    ],
+    [
+     "MACD",
+     "RSI",
+     1,
+     0.7799038426204253
+    ],
+    [
+     "BB_position",
+     "WilliamsR",
+     1,
+     0.779151218553254
+    ],
+    [
+     "DI_minus",
+     "MACD_Signal",
+     6,
+     -0.7768806411517978
+    ],
+    [
+     "WilliamsR",
+     "RSI",
+     1,
+     0.7734280296806197
+    ],
+    [
+     "DI_plus",
+     "MACD_Signal",
+     6,
+     0.7730054590088613
+    ],
+    [
+     "WilliamsR",
+     "price_minus_ema",
+     1,
+     0.7727896465491371
+    ],
+    [
+     "Stochastic_K",
+     "RSI",
+     1,
+     0.770651898718702
+    ],
+    [
+     "Stochastic_K",
+     "CCI",
+     1,
+     0.7692687551998438
+    ],
+    [
+     "MACD_Histogram",
+     "Stochastic_D",
+     1,
+     0.7592470088876272
+    ],
+    [
+     "RSI",
+     "BB_position",
+     1,
+     0.7553378734882331
+    ],
+    [
+     "Stochastic_K",
+     "price_minus_ema",
+     1,
+     0.7551698889777804
+    ],
+    [
+     "BB_position",
+     "ROC",
+     1,
+     0.7547863884406099
+    ],
+    [
+     "BB_position",
+     "DI_minus",
+     1,
+     -0.7540810554262154
+    ],
+    [
+     "Stochastic_K",
+     "BB_position",
+     1,
+     0.7512268404687898
+    ],
+    [
+     "CCI",
+     "WilliamsR",
+     1,
+     0.7495743813943115
+    ],
+    [
+     "CCI",
+     "ROC",
+     1,
+     0.7455729677332554
+    ],
+    [
+     "DI_minus",
+     "DI_plus",
+     1,
+     -0.7445548111077148
+    ],
+    [
+     "MACD_Histogram",
+     "Stochastic_K",
+     1,
+     0.744439887765166
+    ],
+    [
+     "DI_plus",
+     "DI_minus",
+     1,
+     -0.7420321914080926
+    ],
+    [
+     "price_minus_ema",
+     "CCI",
+     1,
+     0.7415121751356778
+    ],
+    [
+     "WilliamsR",
+     "ROC",
+     1,
+     0.7400257218032751
+    ],
+    [
+     "CCI",
+     "DI_minus",
+     1,
+     -0.7397282641433116
+    ],
+    [
+     "Stochastic_D",
+     "RSI",
+     1,
+     0.7376165194086814
+    ],
+    [
+     "Stochastic_K",
+     "ROC",
+     1,
+     0.7345448211847119
+    ],
+    [
+     "BB_position",
+     "DI_plus",
+     1,
+     0.7342990788019785
+    ],
+    [
+     "ROC",
+     "RSI",
+     1,
+     0.728284548756251
+    ],
+    [
+     "BB_position",
+     "MACD_Histogram",
+     1,
+     0.7277597095416137
+    ],
+    [
+     "RSI",
+     "ROC",
+     1,
+     0.7268078636592576
+    ],
+    [
+     "WilliamsR",
+     "MACD_Histogram",
+     1,
+     0.7260964631879335
+    ],
+    [
+     "ROC",
+     "MACD",
+     4,
+     0.7255467612454898
+    ],
+    [
+     "DI_minus",
+     "Stochastic_D",
+     1,
+     -0.723011789194581
+    ],
+    [
+     "CCI",
+     "MACD_Histogram",
+     1,
+     0.7223327455873921
+    ],
+    [
+     "CCI",
+     "DI_plus",
+     1,
+     0.721012952790632
+    ],
+    [
+     "price_minus_ema",
+     "BB_position",
+     1,
+     0.718230128253503
+    ],
+    [
+     "MACD",
+     "DI_plus",
+     1,
+     0.716793094926485
+    ],
+    [
+     "RSI",
+     "WilliamsR",
+     1,
+     0.715625466869854
+    ],
+    [
+     "MACD",
+     "DI_minus",
+     1,
+     -0.7136582518831694
+    ],
+    [
+     "Stochastic_K",
+     "MACD_Histogram",
+     1,
+     0.7118479364723309
+    ],
+    [
+     "Stochastic_D",
+     "price_minus_ema",
+     1,
+     0.7101719267214108
+    ],
+    [
+     "DI_minus",
+     "Stochastic_K",
+     1,
+     -0.707486254411539
+    ],
+    [
+     "ROC",
+     "CCI",
+     1,
+     0.7071464609555945
+    ],
+    [
+     "Stochastic_D",
+     "MACD",
+     2,
+     0.7069680534299342
+    ],
+    [
+     "BB_position",
+     "MACD",
+     4,
+     0.6961395923335413
+    ],
+    [
+     "Stochastic_D",
+     "WilliamsR",
+     1,
+     0.6938688207376925
+    ],
+    [
+     "DI_plus",
+     "Stochastic_D",
+     1,
+     0.6932636944616878
+    ],
+    [
+     "Stochastic_K",
+     "MACD",
+     3,
+     0.6907177104721536
+    ],
+    [
+     "ROC",
+     "BB_position",
+     1,
+     0.6895666532102126
+    ],
+    [
+     "ROC",
+     "WilliamsR",
+     1,
+     0.6881061497589815
+    ],
+    [
+     "Stochastic_D",
+     "ROC",
+     1,
+     0.6877123051013089
+    ],
+    [
+     "CCI",
+     "MACD",
+     4,
+     0.6874417862691443
+    ],
+    [
+     "WilliamsR",
+     "DI_minus",
+     1,
+     -0.6862316811197882
+    ],
+    [
+     "ROC",
+     "DI_minus",
+     1,
+     -0.6859266348505436
+    ],
+    [
+     "DI_minus",
+     "CCI",
+     1,
+     -0.6854310373693843
+    ],
+    [
+     "Stochastic_D",
+     "CCI",
+     1,
+     0.6845481028958588
+    ],
+    [
+     "ROC",
+     "MACD_Signal",
+     9,
+     0.6823928076855501
+    ],
+    [
+     "price_minus_ema",
+     "WilliamsR",
+     1,
+     0.6819018691772888
+    ],
+    [
+     "Stochastic_K",
+     "DI_minus",
+     1,
+     -0.6811852676384269
+    ],
+    [
+     "Stochastic_D",
+     "BB_position",
+     1,
+     0.6781133679110933
+    ],
+    [
+     "DI_plus",
+     "Stochastic_K",
+     1,
+     0.6750793988196957
+    ],
+    [
+     "ROC",
+     "DI_plus",
+     1,
+     0.6711982729087548
+    ],
+    [
+     "Stochastic_D",
+     "MACD_Signal",
+     7,
+     0.6665951197680723
+    ],
+    [
+     "DI_minus",
+     "BB_position",
+     1,
+     -0.6651220106102389
+    ],
+    [
+     "DI_plus",
+     "CCI",
+     1,
+     0.6603164806793588
+    ],
+    [
+     "DI_minus",
+     "ROC",
+     1,
+     -0.6588108183003756
+    ],
+    [
+     "WilliamsR",
+     "DI_plus",
+     1,
+     0.658387135242581
+    ],
+    [
+     "BB_position",
+     "MACD_Signal",
+     9,
+     0.6565127808612573
+    ],
+    [
+     "Stochastic_K",
+     "DI_plus",
+     1,
+     0.6563938937029871
+    ],
+    [
+     "MACD_Signal",
+     "RSI",
+     1,
+     0.6557612182687008
+    ],
+    [
+     "price_minus_ema",
+     "MACD_Histogram",
+     1,
+     0.6538728331884766
+    ],
+    [
+     "MACD_Histogram",
+     "price_minus_ema",
+     1,
+     0.6503267031688192
+    ],
+    [
+     "Stochastic_D",
+     "DI_minus",
+     1,
+     -0.6500064325744656
+    ],
+    [
+     "Stochastic_K",
+     "MACD_Signal",
+     8,
+     0.6497876010485756
+    ],
+    [
+     "WilliamsR",
+     "MACD",
+     4,
+     0.6484577224313783
+    ],
+    [
+     "CCI",
+     "MACD_Signal",
+     9,
+     0.6474840569247321
+    ],
+    [
+     "DI_plus",
+     "ROC",
+     1,
+     0.6410631322913547
+    ],
+    [
+     "Stochastic_D",
+     "MACD_Histogram",
+     1,
+     0.6407981990630921
+    ],
+    [
+     "DI_plus",
+     "BB_position",
+     1,
+     0.6405754928706697
+    ],
+    [
+     "MACD_Histogram",
+     "CCI",
+     1,
+     0.6398276435627557
+    ],
+    [
+     "MACD_Signal",
+     "price_minus_ema",
+     1,
+     0.6381115467148976
+    ],
+    [
+     "MACD_Histogram",
+     "WilliamsR",
+     1,
+     0.6378636057512165
+    ],
+    [
+     "MACD",
+     "Stochastic_D",
+     1,
+     0.6309078007931036
+    ],
+    [
+     "Stochastic_D",
+     "DI_plus",
+     1,
+     0.6299632073374766
+    ],
+    [
+     "ATR",
+     "BB_Width",
+     1,
+     0.6293687294697212
+    ],
+    [
+     "MACD_Histogram",
+     "BB_position",
+     1,
+     0.6277016676144592
+    ],
+    [
+     "ATR",
+     "rolling_std_24",
+     2,
+     0.6169011418512073
+    ],
+    [
+     "BB_Width",
+     "ATR",
+     1,
+     0.615161510022038
+    ],
+    [
+     "WilliamsR",
+     "MACD_Signal",
+     9,
+     0.6087725274355502
+    ],
+    [
+     "MACD_Signal",
+     "DI_plus",
+     1,
+     0.6020556131535597
+    ],
+    [
+     "DI_minus",
+     "WilliamsR",
+     1,
+     -0.599957838805662
+    ],
+    [
+     "rolling_std_24",
+     "ATR",
+     1,
+     0.5937243695172871
+    ],
+    [
+     "MACD_Signal",
+     "DI_minus",
+     1,
+     -0.5916129544161652
+    ],
+    [
+     "ATR",
+     "bars_to_friday",
+     112,
+     0.5786805455698545
+    ],
+    [
+     "bars_to_friday",
+     "ATR",
+     120,
+     0.5690061216605609
+    ],
+    [
+     "DI_plus",
+     "WilliamsR",
+     1,
+     0.5687641022502972
+    ],
+    [
+     "MACD",
+     "Stochastic_K",
+     1,
+     0.5600061940672328
+    ],
+    [
+     "RSI",
+     "MACD_Histogram",
+     1,
+     0.5582060992776583
+    ],
+    [
+     "ATR_ratio",
+     "bars_to_friday",
+     120,
+     -0.5501044263431917
+    ],
+    [
+     "ATR_ratio",
+     "BB_Width",
+     1,
+     -0.5449794266439554
+    ],
+    [
+     "MACD",
+     "ROC",
+     1,
+     0.5447563901398296
+    ],
+    [
+     "MACD_Histogram",
+     "RSI",
+     1,
+     0.543008480162282
+    ],
+    [
+     "ATR_ratio",
+     "rolling_std_24",
+     2,
+     -0.5366492378883271
+    ],
+    [
+     "BB_Width",
+     "ATR_ratio",
+     1,
+     -0.5329290465938581
+    ],
+    [
+     "MACD_Histogram",
+     "DI_minus",
+     1,
+     -0.5237307815673519
+    ],
+    [
+     "rolling_std_24",
+     "ATR_ratio",
+     1,
+     -0.5182008573862825
+    ],
+    [
+     "bars_to_friday",
+     "ATR_ratio",
+     21,
+     -0.5156835332598045
+    ],
+    [
+     "DI_minus",
+     "MACD_Histogram",
+     1,
+     -0.5145305178470002
+    ],
+    [
+     "MACD_Histogram",
+     "DI_plus",
+     1,
+     0.5011034887564046
+    ],
+    [
+     "MACD",
+     "CCI",
+     1,
+     0.5003065631231413
+    ],
+    [
+     "MACD",
+     "BB_position",
+     1,
+     0.4985515287193601
+    ],
+    [
+     "DI_plus",
+     "MACD_Histogram",
+     1,
+     0.4887592901127798
+    ],
+    [
+     "MACD_Histogram",
+     "MACD",
+     5,
+     0.4883224276419141
+    ],
+    [
+     "rolling_std_24",
+     "ADX",
+     1,
+     0.45335008302121677
+    ],
+    [
+     "MACD",
+     "WilliamsR",
+     1,
+     0.452312988814945
+    ],
+    [
+     "MACD_Signal",
+     "MACD_Histogram",
+     12,
+     -0.44702135933807663
+    ],
+    [
+     "MACD",
+     "MACD_Histogram",
+     15,
+     -0.44625878745507613
+    ],
+    [
+     "MACD_Histogram",
+     "MACD_Signal",
+     11,
+     0.44535761808383284
+    ],
+    [
+     "ADX",
+     "rolling_std_24",
+     1,
+     0.4327479888055321
+    ],
+    [
+     "MACD_Signal",
+     "Stochastic_D",
+     1,
+     0.42979637921116337
+    ],
+    [
+     "BB_Width",
+     "ADX",
+     2,
+     0.39265962331977494
+    ],
+    [
+     "MACD_Signal",
+     "Stochastic_K",
+     1,
+     0.3593064305013088
+    ],
+    [
+     "rolling_std_24",
+     "bars_to_friday",
+     120,
+     0.34947774684174604
+    ],
+    [
+     "bars_to_friday",
+     "rolling_std_24",
+     88,
+     0.34384382306818084
+    ],
+    [
+     "ADX",
+     "BB_Width",
+     1,
+     0.3437550479031406
+    ],
+    [
+     "BB_Width",
+     "bars_to_friday",
+     120,
+     0.3406737778541427
+    ],
+    [
+     "MACD_Signal",
+     "BB_position",
+     1,
+     0.3309035005660583
+    ],
+    [
+     "bars_to_friday",
+     "BB_Width",
+     120,
+     0.33074039745000755
+    ],
+    [
+     "MACD_Signal",
+     "CCI",
+     1,
+     0.32894805957026874
+    ],
+    [
+     "MACD_Signal",
+     "ROC",
+     1,
+     0.3260767446781479
+    ],
+    [
+     "MACD_Signal",
+     "WilliamsR",
+     1,
+     0.2786972674703979
+    ],
+    [
+     "DI_plus",
+     "BB_Width",
+     5,
+     0.16626594912964415
+    ],
+    [
+     "ATR",
+     "ADX",
+     36,
+     -0.16179700043928613
+    ],
+    [
+     "MACD_Signal",
+     "ATR",
+     72,
+     -0.15595710381175484
+    ],
+    [
+     "DI_plus",
+     "rolling_std_24",
+     9,
+     0.15546683707227363
+    ],
+    [
+     "ATR_ratio",
+     "ADX",
+     35,
+     0.15057280912008728
+    ],
+    [
+     "MACD",
+     "ATR",
+     74,
+     -0.1491178877274196
+    ],
+    [
+     "dow_sin",
+     "BB_Width",
+     16,
+     0.14663569881508706
+    ],
+    [
+     "BB_Width",
+     "dow_sin",
+     104,
+     0.14621033433831085
+    ],
+    [
+     "MACD_Signal",
+     "ADX",
+     105,
+     0.14525279396009094
+    ],
+    [
+     "DI_minus",
+     "ADX",
+     117,
+     -0.14427717212852326
+    ],
+    [
+     "dow_cos",
+     "BB_Width",
+     23,
+     0.14377221725295744
+    ],
+    [
+     "BB_Width",
+     "dow_cos",
+     97,
+     0.14260713231748243
+    ],
+    [
+     "MACD",
+     "ADX",
+     110,
+     0.140817536554013
+    ],
+    [
+     "DI_minus",
+     "BB_Width",
+     2,
+     0.13719546733920682
+    ],
+    [
+     "DI_minus",
+     "rolling_std_24",
+     3,
+     0.13617745935510733
+    ],
+    [
+     "RSI",
+     "ADX",
+     43,
+     -0.1352888038409079
+    ],
+    [
+     "bars_to_friday",
+     "MACD_Signal",
+     92,
+     -0.13414875868539092
+    ],
+    [
+     "bars_to_friday",
+     "MACD",
+     88,
+     -0.12782193663599276
+    ],
+    [
+     "price_minus_ema",
+     "ATR",
+     80,
+     -0.1254576770212765
+    ],
+    [
+     "rolling_std_24",
+     "dow_sin",
+     102,
+     0.12514297749662184
+    ],
+    [
+     "dow_sin",
+     "rolling_std_24",
+     3,
+     -0.12426332992575695
+    ],
+    [
+     "MACD_Signal",
+     "bars_to_friday",
+     10,
+     -0.12425622002059594
+    ],
+    [
+     "rolling_std_24",
+     "dow_cos",
+     95,
+     0.12291958356217748
+    ],
+    [
+     "price_minus_ema",
+     "ADX",
+     116,
+     0.12284954379093002
+    ],
+    [
+     "dow_cos",
+     "rolling_std_24",
+     25,
+     0.12284230470813602
+    ],
+    [
+     "Stochastic_D",
+     "ADX",
+     46,
+     -0.11995629719618665
+    ],
+    [
+     "DI_plus",
+     "ADX",
+     43,
+     -0.11960024425125146
+    ],
+    [
+     "RSI",
+     "ATR",
+     80,
+     -0.11839668183366356
+    ],
+    [
+     "MACD",
+     "bars_to_friday",
+     12,
+     -0.11832806014146886
+    ],
+    [
+     "bars_to_friday",
+     "RSI",
+     86,
+     -0.11832098187537719
+    ],
+    [
+     "Stochastic_K",
+     "ADX",
+     47,
+     -0.11685530754371162
+    ],
+    [
+     "DI_minus",
+     "ATR",
+     67,
+     0.11651956871334505
+    ],
+    [
+     "BB_Width",
+     "DI_minus",
+     1,
+     0.11618517186634776
+    ],
+    [
+     "BB_position",
+     "ADX",
+     48,
+     -0.11195571425873725
+    ],
+    [
+     "rolling_std_24",
+     "DI_minus",
+     1,
+     0.11050845093469151
+    ],
+    [
+     "BB_Width",
+     "DI_plus",
+     1,
+     0.110344302303999
+    ],
+    [
+     "DI_plus",
+     "ATR_ratio",
+     7,
+     -0.10955735557560953
+    ],
+    [
+     "WilliamsR",
+     "ADX",
+     49,
+     -0.1093958322348357
+    ],
+    [
+     "CCI",
+     "ADX",
+     48,
+     -0.10933768253467877
+    ],
+    [
+     "ATR_ratio",
+     "RSI",
+     92,
+     -0.10750195380846886
+    ],
+    [
+     "bars_to_friday",
+     "price_minus_ema",
+     86,
+     -0.1050280712765134
+    ],
+    [
+     "DI_plus",
+     "ATR",
+     7,
+     0.1043274743945736
+    ],
+    [
+     "MACD_Signal",
+     "ATR_ratio",
+     74,
+     0.10294289622630014
+    ],
+    [
+     "RSI",
+     "bars_to_friday",
+     14,
+     -0.10167235267010681
+    ],
+    [
+     "ADX",
+     "DI_plus",
+     14,
+     -0.09887216620874445
+    ],
+    [
+     "ATR_ratio",
+     "DI_minus",
+     98,
+     0.09851086994765236
+    ],
+    [
+     "MACD",
+     "ATR_ratio",
+     78,
+     0.09848848973269336
+    ],
+    [
+     "ROC",
+     "ADX",
+     120,
+     0.09733691635438199
+    ],
+    [
+     "price_minus_ema",
+     "bars_to_friday",
+     14,
+     -0.09709311126555631
+    ],
+    [
+     "bars_to_friday",
+     "Stochastic_D",
+     85,
+     -0.096996632400112
+    ],
+    [
+     "ADX",
+     "ATR",
+     52,
+     0.09695065133909005
+    ],
+    [
+     "bars_to_friday",
+     "Stochastic_K",
+     84,
+     -0.09450419188662164
+    ],
+    [
+     "Stochastic_D",
+     "BB_Width",
+     77,
+     -0.0943983469065394
+    ],
+    [
+     "ADX",
+     "RSI",
+     13,
+     -0.09358451913558104
+    ],
+    [
+     "RSI",
+     "BB_Width",
+     78,
+     -0.09353455507268316
+    ],
+    [
+     "Stochastic_K",
+     "BB_Width",
+     78,
+     -0.0925490310075031
+    ],
+    [
+     "MACD",
+     "BB_Width",
+     73,
+     -0.09233012723265362
+    ],
+    [
+     "ADX",
+     "DI_minus",
+     12,
+     0.09230933430214512
+    ],
+    [
+     "dow_cos",
+     "hod_sin",
+     8,
+     0.09106527811118713
+    ],
+    [
+     "MACD_Signal",
+     "BB_Width",
+     70,
+     -0.09065487876574678
+    ],
+    [
+     "ADX",
+     "BB_position",
+     11,
+     -0.09031821413321162
+    ],
+    [
+     "Stochastic_D",
+     "rolling_std_24",
+     79,
+     -0.08969585559120452
+    ],
+    [
+     "rolling_std_24",
+     "Stochastic_D",
+     80,
+     0.08968649441017366
+    ],
+    [
+     "RSI",
+     "rolling_std_24",
+     80,
+     -0.0894286883673081
+    ],
+    [
+     "hod_sin",
+     "dow_cos",
+     1,
+     -0.08941002125524924
+    ],
+    [
+     "ADX",
+     "CCI",
+     11,
+     -0.08937313116303486
+    ],
+    [
+     "dow_sin",
+     "ATR",
+     44,
+     0.08930783094282849
+    ],
+    [
+     "dow_cos",
+     "ATR_ratio",
+     51,
+     -0.08922699724157625
+    ],
+    [
+     "dow_cos",
+     "ATR",
+     51,
+     0.08908663600166017
+    ],
+    [
+     "dow_sin",
+     "ATR_ratio",
+     28,
+     0.08860236075828483
+    ],
+    [
+     "bars_to_friday",
+     "WilliamsR",
+     82,
+     -0.08855864137407626
+    ],
+    [
+     "ATR_ratio",
+     "DI_plus",
+     89,
+     -0.08842219028476798
+    ],
+    [
+     "Stochastic_K",
+     "rolling_std_24",
+     80,
+     -0.08801536184813963
+    ],
+    [
+     "rolling_std_24",
+     "Stochastic_K",
+     79,
+     0.08788809724736067
+    ],
+    [
+     "ROC",
+     "ATR",
+     85,
+     -0.08755855406034821
+    ],
+    [
+     "price_minus_ema",
+     "BB_Width",
+     76,
+     -0.08745245391332364
+    ],
+    [
+     "dow_cos",
+     "hod_cos",
+     4,
+     -0.08730557260259772
+    ],
+    [
+     "WilliamsR",
+     "BB_Width",
+     79,
+     -0.08714828043859735
+    ],
+    [
+     "BB_Width",
+     "Stochastic_D",
+     85,
+     0.08712885381170424
+    ],
+    [
+     "ATR_ratio",
+     "dow_sin",
+     2,
+     0.0870193572017452
+    ],
+    [
+     "Stochastic_D",
+     "ATR",
+     83,
+     -0.0870168398732095
+    ],
+    [
+     "ATR",
+     "dow_sin",
+     16,
+     0.08691805125591594
+    ],
+    [
+     "ADX",
+     "Stochastic_D",
+     13,
+     -0.08659332714583914
+    ],
+    [
+     "ADX",
+     "MACD",
+     19,
+     -0.08643958877071298
+    ],
+    [
+     "ADX",
+     "MACD_Signal",
+     22,
+     -0.08639295137346514
+    ],
+    [
+     "ATR",
+     "dow_cos",
+     39,
+     0.08620981059153103
+    ],
+    [
+     "hod_cos",
+     "dow_cos",
+     11,
+     0.08571366413113836
+    ],
+    [
+     "BB_Width",
+     "Stochastic_K",
+     84,
+     0.08549345659706994
+    ],
+    [
+     "ATR_ratio",
+     "dow_cos",
+     39,
+     -0.08502206933937033
+    ],
+    [
+     "Stochastic_K",
+     "ATR",
+     84,
+     -0.08497167285750797
+    ],
+    [
+     "ADX",
+     "Stochastic_K",
+     12,
+     -0.0845680608008639
+    ],
+    [
+     "WilliamsR",
+     "rolling_std_24",
+     81,
+     -0.08304178764357574
+    ],
+    [
+     "MACD",
+     "rolling_std_24",
+     76,
+     -0.08286328901324881
+    ],
+    [
+     "rolling_std_24",
+     "WilliamsR",
+     78,
+     0.08271923765737997
+    ],
+    [
+     "price_minus_ema",
+     "ATR_ratio",
+     84,
+     0.08210805202458103
+    ],
+    [
+     "BB_position",
+     "ATR",
+     92,
+     -0.08151799539517929
+    ],
+    [
+     "bars_to_friday",
+     "BB_position",
+     86,
+     -0.08127334194041769
+    ],
+    [
+     "MACD_Signal",
+     "rolling_std_24",
+     72,
+     -0.08086956003312322
+    ],
+    [
+     "BB_Width",
+     "WilliamsR",
+     83,
+     0.08076523159518192
+    ],
+    [
+     "ADX",
+     "price_minus_ema",
+     13,
+     -0.0807577257438824
+    ],
+    [
+     "rolling_std_24",
+     "DI_plus",
+     1,
+     0.08046158355383023
+    ],
+    [
+     "CCI",
+     "ATR",
+     92,
+     -0.08043092535045782
+    ],
+    [
+     "price_minus_ema",
+     "rolling_std_24",
+     79,
+     -0.08029356036899385
+    ],
+    [
+     "BB_position",
+     "BB_Width",
+     79,
+     -0.08018626898123012
+    ],
+    [
+     "ATR_ratio",
+     "Stochastic_D",
+     88,
+     -0.08001092199023421
+    ],
+    [
+     "WilliamsR",
+     "ATR",
+     85,
+     -0.07984106668052464
+    ],
+    [
+     "ADX",
+     "WilliamsR",
+     11,
+     -0.07940479340437698
+    ],
+    [
+     "ATR_ratio",
+     "hod_sin",
+     1,
+     0.07925238940035256
+    ],
+    [
+     "hod_sin",
+     "ATR_ratio",
+     5,
+     0.07915533790931363
+    ],
+    [
+     "bars_to_friday",
+     "CCI",
+     86,
+     -0.07895770843962713
+    ],
+    [
+     "ATR_ratio",
+     "Stochastic_K",
+     88,
+     -0.07797163522638725
+    ],
+    [
+     "Stochastic_D",
+     "bars_to_friday",
+     12,
+     -0.07789274225777902
+    ],
+    [
+     "CCI",
+     "BB_Width",
+     79,
+     -0.0778605513654504
+    ],
+    [
+     "BB_position",
+     "rolling_std_24",
+     81,
+     -0.07655451252511009
+    ],
+    [
+     "hod_sin",
+     "ATR",
+     2,
+     0.07637823240170306
+    ],
+    [
+     "ATR",
+     "hod_sin",
+     4,
+     0.07631529567145931
+    ],
+    [
+     "MACD_Histogram",
+     "BB_Width",
+     20,
+     0.07606696488394142
+    ],
+    [
+     "Stochastic_K",
+     "bars_to_friday",
+     13,
+     -0.07598338574240256
+    ],
+    [
+     "ROC",
+     "BB_Width",
+     77,
+     -0.07535325553415319
+    ],
+    [
+     "CCI",
+     "rolling_std_24",
+     81,
+     -0.07489610078411128
+    ],
+    [
+     "ATR_ratio",
+     "BB_position",
+     80,
+     -0.07434231681118454
+    ],
+    [
+     "rolling_std_24",
+     "BB_position",
+     78,
+     0.07380109737247079
+    ],
+    [
+     "rolling_std_24",
+     "RSI",
+     80,
+     0.07320107019740715
+    ],
+    [
+     "ATR_ratio",
+     "WilliamsR",
+     87,
+     -0.07315109480176271
+    ],
+    [
+     "ADX",
+     "ROC",
+     10,
+     -0.07275833835255155
+    ],
+    [
+     "MACD_Histogram",
+     "rolling_std_24",
+     24,
+     0.07254090785489778
+    ],
+    [
+     "BB_Width",
+     "RSI",
+     84,
+     0.07234519785200978
+    ],
+    [
+     "MACD_Histogram",
+     "ADX",
+     120,
+     0.07215174795429144
+    ],
+    [
+     "ATR_ratio",
+     "CCI",
+     80,
+     -0.0720571955393857
+    ],
+    [
+     "WilliamsR",
+     "bars_to_friday",
+     14,
+     -0.0715949792775945
+    ],
+    [
+     "hod_cos",
+     "ATR_ratio",
+     7,
+     0.07145919681682628
+    ],
+    [
+     "rolling_std_24",
+     "CCI",
+     78,
+     0.07120650361832746
+    ],
+    [
+     "DI_minus",
+     "ATR_ratio",
+     79,
+     -0.07094910254926325
+    ],
+    [
+     "ATR_ratio",
+     "MACD_Signal",
+     101,
+     -0.07063178661475462
+    ],
+    [
+     "ROC",
+     "rolling_std_24",
+     79,
+     -0.07054881874128806
+    ],
+    [
+     "ADX",
+     "ATR_ratio",
+     61,
+     -0.07042211179287887
+    ],
+    [
+     "RSI",
+     "ATR_ratio",
+     11,
+     -0.0703802060813325
+    ],
+    [
+     "hod_cos",
+     "ATR",
+     1,
+     -0.0703005271489116
+    ],
+    [
+     "ATR_ratio",
+     "hod_cos",
+     5,
+     0.07023383217451455
+    ],
+    [
+     "DI_minus",
+     "bars_to_friday",
+     14,
+     0.0697666240198177
+    ],
+    [
+     "ATR",
+     "hod_cos",
+     5,
+     -0.06951495278327058
+    ],
+    [
+     "BB_Width",
+     "BB_position",
+     82,
+     0.06924428386722828
+    ],
+    [
+     "ATR_ratio",
+     "MACD",
+     98,
+     -0.06854862256329453
+    ],
+    [
+     "bars_to_friday",
+     "ROC",
+     82,
+     -0.06753250545329703
+    ],
+    [
+     "bars_to_friday",
+     "DI_minus",
+     86,
+     0.0675135193765713
+    ],
+    [
+     "BB_Width",
+     "CCI",
+     83,
+     0.06629951850270395
+    ],
+    [
+     "rolling_std_24",
+     "MACD_Signal",
+     23,
+     -0.06595788676146065
+    ],
+    [
+     "BB_position",
+     "bars_to_friday",
+     14,
+     -0.06549093070064974
+    ],
+    [
+     "rolling_std_24",
+     "MACD_Histogram",
+     79,
+     0.06506493209533155
+    ],
+    [
+     "ATR",
+     "DI_plus",
+     1,
+     0.06501200140189371
+    ],
+    [
+     "rolling_std_24",
+     "MACD",
+     20,
+     -0.06479228179931644
+    ],
+    [
+     "CCI",
+     "bars_to_friday",
+     14,
+     -0.0635903495762698
+    ],
+    [
+     "BB_Width",
+     "MACD_Histogram",
+     6,
+     -0.062310214033805184
+    ],
+    [
+     "ROC",
+     "bars_to_friday",
+     14,
+     -0.06228795287522212
+    ],
+    [
+     "BB_position",
+     "ATR_ratio",
+     23,
+     -0.06201799091021674
+    ],
+    [
+     "CCI",
+     "ATR_ratio",
+     22,
+     -0.06044963373855735
+    ],
+    [
+     "ATR_ratio",
+     "price_minus_ema",
+     91,
+     -0.059596651738415066
+    ],
+    [
+     "rolling_std_24",
+     "ROC",
+     79,
+     0.05855815863578169
+    ],
+    [
+     "ROC",
+     "ATR_ratio",
+     91,
+     0.05844488544763555
+    ],
+    [
+     "Stochastic_D",
+     "ATR_ratio",
+     105,
+     0.05827655385999544
+    ],
+    [
+     "ADX",
+     "MACD_Histogram",
+     11,
+     -0.05786241189088527
+    ],
+    [
+     "rolling_std_24",
+     "price_minus_ema",
+     13,
+     -0.0573819008542538
+    ],
+    [
+     "Stochastic_K",
+     "ATR_ratio",
+     106,
+     0.056779335423209294
+    ],
+    [
+     "BB_Width",
+     "MACD_Signal",
+     24,
+     -0.05663479553840403
+    ],
+    [
+     "BB_Width",
+     "ROC",
+     83,
+     0.05616562725912818
+    ],
+    [
+     "ROC",
+     "dow_sin",
+     87,
+     0.055735267558339824
+    ],
+    [
+     "BB_Width",
+     "MACD",
+     20,
+     -0.05570803461518465
+    ],
+    [
+     "ATR",
+     "MACD_Histogram",
+     6,
+     -0.05520693610534199
+    ],
+    [
+     "MACD_Histogram",
+     "ATR",
+     27,
+     0.05511125974812252
+    ],
+    [
+     "ROC",
+     "dow_cos",
+     63,
+     -0.054827901751293893
+    ],
+    [
+     "BB_Width",
+     "price_minus_ema",
+     84,
+     0.05369445239459212
+    ],
+    [
+     "MACD_Histogram",
+     "dow_sin",
+     87,
+     0.05349270197628258
+    ],
+    [
+     "WilliamsR",
+     "ATR_ratio",
+     106,
+     0.053349802026359534
+    ],
+    [
+     "MACD_Histogram",
+     "dow_cos",
+     64,
+     -0.05244115252656037
+    ],
+    [
+     "bars_to_friday",
+     "DI_plus",
+     86,
+     -0.04871574897071478
+    ],
+    [
+     "DI_minus",
+     "dow_sin",
+     118,
+     -0.046256080561231205
+    ],
+    [
+     "ATR",
+     "RSI",
+     86,
+     0.04559914148563891
+    ],
+    [
+     "ATR",
+     "ROC",
+     6,
+     -0.04421793758928572
+    ],
+    [
+     "DI_minus",
+     "dow_cos",
+     69,
+     0.04408943112039352
+    ],
+    [
+     "dow_sin",
+     "ROC",
+     63,
+     0.04385494581300335
+    ],
+    [
+     "dow_cos",
+     "ROC",
+     57,
+     -0.04368768165854887
+    ],
+    [
+     "ATR",
+     "Stochastic_D",
+     84,
+     0.04305348932734495
+    ],
+    [
+     "dow_cos",
+     "DI_minus",
+     81,
+     0.04302059921696146
+    ],
+    [
+     "ATR",
+     "BB_position",
+     80,
+     0.04255885480983748
+    ],
+    [
+     "dow_sin",
+     "MACD_Histogram",
+     63,
+     0.042378543142823605
+    ],
+    [
+     "DI_minus",
+     "hod_sin",
+     29,
+     0.04234645350215535
+    ],
+    [
+     "Stochastic_D",
+     "dow_sin",
+     98,
+     -0.04215721190934397
+    ],
+    [
+     "ATR",
+     "Stochastic_K",
+     82,
+     0.04202999259077866
+    ],
+    [
+     "ATR",
+     "CCI",
+     80,
+     0.04195321678982008
+    ],
+    [
+     "ATR_ratio",
+     "ROC",
+     86,
+     -0.041842187478989865
+    ],
+    [
+     "Stochastic_K",
+     "dow_sin",
+     99,
+     -0.04172359155812279
+    ],
+    [
+     "hod_sin",
+     "DI_minus",
+     37,
+     0.041674166831751965
+    ],
+    [
+     "hod_cos",
+     "DI_minus",
+     33,
+     0.04121019335957403
+    ],
+    [
+     "dow_sin",
+     "ADX",
+     118,
+     -0.04120665906023547
+    ],
+    [
+     "WilliamsR",
+     "dow_sin",
+     100,
+     -0.04098656667469777
+    ],
+    [
+     "dow_cos",
+     "ADX",
+     95,
+     -0.04054272550074485
+    ],
+    [
+     "dow_sin",
+     "DI_minus",
+     104,
+     0.040112263182241405
+    ],
+    [
+     "DI_minus",
+     "hod_cos",
+     9,
+     0.03977170564934619
+    ],
+    [
+     "ATR",
+     "WilliamsR",
+     80,
+     0.03951727235702916
+    ],
+    [
+     "price_minus_ema",
+     "dow_sin",
+     87,
+     0.03930844623804802
+    ],
+    [
+     "dow_cos",
+     "MACD_Histogram",
+     86,
+     -0.038927252772143005
+    ],
+    [
+     "ADX",
+     "dow_cos",
+     114,
+     -0.03892713507153175
+    ],
+    [
+     "ATR_ratio",
+     "MACD_Histogram",
+     7,
+     0.03879010757641927
+    ],
+    [
+     "MACD_Histogram",
+     "ATR_ratio",
+     27,
+     -0.038683472960267744
+    ],
+    [
+     "Stochastic_D",
+     "dow_cos",
+     120,
+     -0.03810531252073364
+    ],
+    [
+     "ATR",
+     "DI_minus",
+     32,
+     -0.037624257995042557
+    ],
+    [
+     "Stochastic_K",
+     "dow_cos",
+     108,
+     0.03737966533911384
+    ],
+    [
+     "WilliamsR",
+     "dow_cos",
+     109,
+     0.037037196323252426
+    ],
+    [
+     "price_minus_ema",
+     "dow_cos",
+     63,
+     -0.03671475760810387
+    ],
+    [
+     "ADX",
+     "dow_sin",
+     106,
+     0.03589980378902557
+    ],
+    [
+     "dow_sin",
+     "Stochastic_D",
+     83,
+     -0.035181501333584025
+    ],
+    [
+     "dow_sin",
+     "Stochastic_K",
+     82,
+     -0.03472545030954277
+    ],
+    [
+     "DI_plus",
+     "bars_to_friday",
+     14,
+     -0.034556312169854296
+    ],
+    [
+     "dow_sin",
+     "WilliamsR",
+     80,
+     -0.03386101163696713
+    ],
+    [
+     "dow_sin",
+     "hod_sin",
+     14,
+     -0.03372485735945411
+    ],
+    [
+     "dow_cos",
+     "Stochastic_K",
+     88,
+     -0.03292549490433242
+    ]
+   ]
+  }
+ },
+ "implementation": {
+  "tool": "tools/profile_train_wide.py",
+  "sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "versions": {
+   "python": "3.12.13",
+   "numpy": "2.4.3",
+   "scipy": "1.17.1",
+   "pandas": "3.0.1",
+   "statsmodels": "0.14.6"
+  },
+  "limits": {
+   "max_columns": 4096,
+   "max_train_rows": 200000,
+   "max_train_cells": 25000000,
+   "max_resource_bytes": 1073741824,
+   "max_pair_lag_columns": 64
+  }
+ },
+ "assumptions": [
+  "No imputation; temporal metrics use the longest contiguous finite run",
+  "Values are profiled as stored (no scaler); TSL loaders standardize with a TRAIN-fitted scaler later",
+  "ADF/KPSS p-values are descriptive and unadjusted for multiple testing",
+  "Point-in-time availability is not certified by this profile",
+  "No target, no model and no holdout value enters any statistic"
+ ],
+ "wall_seconds": 7.057432784000412
+}
