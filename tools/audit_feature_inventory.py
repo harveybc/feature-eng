@@ -22,7 +22,7 @@ def load(path):
 def write_csv(path, rows):
     fields = list(dict.fromkeys(k for row in rows for k in row))
     with path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fields)
+        writer = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
 
