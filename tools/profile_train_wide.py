@@ -341,14 +341,44 @@ def profile_column(emit, name, x, nonnumeric, missing_tokens, m, step_seconds):
     return None
 
 
+def adf_aic_lag(y):
+    """Memory-bounded twin of statsmodels adfuller(autolag="AIC", regression="c") lag choice.
+
+    statsmodels keeps every candidate OLS result (n x k design each), which cost ~1 GB on a
+    36887-row series; this computes the same AIC per lag from one design matrix."""
+    n = len(y)
+    maxlag = int(np.ceil(12.0 * np.power(n / 100.0, 1 / 4.0)))
+    maxlag = min(n // 2 - 2, maxlag)
+    if maxlag < 0:
+        raise ValueError("sample size too short for ADF")
+    dx = np.diff(y)
+    nobs = len(dx) - maxlag
+    cols = [np.ones(nobs), y[maxlag:-1]]
+    cols += [dx[maxlag - j:len(dx) - j] for j in range(1, maxlag + 1)]
+    full = np.column_stack(cols)
+    endog = dx[maxlag:]
+    best, best_aic = 0, np.inf
+    for lag in range(0, maxlag + 1):
+        Xk = full[:, :2 + lag]
+        beta, *_ = np.linalg.lstsq(Xk, endog, rcond=None)
+        r = endog - Xk @ beta
+        ssr = float(r @ r)
+        llf = -nobs / 2.0 * (np.log(2 * np.pi) + np.log(ssr / nobs) + 1)
+        aic = -2 * llf + 2 * Xk.shape[1]
+        if aic < best_aic:
+            best, best_aic = lag, aic
+    return best, maxlag
+
+
 def stationarity(emit, name, y):
     try:
         from statsmodels.tsa.stattools import adfuller, kpss
-    except ImportError:
+    except Exception as exc:          # ImportError, or a broken install that fails while importing
+        why = f"statsmodels unavailable: {type(exc).__name__}: {exc}"[:200]
         for t in ("adf_c_aic", "kpss_c_auto", "kpss_ct_auto"):
             for k in ("statistic", "pvalue", "lags"):
-                emit(name, "stationarity", f"{t}_{k}", status="UNSUPPORTED", reason="statsmodels not installed")
-        emit(name, "stationarity", "adf_kpss_joint_reading", status="UNSUPPORTED", reason="statsmodels not installed")
+                emit(name, "stationarity", f"{t}_{k}", status="UNSUPPORTED", reason=why)
+        emit(name, "stationarity", "adf_kpss_joint_reading", status="UNSUPPORTED", reason=why)
         return
     results = {}
     specs = (("adf_c_aic", {"test": "ADF", "null": "unit root", "regression": "c", "autolag": "AIC",
@@ -368,7 +398,12 @@ def stationarity(emit, name, y):
             with warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter("always")
                 if key.startswith("adf"):
-                    a = adfuller(y, regression="c", autolag="AIC")
+                    best, maxlag = adf_aic_lag(y)
+                    settings["lag_selection"] = ("AIC over lags 0..maxlag on the common trimmed sample, as statsmodels "
+                                                 "_autolag does, without retaining every fitted model; final fit "
+                                                 "adfuller(maxlag=best, autolag=None)")
+                    settings["maxlag"] = maxlag
+                    a = adfuller(y, regression="c", maxlag=best, autolag=None)
                     stat, pv, lags = a[0], a[1], a[2]
                 else:
                     a = kpss(y, regression="c" if key == "kpss_c_auto" else "ct", nlags="auto")
@@ -433,9 +468,6 @@ def seasonality(emit, name, y, periods, primary):
              status="OK" if vs > 0 else "NOT_RUN", reason="" if vs > 0 else "ZERO_VARIANCE", settings=settings)
         emit(name, "seasonality", "stl_trend_strength_primary", float(max(0.0, 1 - np.var(R) / vt)) if vt > 0 else None,
              status="OK" if vt > 0 else "NOT_RUN", reason="" if vt > 0 else "ZERO_VARIANCE", settings=settings)
-    except ImportError:
-        for metric in ("stl_seasonal_strength_primary", "stl_trend_strength_primary"):
-            emit(name, "seasonality", metric, status="UNSUPPORTED", reason="statsmodels not installed", settings=settings)
     except Exception as exc:
         for metric in ("stl_seasonal_strength_primary", "stl_trend_strength_primary"):
             emit(name, "seasonality", metric, status="FAILED", reason=f"{type(exc).__name__}: {exc}"[:200], settings=settings)

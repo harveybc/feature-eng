@@ -1,0 +1,66 @@
+{
+ "schema": "m03_selection_protocol.v1",
+ "status": "PROTOCOL_NOT_RESULT",
+ "principle": "Metrics propose candidate groupings and candidate extractor families; only inner chronological validation under equal budgets decides, and nothing is fitted on outer validation or the external test.",
+ "populations": {
+  "outer_train": "declared TRAIN rows of the admissible-input declaration",
+  "inner_folds": "K=3 expanding-window chronological folds inside outer_train; each inner validation block is the last 15% of its fold; purge gap = lookback + max horizon rows between inner train and inner validation",
+  "outer_validation": "used once, to compare frozen candidates chosen on inner folds (M04 incumbent rule)",
+  "external_test": "NEVER used for any selection, grouping, importance, threshold or cluster count"
+ },
+ "stages": [
+  {
+   "id": "S0",
+   "name": "admissibility",
+   "rule": "take the admissible-input declaration as is; exclusions keep their reasons; no extra drop"
+  },
+  {
+   "id": "S1",
+   "name": "singleton baseline",
+   "rule": "one feature per branch (declaration branches_one_feature_each); this is candidate G0"
+  },
+  {
+   "id": "S2",
+   "name": "all-admissible control",
+   "rule": "every admissible feature in one shared-input branch arrangement with the same core/head budget; candidate C_ALL; always reported beside every grouped candidate"
+  },
+  {
+   "id": "G1",
+   "name": "domain groups",
+   "rule": "groups declared from column semantics before seeing any target (e.g. weather: pressure/temperature/humidity/wind/radiation/rain; FX: trend/oscillator/volatility/calendar); a dataset without declared semantics (Electricity, Traffic client IDs) records G1 as UNSUPPORTED_NO_DOMAIN_SEMANTICS, not as a result"
+  },
+  {
+   "id": "G2",
+   "name": "metric-space clusters",
+   "rule": "standardize the TRAIN-only profile vectors (per column: acf lags, declared-seasonality ACF and STL strength, spectral entropy and peak period, diff_std_over_std, tail ratios, ADF/KPSS statistics) using statistics of the inner-train fold only; agglomerative Ward clustering; number of clusters k in {2,3,4,6,8} (bounded by branch count) chosen by inner-validation loss, not by silhouette alone"
+  },
+  {
+   "id": "G3",
+   "name": "redundancy / lag-informed groups",
+   "rule": "on each inner-train fold: |Pearson| >= t with t in {0.90, 0.95, 0.99} forms connected components; lagged max |cross-correlation| over lags 1..primary period merges leader->follower pairs above the same t; threshold t chosen by inner-validation loss"
+  },
+  {
+   "id": "X1",
+   "name": "extractor proposal",
+   "rule": "metrics only PROPOSE branch extractor families to include in the search: strong declared-seasonality (STL seasonal strength >= 0.6 or seasonal ACF >= 0.5) proposes dilated causal Conv1D with receptive field >= the period; persistent low-frequency or unit-root reading proposes differenced input or recurrent branch; heavy tails (tail ratio > 2x Gaussian) propose robust scaling; every proposal is tested against the default causal Conv1D under the same budget and can lose"
+  },
+  {
+   "id": "F1",
+   "name": "freeze",
+   "rule": "the grouping, k or t, and extractor families with the best mean inner-validation loss (ties -> fewer parameters) are frozen with their digests BEFORE outer validation is read"
+  }
+ ],
+ "comparison": {
+  "metric": "the forecasting objective declared by M04 (MSE/MAE in the protocol's TRAIN-fitted scaled space) plus same-row persistence skill",
+  "budget": "equal candidate budget (epochs, early-stopping patience, parameter count within +-10%) across G0, C_ALL, G1, G2, G3",
+  "seeds": "paired seeds across candidates",
+  "report": "every candidate, including losers, with inner fold losses; exclusions and their reasons carried from S0"
+ },
+ "forbidden": [
+  "target-based selection on the external test",
+  "reading outer validation before F1",
+  "fitting scalers, clusters, thresholds or importances on any non-inner-train rows",
+  "claiming a metric proves an architecture wins"
+ ],
+ "protocol_sha256": "e896ecb6a93aab8115bbc76a1f669dab56673b92685b53b769d3eb1b9528ffa6"
+}

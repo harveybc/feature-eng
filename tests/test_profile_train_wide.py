@@ -130,6 +130,17 @@ class WideProfileTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.run_profile(manifest(self.path))
 
+    def test_adf_lag_choice_matches_statsmodels_autolag(self):
+        from statsmodels.tsa.stattools import adfuller
+        rng = np.random.default_rng(3)
+        for series in (np.cumsum(rng.normal(size=900)),
+                       np.sin(np.arange(900) / 5) + rng.normal(size=900) * 0.3):
+            best, _ = W.adf_aic_lag(series)
+            ref = adfuller(series, regression="c", autolag="AIC")
+            mine = adfuller(series, regression="c", maxlag=best, autolag=None)
+            self.assertEqual(best, ref[2])
+            self.assertAlmostEqual(mine[0], ref[0], places=8)
+
 
 if __name__ == "__main__":
     unittest.main()
