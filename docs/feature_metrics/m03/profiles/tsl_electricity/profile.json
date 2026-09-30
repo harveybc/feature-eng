@@ -1,0 +1,5077 @@
+{
+ "schema": "feature_train_profile.v2",
+ "dataset_id": "sota_benchmarks.thuml_tsl_electricity.train",
+ "split": "TRAIN",
+ "governance": "LAKE_RESOURCE_IDENTITY",
+ "lake": "sota_benchmarks",
+ "resource": "thuml_tsl_electricity/electricity.csv",
+ "manifest": {
+  "schema": "feature_train_manifest.v2",
+  "split": "TRAIN",
+  "dataset_id": "sota_benchmarks.thuml_tsl_electricity.train",
+  "governance": "LAKE_RESOURCE_IDENTITY",
+  "lake": "sota_benchmarks",
+  "resource": "thuml_tsl_electricity/electricity.csv",
+  "resource_sha256": "7e45845d54c5219bad0ae6bc1b5316cf8ff9cead5d33fa998a5a51c2e4a497ad",
+  "identity_sources": [
+   "predictor docs/contracts/tsl_literature_metrics.v1.json (registered sha256, rows, step)",
+   "predictor docs/TSL_BENCHMARK_LAKE.md (lake registration, VERIFIED_TRANSFER)"
+  ],
+  "path": "thuml_tsl_electricity/electricity.csv",
+  "path_note": "relative to a local directory holding bytes whose SHA256 equals resource_sha256; the profiler refuses any other bytes",
+  "registered_rows": 26304,
+  "columns_total": 322,
+  "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+  "boundaries": {
+   "train": [
+    0,
+    18412
+   ]
+  },
+  "holdout_not_profiled": {
+   "validation": [
+    18412,
+    21044
+   ],
+   "test": [
+    21044,
+    26304
+   ]
+  },
+  "timestamp_column": "date",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S",
+  "step_seconds": 3600,
+  "default_role": "feature",
+  "target_channels": [
+   "OT"
+  ],
+  "target_note": "multivariate (M) protocol: every channel is both an input and a forecast target; OT is the S/MS target. Admissible as a lagged input only",
+  "declared_periods_rows": {
+   "daily": 24,
+   "weekly": 168
+  },
+  "primary_period": "daily",
+  "max_missing_fraction": 0.2,
+  "availability": "retrospective public benchmark; availability UNDECLARED/UNKNOWN; not point-in-time financial data",
+  "columns": {}
+ },
+ "manifest_sha256": "eca31ec195ea6d477e2789b019500c08e2b32a7a8e9f39a948983d55d628353b",
+ "resource_identity": {
+  "sha256": "7e45845d54c5219bad0ae6bc1b5316cf8ff9cead5d33fa998a5a51c2e4a497ad",
+  "bytes": 95581762,
+  "records": 26304,
+  "verified_against_declared": true,
+  "note": "every byte hashed for identity; no value past the TRAIN boundary parsed"
+ },
+ "train_prefix": {
+  "rows": [
+   0,
+   18412
+  ],
+  "bytes_parsed": 66926782,
+  "prefix_sha256": "d7b6de5ffa440e6fcdf003178c7c62431d535ba1c0cb89fd2bc44af6dfc0ad20",
+  "split_rule": "Time-Series-Library Dataset_Custom: num_train=int(N*0.7), num_test=int(N*0.2), vali=rest; TRAIN rows [0,num_train). Source: data_provider/data_loader.py (Dataset_Custom). Confirmed by existing CHARACTERIZATION sets where present",
+  "full_train_coverage": true
+ },
+ "sampling": {
+  "status": "REGULAR",
+  "invalid_count": 0,
+  "first": "2016-07-01 02:00:00",
+  "last": "2018-08-07 05:00:00",
+  "median_step_seconds": 3600.0,
+  "top_steps_seconds": {
+   "3600.0": 18411
+  },
+  "non_positive_steps": 0,
+  "declared_step_seconds": 3600,
+  "verified_step_seconds": 3600
+ },
+ "columns": [
+  {
+   "column": "date",
+   "position": 0,
+   "role": "timestamp",
+   "declared_reason": "time index; never a branch input",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "time index; never a branch input"
+  },
+  {
+   "column": "0",
+   "position": 1,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "1",
+   "position": 2,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "2",
+   "position": 3,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "3",
+   "position": 4,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "4",
+   "position": 5,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "5",
+   "position": 6,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "6",
+   "position": 7,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "7",
+   "position": 8,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "8",
+   "position": 9,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "9",
+   "position": 10,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "10",
+   "position": 11,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "11",
+   "position": 12,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "12",
+   "position": 13,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "13",
+   "position": 14,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "14",
+   "position": 15,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "15",
+   "position": 16,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "16",
+   "position": 17,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "17",
+   "position": 18,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "18",
+   "position": 19,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "19",
+   "position": 20,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "20",
+   "position": 21,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "21",
+   "position": 22,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "22",
+   "position": 23,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "23",
+   "position": 24,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "24",
+   "position": 25,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "25",
+   "position": 26,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "26",
+   "position": 27,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "27",
+   "position": 28,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "28",
+   "position": 29,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "29",
+   "position": 30,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "30",
+   "position": 31,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "31",
+   "position": 32,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "32",
+   "position": 33,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "33",
+   "position": 34,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "34",
+   "position": 35,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "35",
+   "position": 36,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "36",
+   "position": 37,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "37",
+   "position": 38,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "38",
+   "position": 39,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "39",
+   "position": 40,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "40",
+   "position": 41,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "41",
+   "position": 42,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "42",
+   "position": 43,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "43",
+   "position": 44,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "44",
+   "position": 45,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "45",
+   "position": 46,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "46",
+   "position": 47,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "47",
+   "position": 48,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "48",
+   "position": 49,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "49",
+   "position": 50,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "50",
+   "position": 51,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "51",
+   "position": 52,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "52",
+   "position": 53,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "53",
+   "position": 54,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "54",
+   "position": 55,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "55",
+   "position": 56,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "56",
+   "position": 57,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "57",
+   "position": 58,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "58",
+   "position": 59,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "59",
+   "position": 60,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "60",
+   "position": 61,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "61",
+   "position": 62,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "62",
+   "position": 63,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "63",
+   "position": 64,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "64",
+   "position": 65,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "65",
+   "position": 66,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "66",
+   "position": 67,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "67",
+   "position": 68,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "68",
+   "position": 69,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "69",
+   "position": 70,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "70",
+   "position": 71,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "71",
+   "position": 72,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "72",
+   "position": 73,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "73",
+   "position": 74,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "74",
+   "position": 75,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "75",
+   "position": 76,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "76",
+   "position": 77,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "77",
+   "position": 78,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "78",
+   "position": 79,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "79",
+   "position": 80,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "80",
+   "position": 81,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "81",
+   "position": 82,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "82",
+   "position": 83,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "83",
+   "position": 84,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "84",
+   "position": 85,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "85",
+   "position": 86,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "86",
+   "position": 87,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "87",
+   "position": 88,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "88",
+   "position": 89,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "89",
+   "position": 90,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "90",
+   "position": 91,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "91",
+   "position": 92,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "92",
+   "position": 93,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "93",
+   "position": 94,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "94",
+   "position": 95,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "95",
+   "position": 96,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "96",
+   "position": 97,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "97",
+   "position": 98,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "98",
+   "position": 99,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "99",
+   "position": 100,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "100",
+   "position": 101,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "101",
+   "position": 102,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "102",
+   "position": 103,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "103",
+   "position": 104,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "104",
+   "position": 105,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "105",
+   "position": 106,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "106",
+   "position": 107,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "107",
+   "position": 108,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "108",
+   "position": 109,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "109",
+   "position": 110,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "110",
+   "position": 111,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "111",
+   "position": 112,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "112",
+   "position": 113,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "113",
+   "position": 114,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "114",
+   "position": 115,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "115",
+   "position": 116,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "116",
+   "position": 117,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "117",
+   "position": 118,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "118",
+   "position": 119,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "119",
+   "position": 120,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "120",
+   "position": 121,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "121",
+   "position": 122,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "122",
+   "position": 123,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "123",
+   "position": 124,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "124",
+   "position": 125,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "125",
+   "position": 126,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "126",
+   "position": 127,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "127",
+   "position": 128,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "128",
+   "position": 129,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "129",
+   "position": 130,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "130",
+   "position": 131,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "131",
+   "position": 132,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "132",
+   "position": 133,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "133",
+   "position": 134,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "134",
+   "position": 135,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "135",
+   "position": 136,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "136",
+   "position": 137,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "137",
+   "position": 138,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "138",
+   "position": 139,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "139",
+   "position": 140,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "140",
+   "position": 141,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "141",
+   "position": 142,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "142",
+   "position": 143,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "143",
+   "position": 144,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "144",
+   "position": 145,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "145",
+   "position": 146,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "146",
+   "position": 147,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "147",
+   "position": 148,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "148",
+   "position": 149,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "149",
+   "position": 150,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "150",
+   "position": 151,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "151",
+   "position": 152,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "152",
+   "position": 153,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "153",
+   "position": 154,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "154",
+   "position": 155,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "155",
+   "position": 156,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "156",
+   "position": 157,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "157",
+   "position": 158,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "158",
+   "position": 159,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "159",
+   "position": 160,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "160",
+   "position": 161,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "161",
+   "position": 162,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "162",
+   "position": 163,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "163",
+   "position": 164,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "164",
+   "position": 165,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "165",
+   "position": 166,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "166",
+   "position": 167,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "167",
+   "position": 168,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "168",
+   "position": 169,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "169",
+   "position": 170,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "170",
+   "position": 171,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "171",
+   "position": 172,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "172",
+   "position": 173,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "173",
+   "position": 174,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "174",
+   "position": 175,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "175",
+   "position": 176,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "176",
+   "position": 177,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "177",
+   "position": 178,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "178",
+   "position": 179,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "179",
+   "position": 180,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "180",
+   "position": 181,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "181",
+   "position": 182,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "182",
+   "position": 183,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "183",
+   "position": 184,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "184",
+   "position": 185,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "185",
+   "position": 186,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "186",
+   "position": 187,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "187",
+   "position": 188,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "188",
+   "position": 189,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "189",
+   "position": 190,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "190",
+   "position": 191,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "191",
+   "position": 192,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "192",
+   "position": 193,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "193",
+   "position": 194,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "194",
+   "position": 195,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "195",
+   "position": 196,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "196",
+   "position": 197,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "197",
+   "position": 198,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "198",
+   "position": 199,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "199",
+   "position": 200,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "200",
+   "position": 201,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "201",
+   "position": 202,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "202",
+   "position": 203,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "203",
+   "position": 204,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "204",
+   "position": 205,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "205",
+   "position": 206,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "206",
+   "position": 207,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "207",
+   "position": 208,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "208",
+   "position": 209,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "209",
+   "position": 210,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "210",
+   "position": 211,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "211",
+   "position": 212,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "212",
+   "position": 213,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "213",
+   "position": 214,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "214",
+   "position": 215,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "215",
+   "position": 216,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "216",
+   "position": 217,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "217",
+   "position": 218,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "218",
+   "position": 219,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "219",
+   "position": 220,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "220",
+   "position": 221,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "221",
+   "position": 222,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "222",
+   "position": 223,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "223",
+   "position": 224,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "224",
+   "position": 225,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "225",
+   "position": 226,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "226",
+   "position": 227,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "227",
+   "position": 228,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "228",
+   "position": 229,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "229",
+   "position": 230,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "230",
+   "position": 231,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "231",
+   "position": 232,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "232",
+   "position": 233,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "233",
+   "position": 234,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "234",
+   "position": 235,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "235",
+   "position": 236,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "236",
+   "position": 237,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "237",
+   "position": 238,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "238",
+   "position": 239,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "239",
+   "position": 240,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "240",
+   "position": 241,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "241",
+   "position": 242,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "242",
+   "position": 243,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "243",
+   "position": 244,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "244",
+   "position": 245,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "245",
+   "position": 246,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "246",
+   "position": 247,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "247",
+   "position": 248,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "248",
+   "position": 249,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "249",
+   "position": 250,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "250",
+   "position": 251,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "251",
+   "position": 252,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "252",
+   "position": 253,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "253",
+   "position": 254,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "254",
+   "position": 255,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "255",
+   "position": 256,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "256",
+   "position": 257,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "257",
+   "position": 258,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "258",
+   "position": 259,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "259",
+   "position": 260,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "260",
+   "position": 261,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "261",
+   "position": 262,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "262",
+   "position": 263,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "263",
+   "position": 264,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "264",
+   "position": 265,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "265",
+   "position": 266,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "266",
+   "position": 267,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "267",
+   "position": 268,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "268",
+   "position": 269,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "269",
+   "position": 270,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "270",
+   "position": 271,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "271",
+   "position": 272,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "272",
+   "position": 273,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "273",
+   "position": 274,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "274",
+   "position": 275,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "275",
+   "position": 276,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "276",
+   "position": 277,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "277",
+   "position": 278,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "278",
+   "position": 279,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "279",
+   "position": 280,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "280",
+   "position": 281,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "281",
+   "position": 282,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "282",
+   "position": 283,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "283",
+   "position": 284,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "284",
+   "position": 285,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "285",
+   "position": 286,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "286",
+   "position": 287,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "287",
+   "position": 288,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "288",
+   "position": 289,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "289",
+   "position": 290,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "290",
+   "position": 291,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "291",
+   "position": 292,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "292",
+   "position": 293,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "293",
+   "position": 294,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "294",
+   "position": 295,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "295",
+   "position": 296,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "296",
+   "position": 297,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "297",
+   "position": 298,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "298",
+   "position": 299,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "299",
+   "position": 300,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "300",
+   "position": 301,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "301",
+   "position": 302,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "302",
+   "position": 303,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "303",
+   "position": 304,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "304",
+   "position": 305,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "305",
+   "position": 306,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "306",
+   "position": 307,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "307",
+   "position": 308,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "308",
+   "position": 309,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "309",
+   "position": 310,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "310",
+   "position": 311,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "311",
+   "position": 312,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "312",
+   "position": 313,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "313",
+   "position": 314,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "314",
+   "position": 315,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "315",
+   "position": 316,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "316",
+   "position": 317,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "317",
+   "position": 318,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "318",
+   "position": 319,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "319",
+   "position": 320,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "OT",
+   "position": 321,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": true,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  }
+ ],
+ "branches": [
+  {
+   "branch": 0,
+   "columns": [
+    "0"
+   ]
+  },
+  {
+   "branch": 1,
+   "columns": [
+    "1"
+   ]
+  },
+  {
+   "branch": 2,
+   "columns": [
+    "2"
+   ]
+  },
+  {
+   "branch": 3,
+   "columns": [
+    "3"
+   ]
+  },
+  {
+   "branch": 4,
+   "columns": [
+    "4"
+   ]
+  },
+  {
+   "branch": 5,
+   "columns": [
+    "5"
+   ]
+  },
+  {
+   "branch": 6,
+   "columns": [
+    "6"
+   ]
+  },
+  {
+   "branch": 7,
+   "columns": [
+    "7"
+   ]
+  },
+  {
+   "branch": 8,
+   "columns": [
+    "8"
+   ]
+  },
+  {
+   "branch": 9,
+   "columns": [
+    "9"
+   ]
+  },
+  {
+   "branch": 10,
+   "columns": [
+    "10"
+   ]
+  },
+  {
+   "branch": 11,
+   "columns": [
+    "11"
+   ]
+  },
+  {
+   "branch": 12,
+   "columns": [
+    "12"
+   ]
+  },
+  {
+   "branch": 13,
+   "columns": [
+    "13"
+   ]
+  },
+  {
+   "branch": 14,
+   "columns": [
+    "14"
+   ]
+  },
+  {
+   "branch": 15,
+   "columns": [
+    "15"
+   ]
+  },
+  {
+   "branch": 16,
+   "columns": [
+    "16"
+   ]
+  },
+  {
+   "branch": 17,
+   "columns": [
+    "17"
+   ]
+  },
+  {
+   "branch": 18,
+   "columns": [
+    "18"
+   ]
+  },
+  {
+   "branch": 19,
+   "columns": [
+    "19"
+   ]
+  },
+  {
+   "branch": 20,
+   "columns": [
+    "20"
+   ]
+  },
+  {
+   "branch": 21,
+   "columns": [
+    "21"
+   ]
+  },
+  {
+   "branch": 22,
+   "columns": [
+    "22"
+   ]
+  },
+  {
+   "branch": 23,
+   "columns": [
+    "23"
+   ]
+  },
+  {
+   "branch": 24,
+   "columns": [
+    "24"
+   ]
+  },
+  {
+   "branch": 25,
+   "columns": [
+    "25"
+   ]
+  },
+  {
+   "branch": 26,
+   "columns": [
+    "26"
+   ]
+  },
+  {
+   "branch": 27,
+   "columns": [
+    "27"
+   ]
+  },
+  {
+   "branch": 28,
+   "columns": [
+    "28"
+   ]
+  },
+  {
+   "branch": 29,
+   "columns": [
+    "29"
+   ]
+  },
+  {
+   "branch": 30,
+   "columns": [
+    "30"
+   ]
+  },
+  {
+   "branch": 31,
+   "columns": [
+    "31"
+   ]
+  },
+  {
+   "branch": 32,
+   "columns": [
+    "32"
+   ]
+  },
+  {
+   "branch": 33,
+   "columns": [
+    "33"
+   ]
+  },
+  {
+   "branch": 34,
+   "columns": [
+    "34"
+   ]
+  },
+  {
+   "branch": 35,
+   "columns": [
+    "35"
+   ]
+  },
+  {
+   "branch": 36,
+   "columns": [
+    "36"
+   ]
+  },
+  {
+   "branch": 37,
+   "columns": [
+    "37"
+   ]
+  },
+  {
+   "branch": 38,
+   "columns": [
+    "38"
+   ]
+  },
+  {
+   "branch": 39,
+   "columns": [
+    "39"
+   ]
+  },
+  {
+   "branch": 40,
+   "columns": [
+    "40"
+   ]
+  },
+  {
+   "branch": 41,
+   "columns": [
+    "41"
+   ]
+  },
+  {
+   "branch": 42,
+   "columns": [
+    "42"
+   ]
+  },
+  {
+   "branch": 43,
+   "columns": [
+    "43"
+   ]
+  },
+  {
+   "branch": 44,
+   "columns": [
+    "44"
+   ]
+  },
+  {
+   "branch": 45,
+   "columns": [
+    "45"
+   ]
+  },
+  {
+   "branch": 46,
+   "columns": [
+    "46"
+   ]
+  },
+  {
+   "branch": 47,
+   "columns": [
+    "47"
+   ]
+  },
+  {
+   "branch": 48,
+   "columns": [
+    "48"
+   ]
+  },
+  {
+   "branch": 49,
+   "columns": [
+    "49"
+   ]
+  },
+  {
+   "branch": 50,
+   "columns": [
+    "50"
+   ]
+  },
+  {
+   "branch": 51,
+   "columns": [
+    "51"
+   ]
+  },
+  {
+   "branch": 52,
+   "columns": [
+    "52"
+   ]
+  },
+  {
+   "branch": 53,
+   "columns": [
+    "53"
+   ]
+  },
+  {
+   "branch": 54,
+   "columns": [
+    "54"
+   ]
+  },
+  {
+   "branch": 55,
+   "columns": [
+    "55"
+   ]
+  },
+  {
+   "branch": 56,
+   "columns": [
+    "56"
+   ]
+  },
+  {
+   "branch": 57,
+   "columns": [
+    "57"
+   ]
+  },
+  {
+   "branch": 58,
+   "columns": [
+    "58"
+   ]
+  },
+  {
+   "branch": 59,
+   "columns": [
+    "59"
+   ]
+  },
+  {
+   "branch": 60,
+   "columns": [
+    "60"
+   ]
+  },
+  {
+   "branch": 61,
+   "columns": [
+    "61"
+   ]
+  },
+  {
+   "branch": 62,
+   "columns": [
+    "62"
+   ]
+  },
+  {
+   "branch": 63,
+   "columns": [
+    "63"
+   ]
+  },
+  {
+   "branch": 64,
+   "columns": [
+    "64"
+   ]
+  },
+  {
+   "branch": 65,
+   "columns": [
+    "65"
+   ]
+  },
+  {
+   "branch": 66,
+   "columns": [
+    "66"
+   ]
+  },
+  {
+   "branch": 67,
+   "columns": [
+    "67"
+   ]
+  },
+  {
+   "branch": 68,
+   "columns": [
+    "68"
+   ]
+  },
+  {
+   "branch": 69,
+   "columns": [
+    "69"
+   ]
+  },
+  {
+   "branch": 70,
+   "columns": [
+    "70"
+   ]
+  },
+  {
+   "branch": 71,
+   "columns": [
+    "71"
+   ]
+  },
+  {
+   "branch": 72,
+   "columns": [
+    "72"
+   ]
+  },
+  {
+   "branch": 73,
+   "columns": [
+    "73"
+   ]
+  },
+  {
+   "branch": 74,
+   "columns": [
+    "74"
+   ]
+  },
+  {
+   "branch": 75,
+   "columns": [
+    "75"
+   ]
+  },
+  {
+   "branch": 76,
+   "columns": [
+    "76"
+   ]
+  },
+  {
+   "branch": 77,
+   "columns": [
+    "77"
+   ]
+  },
+  {
+   "branch": 78,
+   "columns": [
+    "78"
+   ]
+  },
+  {
+   "branch": 79,
+   "columns": [
+    "79"
+   ]
+  },
+  {
+   "branch": 80,
+   "columns": [
+    "80"
+   ]
+  },
+  {
+   "branch": 81,
+   "columns": [
+    "81"
+   ]
+  },
+  {
+   "branch": 82,
+   "columns": [
+    "82"
+   ]
+  },
+  {
+   "branch": 83,
+   "columns": [
+    "83"
+   ]
+  },
+  {
+   "branch": 84,
+   "columns": [
+    "84"
+   ]
+  },
+  {
+   "branch": 85,
+   "columns": [
+    "85"
+   ]
+  },
+  {
+   "branch": 86,
+   "columns": [
+    "86"
+   ]
+  },
+  {
+   "branch": 87,
+   "columns": [
+    "87"
+   ]
+  },
+  {
+   "branch": 88,
+   "columns": [
+    "88"
+   ]
+  },
+  {
+   "branch": 89,
+   "columns": [
+    "89"
+   ]
+  },
+  {
+   "branch": 90,
+   "columns": [
+    "90"
+   ]
+  },
+  {
+   "branch": 91,
+   "columns": [
+    "91"
+   ]
+  },
+  {
+   "branch": 92,
+   "columns": [
+    "92"
+   ]
+  },
+  {
+   "branch": 93,
+   "columns": [
+    "93"
+   ]
+  },
+  {
+   "branch": 94,
+   "columns": [
+    "94"
+   ]
+  },
+  {
+   "branch": 95,
+   "columns": [
+    "95"
+   ]
+  },
+  {
+   "branch": 96,
+   "columns": [
+    "96"
+   ]
+  },
+  {
+   "branch": 97,
+   "columns": [
+    "97"
+   ]
+  },
+  {
+   "branch": 98,
+   "columns": [
+    "98"
+   ]
+  },
+  {
+   "branch": 99,
+   "columns": [
+    "99"
+   ]
+  },
+  {
+   "branch": 100,
+   "columns": [
+    "100"
+   ]
+  },
+  {
+   "branch": 101,
+   "columns": [
+    "101"
+   ]
+  },
+  {
+   "branch": 102,
+   "columns": [
+    "102"
+   ]
+  },
+  {
+   "branch": 103,
+   "columns": [
+    "103"
+   ]
+  },
+  {
+   "branch": 104,
+   "columns": [
+    "104"
+   ]
+  },
+  {
+   "branch": 105,
+   "columns": [
+    "105"
+   ]
+  },
+  {
+   "branch": 106,
+   "columns": [
+    "106"
+   ]
+  },
+  {
+   "branch": 107,
+   "columns": [
+    "107"
+   ]
+  },
+  {
+   "branch": 108,
+   "columns": [
+    "108"
+   ]
+  },
+  {
+   "branch": 109,
+   "columns": [
+    "109"
+   ]
+  },
+  {
+   "branch": 110,
+   "columns": [
+    "110"
+   ]
+  },
+  {
+   "branch": 111,
+   "columns": [
+    "111"
+   ]
+  },
+  {
+   "branch": 112,
+   "columns": [
+    "112"
+   ]
+  },
+  {
+   "branch": 113,
+   "columns": [
+    "113"
+   ]
+  },
+  {
+   "branch": 114,
+   "columns": [
+    "114"
+   ]
+  },
+  {
+   "branch": 115,
+   "columns": [
+    "115"
+   ]
+  },
+  {
+   "branch": 116,
+   "columns": [
+    "116"
+   ]
+  },
+  {
+   "branch": 117,
+   "columns": [
+    "117"
+   ]
+  },
+  {
+   "branch": 118,
+   "columns": [
+    "118"
+   ]
+  },
+  {
+   "branch": 119,
+   "columns": [
+    "119"
+   ]
+  },
+  {
+   "branch": 120,
+   "columns": [
+    "120"
+   ]
+  },
+  {
+   "branch": 121,
+   "columns": [
+    "121"
+   ]
+  },
+  {
+   "branch": 122,
+   "columns": [
+    "122"
+   ]
+  },
+  {
+   "branch": 123,
+   "columns": [
+    "123"
+   ]
+  },
+  {
+   "branch": 124,
+   "columns": [
+    "124"
+   ]
+  },
+  {
+   "branch": 125,
+   "columns": [
+    "125"
+   ]
+  },
+  {
+   "branch": 126,
+   "columns": [
+    "126"
+   ]
+  },
+  {
+   "branch": 127,
+   "columns": [
+    "127"
+   ]
+  },
+  {
+   "branch": 128,
+   "columns": [
+    "128"
+   ]
+  },
+  {
+   "branch": 129,
+   "columns": [
+    "129"
+   ]
+  },
+  {
+   "branch": 130,
+   "columns": [
+    "130"
+   ]
+  },
+  {
+   "branch": 131,
+   "columns": [
+    "131"
+   ]
+  },
+  {
+   "branch": 132,
+   "columns": [
+    "132"
+   ]
+  },
+  {
+   "branch": 133,
+   "columns": [
+    "133"
+   ]
+  },
+  {
+   "branch": 134,
+   "columns": [
+    "134"
+   ]
+  },
+  {
+   "branch": 135,
+   "columns": [
+    "135"
+   ]
+  },
+  {
+   "branch": 136,
+   "columns": [
+    "136"
+   ]
+  },
+  {
+   "branch": 137,
+   "columns": [
+    "137"
+   ]
+  },
+  {
+   "branch": 138,
+   "columns": [
+    "138"
+   ]
+  },
+  {
+   "branch": 139,
+   "columns": [
+    "139"
+   ]
+  },
+  {
+   "branch": 140,
+   "columns": [
+    "140"
+   ]
+  },
+  {
+   "branch": 141,
+   "columns": [
+    "141"
+   ]
+  },
+  {
+   "branch": 142,
+   "columns": [
+    "142"
+   ]
+  },
+  {
+   "branch": 143,
+   "columns": [
+    "143"
+   ]
+  },
+  {
+   "branch": 144,
+   "columns": [
+    "144"
+   ]
+  },
+  {
+   "branch": 145,
+   "columns": [
+    "145"
+   ]
+  },
+  {
+   "branch": 146,
+   "columns": [
+    "146"
+   ]
+  },
+  {
+   "branch": 147,
+   "columns": [
+    "147"
+   ]
+  },
+  {
+   "branch": 148,
+   "columns": [
+    "148"
+   ]
+  },
+  {
+   "branch": 149,
+   "columns": [
+    "149"
+   ]
+  },
+  {
+   "branch": 150,
+   "columns": [
+    "150"
+   ]
+  },
+  {
+   "branch": 151,
+   "columns": [
+    "151"
+   ]
+  },
+  {
+   "branch": 152,
+   "columns": [
+    "152"
+   ]
+  },
+  {
+   "branch": 153,
+   "columns": [
+    "153"
+   ]
+  },
+  {
+   "branch": 154,
+   "columns": [
+    "154"
+   ]
+  },
+  {
+   "branch": 155,
+   "columns": [
+    "155"
+   ]
+  },
+  {
+   "branch": 156,
+   "columns": [
+    "156"
+   ]
+  },
+  {
+   "branch": 157,
+   "columns": [
+    "157"
+   ]
+  },
+  {
+   "branch": 158,
+   "columns": [
+    "158"
+   ]
+  },
+  {
+   "branch": 159,
+   "columns": [
+    "159"
+   ]
+  },
+  {
+   "branch": 160,
+   "columns": [
+    "160"
+   ]
+  },
+  {
+   "branch": 161,
+   "columns": [
+    "161"
+   ]
+  },
+  {
+   "branch": 162,
+   "columns": [
+    "162"
+   ]
+  },
+  {
+   "branch": 163,
+   "columns": [
+    "163"
+   ]
+  },
+  {
+   "branch": 164,
+   "columns": [
+    "164"
+   ]
+  },
+  {
+   "branch": 165,
+   "columns": [
+    "165"
+   ]
+  },
+  {
+   "branch": 166,
+   "columns": [
+    "166"
+   ]
+  },
+  {
+   "branch": 167,
+   "columns": [
+    "167"
+   ]
+  },
+  {
+   "branch": 168,
+   "columns": [
+    "168"
+   ]
+  },
+  {
+   "branch": 169,
+   "columns": [
+    "169"
+   ]
+  },
+  {
+   "branch": 170,
+   "columns": [
+    "170"
+   ]
+  },
+  {
+   "branch": 171,
+   "columns": [
+    "171"
+   ]
+  },
+  {
+   "branch": 172,
+   "columns": [
+    "172"
+   ]
+  },
+  {
+   "branch": 173,
+   "columns": [
+    "173"
+   ]
+  },
+  {
+   "branch": 174,
+   "columns": [
+    "174"
+   ]
+  },
+  {
+   "branch": 175,
+   "columns": [
+    "175"
+   ]
+  },
+  {
+   "branch": 176,
+   "columns": [
+    "176"
+   ]
+  },
+  {
+   "branch": 177,
+   "columns": [
+    "177"
+   ]
+  },
+  {
+   "branch": 178,
+   "columns": [
+    "178"
+   ]
+  },
+  {
+   "branch": 179,
+   "columns": [
+    "179"
+   ]
+  },
+  {
+   "branch": 180,
+   "columns": [
+    "180"
+   ]
+  },
+  {
+   "branch": 181,
+   "columns": [
+    "181"
+   ]
+  },
+  {
+   "branch": 182,
+   "columns": [
+    "182"
+   ]
+  },
+  {
+   "branch": 183,
+   "columns": [
+    "183"
+   ]
+  },
+  {
+   "branch": 184,
+   "columns": [
+    "184"
+   ]
+  },
+  {
+   "branch": 185,
+   "columns": [
+    "185"
+   ]
+  },
+  {
+   "branch": 186,
+   "columns": [
+    "186"
+   ]
+  },
+  {
+   "branch": 187,
+   "columns": [
+    "187"
+   ]
+  },
+  {
+   "branch": 188,
+   "columns": [
+    "188"
+   ]
+  },
+  {
+   "branch": 189,
+   "columns": [
+    "189"
+   ]
+  },
+  {
+   "branch": 190,
+   "columns": [
+    "190"
+   ]
+  },
+  {
+   "branch": 191,
+   "columns": [
+    "191"
+   ]
+  },
+  {
+   "branch": 192,
+   "columns": [
+    "192"
+   ]
+  },
+  {
+   "branch": 193,
+   "columns": [
+    "193"
+   ]
+  },
+  {
+   "branch": 194,
+   "columns": [
+    "194"
+   ]
+  },
+  {
+   "branch": 195,
+   "columns": [
+    "195"
+   ]
+  },
+  {
+   "branch": 196,
+   "columns": [
+    "196"
+   ]
+  },
+  {
+   "branch": 197,
+   "columns": [
+    "197"
+   ]
+  },
+  {
+   "branch": 198,
+   "columns": [
+    "198"
+   ]
+  },
+  {
+   "branch": 199,
+   "columns": [
+    "199"
+   ]
+  },
+  {
+   "branch": 200,
+   "columns": [
+    "200"
+   ]
+  },
+  {
+   "branch": 201,
+   "columns": [
+    "201"
+   ]
+  },
+  {
+   "branch": 202,
+   "columns": [
+    "202"
+   ]
+  },
+  {
+   "branch": 203,
+   "columns": [
+    "203"
+   ]
+  },
+  {
+   "branch": 204,
+   "columns": [
+    "204"
+   ]
+  },
+  {
+   "branch": 205,
+   "columns": [
+    "205"
+   ]
+  },
+  {
+   "branch": 206,
+   "columns": [
+    "206"
+   ]
+  },
+  {
+   "branch": 207,
+   "columns": [
+    "207"
+   ]
+  },
+  {
+   "branch": 208,
+   "columns": [
+    "208"
+   ]
+  },
+  {
+   "branch": 209,
+   "columns": [
+    "209"
+   ]
+  },
+  {
+   "branch": 210,
+   "columns": [
+    "210"
+   ]
+  },
+  {
+   "branch": 211,
+   "columns": [
+    "211"
+   ]
+  },
+  {
+   "branch": 212,
+   "columns": [
+    "212"
+   ]
+  },
+  {
+   "branch": 213,
+   "columns": [
+    "213"
+   ]
+  },
+  {
+   "branch": 214,
+   "columns": [
+    "214"
+   ]
+  },
+  {
+   "branch": 215,
+   "columns": [
+    "215"
+   ]
+  },
+  {
+   "branch": 216,
+   "columns": [
+    "216"
+   ]
+  },
+  {
+   "branch": 217,
+   "columns": [
+    "217"
+   ]
+  },
+  {
+   "branch": 218,
+   "columns": [
+    "218"
+   ]
+  },
+  {
+   "branch": 219,
+   "columns": [
+    "219"
+   ]
+  },
+  {
+   "branch": 220,
+   "columns": [
+    "220"
+   ]
+  },
+  {
+   "branch": 221,
+   "columns": [
+    "221"
+   ]
+  },
+  {
+   "branch": 222,
+   "columns": [
+    "222"
+   ]
+  },
+  {
+   "branch": 223,
+   "columns": [
+    "223"
+   ]
+  },
+  {
+   "branch": 224,
+   "columns": [
+    "224"
+   ]
+  },
+  {
+   "branch": 225,
+   "columns": [
+    "225"
+   ]
+  },
+  {
+   "branch": 226,
+   "columns": [
+    "226"
+   ]
+  },
+  {
+   "branch": 227,
+   "columns": [
+    "227"
+   ]
+  },
+  {
+   "branch": 228,
+   "columns": [
+    "228"
+   ]
+  },
+  {
+   "branch": 229,
+   "columns": [
+    "229"
+   ]
+  },
+  {
+   "branch": 230,
+   "columns": [
+    "230"
+   ]
+  },
+  {
+   "branch": 231,
+   "columns": [
+    "231"
+   ]
+  },
+  {
+   "branch": 232,
+   "columns": [
+    "232"
+   ]
+  },
+  {
+   "branch": 233,
+   "columns": [
+    "233"
+   ]
+  },
+  {
+   "branch": 234,
+   "columns": [
+    "234"
+   ]
+  },
+  {
+   "branch": 235,
+   "columns": [
+    "235"
+   ]
+  },
+  {
+   "branch": 236,
+   "columns": [
+    "236"
+   ]
+  },
+  {
+   "branch": 237,
+   "columns": [
+    "237"
+   ]
+  },
+  {
+   "branch": 238,
+   "columns": [
+    "238"
+   ]
+  },
+  {
+   "branch": 239,
+   "columns": [
+    "239"
+   ]
+  },
+  {
+   "branch": 240,
+   "columns": [
+    "240"
+   ]
+  },
+  {
+   "branch": 241,
+   "columns": [
+    "241"
+   ]
+  },
+  {
+   "branch": 242,
+   "columns": [
+    "242"
+   ]
+  },
+  {
+   "branch": 243,
+   "columns": [
+    "243"
+   ]
+  },
+  {
+   "branch": 244,
+   "columns": [
+    "244"
+   ]
+  },
+  {
+   "branch": 245,
+   "columns": [
+    "245"
+   ]
+  },
+  {
+   "branch": 246,
+   "columns": [
+    "246"
+   ]
+  },
+  {
+   "branch": 247,
+   "columns": [
+    "247"
+   ]
+  },
+  {
+   "branch": 248,
+   "columns": [
+    "248"
+   ]
+  },
+  {
+   "branch": 249,
+   "columns": [
+    "249"
+   ]
+  },
+  {
+   "branch": 250,
+   "columns": [
+    "250"
+   ]
+  },
+  {
+   "branch": 251,
+   "columns": [
+    "251"
+   ]
+  },
+  {
+   "branch": 252,
+   "columns": [
+    "252"
+   ]
+  },
+  {
+   "branch": 253,
+   "columns": [
+    "253"
+   ]
+  },
+  {
+   "branch": 254,
+   "columns": [
+    "254"
+   ]
+  },
+  {
+   "branch": 255,
+   "columns": [
+    "255"
+   ]
+  },
+  {
+   "branch": 256,
+   "columns": [
+    "256"
+   ]
+  },
+  {
+   "branch": 257,
+   "columns": [
+    "257"
+   ]
+  },
+  {
+   "branch": 258,
+   "columns": [
+    "258"
+   ]
+  },
+  {
+   "branch": 259,
+   "columns": [
+    "259"
+   ]
+  },
+  {
+   "branch": 260,
+   "columns": [
+    "260"
+   ]
+  },
+  {
+   "branch": 261,
+   "columns": [
+    "261"
+   ]
+  },
+  {
+   "branch": 262,
+   "columns": [
+    "262"
+   ]
+  },
+  {
+   "branch": 263,
+   "columns": [
+    "263"
+   ]
+  },
+  {
+   "branch": 264,
+   "columns": [
+    "264"
+   ]
+  },
+  {
+   "branch": 265,
+   "columns": [
+    "265"
+   ]
+  },
+  {
+   "branch": 266,
+   "columns": [
+    "266"
+   ]
+  },
+  {
+   "branch": 267,
+   "columns": [
+    "267"
+   ]
+  },
+  {
+   "branch": 268,
+   "columns": [
+    "268"
+   ]
+  },
+  {
+   "branch": 269,
+   "columns": [
+    "269"
+   ]
+  },
+  {
+   "branch": 270,
+   "columns": [
+    "270"
+   ]
+  },
+  {
+   "branch": 271,
+   "columns": [
+    "271"
+   ]
+  },
+  {
+   "branch": 272,
+   "columns": [
+    "272"
+   ]
+  },
+  {
+   "branch": 273,
+   "columns": [
+    "273"
+   ]
+  },
+  {
+   "branch": 274,
+   "columns": [
+    "274"
+   ]
+  },
+  {
+   "branch": 275,
+   "columns": [
+    "275"
+   ]
+  },
+  {
+   "branch": 276,
+   "columns": [
+    "276"
+   ]
+  },
+  {
+   "branch": 277,
+   "columns": [
+    "277"
+   ]
+  },
+  {
+   "branch": 278,
+   "columns": [
+    "278"
+   ]
+  },
+  {
+   "branch": 279,
+   "columns": [
+    "279"
+   ]
+  },
+  {
+   "branch": 280,
+   "columns": [
+    "280"
+   ]
+  },
+  {
+   "branch": 281,
+   "columns": [
+    "281"
+   ]
+  },
+  {
+   "branch": 282,
+   "columns": [
+    "282"
+   ]
+  },
+  {
+   "branch": 283,
+   "columns": [
+    "283"
+   ]
+  },
+  {
+   "branch": 284,
+   "columns": [
+    "284"
+   ]
+  },
+  {
+   "branch": 285,
+   "columns": [
+    "285"
+   ]
+  },
+  {
+   "branch": 286,
+   "columns": [
+    "286"
+   ]
+  },
+  {
+   "branch": 287,
+   "columns": [
+    "287"
+   ]
+  },
+  {
+   "branch": 288,
+   "columns": [
+    "288"
+   ]
+  },
+  {
+   "branch": 289,
+   "columns": [
+    "289"
+   ]
+  },
+  {
+   "branch": 290,
+   "columns": [
+    "290"
+   ]
+  },
+  {
+   "branch": 291,
+   "columns": [
+    "291"
+   ]
+  },
+  {
+   "branch": 292,
+   "columns": [
+    "292"
+   ]
+  },
+  {
+   "branch": 293,
+   "columns": [
+    "293"
+   ]
+  },
+  {
+   "branch": 294,
+   "columns": [
+    "294"
+   ]
+  },
+  {
+   "branch": 295,
+   "columns": [
+    "295"
+   ]
+  },
+  {
+   "branch": 296,
+   "columns": [
+    "296"
+   ]
+  },
+  {
+   "branch": 297,
+   "columns": [
+    "297"
+   ]
+  },
+  {
+   "branch": 298,
+   "columns": [
+    "298"
+   ]
+  },
+  {
+   "branch": 299,
+   "columns": [
+    "299"
+   ]
+  },
+  {
+   "branch": 300,
+   "columns": [
+    "300"
+   ]
+  },
+  {
+   "branch": 301,
+   "columns": [
+    "301"
+   ]
+  },
+  {
+   "branch": 302,
+   "columns": [
+    "302"
+   ]
+  },
+  {
+   "branch": 303,
+   "columns": [
+    "303"
+   ]
+  },
+  {
+   "branch": 304,
+   "columns": [
+    "304"
+   ]
+  },
+  {
+   "branch": 305,
+   "columns": [
+    "305"
+   ]
+  },
+  {
+   "branch": 306,
+   "columns": [
+    "306"
+   ]
+  },
+  {
+   "branch": 307,
+   "columns": [
+    "307"
+   ]
+  },
+  {
+   "branch": 308,
+   "columns": [
+    "308"
+   ]
+  },
+  {
+   "branch": 309,
+   "columns": [
+    "309"
+   ]
+  },
+  {
+   "branch": 310,
+   "columns": [
+    "310"
+   ]
+  },
+  {
+   "branch": 311,
+   "columns": [
+    "311"
+   ]
+  },
+  {
+   "branch": 312,
+   "columns": [
+    "312"
+   ]
+  },
+  {
+   "branch": 313,
+   "columns": [
+    "313"
+   ]
+  },
+  {
+   "branch": 314,
+   "columns": [
+    "314"
+   ]
+  },
+  {
+   "branch": 315,
+   "columns": [
+    "315"
+   ]
+  },
+  {
+   "branch": 316,
+   "columns": [
+    "316"
+   ]
+  },
+  {
+   "branch": 317,
+   "columns": [
+    "317"
+   ]
+  },
+  {
+   "branch": 318,
+   "columns": [
+    "318"
+   ]
+  },
+  {
+   "branch": 319,
+   "columns": [
+    "319"
+   ]
+  },
+  {
+   "branch": 320,
+   "columns": [
+    "OT"
+   ]
+  }
+ ],
+ "grouping": "one admissible feature per branch; metrics propose, inner validation decides",
+ "redundancy": {
+  "rule": "Pearson on TRAIN rows with every selected column finite; descriptive, never merges",
+  "columns": 321,
+  "rows_used": 18412,
+  "status": "OK",
+  "pairs": 51360,
+  "pairs_abs_ge_0_95": 14,
+  "pairs_abs_ge_0_99": 0,
+  "abs_corr_quantiles": {
+   "0.5": 0.4751996282869627,
+   "0.9": 0.8645613309223855,
+   "0.99": 0.920668138411222
+  },
+  "components_abs_ge_0.95": {
+   "count_multi_member": 6,
+   "largest": 5,
+   "members": [
+    [
+     "210",
+     "215",
+     "221",
+     "249",
+     "262"
+    ],
+    [
+     "93",
+     "292",
+     "306",
+     "308"
+    ],
+    [
+     "168",
+     "171",
+     "186",
+     "187"
+    ],
+    [
+     "89",
+     "91"
+    ],
+    [
+     "159",
+     "181"
+    ],
+    [
+     "296",
+     "297"
+    ]
+   ]
+  },
+  "components_abs_ge_0.99": {
+   "count_multi_member": 0,
+   "largest": 1,
+   "members": []
+  },
+  "redundant_pairs_abs_ge_0_95": [
+   [
+    "93",
+    "292",
+    0.9725789671231643
+   ],
+   [
+    "89",
+    "91",
+    0.9688578530254816
+   ],
+   [
+    "186",
+    "187",
+    0.9633870235850666
+   ],
+   [
+    "159",
+    "181",
+    0.9606849160949295
+   ],
+   [
+    "296",
+    "297",
+    0.9604181858822491
+   ],
+   [
+    "210",
+    "262",
+    0.954602440088712
+   ],
+   [
+    "93",
+    "306",
+    0.9543898579852298
+   ],
+   [
+    "292",
+    "308",
+    0.9534982552414435
+   ],
+   [
+    "93",
+    "308",
+    0.953254778098647
+   ],
+   [
+    "210",
+    "249",
+    0.952822732321172
+   ],
+   [
+    "210",
+    "221",
+    0.9524833555265735
+   ],
+   [
+    "210",
+    "215",
+    0.9506313552518357
+   ],
+   [
+    "171",
+    "187",
+    0.950540188956317
+   ],
+   [
+    "168",
+    "187",
+    0.9500258397317299
+   ]
+  ],
+  "lagged": {
+   "status": "NOT_RUN",
+   "reason": "COLUMNS_OVER_LAG_SCAN_CAP_64",
+   "consequence": "lag-informed grouping must be fitted inside inner folds (protocol step G3)"
+  }
+ },
+ "implementation": {
+  "tool": "tools/profile_train_wide.py",
+  "sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "versions": {
+   "python": "3.12.13",
+   "numpy": "2.4.3",
+   "scipy": "1.17.1",
+   "pandas": "3.0.1",
+   "statsmodels": "0.14.6"
+  },
+  "limits": {
+   "max_columns": 4096,
+   "max_train_rows": 200000,
+   "max_train_cells": 25000000,
+   "max_resource_bytes": 1073741824,
+   "max_pair_lag_columns": 64
+  }
+ },
+ "assumptions": [
+  "No imputation; temporal metrics use the longest contiguous finite run",
+  "Values are profiled as stored (no scaler); TSL loaders standardize with a TRAIN-fitted scaler later",
+  "ADF/KPSS p-values are descriptive and unadjusted for multiple testing",
+  "Point-in-time availability is not certified by this profile",
+  "No target, no model and no holdout value enters any statistic"
+ ],
+ "wall_seconds": 262.59235249701305
+}
