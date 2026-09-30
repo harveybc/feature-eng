@@ -1,0 +1,11 @@
+{
+  "command": "env OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES= python -m unittest discover -s tests -p 'test_*feature*.py' -v",
+  "exit_code": 0,
+  "passed": 15,
+  "failed": 0,
+  "scope": ["tests/test_train_feature_profile.py", "tests/test_feature_inventory_audit.py"],
+  "legacy_suite": "NOT_RUN: pre-existing stale collection failures documented in AGENTS.md",
+  "real_train_cli": "EXIT_0; 512 rows, 28 columns, 23 branches, 238084 bytes",
+  "metadata_audit_cli": "EXIT_0; bounded artifact audit; coverage.json",
+  "scientific_eligibility": "NOT_CLAIMED"
+}

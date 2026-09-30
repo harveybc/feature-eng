@@ -1,0 +1,13 @@
+{
+  "initiative": "feature-metrics-audit-20260930",
+  "current_stage": "S14_RELEASE_OPERATION",
+  "stages": {"S0_S8": "PASSED", "S9": "PASSED", "S10_S12": "PASSED_BOUNDED_ALPHA_ONLY", "S13": "DEFERRED_OPTIONAL", "S14": "HANDOFF_TO_SATOSHI"},
+  "traceability_file": "docs/feature_metrics/DESIGN.md",
+  "evidence": ["evidence/TEST_RECEIPT.json", "evidence/train_512/profile.json", "evidence/inventory/coverage.json", "HANDOFF.md"],
+  "reviewer": "coding agent; independent review not yet performed",
+  "accepted_requirements": ["R1", "R2", "R3", "R4", "R5_WITH_EXPLICIT_UNKNOWNS", "R6"],
+  "next_allowed_actions": ["Satoshi independent review/cherry-pick under parent master plan", "confirm inventory identities and train provenance before any expanded run"],
+  "blocked_actions": ["heldout data read", "automatic model selection", "scientific eligibility claims"],
+  "open_decisions": ["upstream normalization provenance is not certified"],
+  "history": [{"stage": "S8_UNIT_TEST_DESIGN", "status": "PASSED", "evidence": "DESIGN.md"}, {"stage": "S12_ALPHA_ACCEPTANCE", "status": "PASSED_BOUNDED_ONLY", "evidence": "evidence/TEST_RECEIPT.json"}, {"stage": "S14_RELEASE_OPERATION", "status": "HANDOFF_REQUESTED_BY_USER", "evidence": "HANDOFF.md"}]
+}
