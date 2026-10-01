@@ -1,0 +1,528 @@
+{
+ "schema": "lane_b_stage_outcome.v1",
+ "dataset": "GBPUSD_1h_lake_S1",
+ "families": {
+  "calendar_session": {
+   "stage_1_availability": "PASS: computed from bar t and earlier (bar-close convention); fitted parts use fold TRAIN only; clock America/New_York stamped at bar END per fx_clock/FX_CLOCK.gbpusd_lake.v1.json",
+   "stage_2_cheap_metrics": {
+    "hour_sin": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.965333775474639
+    },
+    "hour_cos": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9651777086505884
+    },
+    "dow_sin": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9638092652725267
+    },
+    "dow_cos": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9735861139298115
+    },
+    "session_london": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.8120465447312405
+    },
+    "session_newyork": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.8215963662573486
+    },
+    "session_tokyo": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.8216724860288116
+    },
+    "overlap_london_newyork": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.6242330888552335
+    }
+   },
+   "stage_3_redundancy": {
+    "kept": [
+     "hour_sin",
+     "hour_cos",
+     "dow_sin",
+     "dow_cos",
+     "session_london",
+     "session_newyork",
+     "session_tokyo",
+     "overlap_london_newyork"
+    ],
+    "dropped_as_redundant_abs_corr_ge_0.95": [],
+    "excluded_cheap": []
+   },
+   "stage_4_utility": {
+    "1h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 49355,
+       "val_rows": 13513,
+       "mae": 0.0005646742014809938,
+       "mse": 7.887295273721502e-07,
+       "zero_mae": 0.000564464885969145,
+       "zero_mse": 7.886505810736416e-07,
+       "mean_only_mae": 0.0005644606849065276,
+       "mean_only_mse": 7.886376411212849e-07
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 62868,
+       "val_rows": 13518,
+       "mae": 0.0008202926310009305,
+       "mse": 1.916499207036756e-06,
+       "zero_mae": 0.0008202780658388898,
+       "zero_mse": 1.917824781783245e-06,
+       "mean_only_mae": 0.0008202934078440827,
+       "mean_only_mse": 1.9177970759955455e-06
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 76387,
+       "val_rows": 13514,
+       "mae": 0.0006863265449284803,
+       "mse": 1.1079358296782592e-06,
+       "zero_mae": 0.0006855093893359634,
+       "zero_mse": 1.10752165257835e-06,
+       "mean_only_mae": 0.0006855178367584525,
+       "mean_only_mse": 1.1074973761935519e-06
+      }
+     ]
+    },
+    "2h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 48909,
+       "val_rows": 13393,
+       "mae": 0.0008092290300458249,
+       "mse": 1.5565338537686436e-06,
+       "zero_mae": 0.0008080011069745283,
+       "zero_mse": 1.5561963088985977e-06,
+       "mean_only_mae": 0.000807989884171624,
+       "mean_only_mse": 1.5561437802353144e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 62302,
+       "val_rows": 13402,
+       "mae": 0.0011715246802573545,
+       "mse": 4.012607592579775e-06,
+       "zero_mae": 0.0011715622032178396,
+       "zero_mse": 4.016260342633366e-06,
+       "mean_only_mae": 0.0011715467095855074,
+       "mean_only_mse": 4.016139665818562e-06
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 75706,
+       "val_rows": 13396,
+       "mae": 0.0009853490716373182,
+       "mse": 2.208667075963101e-06,
+       "zero_mae": 0.0009846790088211166,
+       "zero_mse": 2.2088098942013385e-06,
+       "mean_only_mae": 0.000984676211087565,
+       "mean_only_mse": 2.208722933866874e-06
+      }
+     ]
+    },
+    "4h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 48057,
+       "val_rows": 13154,
+       "mae": 0.0011692296525532462,
+       "mse": 3.147038088802966e-06,
+       "zero_mae": 0.0011682546077269693,
+       "zero_mse": 3.149525257039403e-06,
+       "mean_only_mae": 0.001168275203268156,
+       "mean_only_mse": 3.1492198331311306e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 61211,
+       "val_rows": 13170,
+       "mae": 0.0017044480692027088,
+       "mse": 8.33450647543303e-06,
+       "zero_mae": 0.0017062566637063422,
+       "zero_mse": 8.344635475363562e-06,
+       "mean_only_mae": 0.0017061573629589542,
+       "mean_only_mse": 8.344098207657305e-06
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 74385,
+       "val_rows": 13161,
+       "mae": 0.0014232994674931838,
+       "mse": 4.383395639516842e-06,
+       "zero_mae": 0.0014228221198594653,
+       "zero_mse": 4.388214642907524e-06,
+       "mean_only_mae": 0.0014230709546057387,
+       "mean_only_mse": 4.387832343093226e-06
+      }
+     ]
+    },
+    "8h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 46360,
+       "val_rows": 12674,
+       "mae": 0.0017391301711873277,
+       "mse": 6.505021258681873e-06,
+       "zero_mae": 0.0017385285597562694,
+       "zero_mse": 6.519714009187168e-06,
+       "mean_only_mae": 0.0017385593784321142,
+       "mean_only_mse": 6.5175586241462435e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 59034,
+       "val_rows": 12706,
+       "mae": 0.002521348227369891,
+       "mse": 1.6466020087662583e-05,
+       "zero_mae": 0.0025248509931200614,
+       "zero_mse": 1.6505110238403233e-05,
+       "mean_only_mae": 0.0025246720769836898,
+       "mean_only_mse": 1.6502346155813234e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 71748,
+       "val_rows": 12690,
+       "mae": 0.002108732731767812,
+       "mse": 8.735338674399606e-06,
+       "zero_mae": 0.0021072032483548876,
+       "zero_mse": 8.74245658880874e-06,
+       "mean_only_mae": 0.002107528995456914,
+       "mean_only_mse": 8.740151389807241e-06
+      }
+     ]
+    },
+    "12h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 44687,
+       "val_rows": 12194,
+       "mae": 0.0021988479089039025,
+       "mse": 9.67461938395801e-06,
+       "zero_mae": 0.0022022893435143234,
+       "zero_mse": 9.713357754930713e-06,
+       "mean_only_mae": 0.0022021252308267454,
+       "mean_only_mse": 9.709460523737501e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 56881,
+       "val_rows": 12245,
+       "mae": 0.0031742108367203985,
+       "mse": 2.4260966499563994e-05,
+       "zero_mae": 0.0031795142089302095,
+       "zero_mse": 2.4342488635092344e-05,
+       "mean_only_mae": 0.0031789633243813026,
+       "mean_only_mse": 2.433871819600199e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 69138,
+       "val_rows": 12218,
+       "mae": 0.0026566071282699806,
+       "mse": 1.3074034000169705e-05,
+       "zero_mae": 0.0026543986331280757,
+       "zero_mse": 1.3086462149250251e-05,
+       "mean_only_mae": 0.0026541158243683517,
+       "mean_only_mse": 1.3081312853893603e-05
+      }
+     ]
+    },
+    "24h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 39717,
+       "val_rows": 10756,
+       "mae": 0.00326003872944022,
+       "mse": 1.867906438664829e-05,
+       "zero_mae": 0.0032596275961910386,
+       "zero_mse": 1.868925244964615e-05,
+       "mean_only_mae": 0.003259531937635039,
+       "mean_only_mse": 1.8688679321240412e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 50479,
+       "val_rows": 10873,
+       "mae": 0.004713328699652483,
+       "mse": 4.780997682068594e-05,
+       "zero_mae": 0.004719667349137318,
+       "zero_mse": 4.7931933279531916e-05,
+       "mean_only_mae": 0.0047194899009193785,
+       "mean_only_mse": 4.793293845792506e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 61366,
+       "val_rows": 10812,
+       "mae": 0.0038591703609311043,
+       "mse": 2.532721658612293e-05,
+       "zero_mae": 0.0038601362210132204,
+       "zero_mse": 2.538792633535471e-05,
+       "mean_only_mae": 0.0038597837706175406,
+       "mean_only_mse": 2.5385429010864765e-05
+      }
+     ]
+    },
+    "48h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 29949,
+       "val_rows": 8035,
+       "mae": 0.0048506346757812655,
+       "mse": 3.768952170659627e-05,
+       "zero_mae": 0.004850427942046528,
+       "zero_mse": 3.7682165191352164e-05,
+       "mean_only_mae": 0.00485053854761315,
+       "mean_only_mse": 3.768140922396663e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 38018,
+       "val_rows": 8114,
+       "mae": 0.0068619122559294395,
+       "mse": 8.561902623017326e-05,
+       "zero_mae": 0.006867242686324816,
+       "zero_mse": 8.575321577997455e-05,
+       "mean_only_mae": 0.006865097465475277,
+       "mean_only_mse": 8.571480713194934e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 46150,
+       "val_rows": 8110,
+       "mae": 0.0055024268477027695,
+       "mse": 4.8312994326755075e-05,
+       "zero_mae": 0.005496274169380152,
+       "zero_mse": 4.8323994469701464e-05,
+       "mean_only_mae": 0.005500876913929962,
+       "mean_only_mse": 4.834832473099756e-05
+      }
+     ]
+    },
+    "144h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 39620,
+       "val_rows": 10704,
+       "mae": 0.006709432406330611,
+       "mse": 7.354833024449749e-05,
+       "zero_mae": 0.006720900271277073,
+       "zero_mse": 7.383413657198488e-05,
+       "mean_only_mae": 0.006714143398102281,
+       "mean_only_mse": 7.354678072167012e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 50368,
+       "val_rows": 10823,
+       "mae": 0.009936681776519084,
+       "mse": 0.000212485407549936,
+       "zero_mae": 0.009947079313840914,
+       "zero_mse": 0.00021347771686780012,
+       "mean_only_mae": 0.009939934588630333,
+       "mean_only_mse": 0.0002126941748399562
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 61263,
+       "val_rows": 10764,
+       "mae": 0.00783205492168021,
+       "mse": 9.511516588448127e-05,
+       "zero_mae": 0.007855100695416317,
+       "zero_mse": 9.537336397186066e-05,
+       "mean_only_mae": 0.007828457704013006,
+       "mean_only_mse": 9.516582647437212e-05
+      }
+     ]
+    }
+   },
+   "cpu_seconds": 3.538053841,
+   "stage_5_causal_ladder": "hand eligible rows to C2",
+   "stage_6_extraction_capacity": "hand eligible rows to M01 (branch width/cost)"
+  }
+ },
+ "ledger_rows": [
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "1h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 40545,
+    "train_rows": 188610,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "2h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 40191,
+    "train_rows": 186917,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "4h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 39485,
+    "train_rows": 183653,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "8h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 38070,
+    "train_rows": 177142,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "12h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 36657,
+    "train_rows": 170706,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "24h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 32441,
+    "train_rows": 151562,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "48h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 24259,
+    "train_rows": 114117,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "GBPUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 32291,
+    "train_rows": 151251,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 3.538053841,
+    "measured": true
+   },
+   "source": "stage pipeline GBPUSD_1h_lake_S1"
+  }
+ ]
+}

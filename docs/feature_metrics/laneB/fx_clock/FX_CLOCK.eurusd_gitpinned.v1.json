@@ -1,0 +1,106 @@
+{
+ "schema": "lane_b_fx_clock_inference.v1",
+ "dataset": "eurusd_gitpinned_1h_train",
+ "rows_read": 79120,
+ "first_stamp": "2005-05-02 00:00:00",
+ "last_stamp_read": "2018-01-25 23:00:00",
+ "cutoff_exclusive": "2018-01-26",
+ "method": "Infer the clock of an hourly FX bar file FROM EVIDENCE in its own TRAIN rows.\n\nPrimary evidence: the weekly FX close (Friday 17:00 America/New_York, which is 21:00 UTC under US daylight time and\n22:00 UTC under US standard time). For every week whose last Friday bar is followed by a gap >= 30 h, the stamp hour\nof that last bar is recorded and split by US DST state of that Friday. A standard clock and a bar-labelling convention\ntogether predict a (summer, winter) pair of close-stamp hours:\n    stamp = bar END   : UTC (21,22)  FIXED_UTC_MINUS_5 (16,17)  NEW_YORK_LOCAL (17,17)  FIXED_UTC_PLUS_2 (23,0)\n    stamp = bar START : UTC (20,21)  FIXED_UTC_MINUS_5 (15,16)  NEW_YORK_LOCAL (16,16)  FIXED_UTC_PLUS_2 (22,23)\nDecision rule (margin): the modal hour in EACH DST state must cover >= 80 percent of that state's weeks and the modal\npair must equal exactly one row above; otherwise UNDETERMINED. A clock shifted by one hour with the opposite labelling\npredicts the same pair (e.g. bar START in UTC == bar END in UTC-1); only the standard clocks above are admitted as\nhypotheses, so what the evidence identifies unambiguously is the UTC interval each stamp covers.\n\nCorroboration (reported, not used in the decision): the Sunday first-bar stamp hour by DST state, and the stamp hour\nof peak mean |log(HIGH/LOW)| by DST state (US data releases at 08:30 New York move one UTC hour with US DST).\nOnly rows stamped before the declared cutoff are parsed.",
+ "weeks": 661,
+ "result": {
+  "verdict": "UTC|START",
+  "modal_close_hour_summer": 20,
+  "modal_close_hour_winter": 21,
+  "share_summer": 0.9953488372093023,
+  "share_winter": 0.9913419913419913,
+  "weeks_summer": 430,
+  "weeks_winter": 231,
+  "hist_summer": {
+   "20": 428,
+   "3": 2
+  },
+  "hist_winter": {
+   "21": 229,
+   "10": 1,
+   "18": 1
+  },
+  "margin": "modal share >= 0.8 in both DST states",
+  "reason": ""
+ },
+ "corroboration": {
+  "sunday_first_bar_hour_summer": {
+   "21": 429
+  },
+  "sunday_first_bar_hour_winter": {
+   "22": 226
+  },
+  "range_peaks": {
+   "summer": {
+    "top3_stamp_hours": [
+     12,
+     14,
+     13
+    ],
+    "profile": {
+     "0": 0.001421,
+     "1": 0.0013371,
+     "2": 0.001084,
+     "3": 0.0009612,
+     "4": 0.0009718,
+     "5": 0.0012455,
+     "6": 0.0019565,
+     "7": 0.0022702,
+     "8": 0.0020573,
+     "9": 0.0019035,
+     "10": 0.0017325,
+     "11": 0.0017626,
+     "12": 0.0027748,
+     "13": 0.0024973,
+     "14": 0.0027084,
+     "15": 0.0021179,
+     "16": 0.0017442,
+     "17": 0.0015714,
+     "18": 0.0016483,
+     "19": 0.0013025,
+     "20": 0.0010157,
+     "21": 0.0009761,
+     "22": 0.0009525,
+     "23": 0.0010757
+    }
+   },
+   "winter": {
+    "top3_stamp_hours": [
+     13,
+     15,
+     14
+    ],
+    "profile": {
+     "0": 0.0014714,
+     "1": 0.0013985,
+     "2": 0.0011754,
+     "3": 0.0010655,
+     "4": 0.000989,
+     "5": 0.0010547,
+     "6": 0.0014285,
+     "7": 0.002048,
+     "8": 0.0023807,
+     "9": 0.0020997,
+     "10": 0.0019348,
+     "11": 0.0017949,
+     "12": 0.0019401,
+     "13": 0.002887,
+     "14": 0.0026004,
+     "15": 0.0028437,
+     "16": 0.0022882,
+     "17": 0.0018074,
+     "18": 0.001587,
+     "19": 0.0016192,
+     "20": 0.0012714,
+     "21": 0.0010332,
+     "22": 0.0011077,
+     "23": 0.001184
+    }
+   }
+  }
+ }
+}

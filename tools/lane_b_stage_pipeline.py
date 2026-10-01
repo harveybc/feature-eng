@@ -37,10 +37,16 @@ def fam_kalman(end):
         p = p + q; k = p / (p + r) if (p + r) > 0 else 1.0; e = x[i] - mu; mu = mu + k * e; p = (1 - k) * p; m[i] = mu; innov[i] = e
     return pd.DataFrame({"kf_deviation": x - m, "kf_innovation": innov, "kf_level_change": pd.Series(m).diff().to_numpy()}), {"q": q, "r": r}
 def fam_calendar(_end):
-    t = pd.to_datetime(df["DATE_TIME"]).dt.tz_localize("UTC"); h = t.dt.hour + t.dt.minute / 60; dw = t.dt.dayofweek
+    raw = pd.to_datetime(df["DATE_TIME"])
+    if cfg.get("stamp_tz"):   # clock inferred from evidence (tools/infer_fx_clock.py); features describe the bar MIDPOINT in UTC
+        loc = raw.dt.tz_localize(cfg["stamp_tz"], ambiguous="NaT", nonexistent="NaT")   # the 1-2 DST-transition stamps per year become NaN rows
+        t = (loc + pd.Timedelta(minutes=-30 if cfg.get("stamp_is", "END") == "END" else 30) * (cfg["step"] / 3600)).dt.tz_convert("UTC")
+    else:
+        t = raw.dt.tz_localize("UTC")
+    h = t.dt.hour + t.dt.minute / 60; dw = t.dt.dayofweek
     out = {"hour_sin": np.sin(2 * np.pi * h / 24), "hour_cos": np.cos(2 * np.pi * h / 24), "dow_sin": np.sin(2 * np.pi * dw / 7), "dow_cos": np.cos(2 * np.pi * dw / 7)}
     for name, tz, a_, b_ in (("london", "Europe/London", 8, 16), ("newyork", "America/New_York", 8, 17), ("tokyo", "Asia/Tokyo", 9, 18)):
-        lt = t.dt.tz_convert(tz); out[f"session_{name}"] = ((lt.dt.hour >= a_) & (lt.dt.hour < b_)).astype(float)   # DST-safe via zoneinfo
+        lt = t.dt.tz_convert(tz); out[f"session_{name}"] = ((lt.dt.hour >= a_) & (lt.dt.hour < b_)).astype(float).where(t.notna())   # DST-safe via zoneinfo
     out["overlap_london_newyork"] = out["session_london"] * out["session_newyork"]
     return pd.DataFrame(out)
 FAMS = {"returns": fam_returns, "technical": fam_technical, "vol_regime": fam_vol_regime, "native_wavelet": fam_wavelet, "kalman_local_level": fam_kalman, "calendar_session": fam_calendar}
@@ -51,13 +57,17 @@ def ridge(Xtr, ytr, Xva, alpha=1.0):
 targets = {h: list(ps.build_targets(C.to_numpy(float), ts, "CLOSE", "CLOSE", {("Y_s" if h <= 6 else "Y_l"): [h]}, cfg["step"]).values())[0] for h in cfg["hours"]}
 out = {"schema": "lane_b_stage_outcome.v1", "dataset": cfg["name"], "families": {}, "ledger_rows": []}
 for fam, fn in FAMS.items():
+    if cfg.get("only_families") and fam not in cfg["only_families"]:
+        continue
     rec = {"stage_1_availability": None}
-    if fam == "calendar_session" and not cfg.get("timezone_utc"):
+    if fam == "calendar_session" and not cfg.get("timezone_utc") and not cfg.get("stamp_tz"):
         rec["stage_1_availability"] = "PENDING: stored timestamp timezone undocumented; hour/session features are not DST-safe without it"
         out["families"][fam] = rec
         out["ledger_rows"].append(dict(dataset=cfg["name"], candidate=fam, target="cumulative log return", horizon="all", split="inner_TRAIN", status="PENDING",
                                        reason=rec["stage_1_availability"], rows={}, cost={}, source="stage pipeline")); continue
     rec["stage_1_availability"] = "PASS: computed from bar t and earlier (bar-close convention); fitted parts use fold TRAIN only"
+    if fam == "calendar_session" and cfg.get("stamp_tz"):
+        rec["stage_1_availability"] += f"; clock {cfg['stamp_tz']} stamped at bar {cfg.get('stamp_is', 'END')} per {cfg.get('clock_evidence')}"
     t0 = time.process_time()
     built = {}
     for f in folds:
@@ -100,7 +110,7 @@ for fam, fn in FAMS.items():
             lr["cost"] = {"cpu_seconds_family_total": rec["cpu_seconds"], "measured": True}
     rec["stage_5_causal_ladder"] = "hand eligible rows to C2" ; rec["stage_6_extraction_capacity"] = "hand eligible rows to M01 (branch width/cost)"
     out["families"][fam] = rec
-for fam, why in (("multitaper", "no timing-verified producer (Stage 2.3 multitaper VIOLATED for restart/prefix; lane C)"),
+for fam, why in () if cfg.get("only_families") else (("multitaper", "no timing-verified producer (Stage 2.3 multitaper VIOLATED for restart/prefix; lane C)"),
                  ("hilbert", "no timing-verified producer (Stage 2.3 Hilbert VIOLATED for restart/prefix; lane C)"),
                  ("stl", "no causal rolling STL producer implemented; a global STL is non-causal")):
     out["ledger_rows"].append(dict(dataset=cfg["name"], candidate=fam, target="cumulative log return", horizon="all", split="inner_TRAIN", status="PENDING", reason=why, rows={}, cost={}, source="stage pipeline"))

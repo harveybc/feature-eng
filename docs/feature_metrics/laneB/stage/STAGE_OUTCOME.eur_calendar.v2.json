@@ -1,0 +1,528 @@
+{
+ "schema": "lane_b_stage_outcome.v1",
+ "dataset": "EURUSD_1h_lake_S1",
+ "families": {
+  "calendar_session": {
+   "stage_1_availability": "PASS: computed from bar t and earlier (bar-close convention); fitted parts use fold TRAIN only; clock America/New_York stamped at bar END per fx_clock/FX_CLOCK.eurusd_lake.v1.json",
+   "stage_2_cheap_metrics": {
+    "hour_sin": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9653483649995538
+    },
+    "hour_cos": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9651832535012902
+    },
+    "dow_sin": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9638179332866642
+    },
+    "dow_cos": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.9735691093060288
+    },
+    "session_london": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.8120575506852992
+    },
+    "session_newyork": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.8215964633144911
+    },
+    "session_tokyo": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.8216651563679448
+    },
+    "overlap_london_newyork": {
+     "missing_fraction": 0.0,
+     "constant": false,
+     "acf1": 0.6242089418873973
+    }
+   },
+   "stage_3_redundancy": {
+    "kept": [
+     "hour_sin",
+     "hour_cos",
+     "dow_sin",
+     "dow_cos",
+     "session_london",
+     "session_newyork",
+     "session_tokyo",
+     "overlap_london_newyork"
+    ],
+    "dropped_as_redundant_abs_corr_ge_0.95": [],
+    "excluded_cheap": []
+   },
+   "stage_4_utility": {
+    "1h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 49362,
+       "val_rows": 13516,
+       "mae": 0.0005981591401431632,
+       "mse": 9.603477873425962e-07,
+       "zero_mae": 0.0005970144883617656,
+       "zero_mse": 9.587655623168783e-07,
+       "mean_only_mae": 0.0005970153253929716,
+       "mean_only_mse": 9.587541266907025e-07
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 62878,
+       "val_rows": 13521,
+       "mae": 0.000797201748684192,
+       "mse": 1.5659111276130072e-06,
+       "zero_mae": 0.0007974192749575985,
+       "zero_mse": 1.5668613564150415e-06,
+       "mean_only_mae": 0.0007974650900386178,
+       "mean_only_mse": 1.5669072587555136e-06
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 76400,
+       "val_rows": 13517,
+       "mae": 0.0005763407320460266,
+       "mse": 7.398762775003882e-07,
+       "zero_mae": 0.0005753417830594453,
+       "zero_mse": 7.386232272917543e-07,
+       "mean_only_mae": 0.0005753624832398512,
+       "mean_only_mse": 7.386230297260533e-07
+      }
+     ]
+    },
+    "2h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 48916,
+       "val_rows": 13395,
+       "mae": 0.0008613915940818619,
+       "mse": 1.9549672886702278e-06,
+       "zero_mae": 0.0008594349038822398,
+       "zero_mse": 1.951539450287356e-06,
+       "mean_only_mae": 0.0008594206182501395,
+       "mean_only_mse": 1.951458797126261e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 62311,
+       "val_rows": 13405,
+       "mae": 0.0011398683797563384,
+       "mse": 3.191016015990639e-06,
+       "zero_mae": 0.0011396960865305576,
+       "zero_mse": 3.195021321789773e-06,
+       "mean_only_mae": 0.0011398087069457521,
+       "mean_only_mse": 3.1952145437816084e-06
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 75718,
+       "val_rows": 13399,
+       "mae": 0.0008233929573886203,
+       "mse": 1.4630390657306317e-06,
+       "zero_mae": 0.0008216199010119239,
+       "zero_mse": 1.4608432340428586e-06,
+       "mean_only_mae": 0.0008216799215159087,
+       "mean_only_mse": 1.4608511795281052e-06
+      }
+     ]
+    },
+    "4h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 48063,
+       "val_rows": 13157,
+       "mae": 0.0012531275938484816,
+       "mse": 3.890856547355292e-06,
+       "zero_mae": 0.0012491825717358585,
+       "zero_mse": 3.885738233239125e-06,
+       "mean_only_mae": 0.0012491227270020253,
+       "mean_only_mse": 3.885346214653887e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 61220,
+       "val_rows": 13173,
+       "mae": 0.0016530899085053165,
+       "mse": 6.490952601351424e-06,
+       "zero_mae": 0.0016535498375927545,
+       "zero_mse": 6.503105980855665e-06,
+       "mean_only_mae": 0.0016536377667764122,
+       "mean_only_mse": 6.50398144113002e-06
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 74397,
+       "val_rows": 13164,
+       "mae": 0.001189566549951411,
+       "mse": 2.9014465050293157e-06,
+       "zero_mae": 0.001188261413281414,
+       "zero_mse": 2.902282062938556e-06,
+       "mean_only_mae": 0.0011884197382300515,
+       "mean_only_mse": 2.9023043332372345e-06
+      }
+     ]
+    },
+    "8h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 46365,
+       "val_rows": 12677,
+       "mae": 0.0018777727875633502,
+       "mse": 8.04291394991878e-06,
+       "zero_mae": 0.001870297397174258,
+       "zero_mse": 8.034666199146712e-06,
+       "mean_only_mae": 0.0018702027660557532,
+       "mean_only_mse": 8.032707161462743e-06
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 59042,
+       "val_rows": 12709,
+       "mae": 0.0024123704844966542,
+       "mse": 1.2693914237043485e-05,
+       "zero_mae": 0.002415518198989707,
+       "zero_mse": 1.27203786667964e-05,
+       "mean_only_mae": 0.002415594896580895,
+       "mean_only_mse": 1.2724465248711534e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 71759,
+       "val_rows": 12693,
+       "mae": 0.0017553315803411859,
+       "mse": 5.887167821221963e-06,
+       "zero_mae": 0.0017539777160998037,
+       "zero_mse": 5.883041826066384e-06,
+       "mean_only_mae": 0.0017542540922848835,
+       "mean_only_mse": 5.882858527759842e-06
+      }
+     ]
+    },
+    "12h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 44692,
+       "val_rows": 12197,
+       "mae": 0.0023784951206904706,
+       "mse": 1.2149277432482193e-05,
+       "zero_mae": 0.002370004263582569,
+       "zero_mse": 1.2137103851016336e-05,
+       "mean_only_mae": 0.002369894294282605,
+       "mean_only_mse": 1.213430806942836e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 56889,
+       "val_rows": 12248,
+       "mae": 0.0029961136996578667,
+       "mse": 1.845235042312525e-05,
+       "zero_mae": 0.0029988086952215565,
+       "zero_mse": 1.8483041169490542e-05,
+       "mean_only_mae": 0.0029995652725187875,
+       "mean_only_mse": 1.84917026057262e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 69149,
+       "val_rows": 12221,
+       "mae": 0.0022053232103871664,
+       "mse": 8.842455722355853e-06,
+       "zero_mae": 0.002201581797924578,
+       "zero_mse": 8.831576349579796e-06,
+       "mean_only_mae": 0.002201790104175615,
+       "mean_only_mse": 8.831025570840225e-06
+      }
+     ]
+    },
+    "24h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 39718,
+       "val_rows": 10760,
+       "mae": 0.0035122009131507365,
+       "mse": 2.3941000063471513e-05,
+       "zero_mae": 0.0034993219597951376,
+       "zero_mse": 2.3772585923781172e-05,
+       "mean_only_mae": 0.0035002614617662196,
+       "mean_only_mse": 2.3815123989970287e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 50482,
+       "val_rows": 10876,
+       "mae": 0.004436157085809148,
+       "mse": 3.6118581884776944e-05,
+       "zero_mae": 0.004437115103288213,
+       "zero_mse": 3.6156115583388635e-05,
+       "mean_only_mae": 0.004437149806938355,
+       "mean_only_mse": 3.61670963023319e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 61378,
+       "val_rows": 10820,
+       "mae": 0.003214341494116981,
+       "mse": 1.7352186325667842e-05,
+       "zero_mae": 0.003209347794538299,
+       "zero_mse": 1.7319268754477977e-05,
+       "mean_only_mae": 0.003209622049213103,
+       "mean_only_mse": 1.732178628074687e-05
+      }
+     ]
+    },
+    "48h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 29954,
+       "val_rows": 8043,
+       "mae": 0.004947858274209904,
+       "mse": 4.4396041381620413e-05,
+       "zero_mae": 0.004921303812809327,
+       "zero_mse": 4.386131720334026e-05,
+       "mean_only_mae": 0.004940001832497089,
+       "mean_only_mse": 4.4260672387117135e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 38025,
+       "val_rows": 8117,
+       "mae": 0.006500772257982192,
+       "mse": 7.392662895163522e-05,
+       "zero_mae": 0.006502150064200158,
+       "zero_mse": 7.395480102314703e-05,
+       "mean_only_mae": 0.00650050830551244,
+       "mean_only_mse": 7.39228812560756e-05
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 46162,
+       "val_rows": 8110,
+       "mae": 0.0045814462163486155,
+       "mse": 3.2606066912823006e-05,
+       "zero_mae": 0.004575994555659764,
+       "zero_mse": 3.252779922281373e-05,
+       "mean_only_mae": 0.004581333190012148,
+       "mean_only_mse": 3.257940250152868e-05
+      }
+     ]
+    },
+    "144h": {
+     "gate": "FAIL",
+     "rows": [
+      {
+       "fold": "inner_1",
+       "train_rows": 39622,
+       "val_rows": 10708,
+       "mae": 0.006879005109620028,
+       "mse": 8.565938582245203e-05,
+       "zero_mae": 0.006882658816246771,
+       "zero_mse": 8.57328749571295e-05,
+       "mean_only_mae": 0.006875618382015983,
+       "mean_only_mse": 8.553450347563267e-05
+      },
+      {
+       "fold": "inner_2",
+       "train_rows": 50378,
+       "val_rows": 10821,
+       "mae": 0.009002669545669653,
+       "mse": 0.00013337937607833618,
+       "zero_mae": 0.00900639645239349,
+       "zero_mse": 0.0001332227708140947,
+       "mean_only_mae": 0.009006547475235417,
+       "mean_only_mse": 0.0001334184617905473
+      },
+      {
+       "fold": "inner_3",
+       "train_rows": 61276,
+       "val_rows": 10767,
+       "mae": 0.006455107638976476,
+       "mse": 6.621437070379859e-05,
+       "zero_mae": 0.006457262818316137,
+       "zero_mse": 6.610746185467355e-05,
+       "mean_only_mae": 0.006453808362153405,
+       "mean_only_mse": 6.615960198501933e-05
+      }
+     ]
+    }
+   },
+   "cpu_seconds": 2.7409616229999996,
+   "stage_5_causal_ladder": "hand eligible rows to C2",
+   "stage_6_extraction_capacity": "hand eligible rows to M01 (branch width/cost)"
+  }
+ },
+ "ledger_rows": [
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "1h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 40554,
+    "train_rows": 188640,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "2h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 40199,
+    "train_rows": 186945,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "4h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 39494,
+    "train_rows": 183680,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "8h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 38079,
+    "train_rows": 177166,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "12h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 36666,
+    "train_rows": 170730,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "24h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 32456,
+    "train_rows": 151578,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "48h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 24270,
+    "train_rows": 114141,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  },
+  {
+   "dataset": "EURUSD_1h_lake_S1",
+   "candidate": "calendar_session",
+   "target": "cumulative log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "not below both controls in every fold",
+   "rows": {
+    "val_rows": 32296,
+    "train_rows": 151276,
+    "channels": 8
+   },
+   "cost": {
+    "cpu_seconds_family_total": 2.7409616229999996,
+    "measured": true
+   },
+   "source": "stage pipeline EURUSD_1h_lake_S1"
+  }
+ ]
+}
