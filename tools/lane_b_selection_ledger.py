@@ -10,12 +10,19 @@ from pathlib import Path
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", required=True); ap.add_argument("--iteration", type=int, required=True); ap.add_argument("--out", required=True)
-    ap.add_argument("--extra", nargs="*", default=[], help="additional stage-pipeline outcome files (lane_b_stage_outcome.v1)")
+    ap.add_argument("--extra", nargs="*", default=[], help="additional stage-pipeline outcome files (lane_b_stage_outcome.v1); a later file's rows for a "
+                    "(dataset, candidate) supersede an earlier file's horizon='all' PENDING row for the same pair")
+    ap.add_argument("--hscoped-v2", nargs="*", default=[], help="DATASET=path pairs: horizon-scoped probe v2 outputs carrying the intercept-only control")
     a = ap.parse_args(); b = Path(a.base); L = lambda p: json.load(open(b / p))
     summ = L("LANE_B_PROBE_SUMMARY.v1.json"); drift = L("macro_daily/DRIFT_CHECK.v1.json")
     drift_ok = {(r["case"].split("_S")[0] if "_S" in r["case"] else r["case"], r["case"], r["horizon_h"]) for r in drift["results"] if r["verdict"] == "FEATURE_SIGNAL"}
     case_map = {("EURUSD_1h_gitpinned", "inner_TRAIN"): "EURUSD_gitpinned", ("EURUSD_1h_lake", "S1_70_15_15"): "EURUSD_lake_S1", ("EURUSD_1h_lake", "S2_prospective_reserve"): "EURUSD_lake_S2",
                 ("GBPUSD_1h_lake", "S1_70_15_15"): "GBPUSD_lake_S1", ("GBPUSD_1h_lake", "S2_prospective_reserve"): "GBPUSD_lake_S2"}
+    hs2 = {}
+    for spec in a.hscoped_v2:
+        ds, pth = spec.split("=", 1); d = json.load(open(b / pth)); hz = d["target"].split("@")[1].split()[0]
+        for cand, v in d["candidates"].items():
+            hs2[(ds, cand, hz)] = (v["verdict"], pth)
     rows = []
     def add(**k): k["id"] = len(rows); rows.append(k)
     for r in summ["rows"]:
@@ -25,7 +32,12 @@ def main():
         cost = {"proxy": "features x train_rows not stored per row; see source", "measured_wall_seconds": None}
         if r["gate"] == "PASS":
             ck = case_map.get((r["asset"], r["split"]))
-            if r["candidate"] == "range" and ck and any(x[1] == ck and x[2] == h for x in drift_ok):
+            v2 = hs2.get((r["asset"], r["candidate"], r["horizon"]))
+            if v2 and v2[0] == "FEATURE_SIGNAL":
+                st, why = "ELIGIBLE", f"MAE and MSE below the zero-return naive AND the intercept-only control in every fold, identical rows ({v2[1]})"
+            elif v2:
+                st, why = "REJECTED", f"intercept-only control verdict {v2[0]} ({v2[1]})"
+            elif r["candidate"] == "range" and ck and any(x[1] == ck and x[2] == h for x in drift_ok):
                 st, why = "ELIGIBLE", "MAE and MSE below the zero-return naive in every fold; intercept-only control passed (DRIFT_CHECK.v1)"
             else:
                 st, why = "PENDING", "passes the zero-return naive but the intercept-only control was not run for this candidate"
@@ -59,7 +71,11 @@ def main():
                     rows={"val_rows": sum(rr.get("val_rows", 0) for rr in x["rows"]), "folds": len(x["rows"]), "channels": len(r["channels_used"])},
                     cost={"proxy": "see source", "measured_wall_seconds": None}, source="macro_daily/MACRO_DAILY_PROBE.v1.json")
     for e in a.extra:
-        for x in json.load(open(e))["ledger_rows"]:
+        new_rows = json.load(open(e))["ledger_rows"]; pairs = {(x["dataset"], x["candidate"]) for x in new_rows}
+        kept = [r for r in rows if not (r["horizon"] == "all" and r["status"] == "PENDING" and (r["dataset"], r["candidate"]) in pairs)]
+        rows[:] = kept
+        for i, r in enumerate(rows): r["id"] = i
+        for x in new_rows:
             add(**x)
     den = L("SELECTION_DENOMINATORS.v1.json")
     for t in den["rows"]:
@@ -69,7 +85,9 @@ def main():
     cnt = {s: sum(r["status"] == s for r in rows) for s in ("ELIGIBLE", "REJECTED", "PENDING")}
     doc = {"schema": "lane_b_selection_ledger.v1", "iteration": a.iteration, "rows": rows, "counts": cnt,
            "eligible": [r for r in rows if r["status"] == "ELIGIBLE"],
-           "inputs": {p: hashlib.sha256((b / p).read_bytes()).hexdigest() for p in ("LANE_B_PROBE_SUMMARY.v1.json", "macro_daily/DRIFT_CHECK.v1.json", "macro_daily/MACRO_DAILY_PROBE.v1.json")},
+           "inputs": {**{p: hashlib.sha256((b / p).read_bytes()).hexdigest() for p in ("LANE_B_PROBE_SUMMARY.v1.json", "macro_daily/DRIFT_CHECK.v1.json", "macro_daily/MACRO_DAILY_PROBE.v1.json")},
+                      **{spec.split("=", 1)[1]: hashlib.sha256((b / spec.split("=", 1)[1]).read_bytes()).hexdigest() for spec in a.hscoped_v2},
+                      **{Path(e).name: hashlib.sha256(Path(e).read_bytes()).hexdigest() for e in a.extra}},
            "rule": __doc__}
     json.dump(doc, open(a.out, "w"), indent=1)
     print(json.dumps({"counts": cnt, "eligible": [(r["dataset"], r["candidate"], r["horizon"], r["split"]) for r in doc["eligible"]]}))

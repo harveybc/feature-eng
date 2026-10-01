@@ -1,0 +1,133 @@
+{
+ "schema": "lane_b_selection_denominators.v4",
+ "date": "2026-10-01",
+ "supersedes": "SELECTION_DENOMINATORS.v3.json (kept)",
+ "catalogue_channels_v1": {
+  "files": 5279,
+  "candidates": 78067,
+  "profiled": 2372,
+  "screened": 83,
+  "evaluated": 0,
+  "selected": 0,
+  "frozen_controls": 87,
+  "deferred": 72045,
+  "excluded": 3650
+ },
+ "evaluated_by_linear_probe": {
+  "channels": 346,
+  "from_v3": 259,
+  "staged_screen": {
+   "channels": 87,
+   "by_dataset": {
+    "ETH_4h_gitpinned": {
+     "returns": 5,
+     "technical": 5,
+     "vol_regime": 3,
+     "native_wavelet": 7,
+     "kalman_local_level": 1,
+     "calendar_session": 8
+    },
+    "EURUSD_1h_lake_S1": {
+     "returns": 5,
+     "technical": 5,
+     "vol_regime": 3,
+     "native_wavelet": 7,
+     "kalman_local_level": 1,
+     "calendar_session": 8
+    },
+    "GBPUSD_1h_lake_S1": {
+     "returns": 5,
+     "technical": 5,
+     "vol_regime": 3,
+     "native_wavelet": 7,
+     "kalman_local_level": 1,
+     "calendar_session": 8
+    }
+   }
+  },
+  "by_dataset_v3": {
+   "ETH_4h": {
+    "variant_A": 83,
+    "range": 3,
+    "realized_volatility": 5,
+    "rolling_zscore": 3,
+    "native_wavelet": 7
+   },
+   "EURUSD_1h_gitpinned": {
+    "variant_A": 4,
+    "range": 3,
+    "realized_volatility": 5
+   },
+   "EURUSD_1d_from_gitpinned": {
+    "variant_A": 4,
+    "range": 3,
+    "realized_volatility": 4
+   },
+   "EURUSD_1h_lake": {
+    "variant_A": 4,
+    "range": 3
+   },
+   "BTCUSDT_4h_lake": {
+    "variant_A": 83,
+    "range": 3
+   },
+   "GBPUSD_1h_lake": {
+    "variant_A": 4,
+    "range": 3
+   },
+   "EURUSD+GBPUSD_daily_macro (FRED/Yahoo, lag 1 day)": {
+    "channels": 35
+   }
+  },
+  "definition": "channel entered the declared ridge probe on inner-validation rows against the zero-return naive (and, from MACRO_DAILY_PROBE on, an intercept-only control); staged-screen channels counted after the |r|>=0.95 redundancy stage"
+ },
+ "selected_by_linear_probe": {
+  "horizon_scoped_manifests": 3,
+  "channel_scopes": 9,
+  "drift_check": "every published pass also beats the intercept-only (TRAIN-mean) control: EURUSD_gitpinned@1h, EURUSD_lake_S1@1h, EURUSD_lake_S1@2h, EURUSD_lake_S1@3h, EURUSD_lake_S1@4h, EURUSD_lake_S2@1h, EURUSD_lake_S2@2h, EURUSD_lake_S2@3h, EURUSD_lake_S2@4h, GBPUSD_lake_S1@8h, GBPUSD_lake_S2@8h",
+  "gitpinned_eurusd_1h_intercept_closure": {
+   "A": "FAIL",
+   "A+range": "FEATURE_SIGNAL",
+   "A+range+rv": "FEATURE_SIGNAL",
+   "range": "FEATURE_SIGNAL",
+   "range+rv": "FEATURE_SIGNAL"
+  },
+  "ledger_it2_eligible_rows": 14
+ },
+ "frozen_controls": {
+  "manifests": 5,
+  "channels": 178,
+  "names": [
+   "SELECTED_FEATURE_MANIFEST.btcusdt_4h_lake.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.eth_4h.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.eurusd_1h.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.eurusd_1h_lake.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.gbpusd_1h_lake.v1.FROZEN_DEVELOPMENT.json"
+  ],
+  "note": "variant A, all admissible inputs; a control for pilots, NOT a selection decision"
+ },
+ "skipped_not_better_than_naive": {
+  "outcomes": 31,
+  "added": [
+   "staged family screen: 18 dataset x family outcomes with no pass (incl. FX calendar under the evidence clock)"
+  ]
+ },
+ "ledger_it2_counts": {
+  "ELIGIBLE": 14,
+  "REJECTED": 746,
+  "PENDING": 71
+ },
+ "deferred_remaining_channels": 72010,
+ "evaluated_by_temporal_model": 0,
+ "selected_by_temporal_model": 0,
+ "inputs": {
+  "SELECTION_DENOMINATORS.v3.json": "8c2a9a93c870eff1569224a76b97b7803cb76f03595f9db78a7b882c20c9dcbb",
+  "SELECTION_LEDGER.it2.json": "e65e858b37885d1193d790fc99e9ee47cd309e697b059d3a79ae9b6e59955629",
+  "EURUSD_1H_HORIZON_SCOPED_PROBE.v2.json": "ba3f0ba098a041b3a7ce7b06bbe0a6876b2c96d12ebbe37e98c311d6d8119109",
+  "STAGE_OUTCOME.eth.v1.json": "4a564b471fba74b88980c6c42aae0276ba9f41937207de42cdee5dc5d9b81aeb",
+  "STAGE_OUTCOME.eur.v1.json": "1cb980dec7114c6b8458881d4ee3d0eb105b0a866dcedb8de229660aecbd7ad9",
+  "STAGE_OUTCOME.gbp.v1.json": "c2a283d2f828c88a1bdb3f465df845773cc3fec7a9a5a936798a619c9aee93ee",
+  "STAGE_OUTCOME.eur_calendar.v2.json": "401e33ee658cc4f1ceab7d8b83a8badd1c200654117537cf71e6b69af3e5bcfc",
+  "STAGE_OUTCOME.gbp_calendar.v2.json": "484d605d8f0bedadc57b9134a9c4acd3098d90d974e5b801abc446b64218fc6f"
+ }
+}

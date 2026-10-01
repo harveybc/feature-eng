@@ -35,16 +35,22 @@ for cn, F in cands.items():
         # identical scored rows for model and naive, and across candidates: rows finite for the widest candidate
         Xw = cands["A+range+rv"].to_numpy(float)
         va = va[np.isfinite(Xw[va]).all(1)]; trm = tr[np.isfinite(X[tr]).all(1)]
-        pred = ridge(X[trm], t.values[trm], X[va]); y = t.values[va]
+        pred = ridge(X[trm], t.values[trm], X[va]); y = t.values[va]; m0 = float(t.values[trm].mean())   # intercept-only control: same TRAIN rows as the model
         rows.append({"fold": f["name"], "val_rows": int(len(va)), "train_rows": int(len(trm)),
                      "mae": float(np.mean(np.abs(pred - y))), "naive_mae": float(np.mean(np.abs(y))),
-                     "mse": float(np.mean((pred - y) ** 2)), "naive_mse": float(np.mean(y ** 2))})
+                     "mse": float(np.mean((pred - y) ** 2)), "naive_mse": float(np.mean(y ** 2)),
+                     "mean_only_mae": float(np.mean(np.abs(m0 - y))), "mean_only_mse": float(np.mean((m0 - y) ** 2))})
     ok = all(r["mae"] < r["naive_mae"] and r["mse"] < r["naive_mse"] for r in rows)
+    ok2 = ok and all(r["mae"] < r["mean_only_mae"] and r["mse"] < r["mean_only_mse"] for r in rows)
+    mean_beats_zero = all(r["mean_only_mae"] < r["naive_mae"] and r["mean_only_mse"] < r["naive_mse"] for r in rows)
     res[cn] = {"features": list(F.columns), "rows": rows, "gate": "PASS" if ok else "SKIPPED_NOT_BETTER_THAN_NAIVE",
+               "gate_both_controls": "PASS" if ok2 else "FAIL", "intercept_only_beats_zero": mean_beats_zero,
+               "verdict": "FEATURE_SIGNAL" if ok2 else ("DRIFT_ONLY" if ok else "FAIL"),
                "mean_mae": float(np.mean([r["mae"] for r in rows])), "mean_naive_mae": float(np.mean([r["naive_mae"] for r in rows])),
                "mean_mse": float(np.mean([r["mse"] for r in rows])), "mean_naive_mse": float(np.mean([r["naive_mse"] for r in rows]))}
-out = {"schema": "lane_b_horizon_scoped_probe.v1", "target": f"{name}@{H * STEP // 3600}h (elapsed seconds)", "horizon_bars": 1 if H * 3600 == STEP else None,
+out = {"schema": "lane_b_horizon_scoped_probe.v2", "purge": PURGE, "n_train": NT, "target": f"{name}@{H * STEP // 3600}h (elapsed seconds)", "horizon_bars": 1 if H * 3600 == STEP else None,
        "gate_rule": "MAE and MSE strictly below the zero-return naive in every one of 3 inner folds; same scored rows for every candidate",
+       "gate_both_controls_rule": "gate AND MAE and MSE strictly below the intercept-only (fold-TRAIN mean) control in every fold (v2)",
        "manifest_canonical": man.get("manifest_sha256_canonical"), "candidates": res}
 json.dump(out, open(OUT, "w"), indent=1)
-print(json.dumps({k: (v["gate"], round(v["mean_mae"], 7), round(v["mean_naive_mae"], 7), round(v["mean_mse"], 10), round(v["mean_naive_mse"], 10)) for k, v in res.items()}))
+print(json.dumps({k: (v["gate"], v["verdict"], round(v["mean_mae"], 7), round(v["mean_naive_mae"], 7), round(v["mean_mse"], 10), round(v["mean_naive_mse"], 10)) for k, v in res.items()}))
