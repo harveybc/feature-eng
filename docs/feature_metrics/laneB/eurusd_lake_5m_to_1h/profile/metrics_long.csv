@@ -1,0 +1,285 @@
+column,family,metric,value,status,reason,settings
+OPEN,missingness,rows,90911,OK,,
+OPEN,missingness,missing_count,0,OK,,"{""also"": ""NaN literals parsed by float()"", ""empty_or_token_cells"": 0, ""tokens"": ["""", ""n/a"", ""na"", ""nan"", ""none"", ""null""]}"
+OPEN,missingness,missing_fraction,0.0,OK,,
+OPEN,missingness,nonnumeric_count,0,OK,,
+OPEN,missingness,nonfinite_count,0,OK,,
+OPEN,missingness,longest_finite_run,90911,OK,,
+OPEN,missingness,constant_flag,False,OK,,
+OPEN,missingness,unique_count,26108,OK,,
+OPEN,distribution,mean,1.2742221489148728,OK,,
+OPEN,distribution,std,0.12340480389782164,OK,,
+OPEN,distribution,min,1.03559,OK,,
+OPEN,distribution,max,1.6016,OK,,
+OPEN,distribution,median,1.2852,OK,,
+OPEN,distribution,iqr,0.1918200000000001,OK,,
+OPEN,distribution,mad,0.09010000000000007,OK,,
+OPEN,distribution,skewness,0.17871082388657308,OK,,"{""bias"": false}"
+OPEN,distribution,excess_kurtosis,-0.609377633710007,OK,,"{""bias"": false}"
+OPEN,distribution,upper_tail_ratio,4.000271021071887,OK,,"{""formula"": ""(q0.995-q0.5)/(q0.75-q0.5); Gaussian ~3.82""}"
+OPEN,distribution,lower_tail_ratio,1.9621266680787952,OK,,"{""formula"": ""(q0.5-q0.005)/(q0.5-q0.25); Gaussian ~3.82""}"
+OPEN,distribution,robust_z_outlier_fraction_gt5,0.0,OK,,"{""scale"": ""1.4826*MAD""}"
+OPEN,distribution,zero_fraction,0.0,OK,,
+OPEN,distribution,quantile_0.005,1.05362,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.01,1.05834,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.05,1.087395,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.25,1.1671749999999999,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.5,1.2852,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.75,1.358995,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.95,1.4774,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.99,1.5728,OK,,"{""method"": ""numpy linear""}"
+OPEN,distribution,quantile_0.995,1.5804,OK,,"{""method"": ""numpy linear""}"
+OPEN,volatility,diff_std,0.0015819850898236658,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+OPEN,volatility,diff_abs_mean,0.0009970037399625997,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+OPEN,volatility,diff_std_over_std,0.012819477361136922,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+OPEN,volatility,rolling_std_cv,0.7127767678005493,OK,,"{""rule"": ""non-overlapping primary-period blocks; std of block std / mean"", ""window_rows"": 24}"
+OPEN,trend,slope_per_row,-2.752923888275774e-06,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+OPEN,trend,slope_per_day,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+OPEN,trend,linear_r2,0.3427525363235646,OK,,
+OPEN,acf,acf_lag_1,0.99990676051668,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,acf_lag_2,0.9998150101469205,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,acf_lag_3,0.9997234663466258,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,acf_lag_6,0.9994512866938928,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,acf_lag_12,0.9988977038828164,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,acf_lag_24,0.9978029477968716,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,acf_lag_120,0.9892402270130042,OK,,"{""estimator"": ""biased, mean-centered""}"
+OPEN,acf,decorrelation_lag_1_over_e,,NOT_RUN,ACF_ABOVE_1_OVER_E_THROUGH_LAG_120,
+OPEN,spectral,peak1_period_rows,90911.0,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+OPEN,spectral,peak1_power_fraction,0.3453498928084602,OK,,
+OPEN,spectral,peak2_period_rows,30303.666666666664,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+OPEN,spectral,peak2_power_fraction,0.25108491897470564,OK,,
+OPEN,spectral,peak3_period_rows,10101.222222222223,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+OPEN,spectral,peak3_power_fraction,0.10155715088696704,OK,,
+OPEN,spectral,peak1_period_hours,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+OPEN,spectral,entropy_normalized,0.206032404325082,OK,,
+OPEN,spectral,low_frequency_power_fraction,0.9996962017122348,OK,,"{""basis"": ""primary period"", ""cutoff_cycles_per_row"": 0.041666666666666664}"
+OPEN,spectral,centroid_cycles_per_row,0.00014315323566974956,OK,,
+OPEN,stationarity,adf_c_aic_statistic,-1.7220312435042895,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+OPEN,stationarity,adf_c_aic_pvalue,0.4197985524652572,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+OPEN,stationarity,adf_c_aic_lags,55,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+OPEN,stationarity,kpss_c_auto_statistic,23.650385800171243,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+OPEN,stationarity,kpss_c_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+OPEN,stationarity,kpss_c_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+OPEN,stationarity,kpss_ct_auto_statistic,5.116901965123933,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+OPEN,stationarity,kpss_ct_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+OPEN,stationarity,kpss_ct_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+OPEN,stationarity,adf_kpss_joint_reading,ADF_DOES_NOT_REJECT_KPSS_REJECTS_LEVEL,OK,,"{""alpha"": 0.05, ""note"": ""descriptive, unadjusted for multiple testing; not an eligibility rule""}"
+OPEN,seasonality,acf_at_day_rows_nominal_24,0.9978029477968725,OK,,"{""declared_period_rows"": 24}"
+OPEN,seasonality,seasonal_diff_var_ratio_day_rows_nominal_24,0.0038871205497196465,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+OPEN,seasonality,acf_at_trading_week_rows_nominal_120,0.9892402270130044,OK,,"{""declared_period_rows"": 120}"
+OPEN,seasonality,seasonal_diff_var_ratio_trading_week_rows_nominal_120,0.019215424480856565,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+OPEN,seasonality,stl_seasonal_strength_primary,0.31241391537917973,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+OPEN,seasonality,stl_trend_strength_primary,0.9997482221097665,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+HIGH,missingness,rows,90911,OK,,
+HIGH,missingness,missing_count,0,OK,,"{""also"": ""NaN literals parsed by float()"", ""empty_or_token_cells"": 0, ""tokens"": ["""", ""n/a"", ""na"", ""nan"", ""none"", ""null""]}"
+HIGH,missingness,missing_fraction,0.0,OK,,
+HIGH,missingness,nonnumeric_count,0,OK,,
+HIGH,missingness,nonfinite_count,0,OK,,
+HIGH,missingness,longest_finite_run,90911,OK,,
+HIGH,missingness,constant_flag,False,OK,,
+HIGH,missingness,unique_count,26121,OK,,
+HIGH,distribution,mean,1.2752504828898594,OK,,
+HIGH,distribution,std,0.12355311322139538,OK,,
+HIGH,distribution,min,1.03699,OK,,
+HIGH,distribution,max,1.6041,OK,,
+HIGH,distribution,median,1.28637,OK,,
+HIGH,distribution,iqr,0.19197500000000023,OK,,
+HIGH,distribution,mad,0.0900700000000001,OK,,
+HIGH,distribution,skewness,0.1789776968220479,OK,,"{""bias"": false}"
+HIGH,distribution,excess_kurtosis,-0.6105620322648244,OK,,"{""bias"": false}"
+HIGH,distribution,upper_tail_ratio,4.017815857473136,OK,,"{""formula"": ""(q0.995-q0.5)/(q0.75-q0.5); Gaussian ~3.82""}"
+HIGH,distribution,lower_tail_ratio,1.956811178183965,OK,,"{""formula"": ""(q0.5-q0.005)/(q0.5-q0.25); Gaussian ~3.82""}"
+HIGH,distribution,robust_z_outlier_fraction_gt5,0.0,OK,,"{""scale"": ""1.4826*MAD""}"
+HIGH,distribution,zero_fraction,0.0,OK,,
+HIGH,distribution,quantile_0.005,1.0545955,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.01,1.059311,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.05,1.088355,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.25,1.1679249999999999,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.5,1.28637,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.75,1.3599,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.95,1.4786,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.99,1.574,OK,,"{""method"": ""numpy linear""}"
+HIGH,distribution,quantile_0.995,1.5818,OK,,"{""method"": ""numpy linear""}"
+HIGH,volatility,diff_std,0.0014807147833478373,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+HIGH,volatility,diff_abs_mean,0.0008962898471015289,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+HIGH,volatility,diff_std_over_std,0.011984439280737004,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+HIGH,volatility,rolling_std_cv,0.713046279226006,OK,,"{""rule"": ""non-overlapping primary-period blocks; std of block std / mean"", ""window_rows"": 24}"
+HIGH,trend,slope_per_row,-2.7583620047315632e-06,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+HIGH,trend,slope_per_day,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+HIGH,trend,linear_r2,0.34328240083501826,OK,,
+HIGH,acf,acf_lag_1,0.9999172889340368,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,acf_lag_2,0.9998196110655103,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,acf_lag_3,0.9997243976474267,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,acf_lag_6,0.9994474812339516,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,acf_lag_12,0.9988850591950486,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,acf_lag_24,0.9978023393403771,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,acf_lag_120,0.9892643480878168,OK,,"{""estimator"": ""biased, mean-centered""}"
+HIGH,acf,decorrelation_lag_1_over_e,,NOT_RUN,ACF_ABOVE_1_OVER_E_THROUGH_LAG_120,
+HIGH,spectral,peak1_period_rows,90911.0,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+HIGH,spectral,peak1_power_fraction,0.346956455133603,OK,,
+HIGH,spectral,peak2_period_rows,30303.666666666664,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+HIGH,spectral,peak2_power_fraction,0.2509658629103568,OK,,
+HIGH,spectral,peak3_period_rows,10101.222222222223,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+HIGH,spectral,peak3_power_fraction,0.10105278113298334,OK,,
+HIGH,spectral,peak1_period_hours,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+HIGH,spectral,entropy_normalized,0.20575003004859427,OK,,
+HIGH,spectral,low_frequency_power_fraction,0.9996976920683083,OK,,"{""basis"": ""primary period"", ""cutoff_cycles_per_row"": 0.041666666666666664}"
+HIGH,spectral,centroid_cycles_per_row,0.00013998695547815578,OK,,
+HIGH,stationarity,adf_c_aic_statistic,-1.7270072234635196,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+HIGH,stationarity,adf_c_aic_pvalue,0.41725399751564607,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+HIGH,stationarity,adf_c_aic_lags,62,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+HIGH,stationarity,kpss_c_auto_statistic,23.69529321026094,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+HIGH,stationarity,kpss_c_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+HIGH,stationarity,kpss_c_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+HIGH,stationarity,kpss_ct_auto_statistic,5.1387437102761115,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+HIGH,stationarity,kpss_ct_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+HIGH,stationarity,kpss_ct_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+HIGH,stationarity,adf_kpss_joint_reading,ADF_DOES_NOT_REJECT_KPSS_REJECTS_LEVEL,OK,,"{""alpha"": 0.05, ""note"": ""descriptive, unadjusted for multiple testing; not an eligibility rule""}"
+HIGH,seasonality,acf_at_day_rows_nominal_24,0.9978023393403779,OK,,"{""declared_period_rows"": 24}"
+HIGH,seasonality,seasonal_diff_var_ratio_day_rows_nominal_24,0.003886337904487813,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+HIGH,seasonality,acf_at_trading_week_rows_nominal_120,0.9892643480878169,OK,,"{""declared_period_rows"": 120}"
+HIGH,seasonality,seasonal_diff_var_ratio_trading_week_rows_nominal_120,0.019160630401896327,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+HIGH,seasonality,stl_seasonal_strength_primary,0.3249458516889696,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+HIGH,seasonality,stl_trend_strength_primary,0.9997506551673055,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+LOW,missingness,rows,90911,OK,,
+LOW,missingness,missing_count,0,OK,,"{""also"": ""NaN literals parsed by float()"", ""empty_or_token_cells"": 0, ""tokens"": ["""", ""n/a"", ""na"", ""nan"", ""none"", ""null""]}"
+LOW,missingness,missing_fraction,0.0,OK,,
+LOW,missingness,nonnumeric_count,0,OK,,
+LOW,missingness,nonfinite_count,0,OK,,
+LOW,missingness,longest_finite_run,90911,OK,,
+LOW,missingness,constant_flag,False,OK,,
+LOW,missingness,unique_count,25987,OK,,
+LOW,distribution,mean,1.2732136235439055,OK,,
+LOW,distribution,std,0.12324311372268656,OK,,
+LOW,distribution,min,1.03406,OK,,
+LOW,distribution,max,1.5994,OK,,
+LOW,distribution,median,1.28408,OK,,
+LOW,distribution,iqr,0.19156000000000017,OK,,
+LOW,distribution,mad,0.09011000000000013,OK,,
+LOW,distribution,skewness,0.178526801731549,OK,,"{""bias"": false}"
+LOW,distribution,excess_kurtosis,-0.608280219019385,OK,,"{""bias"": false}"
+LOW,distribution,upper_tail_ratio,3.9883658008658,OK,,"{""formula"": ""(q0.995-q0.5)/(q0.75-q0.5); Gaussian ~3.82""}"
+LOW,distribution,lower_tail_ratio,1.9655176810608608,OK,,"{""formula"": ""(q0.5-q0.005)/(q0.5-q0.25); Gaussian ~3.82""}"
+LOW,distribution,robust_z_outlier_fraction_gt5,0.0,OK,,"{""scale"": ""1.4826*MAD""}"
+LOW,distribution,zero_fraction,0.0,OK,,
+LOW,distribution,quantile_0.005,1.0528565,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.01,1.0576109999999999,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.05,1.08665,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.25,1.16644,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.5,1.28408,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.75,1.358,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.95,1.4763,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.99,1.5715,OK,,"{""method"": ""numpy linear""}"
+LOW,distribution,quantile_0.995,1.5789,OK,,"{""method"": ""numpy linear""}"
+LOW,volatility,diff_std,0.0014639542666498296,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+LOW,volatility,diff_abs_mean,0.0008938026619733806,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+LOW,volatility,diff_std_over_std,0.011878588770029957,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+LOW,volatility,rolling_std_cv,0.7075706878181457,OK,,"{""rule"": ""non-overlapping primary-period blocks; std of block std / mean"", ""window_rows"": 24}"
+LOW,trend,slope_per_row,-2.747202734292678e-06,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+LOW,trend,slope_per_day,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+LOW,trend,linear_r2,0.3422256024580156,OK,,
+LOW,acf,acf_lag_1,0.9999188266787307,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,acf_lag_2,0.9998204408943395,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,acf_lag_3,0.9997237350587553,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,acf_lag_6,0.9994458918321552,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,acf_lag_12,0.9988825682193477,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,acf_lag_24,0.9978047424125255,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,acf_lag_120,0.9892283131543286,OK,,"{""estimator"": ""biased, mean-centered""}"
+LOW,acf,decorrelation_lag_1_over_e,,NOT_RUN,ACF_ABOVE_1_OVER_E_THROUGH_LAG_120,
+LOW,spectral,peak1_period_rows,90911.0,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+LOW,spectral,peak1_power_fraction,0.3437905372471183,OK,,
+LOW,spectral,peak2_period_rows,30303.666666666664,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+LOW,spectral,peak2_power_fraction,0.2512042607664955,OK,,
+LOW,spectral,peak3_period_rows,10101.222222222223,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+LOW,spectral,peak3_power_fraction,0.10204399114254567,OK,,
+LOW,spectral,peak1_period_hours,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+LOW,spectral,entropy_normalized,0.206311626870472,OK,,
+LOW,spectral,low_frequency_power_fraction,0.9996981410608247,OK,,"{""basis"": ""primary period"", ""cutoff_cycles_per_row"": 0.041666666666666664}"
+LOW,spectral,centroid_cycles_per_row,0.0001400945430892514,OK,,
+LOW,stationarity,adf_c_aic_statistic,-1.75087042330782,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+LOW,stationarity,adf_c_aic_pvalue,0.4051112401139598,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+LOW,stationarity,adf_c_aic_lags,51,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+LOW,stationarity,kpss_c_auto_statistic,23.605931238361645,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+LOW,stationarity,kpss_c_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+LOW,stationarity,kpss_c_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+LOW,stationarity,kpss_ct_auto_statistic,5.095774733664645,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+LOW,stationarity,kpss_ct_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+LOW,stationarity,kpss_ct_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+LOW,stationarity,adf_kpss_joint_reading,ADF_DOES_NOT_REJECT_KPSS_REJECTS_LEVEL,OK,,"{""alpha"": 0.05, ""note"": ""descriptive, unadjusted for multiple testing; not an eligibility rule""}"
+LOW,seasonality,acf_at_day_rows_nominal_24,0.9978047424125265,OK,,"{""declared_period_rows"": 24}"
+LOW,seasonality,seasonal_diff_var_ratio_day_rows_nominal_24,0.003886358573961285,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+LOW,seasonality,acf_at_trading_week_rows_nominal_120,0.9892283131543289,OK,,"{""declared_period_rows"": 120}"
+LOW,seasonality,seasonal_diff_var_ratio_trading_week_rows_nominal_120,0.01925068617234558,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+LOW,seasonality,stl_seasonal_strength_primary,0.3323465469312499,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+LOW,seasonality,stl_trend_strength_primary,0.9997516575111883,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+CLOSE,missingness,rows,90911,OK,,
+CLOSE,missingness,missing_count,0,OK,,"{""also"": ""NaN literals parsed by float()"", ""empty_or_token_cells"": 0, ""tokens"": ["""", ""n/a"", ""na"", ""nan"", ""none"", ""null""]}"
+CLOSE,missingness,missing_fraction,0.0,OK,,
+CLOSE,missingness,nonnumeric_count,0,OK,,
+CLOSE,missingness,nonfinite_count,0,OK,,
+CLOSE,missingness,longest_finite_run,90911,OK,,
+CLOSE,missingness,constant_flag,False,OK,,
+CLOSE,missingness,unique_count,26159,OK,,
+CLOSE,distribution,mean,1.2742202140555048,OK,,
+CLOSE,distribution,std,0.12340351520437468,OK,,
+CLOSE,distribution,min,1.0356,OK,,
+CLOSE,distribution,max,1.6017,OK,,
+CLOSE,distribution,median,1.2852,OK,,
+CLOSE,distribution,iqr,0.19183499999999998,OK,,
+CLOSE,distribution,mad,0.09010000000000007,OK,,
+CLOSE,distribution,skewness,0.1787828279381772,OK,,"{""bias"": false}"
+CLOSE,distribution,excess_kurtosis,-0.6092616660362355,OK,,"{""bias"": false}"
+CLOSE,distribution,upper_tail_ratio,4.000542078872477,OK,,"{""formula"": ""(q0.995-q0.5)/(q0.75-q0.5); Gaussian ~3.82""}"
+CLOSE,distribution,lower_tail_ratio,1.9617857596679238,OK,,"{""formula"": ""(q0.5-q0.005)/(q0.5-q0.25); Gaussian ~3.82""}"
+CLOSE,distribution,robust_z_outlier_fraction_gt5,0.0,OK,,"{""scale"": ""1.4826*MAD""}"
+CLOSE,distribution,zero_fraction,0.0,OK,,
+CLOSE,distribution,quantile_0.005,1.053621,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.01,1.05833,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.05,1.087405,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.25,1.167155,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.5,1.2852,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.75,1.35899,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.95,1.4774,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.99,1.5728899999999995,OK,,"{""method"": ""numpy linear""}"
+CLOSE,distribution,quantile_0.995,1.5804,OK,,"{""method"": ""numpy linear""}"
+CLOSE,volatility,diff_std,0.0015801898826753881,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+CLOSE,volatility,diff_abs_mean,0.0009956228137718622,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+CLOSE,volatility,diff_std_over_std,0.012805063778437408,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+CLOSE,volatility,rolling_std_cv,0.7089802606145983,OK,,"{""rule"": ""non-overlapping primary-period blocks; std of block std / mean"", ""window_rows"": 24}"
+CLOSE,trend,slope_per_row,-2.7529401630116874e-06,OK,,"{""rule"": ""longest contiguous finite run; no imputation"", ""segment_rows"": [0, 90911]}"
+CLOSE,trend,slope_per_day,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+CLOSE,trend,linear_r2,0.34276374770348106,OK,,
+CLOSE,acf,acf_lag_1,0.9999075234148286,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,acf_lag_2,0.9998161378333628,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,acf_lag_3,0.9997242298345448,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,acf_lag_6,0.9994524756817776,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,acf_lag_12,0.9988990626366289,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,acf_lag_24,0.9978075649954189,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,acf_lag_120,0.989248883912153,OK,,"{""estimator"": ""biased, mean-centered""}"
+CLOSE,acf,decorrelation_lag_1_over_e,,NOT_RUN,ACF_ABOVE_1_OVER_E_THROUGH_LAG_120,
+CLOSE,spectral,peak1_period_rows,90911.0,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+CLOSE,spectral,peak1_power_fraction,0.34533437439277903,OK,,
+CLOSE,spectral,peak2_period_rows,30303.666666666664,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+CLOSE,spectral,peak2_power_fraction,0.2510883915471484,OK,,
+CLOSE,spectral,peak3_period_rows,10101.222222222223,OK,,"{""method"": ""periodogram, linear detrend, rank by power""}"
+CLOSE,spectral,peak3_power_fraction,0.1015686936003662,OK,,
+CLOSE,spectral,peak1_period_hours,,UNSUPPORTED,NO_VERIFIED_REGULAR_STEP,
+CLOSE,spectral,entropy_normalized,0.2060275758968255,OK,,
+CLOSE,spectral,low_frequency_power_fraction,0.9996963593642201,OK,,"{""basis"": ""primary period"", ""cutoff_cycles_per_row"": 0.041666666666666664}"
+CLOSE,spectral,centroid_cycles_per_row,0.00014305905862292557,OK,,
+CLOSE,stationarity,adf_c_aic_statistic,-1.7206392156110082,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+CLOSE,stationarity,adf_c_aic_pvalue,0.4205111285329524,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+CLOSE,stationarity,adf_c_aic_lags,55,OK,,"{""autolag"": ""AIC"", ""lag_selection"": ""AIC over lags 0..maxlag on the common trimmed sample, as statsmodels _autolag does, without retaining every fitted model; final fit adfuller(maxlag=best, autolag=None)"", ""limitation"": ""MacKinnon approximate p-value; low power near unity; lag choice by AIC"", ""maxlag"": 66, ""n"": 90911, ""null"": ""unit root"", ""regression"": ""c"", ""test"": ""ADF""}"
+CLOSE,stationarity,kpss_c_auto_statistic,23.65076006690204,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+CLOSE,stationarity,kpss_c_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+CLOSE,stationarity,kpss_c_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""level stationarity"", ""regression"": ""c"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+CLOSE,stationarity,kpss_ct_auto_statistic,5.116666607769916,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+CLOSE,stationarity,kpss_ct_auto_pvalue,0.01,OK_WITH_WARNING,P_VALUE_AT_TABLE_BOUND,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+CLOSE,stationarity,kpss_ct_auto_lags,174,OK_WITH_WARNING,,"{""limitation"": ""p-value interpolated from a table bounded to [0.01, 0.10]"", ""n"": 90911, ""nlags"": ""auto (Hobijn)"", ""null"": ""trend stationarity"", ""regression"": ""ct"", ""test"": ""KPSS"", ""warnings"": [""The test statistic is outside of the range of p-values available in the\nlook-up table. The actual p-value is smaller than the p-value returned.\n""]}"
+CLOSE,stationarity,adf_kpss_joint_reading,ADF_DOES_NOT_REJECT_KPSS_REJECTS_LEVEL,OK,,"{""alpha"": 0.05, ""note"": ""descriptive, unadjusted for multiple testing; not an eligibility rule""}"
+CLOSE,seasonality,acf_at_day_rows_nominal_24,0.9978075649954189,OK,,"{""declared_period_rows"": 24}"
+CLOSE,seasonality,seasonal_diff_var_ratio_day_rows_nominal_24,0.0038789789252114495,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+CLOSE,seasonality,acf_at_trading_week_rows_nominal_120,0.9892488839121527,OK,,"{""declared_period_rows"": 120}"
+CLOSE,seasonality,seasonal_diff_var_ratio_trading_week_rows_nominal_120,0.01920222426413712,OK,,"{""formula"": ""var(x_t - x_{t-s}) / var(x_t); 2 for white noise, <1 when season repeats""}"
+CLOSE,seasonality,stl_seasonal_strength_primary,0.31356716889749237,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"
+CLOSE,seasonality,stl_trend_strength_primary,0.9997490150256692,OK,,"{""formula"": ""max(0, 1 - var(R)/var(S+R)) and max(0, 1 - var(R)/var(T+R)) (Wang, Smith, Hyndman 2006)"", ""method"": ""statsmodels STL"", ""note"": ""optional diagnostic transform; not a model input"", ""period"": 24, ""robust"": false}"

@@ -1,0 +1,157 @@
+{
+ "schema": "selected_feature_manifest.v1",
+ "status": "FROZEN_DEVELOPMENT",
+ "frozen_at": "2026-10-01",
+ "frozen_by": "Satoshi, successor technical lead (lane B / M03)",
+ "variant": "A_all_admissible_control",
+ "task": {
+  "asset": "EURUSD",
+  "bar": "1h (resampled from lake 5m; irregular across weekends)",
+  "decision_time": "after bar completion",
+  "targets": "elapsed-second log returns at 1..24 h and 48..144 h; Y_b NOT_EVALUATED"
+ },
+ "resource": {
+  "availability_class": "DEVELOPMENT",
+  "source_state": "BOUNDED_AT_FILE_GRAIN",
+  "reference_kind": "LANE_B_DERIVATIVE_ON_WORKER_B",
+  "path": "~/.local/state/crispdm-data-foundation/m03_feature_inventory_20260930/eurusd_lake_5m_to_1h/eurusd_1h_from_lake_5m.csv (worker_b)",
+  "sha256": "ab0ada2840e1c6c14941f3109069d91efb5a1358fdf603aeca25caf84a267f80",
+  "rows": 129873,
+  "timestamp_column": "DATE_TIME",
+  "period": [
+   "2005-01-03 02:00:00",
+   "2025-12-31 17:00:00"
+  ],
+  "provenance_file_sha256": "e66903ca41f134abbee0db9af0c2fabecb61efded40abbf837c1509359f5d5cb",
+  "lake_parent": {
+   "lake_relative_path": "features/trading_asset_data/eurusd/5m.parquet",
+   "sha256": "c746f344ac743768e8c7f20e2e4ef3b7fb8222d96b3660f196c0a1d74039f327",
+   "census_appearance": "app_ae9142c201e6694a3b1e1fde",
+   "raw_parent": "market_data/forex/g10/eurusd/5m.parquet (HistData; raw provenance sha d527b46a\u2026)",
+   "rows_5m": 1552028
+  },
+  "transform": {
+   "resample": "1h, closed=left, label=right (stamp = bar completion)",
+   "ohlc": "first/max/min/last of 5m bars",
+   "n_5m_bars_column": "N_5M_BARS",
+   "timezone": "as stored (UTC-parsed; source timezone undocumented)"
+  },
+  "point_in_time": {
+   "stamp": "bar completion (label=right)",
+   "meaning": "bar-close stamp; no observed publication or receipt clock"
+  },
+  "governed_resource_id": "NONE (lane B derivative of a census appearance; not registered in data-gov)",
+  "lineage_vs_v1": "different lineage from the heuristic-strategy file used by eurusd_1h v1 (that file's provider is undocumented)"
+ },
+ "split_variants": {
+  "S1_70_15_15": {
+   "train": {
+    "rows": [
+     0,
+     90911
+    ],
+    "period": [
+     "2005-01-03 02:00:00",
+     "2019-08-13 06:00:00"
+    ]
+   },
+   "validation": {
+    "rows": [
+     90911,
+     110392
+    ],
+    "period": [
+     "2019-08-13 07:00:00",
+     "2022-09-28 21:00:00"
+    ]
+   },
+   "test": {
+    "rows": [
+     110392,
+     129873
+    ],
+    "period": [
+     "2022-09-28 22:00:00",
+     "2025-12-31 17:00:00"
+    ],
+    "use": "protected"
+   },
+   "purge": "144 h between blocks"
+  },
+  "S2_prospective_reserve": {
+   "train": {
+    "rows": [
+     0,
+     93924
+    ],
+    "period": [
+     "2005-01-03 02:00:00",
+     "2020-02-06 09:00:00"
+    ]
+   },
+   "validation": {
+    "rows": [
+     93924,
+     117405
+    ],
+    "period": [
+     "2020-02-06 10:00:00",
+     "2023-12-29 17:00:00"
+    ]
+   },
+   "reserve": {
+    "rows": [
+     117405,
+     129873
+    ],
+    "period": [
+     "2024-01-01 18:00:00",
+     "2025-12-31 17:00:00"
+    ],
+    "status": "PROSPECTIVE_CONFIRMATION_PROTECTED",
+    "never_read_statement": "no value of this block has entered any statistic, profile, probe or model; its bytes were read only by the 5m->1h resample and by a timestamp scan locating the 2024-01-01 boundary"
+   },
+   "purge": "144 h between blocks",
+   "rule": "rows before 2024-01-01 split 80/20 chronologically; 2024-01-01..2025-12-31 reserved"
+  }
+ },
+ "split_authority": "both variants declared; S2's reserve is the clean prospective block",
+ "admissible_declaration_sha256": "5739469c2d0fde06004622e3af2d95b9a6c327617da2c804c4df547c1569a938",
+ "admissible_declaration_file_sha256": "854e66eb7f1ae257eb947f02987fad5953f8f3634d8310fec1a0d0bb88993c89",
+ "features": [
+  "OPEN",
+  "HIGH",
+  "LOW",
+  "CLOSE"
+ ],
+ "feature_count": 4,
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  },
+  {
+   "column": "N_5M_BARS",
+   "status": "EXCLUDED",
+   "reason": "DATA_COMPLETENESS_COUNT: number of 5m bars aggregated into the hour; a quality field, not a market feature"
+  }
+ ],
+ "probe_file_sha256": "6e31c14c31f6da116a1cfedfc0bbd0fa5b6f57922245505dcff9f0611269500c",
+ "blockers": {
+  "B1_point_in_time": "RECORDED_NOT_CLEARED (DEVELOPMENT)",
+  "B2_lake_resource": "RECORDED_NOT_CLEARED (derivative not registered in data-gov)"
+ },
+ "not_claimed": [
+  "temporal-model performance",
+  "trading utility",
+  "point-in-time admissibility"
+ ],
+ "version": "v1",
+ "probe_outcome": {
+  "S1_70_15_15": [],
+  "S2_prospective_reserve": []
+ },
+ "probe_status": "SKIPPED_NOT_BETTER_THAN_NAIVE on every horizon in both split variants (control only)",
+ "manifest_sha256_canonical": "6a5d26c8c13214bd7acf99530e69dbefeff7443c4b6a65c667e29a325c44dcc9"
+}

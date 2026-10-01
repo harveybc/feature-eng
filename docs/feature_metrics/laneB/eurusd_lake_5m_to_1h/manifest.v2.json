@@ -1,0 +1,7 @@
+{"schema":"feature_train_manifest.v2","split":"TRAIN","dataset_id":"lake_derived.eurusd_1h_from_histdata_5m.train","governance":"LOCAL_FILE",
+ "resource_sha256":"ab0ada2840e1c6c14941f3109069d91efb5a1358fdf603aeca25caf84a267f80","path":"eurusd_1h_from_lake_5m.csv","path_note":"lane B derivative of lake features/trading_asset_data/eurusd/5m.parquet (c746f344), PROVENANCE.json e66903ca",
+ "registered_rows":129873,"columns_total":6,"split_rule":"S1 70/15/15 chronological rows: TRAIN [0,90911); this TRAIN ends before 2024 so it is also inside S2 TRAIN+validation",
+ "boundaries":{"train":[0,90911]},"timestamp_column":"DATE_TIME","timestamp_format":"%Y-%m-%d %H:%M:%S","step_seconds":3600,
+ "default_role":"feature","target_channels":[],"declared_periods_rows":{"day_rows_nominal":24,"trading_week_rows_nominal":120},
+ "primary_period":"day_rows_nominal","max_missing_fraction":0.2,
+ "columns":{"N_5M_BARS":{"role":"excluded","reason":"DATA_COMPLETENESS_COUNT: number of 5m bars aggregated into the hour; a quality field, not a market feature"}}}

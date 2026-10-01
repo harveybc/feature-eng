@@ -1,0 +1,336 @@
+{
+ "schema": "feature_train_profile.v2",
+ "dataset_id": "lake_derived.eurusd_1h_from_histdata_5m.train",
+ "split": "TRAIN",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "manifest": {
+  "schema": "feature_train_manifest.v2",
+  "split": "TRAIN",
+  "dataset_id": "lake_derived.eurusd_1h_from_histdata_5m.train",
+  "governance": "LOCAL_FILE",
+  "resource_sha256": "ab0ada2840e1c6c14941f3109069d91efb5a1358fdf603aeca25caf84a267f80",
+  "path": "eurusd_1h_from_lake_5m.csv",
+  "path_note": "lane B derivative of lake features/trading_asset_data/eurusd/5m.parquet (c746f344), PROVENANCE.json e66903ca",
+  "registered_rows": 129873,
+  "columns_total": 6,
+  "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,90911); this TRAIN ends before 2024 so it is also inside S2 TRAIN+validation",
+  "boundaries": {
+   "train": [
+    0,
+    90911
+   ]
+  },
+  "timestamp_column": "DATE_TIME",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S",
+  "step_seconds": 3600,
+  "default_role": "feature",
+  "target_channels": [],
+  "declared_periods_rows": {
+   "day_rows_nominal": 24,
+   "trading_week_rows_nominal": 120
+  },
+  "primary_period": "day_rows_nominal",
+  "max_missing_fraction": 0.2,
+  "columns": {
+   "N_5M_BARS": {
+    "role": "excluded",
+    "reason": "DATA_COMPLETENESS_COUNT: number of 5m bars aggregated into the hour; a quality field, not a market feature"
+   }
+  }
+ },
+ "manifest_sha256": "c91d797a5052651e180278d879b87ec8e8e3f3d6709e5414a7053df2ac075b06",
+ "resource_identity": {
+  "sha256": "ab0ada2840e1c6c14941f3109069d91efb5a1358fdf603aeca25caf84a267f80",
+  "bytes": 6911409,
+  "records": 129873,
+  "verified_against_declared": true,
+  "note": "every byte hashed for identity; no value past the TRAIN boundary parsed"
+ },
+ "train_prefix": {
+  "rows": [
+   0,
+   90911
+  ],
+  "bytes_parsed": 4786518,
+  "prefix_sha256": "56aead22e81d087bd88e8b916cec5f11e4df34b5bcf3dc156464198692a5ec32",
+  "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,90911); this TRAIN ends before 2024 so it is also inside S2 TRAIN+validation",
+  "full_train_coverage": true
+ },
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "invalid_count": 0,
+  "first": "2005-01-03 02:00:00",
+  "last": "2019-08-13 06:00:00",
+  "median_step_seconds": 3600.0,
+  "top_steps_seconds": {
+   "3600.0": 90085,
+   "176400.0": 710,
+   "172800.0": 22,
+   "10800.0": 14,
+   "7200.0": 13
+  },
+  "non_positive_steps": 0,
+  "declared_step_seconds": 3600,
+  "verified_step_seconds": null,
+  "consequence": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only"
+ },
+ "columns": [
+  {
+   "column": "DATE_TIME",
+   "position": 0,
+   "role": "timestamp",
+   "declared_reason": "time index; never a branch input",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "time index; never a branch input"
+  },
+  {
+   "column": "OPEN",
+   "position": 1,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "HIGH",
+   "position": 2,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "LOW",
+   "position": 3,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "CLOSE",
+   "position": 4,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "N_5M_BARS",
+   "position": 5,
+   "role": "excluded",
+   "declared_reason": "DATA_COMPLETENESS_COUNT: number of 5m bars aggregated into the hour; a quality field, not a market feature",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "DATA_COMPLETENESS_COUNT: number of 5m bars aggregated into the hour; a quality field, not a market feature"
+  }
+ ],
+ "branches": [
+  {
+   "branch": 0,
+   "columns": [
+    "OPEN"
+   ]
+  },
+  {
+   "branch": 1,
+   "columns": [
+    "HIGH"
+   ]
+  },
+  {
+   "branch": 2,
+   "columns": [
+    "LOW"
+   ]
+  },
+  {
+   "branch": 3,
+   "columns": [
+    "CLOSE"
+   ]
+  }
+ ],
+ "grouping": "one admissible feature per branch; metrics propose, inner validation decides",
+ "redundancy": {
+  "rule": "Pearson on TRAIN rows with every selected column finite; descriptive, never merges",
+  "columns": 4,
+  "rows_used": 90911,
+  "status": "OK",
+  "pairs": 6,
+  "pairs_abs_ge_0_95": 6,
+  "pairs_abs_ge_0_99": 6,
+  "abs_corr_quantiles": {
+   "0.5": 0.9999507378250179,
+   "0.9": 0.9999568075686303,
+   "0.99": 0.999957548409694
+  },
+  "components_abs_ge_0.95": {
+   "count_multi_member": 1,
+   "largest": 4,
+   "members": [
+    [
+     "OPEN",
+     "HIGH",
+     "LOW",
+     "CLOSE"
+    ]
+   ]
+  },
+  "components_abs_ge_0.99": {
+   "count_multi_member": 1,
+   "largest": 4,
+   "members": [
+    [
+     "OPEN",
+     "HIGH",
+     "LOW",
+     "CLOSE"
+    ]
+   ]
+  },
+  "redundant_pairs_abs_ge_0_95": [
+   [
+    "LOW",
+    "CLOSE",
+    0.9999576307253677
+   ],
+   [
+    "HIGH",
+    "CLOSE",
+    0.9999559844118929
+   ],
+   [
+    "OPEN",
+    "LOW",
+    0.9999510391019023
+   ],
+   [
+    "OPEN",
+    "HIGH",
+    0.9999504365481333
+   ],
+   [
+    "OPEN",
+    "CLOSE",
+    0.9999202995043451
+   ],
+   [
+    "HIGH",
+    "LOW",
+    0.9999146489084669
+   ]
+  ],
+  "lagged": {
+   "status": "OK",
+   "rule": "max |corr(x_i(t), x_j(t-lag))| over lags 1..120; leader first",
+   "pairs": [
+    [
+     "CLOSE",
+     "OPEN",
+     1,
+     0.9999974932853309
+    ],
+    [
+     "LOW",
+     "OPEN",
+     1,
+     0.99995512119476
+    ],
+    [
+     "HIGH",
+     "OPEN",
+     1,
+     0.999953577966852
+    ],
+    [
+     "CLOSE",
+     "LOW",
+     1,
+     0.9999493516324677
+    ],
+    [
+     "CLOSE",
+     "HIGH",
+     1,
+     0.9999482650699625
+    ],
+    [
+     "LOW",
+     "HIGH",
+     1,
+     0.9998814526239991
+    ],
+    [
+     "HIGH",
+     "LOW",
+     1,
+     0.9998807110875831
+    ],
+    [
+     "LOW",
+     "CLOSE",
+     1,
+     0.9998773138229801
+    ],
+    [
+     "HIGH",
+     "CLOSE",
+     1,
+     0.9998756278651
+    ],
+    [
+     "OPEN",
+     "LOW",
+     1,
+     0.9998671351837718
+    ],
+    [
+     "OPEN",
+     "HIGH",
+     1,
+     0.999866874836892
+    ],
+    [
+     "OPEN",
+     "CLOSE",
+     1,
+     0.9998398110162934
+    ]
+   ]
+  }
+ },
+ "implementation": {
+  "tool": "tools/profile_train_wide.py",
+  "sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "versions": {
+   "python": "3.12.13",
+   "numpy": "2.4.3",
+   "scipy": "1.17.1",
+   "pandas": "3.0.1",
+   "statsmodels": "0.14.6"
+  },
+  "limits": {
+   "max_columns": 4096,
+   "max_train_rows": 200000,
+   "max_train_cells": 25000000,
+   "max_resource_bytes": 1073741824,
+   "max_pair_lag_columns": 64
+  }
+ },
+ "assumptions": [
+  "No imputation; temporal metrics use the longest contiguous finite run",
+  "Values are profiled as stored (no scaler); TSL loaders standardize with a TRAIN-fitted scaler later",
+  "ADF/KPSS p-values are descriptive and unadjusted for multiple testing",
+  "Point-in-time availability is not certified by this profile",
+  "No target, no model and no holdout value enters any statistic"
+ ],
+ "wall_seconds": 38.8662726689945
+}
