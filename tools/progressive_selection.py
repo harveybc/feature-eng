@@ -440,7 +440,7 @@ def _components(C, names, thr):
     return [g for g in groups.values() if len(g) > 1]
 
 
-def prioritize(X, names, targets, fold, params):
+def prioritize(X, names, targets, fold, params, no_target_reason=None):
     a, b = fold["train"]
     Xf = X[a:b]
     rows = {f: {"feature": f, "fold": fold["name"], "tier": None, "reasons": [], "group": None,
@@ -470,7 +470,8 @@ def prioritize(X, names, targets, fold, params):
     built = {k: t for k, t in targets.items() if t.status == "CONSTRUCTED"}
     if not built:
         why = "NO_DECLARED_TARGET_CONSTRUCTED: " + (
-            "; ".join(f"{k[0]}@{k[1]}h={t.status}" for k, t in targets.items()) or "resource declares no business target")
+            "; ".join(f"{k[0]}@{k[1]}h={t.status}" for k, t in targets.items()) or no_target_reason
+            or "resource declares no business target")
         for i in eligible:
             rows[names[i]].update(tier="UNRANKED", reincorporation=REINCORPORATION)
             rows[names[i]]["reasons"].append(why)
@@ -587,7 +588,7 @@ def _overlay_outer(cells, v2_metrics: Path, v2_profile_sha: str):
 
 
 def run_dataset(manifest_path, declaration_path, source_root, out_dir, cache_root, purge, v2_dir=None,
-                targets_spec=None, target_note=None):
+                targets_spec=None, target_note=None, fold_rule=None):
     W = _load_wide()
     m = json.loads(Path(manifest_path).read_text())
     decl_bytes = Path(declaration_path).read_bytes()
@@ -632,17 +633,29 @@ def run_dataset(manifest_path, declaration_path, source_root, out_dir, cache_roo
     for k, t in targets.items():
         target_status.append({"target": k[0], "horizon_hours": k[1], "status": t.status, "note": t.note})
     if not targets:
-        target_status.append({"target": "Y_s/Y_l/Y_b", "horizon_hours": None, "status": "NOT_EVALUATED",
+        applicable = not (target_note or "").startswith("NOT_APPLICABLE")
+        target_status.append({"target": "Y_s/Y_l/Y_b", "horizon_hours": None,
+                              "status": "NOT_EVALUATED" if applicable else "NOT_APPLICABLE",
                               "note": target_note or "no business target declared for this resource"})
     worklists = []
+    acf1 = {(c["feature"], c["fold"]): c["value"] for c in cells
+            if c["metric"] == "acf_lag_1" and c["status"] in ("MEASURED", "MEASURED_REUSED")}
     for fold in folds[1:]:
-        worklists += prioritize(X, names, targets, fold, params)
+        for r in prioritize(X, names, targets, fold, params, no_target_reason=target_note):
+            a1 = acf1.get((r["feature"], fold["name"]))
+            if r["tier"] in ("PRIORITY", "SYNERGY", "REPRESENTATIVE") and a1 is not None and a1 >= 0.99:
+                r["reasons"].append(f"CAUTION_PERSISTENT_INPUT acf1={a1:.4f}: a Spearman screen against overlapping "
+                                    "multi-bar return labels on a near-unit-root input can reflect regime/trend "
+                                    "confounding; PS4 must test a differenced or ratio variant before any claim")
+            worklists.append(r)
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=False)
     _write_csv(out / "ps1_cells.csv", cells, ["feature", "fold", "family", "metric", "status", "value", "reason"])
-    _write_csv(out / "metric_coverage.csv", [dict(r, not_run_reasons=json.dumps(r["not_run_reasons"]))
-                                            for r in metric_coverage(cells)],
-               ["fold", "family", "metric", "denominator", "measured", "reused", "failed", "not_run", "not_run_reasons"])
+    rule = fold_rule or "inner expanding chronological folds inside the declared TRAIN prefix"
+    _write_csv(out / "metric_coverage.csv", [dict(r, not_run_reasons=json.dumps(r["not_run_reasons"]), dataset=m["dataset_id"],
+                                                  fold_rule=rule) for r in metric_coverage(cells)],
+               ["dataset", "fold_rule", "fold", "family", "metric", "denominator", "measured", "reused", "failed", "not_run",
+                "not_run_reasons"])
     cov = coverage(cells, names, folds)
     _write_csv(out / "coverage_feature_fold.csv",
                [dict(feature=f, fold=fo, basic_complete=v["basic_complete"], full_complete=v["full_complete"],
@@ -662,6 +675,7 @@ def run_dataset(manifest_path, declaration_path, source_root, out_dir, cache_roo
         if r["tier"] in ("PRIORITY", "SYNERGY"):
             stab[r["feature"]] = stab.get(r["feature"], 0) + 1
     summary = {"schema": "lane_b_ps0_ps2_run.v1", "dataset_id": m["dataset_id"], "identity": identity,
+               "fold_rule": fold_rule or "inner expanding chronological folds inside the declared TRAIN prefix",
                "declaration_sha256": decl["declaration_sha256"], "declaration_file_sha256": hashlib.sha256(decl_bytes).hexdigest(),
                "code_sha256": CODE_SHA, "params": params, "folds": folds, "features": len(names),
                "cells": len(cells), "cells_by_status": _count(cells, "status"),
@@ -697,11 +711,12 @@ def main():
     ap.add_argument("--cache-root", required=True)
     ap.add_argument("--purge", type=int, required=True, help="rows: lookback + maximum horizon support")
     ap.add_argument("--v2-profile-dir")
+    ap.add_argument("--fold-rule", help="declared fold rule of this dataset family, recorded in the coverage table")
     ap.add_argument("--targets-json", help='{"asset_column":..., "horizons":{...}, "barrier_rule":...} or {"why": ...}')
     a = ap.parse_args()
     spec = json.loads(a.targets_json) if a.targets_json else {}
     s = run_dataset(a.manifest, a.declaration, a.source_root, a.output, a.cache_root, a.purge, a.v2_profile_dir,
-                    spec if "asset_column" in spec else None, spec.get("why"))
+                    spec if "asset_column" in spec else None, spec.get("why"), a.fold_rule)
     print(json.dumps({k: s[k] for k in ("dataset_id", "features", "cells", "cells_by_status", "basic_complete",
                                          "full_complete", "feature_fold_pairs", "tiers_by_fold")}, default=str))
 

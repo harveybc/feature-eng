@@ -1,4 +1,8 @@
-"""FS19: a restarted profile is reused only with identical bytes/params/fold; a vintage change never reuses a decision."""
+"""FS19: a restarted profile is reused only with identical bytes/params/fold; a vintage change never reuses a decision.
+
+Covered here (M03 half): PS1 cache and decision store keyed by bytes, vintage, fold, params and code.
+NOT covered (M06 half): warehouse/lake retention and the run/attempt lineage of reused results; that half is a dependency on M06, not claimed.
+"""
 import tempfile
 import unittest
 from pathlib import Path

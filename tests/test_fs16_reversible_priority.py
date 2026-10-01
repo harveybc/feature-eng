@@ -1,4 +1,8 @@
-"""FS16: reversible priority; a pair useful only jointly reappears despite individual rank."""
+"""FS16: reversible priority; a pair useful only jointly reappears despite individual rank.
+
+Covered here (M03 half): the PS2 work list keeps a jointly useful pair and never discards.
+NOT covered (M01 half, PS5): re-entry of the pair in joint selection with refitting on the temporal model; that half is a dependency on M01, not claimed.
+"""
 import unittest
 
 from tests._ps_fixtures import PS, HOUR, params, synthetic_market
