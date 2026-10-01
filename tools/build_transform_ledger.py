@@ -77,8 +77,11 @@ def build(disc_path, out_dir):
     row(it, "market_state_learned_gmm", "FEATURE_ENG_REGIME_V3_GMM (fixed centroids, 15y EURUSD, forward-return label map)",
         {"applicable": 1, "implemented": 1, "excluded": 1}, f"feature-eng d081d0f app/regime_detector.py:247-302; LEARNED, fit period UNKNOWN; {REG}; {C}",
         reason="fitted outside any fold and labels chosen from forward returns: refused until refit on fold TRAIN", owner="lane C")
-    row(it, "wavelet", "NATIVE_DWT_db4 (not implemented)", {"applicable": 1, "deferred": 1}, f"{C}: pywt imported, wavedec never called",
-        reason="NO native wavelet producer exists (NOT_IMPLEMENTED)", owner="lane B implement / lane C test", next_step=f"causal trailing-window pywt DWT producer with frozen TRAIN windows, card method block per {CARD}; the successor must not keep the worker's hard-coded user-home PROJECT3_ROOT default (line 22), and the existing worker is not edited in place")
+    row(it, "wavelet", "NATIVE_DWT_DB4_TRAILING_WINDOW", {"applicable": 1, "implemented": 1},
+        "financial-data satoshi/b-native-wavelet-20261001 028f42847 _scripts/lib/native_wavelet.py (tests 8/8 on coordinator); "
+        "lane C repointed test green on that tree (financial-data satoshi/c-method-semantics-20261001 1c2ccc88f); the Stage 2.3 worker still emits only the proxy",
+        reason="implemented only: NOT materialized on lake data, NOT temporally verified on lake data, NOT profiled, NOT evaluated",
+        owner="lane B (materialize/profile) / lane C (verdict)", next_step=f"causal trailing-window pywt DWT producer with frozen TRAIN windows, card method block per {CARD}; the successor must not keep the worker's hard-coded user-home PROJECT3_ROOT default (line 22), and the existing worker is not edited in place")
     row(it, "wavelet", "PROXY_ROLLING_MEAN_MULTISCALE_16_32_64_128", {"applicable": 1, "implemented": 1, "materialized": 1},
         f"wavelet.parquet; {C}: MULTISCALE_ROLLING_MEAN_PROXY, proxy_of DWT_DB4", files_=m("wavelet"), owner="lane C (temporal) / lane B",
         next_step="keep with honest method id; never certifies native wavelet")
