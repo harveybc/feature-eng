@@ -1,0 +1,1002 @@
+{
+ "schema": "lane_b_successor_contract_draft.v1",
+ "status": "PREPARED_NOT_ACTIVATED",
+ "supersedes_for_task_only": {
+  "c127_contract_sha256": "d88c2cc90707c215d84eb5ea2a1c0c71fe19ff6c27a1926e92884b3cd3427b21",
+  "c127_contracts_file_sha256": "4447df439434d017b79e4fc97f405b3dd8d636ae37d7b9c09cc374416364924e",
+  "kept": "C127 is unchanged; this draft is a separate object and the two are never mixed"
+ },
+ "task_rule": "ETH 4h task split from immutable predictor manifest 14a1077f: train ..2023-12-31, validation 2024, test 2025",
+ "cuts": {
+  "calibration": "2024-01-01T00:00:00Z",
+  "confirmation": "2025-01-01T00:00:00Z"
+ },
+ "timestamps": {
+  "rows": 18337,
+  "first": "2017-08-17 04:00:00+00:00",
+  "last": "2025-12-31 20:00:00+00:00",
+  "train_last": "2023-12-31 20:00:00+00:00",
+  "calibration_first": "2024-01-01 00:00:00+00:00",
+  "confirmation_first": "2025-01-01 00:00:00+00:00"
+ },
+ "df_contract_module_sha256": "2bd12b33ff34209c3d58ff22c95204d8d7cfa4c30cf021ef54d11aa826273f93",
+ "file_bytes_verified_sha256": "37321161d3e0d372abd0c3a0cc867ed4b2faf1fdf1e4569d55da6f6a1a1df099",
+ "contract": {
+  "bank": "FINANCIAL",
+  "content_sha256": "64d331716a2603344a0ff41d22f45a24b7cd9ae3c75ff328c94f1713deff6849",
+  "contract_sha256": "cd46e819bf22ddc7132286641429467424dc9a164639ffc37efb13bbd1e2eb36",
+  "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+  "dependence": [],
+  "files": [
+   {
+    "bytes": 1578451,
+    "name": "features/trading_asset_data/ethusdt/4h.parquet",
+    "role": "DATA",
+    "sha256": "37321161d3e0d372abd0c3a0cc867ed4b2faf1fdf1e4569d55da6f6a1a1df099"
+   }
+  ],
+  "license": {
+   "attribution_required": "UNKNOWN",
+   "derivatives": "UNKNOWN",
+   "evidence": [],
+   "id": "UNKNOWN",
+   "redistribution": "UNKNOWN",
+   "state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+   "text_sha256": "UNKNOWN",
+   "url": "UNKNOWN"
+  },
+  "original_fields": {
+   "census_appearance": {
+    "appearance_id": "app_00bd88770beb60e9ac4b30f4",
+    "bytes_read_for_digest": 1578451,
+    "ctime_ns": 1777682748937912263,
+    "declared_columns": [
+     "timestamp",
+     "open",
+     "high",
+     "low",
+     "close",
+     "volume",
+     "close_time",
+     "quote_volume",
+     "trade_count",
+     "taker_buy_base_volume",
+     "taker_buy_quote_volume"
+    ],
+    "declared_rows": 18337,
+    "digest_state": "PHYSICALLY_DIGESTED",
+    "entity": "ethusdt",
+    "frequency": "4h",
+    "manifest_status": "ok",
+    "mtime_ns": 1777682481122005907,
+    "period_end": "2025-12-31T20:00:00+00:00",
+    "period_start": "2017-08-17T04:00:00+00:00",
+    "physical_sha256": "37321161d3e0d372abd0c3a0cc867ed4b2faf1fdf1e4569d55da6f6a1a1df099",
+    "presence": "PRESENT",
+    "profile_depth": "DECLARED_SCHEMA_ONLY",
+    "provenance": {
+     "acquired_at": "UNKNOWN",
+     "description": "UNKNOWN",
+     "license": "UNKNOWN",
+     "provenance_file": "features/trading_asset_data/ethusdt/provenance.json",
+     "source": "UNKNOWN",
+     "url_or_doi": "UNKNOWN"
+    },
+    "relative_path": "features/trading_asset_data/ethusdt/4h.parquet",
+    "size_bytes": 1578451,
+    "source_class": "trading_asset"
+   },
+   "census_variables": [
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "taker_buy_base_volume",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "UNKNOWN",
+     "semantics_source": "UNAVAILABLE",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_1645c5b8245816fff72f0dea"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "quote_volume",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "UNKNOWN",
+     "semantics_source": "UNAVAILABLE",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_6d222a958029704d07bf458e"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "close",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "OHLC prices when available.",
+     "semantics_source": "features/trading_asset_data/ethusdt/data_dictionary.md",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_7066334d9763821d4ade771c"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "timestamp",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "UTC bar timestamp.",
+     "semantics_source": "features/trading_asset_data/ethusdt/data_dictionary.md",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_7df7bcb7d2170868ae621460"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "close_time",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "UNKNOWN",
+     "semantics_source": "UNAVAILABLE",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_b3e10e1dcff996c5ee5e9643"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "trade_count",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "UNKNOWN",
+     "semantics_source": "UNAVAILABLE",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_b8bbc266faf07d63d4fb03c4"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "taker_buy_quote_volume",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "UNKNOWN",
+     "semantics_source": "UNAVAILABLE",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_bd9e616ec26a56defb3a37dd"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "volume",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "traded base volume when available.",
+     "semantics_source": "features/trading_asset_data/ethusdt/data_dictionary.md",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_c40c2c73da3717ff0ae29b7c"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "high",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "OHLC prices when available.",
+     "semantics_source": "features/trading_asset_data/ethusdt/data_dictionary.md",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_e3750b44a3ab2ae5316f915a"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "low",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "OHLC prices when available.",
+     "semantics_source": "features/trading_asset_data/ethusdt/data_dictionary.md",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_e9c0da93fdbf9bef5397acf0"
+    },
+    {
+     "appearance_count": 4,
+     "appearances": [
+      "app_00bd88770beb60e9ac4b30f4",
+      "app_402ddd5e2a855eeeb4ceccc7",
+      "app_4607748a7bd2ed9e99ce71be",
+      "app_b034317477e2c77ab5b8f6db"
+     ],
+     "availability_contract": "UNAVAILABLE",
+     "available_time": "UNAVAILABLE",
+     "concept_name": "open",
+     "entity": "ethusdt",
+     "event_time": "UNAVAILABLE",
+     "frequencies": [
+      "15m",
+      "1h",
+      "4h",
+      "5m"
+     ],
+     "license": "UNKNOWN",
+     "lineage": {
+      "provenance_files": [
+       "features/trading_asset_data/ethusdt/provenance.json"
+      ],
+      "source_declarations": [
+       "UNKNOWN"
+      ],
+      "upstream_join_rule": "UNAVAILABLE",
+      "upstream_source_dirs": []
+     },
+     "physical_type": "UNKNOWN",
+     "profile_depth": "DECLARED_SCHEMA_ONLY",
+     "role": "UNKNOWN",
+     "semantics": "OHLC prices when available.",
+     "semantics_source": "features/trading_asset_data/ethusdt/data_dictionary.md",
+     "source_class": "trading_asset",
+     "unit": "UNKNOWN",
+     "variable_id": "var_f7729e42e61650b41377c1ea"
+    }
+   ]
+  },
+  "panel": {
+   "aligned_common_grid": false,
+   "alignment_rule": "UNKNOWN",
+   "n_series": 1
+  },
+  "partitions": {
+   "scheme": "calendar_cut_on_timestamp_column",
+   "fractions": {
+    "train": 0.7608114740688225,
+    "calibration": 0.11975786660849648,
+    "confirmation": 0.11943065932268092
+   },
+   "boundaries": {
+    "train": [
+     0,
+     13951
+    ],
+    "calibration": [
+     13951,
+     16147
+    ],
+    "confirmation": [
+     16147,
+     18337
+    ]
+   },
+   "frozen_before_profile": true,
+   "sealed_periods_excluded": []
+  },
+  "schema": "crispdm.data_foundation.dataset_contract.v1",
+  "source": {
+   "citation": "UNKNOWN",
+   "doi": "UNKNOWN",
+   "official_url": "UNKNOWN",
+   "provider": "Binance Spot",
+   "upstream_owner": "UNKNOWN"
+  },
+  "time": {
+   "availability_delay_seconds": "UNKNOWN",
+   "availability_rule": "UNKNOWN",
+   "frequency_nominal_seconds": 14400,
+   "range_end": "2025-12-31T20:00:00+00:00",
+   "range_start": "2017-08-17T04:00:00+00:00",
+   "timestamp_meaning": "UNKNOWN",
+   "timezone": "UNKNOWN"
+  },
+  "variables": [
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "timestamp",
+    "original_fields": {
+     "census_variable_id": "var_7df7bcb7d2170868ae621460"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "UTC bar timestamp.",
+     "evidence": [
+      {
+       "sha256": "04d3d4c0a8b8f1593d4d012786abacf72e539df43295d97ba7adb3992c24b4a6",
+       "source": "features/trading_asset_data/ethusdt/data_dictionary.md"
+      }
+     ],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "7bba0ce04e55f43c9bc39bd4d60e2be779ee0e53a6a6e25058dbec7c9818d2f6"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "open",
+    "original_fields": {
+     "census_variable_id": "var_f7729e42e61650b41377c1ea"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "OHLC prices when available.",
+     "evidence": [
+      {
+       "sha256": "04d3d4c0a8b8f1593d4d012786abacf72e539df43295d97ba7adb3992c24b4a6",
+       "source": "features/trading_asset_data/ethusdt/data_dictionary.md"
+      }
+     ],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "4eeb118b135c704656973178775811e8c5a17745371ca9ca10e0378dab912870"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "high",
+    "original_fields": {
+     "census_variable_id": "var_e3750b44a3ab2ae5316f915a"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "OHLC prices when available.",
+     "evidence": [
+      {
+       "sha256": "04d3d4c0a8b8f1593d4d012786abacf72e539df43295d97ba7adb3992c24b4a6",
+       "source": "features/trading_asset_data/ethusdt/data_dictionary.md"
+      }
+     ],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "99fe2cc9e57dc4db5c4073efd4adbf8b9a9a46b83bdf0cc4285c14a690eb0e42"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "low",
+    "original_fields": {
+     "census_variable_id": "var_e9c0da93fdbf9bef5397acf0"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "OHLC prices when available.",
+     "evidence": [
+      {
+       "sha256": "04d3d4c0a8b8f1593d4d012786abacf72e539df43295d97ba7adb3992c24b4a6",
+       "source": "features/trading_asset_data/ethusdt/data_dictionary.md"
+      }
+     ],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "977a6aeaaea92f9868263b41bdc1291e0c5ac3f97bf4e06290e8898601e92a3c"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "close",
+    "original_fields": {
+     "census_variable_id": "var_7066334d9763821d4ade771c"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "OHLC prices when available.",
+     "evidence": [
+      {
+       "sha256": "04d3d4c0a8b8f1593d4d012786abacf72e539df43295d97ba7adb3992c24b4a6",
+       "source": "features/trading_asset_data/ethusdt/data_dictionary.md"
+      }
+     ],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "1a3a3555f02c08c683823ad5574fbbe4206c67f9a064cd953ac62113e2c0ef35"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "volume",
+    "original_fields": {
+     "census_variable_id": "var_c40c2c73da3717ff0ae29b7c"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "traded base volume when available.",
+     "evidence": [
+      {
+       "sha256": "04d3d4c0a8b8f1593d4d012786abacf72e539df43295d97ba7adb3992c24b4a6",
+       "source": "features/trading_asset_data/ethusdt/data_dictionary.md"
+      }
+     ],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "3866663b9f3f1e32679de2e3b54d76cf1a3c77f958bbc18c0271a2dd822c265a"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "close_time",
+    "original_fields": {
+     "census_variable_id": "var_b3e10e1dcff996c5ee5e9643"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "UNKNOWN",
+     "evidence": [],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "a6a3682b4a341854d47a1af8940badc48939240abea9d4b78c830509c5a68675"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "quote_volume",
+    "original_fields": {
+     "census_variable_id": "var_6d222a958029704d07bf458e"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "UNKNOWN",
+     "evidence": [],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "271a0e29cdf54bffef89bfd31448f02efcce20ae32124ad4732199e6269a91b9"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "trade_count",
+    "original_fields": {
+     "census_variable_id": "var_b8bbc266faf07d63d4fb03c4"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "UNKNOWN",
+     "evidence": [],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "1bd6c6ded336d838d1c5d18213b37a7cddf66acc6da3fdde056dc32301c89130"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "taker_buy_base_volume",
+    "original_fields": {
+     "census_variable_id": "var_1645c5b8245816fff72f0dea"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "UNKNOWN",
+     "evidence": [],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "d5f9c920cceba5a1e41de35ec30de7d0d9c0bc36da58ecc7d6d75ee26af124b4"
+   },
+   {
+    "available_time_rule": "UNKNOWN",
+    "dataset_id": "financial_data.census_appearance.app_00bd88770beb60e9ac4b30f4",
+    "event_time": "UNKNOWN",
+    "frequency_nominal_seconds": 14400,
+    "license_state": "INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE",
+    "missingness": {
+     "encoding": "UNKNOWN",
+     "policy": "UNKNOWN"
+    },
+    "name": "taker_buy_quote_volume",
+    "original_fields": {
+     "census_variable_id": "var_bd9e616ec26a56defb3a37dd"
+    },
+    "physical_type": "UNKNOWN",
+    "producer": {
+     "kind": "UNKNOWN",
+     "reference": "DECLARED_VIA_PROVENANCE_SOURCE_DIR:Binance Spot"
+    },
+    "role": "UNKNOWN",
+    "schema": "crispdm.data_foundation.variable_contract.v1",
+    "semantics": {
+     "description": "UNKNOWN",
+     "evidence": [],
+     "type": "UNKNOWN"
+    },
+    "sentinels": {
+     "policy": "UNKNOWN",
+     "values": []
+    },
+    "unit": {
+     "evidence": [],
+     "value": "UNKNOWN"
+    },
+    "variable_id": "596bdd13b349d8352cb8819db7a304ce78a20624e24a31e080d9c3af11f1e7c2"
+   }
+  ],
+  "version": "census_sha256:49a8813d782a0e11cfcfde3e02a946fa04883db9f4e9563dced2fa24a7a1b82d+calendar_successor_draft"
+ },
+ "not_done": [
+  "not written to financial-data census or any lake/data-gov configuration",
+  "availability stays UNKNOWN: a split contract is not availability (owner question 19)"
+ ],
+ "activation_path": "owner: review, then add as a NEW contract file beside C127 and register; no edit of C127"
+}

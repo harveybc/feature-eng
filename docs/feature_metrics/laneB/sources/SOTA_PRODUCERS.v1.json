@@ -1,0 +1,67 @@
+{
+ "schema": "lane_b_sota_producers.v1",
+ "date": "2026-10-01",
+ "read": "source code only; no data value read",
+ "producers": [
+  {
+   "family": "sota_hmm_regime",
+   "producer": "financial-data _scripts/workers/stage25_sota_feature_enrichment_worker.py@ef0ba661 (last changed 0caf69012) regime_labels() :119-155",
+   "method_id": "LEARNED_GAUSSIAN_HMM_3STATE_FULLSERIES",
+   "observations": [
+    "scaler means/stds computed on the WHOLE series (all years, subsampled)",
+    "GaussianHMM fitted on the whole series, including the task's validation and test years",
+    "states from model.predict (Viterbi over the full sequence) and probabilities from predict_proba (forward-backward smoothing): every emitted value at t depends on observations after t",
+    "state ordering by mean rolling_vol over all rows"
+   ],
+   "verdict": "NON_CAUSAL_EMISSION_AND_FIT_ACROSS_HOLDOUT",
+   "ledger_state": "excluded",
+   "next": "refit per TRAIN fold and emit with forward filtering only (lane C test)"
+  },
+  {
+   "family": "sota_intrabar_realized",
+   "producer": "financial-data _scripts/workers/stage25_sota_feature_enrichment_worker.py@ef0ba661 (last changed 0caf69012) realized_moments() :82-118",
+   "method_id": "REALIZED_MOMENTS_FROM_LOWER_FREQUENCY_LABEL_LEFT",
+   "observations": [
+    "intrabar returns resampled with label='left', closed='left': the value stamped at a bar's OPEN summarizes the whole bar, which is complete only at its close"
+   ],
+   "verdict": "AVAILABLE_ONE_BAR_AFTER_ITS_LABEL",
+   "ledger_state": "deferred",
+   "next": "shift by one bar (or relabel to bar end) before any join; temporal test"
+  },
+  {
+   "family": "sota_pair_spreads",
+   "producer": "financial-data _scripts/workers/stage25_sota_feature_enrichment_worker.py@ef0ba661 (last changed 0caf69012) pair_spreads() :157-200",
+   "method_id": "OLS_HEDGE_RATIO_FIXED_CUT_2024_01_01",
+   "observations": [
+    "alpha/beta fitted on rows before a hard-coded 2024-01-01 cut (falls back to ALL rows when fewer than 500)",
+    "rolling z-score and correlation are trailing"
+   ],
+   "verdict": "FIT_PERIOD_NOT_FOLD_BOUND (and silent full-series fallback)",
+   "ledger_state": "deferred",
+   "next": "fit hedge ratio inside each TRAIN fold; remove the full-series fallback in a successor"
+  },
+  {
+   "family": "sota_funding_term_structure",
+   "producer": "financial-data _scripts/workers/stage25_sota_feature_enrichment_worker.py@ef0ba661 (last changed 0caf69012) funding_term_structure() :212-246",
+   "method_id": "TRAILING_FUNDING_EVENT_MEANS_ASOF_BACKWARD",
+   "observations": [
+    "trailing means over funding events; merge_asof backward on fundingTime"
+   ],
+   "verdict": "PLAUSIBLY_PAST_ONLY_IF_fundingTime_IS_PUBLICATION",
+   "ledger_state": "deferred",
+   "next": "confirm fundingTime semantics (settlement vs publication); temporal test"
+  },
+  {
+   "family": "learned_cnn / learned_lstm",
+   "producer": "financial-data _scripts/workers/stage24_cnn_autoencoder_worker.py, stage24_lstm_autoencoder_worker.py; inputs from stage24_learned_input_prep_worker.py",
+   "method_id": "AUTOENCODER_FIT_TRAIN_LT_2024_EARLYSTOP_ON_2024",
+   "observations": [
+    "inputs normalized with TRAIN (<2024-01-01) statistics",
+    "autoencoders fit on TRAIN windows with validation_data from 2024 (early stopping / monitoring on the task's validation year)"
+   ],
+   "verdict": "DONOR_TOUCHED_THE_TASK_VALIDATION_YEAR",
+   "ledger_state": "deferred",
+   "next": "M02: refit inside inner TRAIN folds or restrict to test-free comparisons that do not use 2024; donor manifest"
+  }
+ ]
+}

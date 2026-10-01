@@ -7,8 +7,8 @@
    "applicable": 4,
    "temporally_verified": 3,
    "materialized": 6,
-   "deferred": 20,
-   "excluded": 16,
+   "excluded": 17,
+   "deferred": 19,
    "NOT_APPLICABLE": 13
   },
   "evaluated": 0,
@@ -276,8 +276,8 @@
   {
    "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
    "family": "market_state_learned_hmm",
-   "method_id": "SOTA_HMM_REGIME (fit provenance UNKNOWN)",
-   "state": "deferred",
+   "method_id": "LEARNED_GAUSSIAN_HMM_3STATE_FULLSERIES",
+   "state": "excluded",
    "states": {
     "applicable": true,
     "implemented": true,
@@ -287,10 +287,10 @@
     "evaluated": false,
     "selected": false
    },
-   "reason": "fit period and fold unknown: cannot be admitted to a temporal fold",
+   "reason": "fit and scaler on the whole series incl. holdout; Viterbi/forward-backward smoothing uses observations after t: NON_CAUSAL",
    "owner": "lane C",
-   "next_step": "link fit period; refit per TRAIN fold",
-   "evidence": "sota_hmm_regime.parquet",
+   "next_step": "refit per TRAIN fold, forward filtering only",
+   "evidence": "stage25 regime_labels(); lane B SOTA_PRODUCERS.v1.json",
    "materialized_files": 10
   },
   {
@@ -476,7 +476,7 @@
   {
    "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
    "family": "learned_cnn_lstm",
-   "method_id": "LEARNED_INPUTS_CNN_LSTM (donor provenance UNKNOWN)",
+   "method_id": "AUTOENCODER_FIT_TRAIN_LT_2024_EARLYSTOP_ON_2024",
    "state": "deferred",
    "states": {
     "applicable": true,
@@ -487,10 +487,10 @@
     "evaluated": false,
     "selected": false
    },
-   "reason": "donor fit period and data unknown",
+   "reason": "donor early-stopped on 2024, the task's validation year",
    "owner": "M02",
-   "next_step": "link donor manifest and fit fold, else exclude",
-   "evidence": "features/learned_inputs (5 assets) + learned_models",
+   "next_step": "refit inside inner TRAIN folds; donor manifest",
+   "evidence": "stage24 cnn/lstm autoencoder workers; lane B SOTA_PRODUCERS.v1.json",
    "materialized_files": 80
   },
   {
@@ -516,61 +516,61 @@
   {
    "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
    "family": "sota_intrabar_realized",
-   "method_id": "SOTA_INTRABAR_REALIZED (producer UNLOCATED)",
+   "method_id": "REALIZED_MOMENTS_FROM_LOWER_FREQUENCY_LABEL_LEFT",
    "state": "deferred",
    "states": {
     "applicable": true,
-    "implemented": false,
+    "implemented": true,
     "materialized": true,
     "temporally_verified": false,
     "profiled": false,
     "evaluated": false,
     "selected": false
    },
-   "reason": "producer and recipe not located",
-   "owner": "lane B",
-   "next_step": "locate producer in financial-data _scripts; method id",
-   "evidence": "sota_intrabar_realized.parquet",
+   "reason": "label-left: value stamped at bar open summarizes the whole bar (available one bar later)",
+   "owner": "lane C (test) / lane B",
+   "next_step": "shift one bar before any join; temporal test",
+   "evidence": "financial-data stage25_sota_feature_enrichment_worker.py@ef0ba661; lane B SOTA_PRODUCERS.v1.json",
    "materialized_files": 10
   },
   {
    "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
    "family": "sota_pair_spreads",
-   "method_id": "SOTA_PAIR_SPREADS (producer UNLOCATED)",
+   "method_id": "OLS_HEDGE_RATIO_FIXED_CUT_2024_01_01",
    "state": "deferred",
    "states": {
     "applicable": true,
-    "implemented": false,
+    "implemented": true,
     "materialized": true,
     "temporally_verified": false,
     "profiled": false,
     "evaluated": false,
     "selected": false
    },
-   "reason": "producer and recipe not located",
+   "reason": "hedge ratio fitted before a hard-coded cut (full-series fallback below 500 rows), not fold-bound",
    "owner": "lane B",
-   "next_step": "locate producer in financial-data _scripts; method id",
-   "evidence": "sota_pair_spreads.parquet",
+   "next_step": "fit inside each TRAIN fold in a successor",
+   "evidence": "financial-data stage25_sota_feature_enrichment_worker.py@ef0ba661; lane B SOTA_PRODUCERS.v1.json",
    "materialized_files": 10
   },
   {
    "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
    "family": "sota_funding_term_structure",
-   "method_id": "SOTA_FUNDING_TERM_STRUCTURE (producer UNLOCATED)",
+   "method_id": "TRAILING_FUNDING_EVENT_MEANS_ASOF_BACKWARD",
    "state": "deferred",
    "states": {
     "applicable": true,
-    "implemented": false,
+    "implemented": true,
     "materialized": true,
     "temporally_verified": false,
     "profiled": false,
     "evaluated": false,
     "selected": false
    },
-   "reason": "producer and recipe not located",
+   "reason": "past-only only if fundingTime is the publication instant (unconfirmed)",
    "owner": "lane B",
-   "next_step": "locate producer in financial-data _scripts; method id",
-   "evidence": "sota_funding_term_structure.parquet",
+   "next_step": "confirm fundingTime semantics; temporal test",
+   "evidence": "financial-data stage25_sota_feature_enrichment_worker.py@ef0ba661; lane B SOTA_PRODUCERS.v1.json",
    "materialized_files": 6
   },
   {

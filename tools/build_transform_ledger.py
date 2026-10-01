@@ -71,9 +71,9 @@ def build(disc_path, out_dir):
     row(it, "market_state_rule", "RULE_VOL_REGIME_HIGH_LOW ; FEATURE_ENG_REGIME_V1_V2_RULES", {"applicable": 1, "implemented": 1, "profiled": 1},
         "ETH 4h view vol_regime_high/low profiled; no materialized hierarchical state provider", reason="not materialized per asset",
         next_step="emit with available history only; durations/transitions not produced")
-    row(it, "market_state_learned_hmm", "SOTA_HMM_REGIME (fit provenance UNKNOWN)", {"applicable": 1, "implemented": 1, "materialized": 1, "deferred": 1},
-        "sota_hmm_regime.parquet", reason="fit period and fold unknown: cannot be admitted to a temporal fold", files_=m("sota_hmm_regime"),
-        owner="lane C", next_step="link fit period; refit per TRAIN fold")
+    row(it, "market_state_learned_hmm", "LEARNED_GAUSSIAN_HMM_3STATE_FULLSERIES", {"applicable": 1, "implemented": 1, "materialized": 1, "excluded": 1},
+        "stage25 regime_labels(); lane B SOTA_PRODUCERS.v1.json", reason="fit and scaler on the whole series incl. holdout; Viterbi/forward-backward smoothing uses observations after t: NON_CAUSAL",
+        files_=m("sota_hmm_regime"), owner="lane C", next_step="refit per TRAIN fold, forward filtering only")
     row(it, "market_state_learned_gmm", "FEATURE_ENG_REGIME_V3_GMM (fixed centroids, 15y EURUSD, forward-return label map)",
         {"applicable": 1, "implemented": 1, "excluded": 1}, f"feature-eng d081d0f app/regime_detector.py:247-302; LEARNED, fit period UNKNOWN; {REG}; {C}",
         reason="fitted outside any fold and labels chosen from forward returns: refused until refit on fold TRAIN", owner="lane C")
@@ -99,14 +99,21 @@ def build(disc_path, out_dir):
         reason="not materialized per asset in financial-data", next_step="emit from the bar timestamp with declared timezone")
     row(it, "event_overlap", "CALENDAR_JOIN", {"applicable": 1, "deferred": 1}, "needs the FXMacroData availability contract",
         reason="no admissible calendar availability yet", owner="lane C (study) / lane B (feature)")
-    row(it, "learned_cnn_lstm", "LEARNED_INPUTS_CNN_LSTM (donor provenance UNKNOWN)", {"applicable": 1, "implemented": 1, "materialized": 1, "deferred": 1},
-        "features/learned_inputs (5 assets) + learned_models", reason="donor fit period and data unknown", files_=li, owner="M02",
-        next_step="link donor manifest and fit fold, else exclude")
+    row(it, "learned_cnn_lstm", "AUTOENCODER_FIT_TRAIN_LT_2024_EARLYSTOP_ON_2024", {"applicable": 1, "implemented": 1, "materialized": 1, "deferred": 1},
+        "stage24 cnn/lstm autoencoder workers; lane B SOTA_PRODUCERS.v1.json", reason="donor early-stopped on 2024, the task's validation year",
+        files_=li, owner="M02", next_step="refit inside inner TRAIN folds; donor manifest")
     row(it, "learned_branch_core_ae", "PREDICTOR_MODULAR_PRETRAIN (M01/M02)", {"applicable": 1, "implemented": 1, "deferred": 1},
         "tools/modular_pretrain.py; donors trained on TSL/synthetic so far", reason="no financial donor", owner="M02")
-    for k in ("sota_intrabar_realized", "sota_pair_spreads", "sota_funding_term_structure"):
-        row(it, k, k.upper() + " (producer UNLOCATED)", {"applicable": 1, "materialized": 1, "deferred": 1}, f"{k}.parquet",
-            reason="producer and recipe not located", files_=m(k), next_step="locate producer in financial-data _scripts; method id")
+    SP = "financial-data stage25_sota_feature_enrichment_worker.py@ef0ba661; lane B SOTA_PRODUCERS.v1.json"
+    row(it, "sota_intrabar_realized", "REALIZED_MOMENTS_FROM_LOWER_FREQUENCY_LABEL_LEFT", {"applicable": 1, "implemented": 1, "materialized": 1, "deferred": 1},
+        SP, reason="label-left: value stamped at bar open summarizes the whole bar (available one bar later)", files_=m("sota_intrabar_realized"),
+        owner="lane C (test) / lane B", next_step="shift one bar before any join; temporal test")
+    row(it, "sota_pair_spreads", "OLS_HEDGE_RATIO_FIXED_CUT_2024_01_01", {"applicable": 1, "implemented": 1, "materialized": 1, "deferred": 1},
+        SP, reason="hedge ratio fitted before a hard-coded cut (full-series fallback below 500 rows), not fold-bound", files_=m("sota_pair_spreads"),
+        next_step="fit inside each TRAIN fold in a successor")
+    row(it, "sota_funding_term_structure", "TRAILING_FUNDING_EVENT_MEANS_ASOF_BACKWARD", {"applicable": 1, "implemented": 1, "materialized": 1, "deferred": 1},
+        SP, reason="past-only only if fundingTime is the publication instant (unconfirmed)", files_=m("sota_funding_term_structure"),
+        next_step="confirm fundingTime semantics; temporal test")
     for k, why in (("surprise", "a price bar has no consensus/actual; surprise belongs to the event source and reaches bars via event_overlap"),
                    ("revision", "a traded price is not revised; vendor corrections are a data-quality matter, not a revision feature")):
         row(it, k, "NA", {}, "", na=why)

@@ -20,10 +20,17 @@ census = json.load(open(census_path))
 sha_by_path = {a["relative_path"]: a["physical_sha256"] for a in census["appearances"]}
 PRODUCER = {"wavelet": "PROXY_ROLLING_MEAN_MULTISCALE_16_32_64_128", "hilbert": "NATIVE_SCIPY_HILBERT_TRAILING_WINDOW",
             "multitaper": "NATIVE_DPSS", "emd": "EMD_BACKEND_UNDECLARED", "fracdiff": "NATIVE_FIXED_WIDTH_FRACDIFF_d0.4_0.6_0.8",
-            "technical": "STAGE22_TECHNICAL", "statistical": "STAGE22_STATISTICAL"}
+            "technical": "STAGE22_TECHNICAL", "statistical": "STAGE22_STATISTICAL",
+            "sota_hmm_regime": "LEARNED_GAUSSIAN_HMM_3STATE_FULLSERIES", "sota_intrabar_realized": "REALIZED_MOMENTS_FROM_LOWER_FREQUENCY_LABEL_LEFT",
+            "sota_pair_spreads": "OLS_HEDGE_RATIO_FIXED_CUT_2024_01_01", "sota_funding_term_structure": "TRAILING_FUNDING_EVENT_MEANS_ASOF_BACKWARD",
+            "learned_cnn": "AUTOENCODER_FIT_TRAIN_LT_2024_EARLYSTOP_ON_2024", "learned_lstm": "AUTOENCODER_FIT_TRAIN_LT_2024_EARLYSTOP_ON_2024"}
 PFILE = {k: "financial-data _scripts/workers/stage23_signal_decomposition_worker.py@ef0ba661" for k in ("wavelet", "hilbert", "multitaper", "emd", "fracdiff")}
 PFILE.update(technical="financial-data _scripts/workers/stage22_trading_features_worker.py@ef0ba661",
              statistical="financial-data _scripts/workers/stage22_trading_features_worker.py@ef0ba661")
+PFILE.update({k: "financial-data _scripts/workers/stage25_sota_feature_enrichment_worker.py@ef0ba661" for k in
+              ("sota_hmm_regime", "sota_intrabar_realized", "sota_pair_spreads", "sota_funding_term_structure")})
+PFILE.update(learned_cnn="financial-data _scripts/workers/stage24_cnn_autoencoder_worker.py@ef0ba661",
+             learned_lstm="financial-data _scripts/workers/stage24_lstm_autoencoder_worker.py@ef0ba661")
 nodes_src = [{"id": f"src:{s['provider']}", "class": "SOURCE", "provider": s["provider"], "status": s.get("status"),
               "rung_gaps": s.get("rung_gaps", [])} for s in sources]
 nodes_res, nodes_rec, edges = [], {}, []
