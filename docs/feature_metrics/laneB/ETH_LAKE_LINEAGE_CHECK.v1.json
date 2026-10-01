@@ -1,0 +1,14 @@
+{
+ "schema": "lane_b_lineage_check.v1",
+ "date": "2026-10-01",
+ "question": "is there a lake-governed ETH 4h or 1h resource with a different lineage than the git-pinned view (predictor b1f8a74f, sha 1b447c66)?",
+ "answer": "NONE",
+ "evidence": [
+  "view config train_metadata.sources = features/trading_asset_data/ethusdt/4h.parquet + trading_asset_features/ethusdt/4h/{technical,statistical}.parquet (predictor examples/data/project3/ethusdt_4h_sac_tech_stat_full_config.json)",
+  "features/trading_asset_data/ethusdt/provenance.json (financial-data 307342627, git-tracked): Stage 2.1 copy of market_data/crypto/spot_top50/ethusdt/{5m,15m,1h,4h}.parquet",
+  "market_data/crypto/spot_top50/ethusdt/provenance.json: source 'Binance Spot', 4h sha 7a6b7983\u2026",
+  "census appearances for entity ethusdt (4h app_00bd8877\u2026, plus 1h/15m/5m) all resolve to that same Binance Spot download"
+ ],
+ "reading": "every lake ETHUSDT spot bar (1h/4h/5m/15m) shares the view's lineage (same vendor, same Stage 1.3/2.1 download); the 1h/5m files are siblings of the view's parent, not independent sources. ETHUSDT perpetual (Binance Futures, market_data/crypto/perpetuals) is a different instrument, not the same asset. No bounded read was made",
+ "what_would_create_one": "an ETH spot price from a second vendor (none retained) or a fresh prospective capture with our receipt clock"
+}
