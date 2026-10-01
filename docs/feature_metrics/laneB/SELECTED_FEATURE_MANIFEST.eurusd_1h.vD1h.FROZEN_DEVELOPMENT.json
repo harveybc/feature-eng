@@ -1,0 +1,148 @@
+{
+ "schema": "selected_feature_manifest.v1",
+ "version": "vD1h",
+ "status": "FROZEN_DEVELOPMENT",
+ "frozen_at": "2026-10-01",
+ "frozen_by": "Satoshi, successor technical lead (lane B / M03)",
+ "variant": "D1h_horizon_scoped:range",
+ "valid_horizons": [
+  1
+ ],
+ "valid_horizons_unit": "bars of 1 h (elapsed seconds; Y@1h only)",
+ "scope_warning": "valid ONLY for the 1 h horizon; every other consumed horizon failed the naive gate (EURUSD_1H_VARIANT_A_PROBE f23afbbb)",
+ "task": {
+  "asset": "EURUSD",
+  "bar": "1h (irregular: weekend gaps)",
+  "decision_time": "after bar t closes (convention, uncertified)",
+  "targets": "Y_s@1..6h and Y_l@24..144h located by elapsed seconds (FS02); Y_b NOT_EVALUATED (S07 variant E config 76447fcc is the candidate rule)",
+  "consumer": "M05 strategy evidence (heuristic-strategy S07)"
+ },
+ "resource": {
+  "availability_class": "DEVELOPMENT",
+  "reference_kind": "GIT_PINNED",
+  "repo": "heuristic-strategy",
+  "commit": "939f5e6e9819c976a6bbb07876cb195bf1374c35",
+  "path": "tests/data/eurusd_hour_2005_2020.csv",
+  "sha256": "72b8271d2a6ab7fc5de8c64dc626f128dbb11a1127c333e4039edecbdcc41783",
+  "rows": 93084,
+  "columns_total": 5,
+  "timestamp_column": "DATE_TIME",
+  "period": [
+   "2005-05-02 00:00:00",
+   "2020-04-29 22:00:00"
+  ],
+  "point_in_time": {
+   "stamp": "commit time of 939f5e6 (git-pinned bytes)",
+   "meaning": "DEVELOPMENT stamp, not an observed publication or receipt clock"
+  },
+  "resolvable_without_coordinator": "verified on worker_b 2026-10-01 (sha 72b8271d)",
+  "governed_resource_id": "NONE (git-pinned DEVELOPMENT reference)",
+  "lake_relation": "the lake's EURUSD appearances (census app_ae9142c2 5m, sha c746f344; HistData raw d527b46a) are a different product; the sealing request 5d12e88 stands for them"
+ },
+ "split": {
+  "declared_by": "coordinator ruling: no C127 contract for this file, so 70/15/15 chronological row blocks with a 144 h purge",
+  "train": {
+   "rows": [
+    0,
+    65158
+   ],
+   "period": [
+    "2005-05-02 00:00:00",
+    "2015-10-16 20:00:00"
+   ]
+  },
+  "validation": {
+   "rows": [
+    65158,
+    79121
+   ],
+   "period": [
+    "2015-10-18 21:00:00",
+    "2018-01-26 00:00:00"
+   ]
+  },
+  "test": {
+   "rows": [
+    79121,
+    93084
+   ],
+   "period": [
+    "2018-01-26 01:00:00",
+    "2020-04-29 22:00:00"
+   ],
+   "use": "protected; never selects"
+  },
+  "purge": "144 h (maximum Y_l support) between blocks; inner folds: 3 expanding inside TRAIN, validation 15 percent, purge 24-row context + 144 h by elapsed seconds",
+  "s07_note": "S07 declares reserved_start 2019-05-16 inside this test block; that reserve was already read (development evidence, not fresh confirmation)"
+ },
+ "parent_manifest_canonical": "326aee0c77134f09bd704ea79918616edb9eb187d770e37f7006dc7e1aef0a14",
+ "features": [
+  "log_high_low",
+  "close_location",
+  "log_close_open"
+ ],
+ "feature_count": 3,
+ "feature_recipes": {
+  "log_high_low": "ln(HIGH_t / LOW_t)",
+  "close_location": "(CLOSE_t - LOW_t) / (HIGH_t - LOW_t), NaN when HIGH_t == LOW_t",
+  "log_close_open": "ln(CLOSE_t / OPEN_t)",
+  "causality": "bar t only (bar-close convention); nothing fitted"
+ },
+ "selection": {
+  "rule": "declared ridge (alpha 1.0, fold-TRAIN standardization); PASS = MAE and MSE strictly below the zero-return naive in every one of 3 inner folds on identical scored rows; among PASS candidates the strict minimum mean MAE, ties to fewer features",
+  "candidates": {
+   "A": {
+    "gate": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+    "mean_mae": 0.0007586179772022644,
+    "mean_mse": 1.4114057810581031e-06,
+    "mean_naive_mae": 0.0007590486819765036,
+    "mean_naive_mse": 1.4116319396752937e-06
+   },
+   "A+range": {
+    "gate": "PASS",
+    "mean_mae": 0.0007576963876033305,
+    "mean_mse": 1.410294373887136e-06,
+    "mean_naive_mae": 0.0007590486819765036,
+    "mean_naive_mse": 1.4116319396752937e-06
+   },
+   "A+range+rv": {
+    "gate": "PASS",
+    "mean_mae": 0.0007577512975206734,
+    "mean_mse": 1.41067582501785e-06,
+    "mean_naive_mae": 0.0007590486819765036,
+    "mean_naive_mse": 1.4116319396752937e-06
+   },
+   "range": {
+    "gate": "PASS",
+    "mean_mae": 0.0007575920347691954,
+    "mean_mse": 1.4100994321687467e-06,
+    "mean_naive_mae": 0.0007590486819765036,
+    "mean_naive_mse": 1.4116319396752937e-06
+   },
+   "range+rv": {
+    "gate": "PASS",
+    "mean_mae": 0.0007576747534992207,
+    "mean_mse": 1.41051726432007e-06,
+    "mean_naive_mae": 0.0007590486819765036,
+    "mean_naive_mse": 1.4116319396752937e-06
+   }
+  },
+  "winner": "range",
+  "probe_file_sha256": "3bfd904d0684f57b15787b997ac28b198ee06680fc1a7d8a02ecde840b22957b",
+  "effect_size": "mean MAE 0.0007575920 vs naive 0.0007590487 (about 0.19 percent)"
+ },
+ "blockers": {
+  "B1_point_in_time": "RECORDED_NOT_CLEARED: DEVELOPMENT class by ruling (Q13); no observed availability contract",
+  "B2_lake_resource": "RECORDED_NOT_CLEARED: not a governed lake resource; provider/licence of this file undocumented",
+  "B3_split": "declared here (70/15/15 + 144 h purge)",
+  "B4_selection": "NOT_APPLICABLE to variant A"
+ },
+ "use": "horizon-1 forecast candidates and M05's naive-gated strategy inputs at 1 h only; development evidence",
+ "not_claimed": [
+  "any horizon other than 1 h",
+  "temporal-model performance",
+  "trading utility",
+  "point-in-time admissibility"
+ ],
+ "manifest_sha256_canonical": "101700ebceca4ed0b3662e4fb862e8e7ce5419be6318d66dfdd770f159d2eae0"
+}

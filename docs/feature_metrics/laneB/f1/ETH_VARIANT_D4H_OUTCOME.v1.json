@@ -1,0 +1,96 @@
+{
+ "schema": "lane_b_variant_outcome.v1",
+ "task": "ETH 4h",
+ "variant": "D-4h horizon-scoped (A+range, A+range+rv; also range, range+rv)",
+ "target": "Y_s@4h only (1 bar)",
+ "status": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+ "evidence": "docs/feature_metrics/laneB/f1/ETH_4H_HORIZON_SCOPED_PROBE.v1.json",
+ "per_candidate": {
+  "A": {
+   "gate": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+   "mean_mae": 0.012955259783989615,
+   "mean_naive_mae": 0.010880835431918345,
+   "mean_mse": 0.0003612131150513636,
+   "mean_naive_mse": 0.00028550826202266357,
+   "folds_mae_below": [
+    false,
+    false,
+    false
+   ],
+   "folds_mse_below": [
+    false,
+    false,
+    false
+   ]
+  },
+  "A+range": {
+   "gate": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+   "mean_mae": 0.012929690980741598,
+   "mean_naive_mae": 0.010880835431918345,
+   "mean_mse": 0.00035994646375282936,
+   "mean_naive_mse": 0.00028550826202266357,
+   "folds_mae_below": [
+    false,
+    false,
+    false
+   ],
+   "folds_mse_below": [
+    false,
+    false,
+    false
+   ]
+  },
+  "A+range+rv": {
+   "gate": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+   "mean_mae": 0.012912678623574973,
+   "mean_naive_mae": 0.010880835431918345,
+   "mean_mse": 0.0003587135098906468,
+   "mean_naive_mse": 0.00028550826202266357,
+   "folds_mae_below": [
+    false,
+    false,
+    false
+   ],
+   "folds_mse_below": [
+    false,
+    false,
+    false
+   ]
+  },
+  "range": {
+   "gate": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+   "mean_mae": 0.010834431617771624,
+   "mean_naive_mae": 0.010880835431918345,
+   "mean_mse": 0.00028540246425784433,
+   "mean_naive_mse": 0.00028550826202266357,
+   "folds_mae_below": [
+    true,
+    true,
+    true
+   ],
+   "folds_mse_below": [
+    true,
+    false,
+    true
+   ]
+  },
+  "range+rv": {
+   "gate": "SKIPPED_NOT_BETTER_THAN_NAIVE",
+   "mean_mae": 0.010832123183319145,
+   "mean_naive_mae": 0.010880835431918345,
+   "mean_mse": 0.0002853190811396693,
+   "mean_naive_mse": 0.00028550826202266357,
+   "folds_mae_below": [
+    true,
+    true,
+    true
+   ],
+   "folds_mse_below": [
+    true,
+    false,
+    false
+   ]
+  }
+ },
+ "reading": "A+range and A+range+rv lose to naive in every fold (MAE and MSE). The range family alone is below naive on MAE in all 3 folds but its MSE is not below naive in inner_2, so it fails the declared MAE-and-MSE gate. No D-4h manifest is published."
+}
