@@ -1,0 +1,63 @@
+{
+ "schema": "lane_b_three_denominators.v1",
+ "date": "2026-10-01",
+ "rule": "three grains, none substitutes for another; no single coverage percentage",
+ "1_distinct_column_profiles": {
+  "denominator": 15228,
+  "covered": 3538,
+  "superseded_outside": 118,
+  "source": "inventory_v3 coverage_summary.json sha 884b595e"
+ },
+ "2_metric_family_cells": {
+  "denominator": 121824,
+  "complete_new_full_train": 10160,
+  "partial": 320,
+  "present_in_reused_c162": 10760,
+  "absent_in_reused_c162": 7064,
+  "not_measured_or_excluded": 93520,
+  "families": [
+   "missingness",
+   "distribution",
+   "volatility",
+   "trend",
+   "acf",
+   "spectral",
+   "stationarity",
+   "seasonality"
+  ],
+  "lane_b_ps1_matrix": {
+   "cells": 193880,
+   "measured": 167638,
+   "reused": 6550,
+   "failed": 0,
+   "not_run_with_reason": 19692,
+   "feature_fold_pairs": 5240,
+   "basic_complete": 5206,
+   "full_complete": 1301,
+   "source": "BATCHES.v2.csv sha 4f66d99b"
+  }
+ },
+ "3_source_recipe_catalogue": {
+  "discovered_files": 5273,
+  "raw": 773,
+  "derived": 4500,
+  "outside_census": 3593,
+  "sources_without_attributed_bytes": 4,
+  "providers": 22,
+  "recipes_in_dag": 13,
+  "transform_ledger_rows": 77,
+  "ledger_by_state": {
+   "profiled": 15,
+   "applicable": 4,
+   "temporally_verified": 3,
+   "materialized": 6,
+   "deferred": 20,
+   "excluded": 16,
+   "NOT_APPLICABLE": 13
+  },
+  "evaluated": 0,
+  "selected": 0,
+  "files_with_profiled_columns": 198,
+  "source": "feature-eng 8215886 sources/; FEATURE_DAG.v3 881f746f"
+ }
+}
