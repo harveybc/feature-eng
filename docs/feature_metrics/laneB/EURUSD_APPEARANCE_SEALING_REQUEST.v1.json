@@ -1,0 +1,127 @@
+{
+ "schema": "lane_b_appearance_sealing_request.v1",
+ "status": "REQUEST_ONLY_NOTHING_SEALED_NOTHING_ACTIVATED",
+ "date": "2026-10-01",
+ "requested_by": "Satoshi, successor technical lead (lane B / M03)",
+ "decides": "owner (question 13)",
+ "why": "no EURUSD price appearance is among the 198 sealed C127 contracts, so PS2 relevance and PS3-C episodes for the business asset have no admissible price source",
+ "candidate": {
+  "census_appearance_id": "app_ae9142c201e6694a3b1e1fde",
+  "entity": "eurusd",
+  "frequency": "5m",
+  "relative_path": "features/trading_asset_data/eurusd/5m.parquet (financial-data lake root)",
+  "physical_sha256": "c746f344ac743768e8c7f20e2e4ef3b7fb8222d96b3660f196c0a1d74039f327",
+  "size_bytes": 24326956,
+  "declared_rows": 1552028,
+  "declared_columns": [
+   "timestamp",
+   "open",
+   "high",
+   "low",
+   "close"
+  ],
+  "period": [
+   "2005-01-03T01:45:00+00:00",
+   "2025-12-31T16:55:00+00:00"
+  ],
+  "digest_state": "PHYSICALLY_DIGESTED",
+  "census_sha256": "49a8813d782a0e11cfcfde3e02a946fa04883db9f4e9563dced2fa24a7a1b82d",
+  "census_variable_ids": {
+   "timestamp": "var_bc0fbb5ea3d8aa6826b53054",
+   "open": "var_e7363a79b84dc92b776f649e",
+   "high": "var_89c1c85788a3d43a9461d381",
+   "low": "var_ee78522a02febac6876f40e2",
+   "close": "var_d5c2819722e4a64e2164fc53"
+  },
+  "provenance": "census provenance file features/trading_asset_data/eurusd/provenance.json: source, licence, acquisition UNKNOWN",
+  "why_not_in_c127": "not selected by the C127 first batch (1.50 GiB unique-byte budget; 6 499 items skipped for budget); not refused",
+  "siblings_same_entity": {
+   "15m": [
+    "app_86f18025bc156063f311b55f",
+    "6a58df420ad454a9a1caff55a01e50f08801c8ef848df6240af3fc2253e93ab8"
+   ],
+   "1h": [
+    "app_ad04e2ab9fceee0e9d399dc1",
+    "84485ea308ff18d1f194d8025445f7796d9f3969eac46c784763329e3d22ac49"
+   ],
+   "4h": [
+    "app_7227bc1ff125fa8109a64dbc",
+    "4e555e2ee465b418a42c35eba4503f6e0e88827bdf1f2495639198c37c6a5a00"
+   ],
+   "note": "each would be a separate request item; 1h is the natural decision frequency of subplan section 3"
+  }
+ },
+ "proposed_split": {
+  "recipe": "subplan section 3: four years TRAIN, one year validation, one year test",
+  "contract_constraint": "predictor tools/df_contract.py (sha 2bd12b33\u2026) validates three contiguous row blocks train/calibration/confirmation starting at row 0 and covering the file",
+  "option_A_recommended": {
+   "train_block": "2005-01-03T01:45 .. 2023-12-31T23:59:59 (row 0 to the first 2024 row)",
+   "calibration_block": "2024-01-01 .. 2024-12-31 (validation year)",
+   "confirmation_block": "2025-01-01 .. 2025-12-31T16:55 (test year, sealed)",
+   "recipe_window_inside_train": "modelling TRAIN = 2020-01-01 .. 2023-12-31 (the 4 years); 2005-2019 rows are inside the TRAIN block but outside the recipe window, usable only by an explicit pretraining declaration",
+   "boundaries_rows": "computed at sealing from the timestamp column only (first row whose timestamp >= 2024-01-01 and >= 2025-01-01); fractions = block rows / declared_rows",
+   "inner_folds": "3 expanding chronological folds inside the recipe window, validation 15 percent each, purge 2016 bars = 24 h lookback (288 bars) + 144 h maximum Y_l horizon (1728 bars)"
+  },
+  "option_B_not_proposed": "a contract whose TRAIN block starts in 2020 needs a schema extension (sealed or excluded leading period); df_contract has sealed_periods_excluded but its validator still requires train to start at row 0; not written",
+  "not_the_c127_rule": "the C127 builder emits 0.6/0.2/0.2 by rows; on 2005-2025 that puts TRAIN near 2017 and is NOT the recipe; do not reuse it for this item"
+ },
+ "identity_fields_carried": {
+  "dataset": [
+   "bank",
+   "content_sha256",
+   "contract_sha256",
+   "dataset_id",
+   "dependence",
+   "files[{bytes,name,role,sha256}]",
+   "license{state,...}",
+   "original_fields{census_appearance,census_variables}",
+   "panel",
+   "partitions{scheme,fractions,boundaries,frozen_before_profile,sealed_periods_excluded}",
+   "schema",
+   "source",
+   "time{frequency_nominal_seconds,range_start,range_end,timestamp_meaning,timezone,availability_rule,availability_delay_seconds}",
+   "variables[]",
+   "version"
+  ],
+  "variable": [
+   "schema",
+   "variable_id (re-derived by df_contract.variable_id_for)",
+   "dataset_id",
+   "name",
+   "role",
+   "physical_type",
+   "unit{value,evidence}",
+   "semantics{type,description,evidence}",
+   "event_time",
+   "available_time_rule",
+   "frequency_nominal_seconds",
+   "missingness{encoding,policy}",
+   "sentinels",
+   "producer",
+   "license_state",
+   "original_fields{census_variable_id}"
+  ],
+  "dataset_id_proposed": "financial_data.census_appearance.app_ae9142c201e6694a3b1e1fde",
+  "known_unknowns": [
+   "timestamp_meaning (bar open or close) UNKNOWN",
+   "timezone UNKNOWN",
+   "availability_rule and delay UNKNOWN (no per-family availability contract instance)",
+   "licence UNKNOWN (INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE)",
+   "revision policy UNKNOWN"
+  ]
+ },
+ "owner_steps_not_executed": [
+  "1. Rule on option A (or require option B as a schema change).",
+  "2. Seal: derive the contract with predictor tools/df_contract.py seal() from the census record above, boundaries computed from timestamps only, into a NEW file (e.g. financial-data features/census/FINANCIAL_EURUSD_CONTRACT.v1.json); never edit FINANCIAL_FIRST_BATCH_CONTRACTS.v1.json. No calendar-cut helper exists today; writing one is a bounded task Satoshi can do after step 1.",
+  "3. Availability: write the resource_contracts entry for the financial lake (form: data-gov docs/07_RESOURCE_CONTRACTS_INSTALLED_2026_09_13.md, availability block with label/completion_lag_max/timezone_evidence/use_class; the honest values today are UNKNOWN, which keeps use_class OFFLINE_DAY_GRANULAR at most) as the PENDING configuration through the operator console (/settings, data-gov README: validate and save a pending configuration).",
+  "4. Activate exactly as on 2026-09-14 (predictor docs/audits/work_plan/SATOSHI_TEMPORAL_SEMANTICS_AND_REAL_HOST_ROUTE_2026_09_14.md, blockers table): the owner promotes the pending file and restarts only that unit: systemctl --user restart crispdm-data-lake-financial. No other unit.",
+  "5. Register the resource with its absences in the data-gov registry (data-gov docs/08_RESOURCE_REGISTRY.md); registering grants nothing.",
+  "6. Verify: a governed whole-resource delivery returns VERIFIED_TRANSFER with the sha above; then lane B adds the appearance to FINANCIAL_TRAIN_CONTRACTS and profiles TRAIN only."
+ ],
+ "what_this_request_does_not_do": [
+  "it seals nothing",
+  "it writes nothing to the lake, data-gov, any config or the census",
+  "it reads no data values (all facts come from the committed census and bank index)",
+  "it does not authorise point-in-time use: availability stays UNKNOWN until step 3 carries evidence"
+ ]
+}
