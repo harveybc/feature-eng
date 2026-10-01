@@ -1,0 +1,298 @@
+{
+ "schema": "lane_b_daily_panel.v1",
+ "family": "yahoo_daily",
+ "availability_class": "DEVELOPMENT",
+ "source_state": "BOUNDED_AT_FILE_GRAIN",
+ "files": [
+  {
+   "path": "market_data/commodities/agriculture/ct_f/daily.parquet",
+   "sha256": "2ca4f2d367258ea4bde48cae9fbe05a21cabb5b829f2a765150db4205a0dca82",
+   "rows": 6519,
+   "first": "2000-01-03",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/agriculture/kc_f/daily.parquet",
+   "sha256": "df5c65d86223e65f417dad78192a1ab8ff87a260014d6ff595a99308f11873b8",
+   "rows": 6517,
+   "first": "2000-01-03",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/agriculture/sb_f/daily.parquet",
+   "sha256": "9e44e3d531425d4140ec4dd494af3cd9a1af97fe620488cb49e6316457c1855a",
+   "rows": 6480,
+   "first": "2000-03-01",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/agriculture/zc_f/daily.parquet",
+   "sha256": "ccfac8d6a6478be0e9962ef10d9067b51ce2b603bfb9d44928969fdb9d89f7c3",
+   "rows": 6369,
+   "first": "2000-07-17",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/agriculture/zs_f/daily.parquet",
+   "sha256": "8ee0dbac1fc3d0fff6f3398a2ca1a97481a0554618ef036d0aac7af5527187e6",
+   "rows": 6361,
+   "first": "2000-09-15",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/agriculture/zw_f/daily.parquet",
+   "sha256": "b37b4d23e8db1e1d518a243f0f4460a590e0bc5f87a3a319286943a5743ef9fc",
+   "rows": 6381,
+   "first": "2000-07-17",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/energy/bz_f/daily.parquet",
+   "sha256": "d6e9f6815fe86d9546b2f2a490ba9af296f0d778379c1d6a676eda3775ba513e",
+   "rows": 4584,
+   "first": "2007-07-30",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/energy/cl_f/daily.parquet",
+   "sha256": "d5336819eb42310f3db116ad2cf92224c67fb8dfd7c206890594f9ba8a2d2c78",
+   "rows": 6366,
+   "first": "2000-08-23",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/energy/ng_f/daily.parquet",
+   "sha256": "72c1a4207bc651c6cd79eea6e78547806c1f51f1dac2fc0c396686c790014aeb",
+   "rows": 6363,
+   "first": "2000-08-30",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/energy/rb_f/daily.parquet",
+   "sha256": "292a3f443d45e8461e86a13bf0448aabfc19b569b72ca3fc83bfa7272ec9e714",
+   "rows": 6321,
+   "first": "2000-11-01",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/precious_metals/gc_f/daily.parquet",
+   "sha256": "4d793e84e905492133169b629b1e8ba4b60bb9a95a878ee9bb1096a68145507d",
+   "rows": 6357,
+   "first": "2000-08-30",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/precious_metals/pa_f/daily.parquet",
+   "sha256": "4673304f40f6e1904864eea472073d3b2980fddc54f465162241b41693b8abad",
+   "rows": 6396,
+   "first": "1998-09-28",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/precious_metals/pl_f/daily.parquet",
+   "sha256": "584e05c8f983a32f73b35bb9098275a5f2c810f6c817225ccf5fe0a677e273d2",
+   "rows": 6385,
+   "first": "1997-10-29",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/commodities/precious_metals/si_f/daily.parquet",
+   "sha256": "c76265e148316a160fdf123ac197e2a7c7a97ff80191b2ccc7849a973a05c178",
+   "rows": 6359,
+   "first": "2000-08-30",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/000001_ss/daily.parquet",
+   "sha256": "e1ffd38c52db449bfb8dbb0044cee20215d225657f4fd151c811ae397a2474c6",
+   "rows": 6905,
+   "first": "1997-07-01",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/axjo/daily.parquet",
+   "sha256": "98601bfe1f65ad7cfba4984bcedcf410ae2e88aeb86096474662a62a521189cc",
+   "rows": 8368,
+   "first": "1992-11-22",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/bsesn/daily.parquet",
+   "sha256": "c7a779b594f9cb3abf066b9cea6a0ceec6a5d4faf20319afdce752cdab807b71",
+   "rows": 7021,
+   "first": "1997-06-30",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/bvsp/daily.parquet",
+   "sha256": "f68a678ce8f4695dde95a1647f3924949a00e04d747ecd83142adbbed1dea7e1",
+   "rows": 8094,
+   "first": "1993-04-27",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/fchi/daily.parquet",
+   "sha256": "4d8e09f280beae1cd977eafcbe32c2ddee52cee0635e01a465975ad43704a6b5",
+   "rows": 9100,
+   "first": "1990-02-28",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/ftse/daily.parquet",
+   "sha256": "f3407b790cbdd4e80c92effefe9337dbd2e2b789f2f11dc7ba77eff08d54b946",
+   "rows": 10608,
+   "first": "1984-01-03",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/gdaxi/daily.parquet",
+   "sha256": "a9b28d374a7fe687de3ce3d91f588745afb9b4edf877965b58f75f26069da313",
+   "rows": 9609,
+   "first": "1987-12-29",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/gsptse/daily.parquet",
+   "sha256": "e1df72fb8de1d4c4e90c2cd159a99bb266f6332c873442f7da0419b4fe36c341",
+   "rows": 11676,
+   "first": "1979-06-29",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/hsi/daily.parquet",
+   "sha256": "e732375b40c9cc320514fcf62386ba4449ab142e90ecb0d44c6b8d72689510a2",
+   "rows": 9625,
+   "first": "1986-12-30",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/ks11/daily.parquet",
+   "sha256": "92287c0056b11d61f3108594202b21e62a3c5bd88043b47aca35d57cd0a01448",
+   "rows": 7153,
+   "first": "1996-12-10",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/mxx/daily.parquet",
+   "sha256": "db45fe6d7093a0b3541e92b7a151725fc91ab26b3aa977f7219958c68d3549f2",
+   "rows": 8550,
+   "first": "1991-11-08",
+   "last": "2025-12-30",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/n225/daily.parquet",
+   "sha256": "eef6ccf3b1196fd7a1a500bf68188c9f6f3ff4f0d8e5b5e8ba9cca0c8b6adac1",
+   "rows": 14996,
+   "first": "1965-01-04",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/stoxx50e/daily.parquet",
+   "sha256": "dae9731b0ee2a89b9f3b9d5aaa9631bd7bafe5cf793194b6dc413e9fcae9319a",
+   "rows": 4701,
+   "first": "2007-03-29",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  },
+  {
+   "path": "market_data/equities/global_indices/twii/daily.parquet",
+   "sha256": "97a11c28d1ad38ca3b1f0df737ac9db96bf0f40383c74dc46a1ff823273a524f",
+   "rows": 6987,
+   "first": "1997-07-01",
+   "last": "2025-12-29",
+   "median_step_days": 1.0,
+   "kept": true
+  }
+ ],
+ "excluded": [],
+ "output": {
+  "file": "yahoo_daily_panel.csv",
+  "sha256": "20731be7295544768d667a88579cf26eef2d772f72677cea36e13f861a798bbe",
+  "columns": [
+   "yahoo__ct_f",
+   "yahoo__kc_f",
+   "yahoo__sb_f",
+   "yahoo__zc_f",
+   "yahoo__zs_f",
+   "yahoo__zw_f",
+   "yahoo__bz_f",
+   "yahoo__cl_f",
+   "yahoo__ng_f",
+   "yahoo__rb_f",
+   "yahoo__gc_f",
+   "yahoo__pa_f",
+   "yahoo__pl_f",
+   "yahoo__si_f",
+   "yahoo__000001_ss",
+   "yahoo__axjo",
+   "yahoo__bsesn",
+   "yahoo__bvsp",
+   "yahoo__fchi",
+   "yahoo__ftse",
+   "yahoo__gdaxi",
+   "yahoo__gsptse",
+   "yahoo__hsi",
+   "yahoo__ks11",
+   "yahoo__mxx",
+   "yahoo__n225",
+   "yahoo__stoxx50e",
+   "yahoo__twii"
+  ],
+  "rows": 18016
+ },
+ "availability_rule": "Yahoo daily close dated d treated as usable only from day d+1 (market close timezone undocumented)",
+ "approval": "coordinator standing approval: one bounded read per source family, <=256M, ionice -c3, <=10 min; lake not modified"
+}

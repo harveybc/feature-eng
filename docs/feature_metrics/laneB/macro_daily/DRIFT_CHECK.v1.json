@@ -1,0 +1,412 @@
+{
+ "schema": "lane_b_drift_check.v1",
+ "results": [
+  {
+   "case": "EURUSD_gitpinned",
+   "horizon_h": 1,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0009162357889743969,
+     "model_mse": 1.83057175879537e-06,
+     "zero_mae": 0.0009175761151620015,
+     "zero_mse": 1.8324289429391747e-06,
+     "mean_only_mae": 0.0009175764038246105,
+     "mean_only_mse": 1.8324269636596166e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0006019497951333389,
+     "model_mse": 9.026203277694256e-07,
+     "zero_mae": 0.0006033910109980422,
+     "zero_mse": 9.027673666186072e-07,
+     "mean_only_mae": 0.0006034218717733959,
+     "mean_only_mse": 9.0281271319975e-07
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0007545905201998505,
+     "model_mse": 1.4971062099414447e-06,
+     "zero_mae": 0.0007561789197694675,
+     "zero_mse": 1.4996995094680995e-06,
+     "mean_only_mae": 0.000756194231508573,
+     "mean_only_mse": 1.4997271220036955e-06
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S1",
+   "horizon_h": 1,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0005953544179168568,
+     "model_mse": 9.577318930137858e-07,
+     "zero_mae": 0.0005970144883617656,
+     "zero_mse": 9.587655623168783e-07,
+     "mean_only_mae": 0.0005970152711950994,
+     "mean_only_mse": 9.58754853692593e-07
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0007961522954258967,
+     "model_mse": 1.5642745219474923e-06,
+     "zero_mae": 0.0007974192749575985,
+     "zero_mse": 1.5668613564150415e-06,
+     "mean_only_mae": 0.0007974648468782655,
+     "mean_only_mse": 1.5669069532947303e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0005739262962208406,
+     "model_mse": 7.378135432630405e-07,
+     "zero_mae": 0.0005753417830594453,
+     "zero_mse": 7.386232272917543e-07,
+     "mean_only_mae": 0.0005753622516891317,
+     "mean_only_mse": 7.386230036599138e-07
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S1",
+   "horizon_h": 2,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0008582126380262684,
+     "model_mse": 1.9495440750699163e-06,
+     "zero_mae": 0.0008594349038822398,
+     "zero_mse": 1.951539450287356e-06,
+     "mean_only_mae": 0.0008594218537257656,
+     "mean_only_mse": 1.95146552882674e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0011383736756509376,
+     "model_mse": 3.1931630831744394e-06,
+     "zero_mae": 0.0011396960865305576,
+     "zero_mse": 3.195021321789773e-06,
+     "mean_only_mae": 0.001139807027054034,
+     "mean_only_mse": 3.1952108647159008e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0008203128235937701,
+     "model_mse": 1.4582630351375799e-06,
+     "zero_mae": 0.0008216199010119239,
+     "zero_mse": 1.4608432340428586e-06,
+     "mean_only_mae": 0.0008216783472487711,
+     "mean_only_mse": 1.4608506329105578e-06
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S1",
+   "horizon_h": 3,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0010654865922782454,
+     "model_mse": 2.9019814908935883e-06,
+     "zero_mae": 0.0010667459153680392,
+     "zero_mse": 2.9039572986661024e-06,
+     "mean_only_mae": 0.0010667006635639434,
+     "mean_only_mse": 2.9037016470769864e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0014134194827149114,
+     "model_mse": 4.884536699195799e-06,
+     "zero_mae": 0.0014147752170335659,
+     "zero_mse": 4.885663632314108e-06,
+     "mean_only_mae": 0.0014147906630307865,
+     "mean_only_mse": 4.886146688648469e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0010147889201345016,
+     "model_mse": 2.1668898858089868e-06,
+     "zero_mae": 0.0010160890404222309,
+     "zero_mse": 2.169851150712168e-06,
+     "mean_only_mae": 0.0010161712544388911,
+     "mean_only_mse": 2.169874243108689e-06
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S1",
+   "horizon_h": 4,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0012486173058610425,
+     "model_mse": 3.884090792362034e-06,
+     "zero_mae": 0.0012491825717358585,
+     "zero_mse": 3.885738233239125e-06,
+     "mean_only_mae": 0.0012491250228877531,
+     "mean_only_mse": 3.88536060001057e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0016526145834094565,
+     "model_mse": 6.502678903233388e-06,
+     "zero_mae": 0.0016535498375927545,
+     "zero_mse": 6.503105980855665e-06,
+     "mean_only_mae": 0.0016536368968539125,
+     "mean_only_mse": 6.503973816775689e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0011873944051463627,
+     "model_mse": 2.8994199326444007e-06,
+     "zero_mae": 0.001188261413281414,
+     "zero_mse": 2.902282062938556e-06,
+     "mean_only_mae": 0.001188417716940223,
+     "mean_only_mse": 2.902303286657291e-06
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S2",
+   "horizon_h": 1,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0006554516699147665,
+     "model_mse": 1.1747162260317277e-06,
+     "zero_mae": 0.0006571386884932063,
+     "zero_mse": 1.176049306490983e-06,
+     "mean_only_mae": 0.0006571396482159614,
+     "mean_only_mse": 1.1760423634530551e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0007148656071471555,
+     "model_mse": 1.2767428581435228e-06,
+     "zero_mae": 0.0007163704466913404,
+     "zero_mse": 1.279622756817221e-06,
+     "mean_only_mae": 0.0007164042978829774,
+     "mean_only_mse": 1.279648399364569e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0005298756625414413,
+     "model_mse": 6.360702569173401e-07,
+     "zero_mae": 0.0005309676514791788,
+     "zero_mse": 6.36378275916445e-07,
+     "mean_only_mae": 0.0005309761547557245,
+     "mean_only_mse": 6.363700697726388e-07
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S2",
+   "horizon_h": 2,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0009426141313245419,
+     "model_mse": 2.3817786754942777e-06,
+     "zero_mae": 0.0009436485113843201,
+     "zero_mse": 2.3831492675268195e-06,
+     "mean_only_mae": 0.0009436407958392578,
+     "mean_only_mse": 2.383102300879223e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.001023888150036548,
+     "model_mse": 2.61412365975137e-06,
+     "zero_mae": 0.0010255137154829667,
+     "zero_mse": 2.6178639300486203e-06,
+     "mean_only_mae": 0.0010255859493080585,
+     "mean_only_mse": 2.6179722089492895e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0007564152347944071,
+     "model_mse": 1.2661114648204273e-06,
+     "zero_mae": 0.0007572945881733742,
+     "zero_mse": 1.2673926356293766e-06,
+     "mean_only_mae": 0.0007573187744734335,
+     "mean_only_mse": 1.267358552757224e-06
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S2",
+   "horizon_h": 3,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0011731948965291587,
+     "model_mse": 3.569816710076822e-06,
+     "zero_mae": 0.001174403321491923,
+     "zero_mse": 3.5714787874920637e-06,
+     "mean_only_mae": 0.0011743510926054705,
+     "mean_only_mse": 3.57131851258681e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.001267176722110355,
+     "model_mse": 3.9919752473928e-06,
+     "zero_mae": 0.0012685458451478515,
+     "zero_mse": 3.994661153460644e-06,
+     "mean_only_mae": 0.001268592161375294,
+     "mean_only_mse": 3.9949292320737425e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.000936224003566102,
+     "model_mse": 1.8782419002858362e-06,
+     "zero_mae": 0.000937382181804881,
+     "zero_mse": 1.8802978890400444e-06,
+     "mean_only_mae": 0.0009374008094517023,
+     "mean_only_mse": 1.8802063453981017e-06
+    }
+   ]
+  },
+  {
+   "case": "EURUSD_lake_S2",
+   "horizon_h": 4,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.001376266619776186,
+     "model_mse": 4.754617442570087e-06,
+     "zero_mae": 0.0013767464245096398,
+     "zero_mse": 4.755965822634449e-06,
+     "mean_only_mae": 0.001376684405670817,
+     "mean_only_mse": 4.755721153578331e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0014823820090142917,
+     "model_mse": 5.339806569842162e-06,
+     "zero_mae": 0.0014834257325056484,
+     "zero_mse": 5.342044151320736e-06,
+     "mean_only_mae": 0.0014835510645504,
+     "mean_only_mse": 5.342512570568802e-06
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.0010953804380169191,
+     "model_mse": 2.509528064750544e-06,
+     "zero_mae": 0.001096213065020283,
+     "zero_mse": 2.511582412174373e-06,
+     "mean_only_mae": 0.0010962441914659433,
+     "mean_only_mse": 2.5114273698874524e-06
+    }
+   ]
+  },
+  {
+   "case": "GBPUSD_lake_S1",
+   "horizon_h": 8,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0017376342621574742,
+     "model_mse": 6.515421133934591e-06,
+     "zero_mae": 0.0017385285597562694,
+     "zero_mse": 6.519714009187168e-06,
+     "mean_only_mae": 0.0017385588312742559,
+     "mean_only_mse": 6.517564055334865e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.0025230946547379497,
+     "model_mse": 1.649593459617329e-05,
+     "zero_mae": 0.0025248509931200614,
+     "zero_mse": 1.6505110238403233e-05,
+     "mean_only_mae": 0.0025246720769836898,
+     "mean_only_mse": 1.650234836406144e-05
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.002106392251049133,
+     "model_mse": 8.735143142221988e-06,
+     "zero_mae": 0.0021072032483548876,
+     "zero_mse": 8.74245658880874e-06,
+     "mean_only_mae": 0.002107528507930361,
+     "mean_only_mse": 8.74015229378844e-06
+    }
+   ]
+  },
+  {
+   "case": "GBPUSD_lake_S2",
+   "horizon_h": 8,
+   "range_beats_zero": true,
+   "range_beats_mean_only": true,
+   "mean_only_beats_zero": false,
+   "verdict": "FEATURE_SIGNAL",
+   "rows": [
+    {
+     "fold": "inner_1",
+     "model_mae": 0.0018151208157474662,
+     "model_mse": 7.140892803038739e-06,
+     "zero_mae": 0.001815995524134522,
+     "zero_mse": 7.1438890160032385e-06,
+     "mean_only_mae": 0.0018162191465632316,
+     "mean_only_mse": 7.1447561091450295e-06
+    },
+    {
+     "fold": "inner_2",
+     "model_mae": 0.002458854473066516,
+     "model_mse": 1.5917216039476476e-05,
+     "zero_mae": 0.00246025159718366,
+     "zero_mse": 1.5923405607882337e-05,
+     "mean_only_mae": 0.002460223306832898,
+     "mean_only_mse": 1.5920276181923905e-05
+    },
+    {
+     "fold": "inner_3",
+     "model_mae": 0.002126545462625312,
+     "model_mse": 9.210406149871005e-06,
+     "zero_mae": 0.0021276662181508614,
+     "zero_mse": 9.211600250518807e-06,
+     "mean_only_mae": 0.002127767754572374,
+     "mean_only_mse": 9.212194353750437e-06
+    }
+   ]
+  }
+ ]
+}

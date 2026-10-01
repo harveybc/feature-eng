@@ -1,0 +1,572 @@
+{
+ "schema": "lane_b_daily_panel.v1",
+ "family": "fred_daily",
+ "availability_class": "DEVELOPMENT",
+ "source_state": "BOUNDED_AT_FILE_GRAIN",
+ "files": [
+  {
+   "path": "macro_economic/fred/credit/aaa/observations.parquet",
+   "sha256": "0257bea8517663c4a596ec409d2f28fe0ff0da72227314cd66d44728d24ae778",
+   "rows": 1284,
+   "first": "1919-01-01",
+   "last": "2025-12-01",
+   "median_step_days": 31.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/credit/aaa10y/observations.parquet",
+   "sha256": "ae2ed42ecc4f360a9e6bcb8c7a8e7ea0fd7ce9b9d577df7894b8af98a1dd0470",
+   "rows": 10747,
+   "first": "1983-01-03",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/credit/baa/observations.parquet",
+   "sha256": "f44bfa5e4f67bcd26ff7f7a9f7c764f8ed9b39507011dec6703d3ab3be7ac753",
+   "rows": 1284,
+   "first": "1919-01-01",
+   "last": "2025-12-01",
+   "median_step_days": 31.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/credit/baa10y/observations.parquet",
+   "sha256": "2fdb32943dc207201bb429a91c262a450c3c65fb1556e41a9005b6998938a856",
+   "rows": 10000,
+   "first": "1986-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/credit/bamlc0a0cm/observations.parquet",
+   "sha256": "653e80ca3486f8426e36d7712d4ff48ed372af53d804b0079acca8c423868030",
+   "rows": 698,
+   "first": "2023-05-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/credit/bamlc0a0cmey/observations.parquet",
+   "sha256": "0c3cf830d21e9bf05e3b9720ab23e0278139e9da4d782c004908ca75477d87a6",
+   "rows": 698,
+   "first": "2023-05-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/credit/bamlh0a0hym2/observations.parquet",
+   "sha256": "c2788090f7d9a59441dfc367b05318083bb289a5963850f0b5a8131365e41e76",
+   "rows": 699,
+   "first": "2023-05-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/credit/bamlh0a0hym2ey/observations.parquet",
+   "sha256": "a2e40bfdd6f19fe6b126e76538f526d48c72a07b6d9f1d052f1fd48277126495",
+   "rows": 699,
+   "first": "2023-05-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/fx_indices/dtwexafegs/observations.parquet",
+   "sha256": "92afb531fca981702971a1a4e8d03fdbdf2d989d607e7c1968f9a9d265f1d731",
+   "rows": 5013,
+   "first": "2006-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/fx_indices/dtwexb/observations.parquet",
+   "sha256": "aef05a7134c9a7dbf5cde5655fe62426a7c95c41e76fe88fa9c4b7b14272aeb4",
+   "rows": 6328,
+   "first": "1995-01-04",
+   "last": "2019-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/fx_indices/dtwexbgs/observations.parquet",
+   "sha256": "dbd871ea01cf6683affd483d47511106836cd4670bffa5abfb09f92d76dcf9ac",
+   "rows": 5013,
+   "first": "2006-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/fx_indices/dtwexemegs/observations.parquet",
+   "sha256": "5b12d8ff78fe4fa9c6b77d6cd11153d35e5abb42804618284fa22bbd7adb716c",
+   "rows": 5013,
+   "first": "2006-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/fx_indices/dtwexm/observations.parquet",
+   "sha256": "f9dda13dd8cf9ee5116ce73ed6d7652b862c6e604fed30a6b1247dfec33ffeb8",
+   "rows": 11834,
+   "first": "1973-01-02",
+   "last": "2019-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dff/observations.parquet",
+   "sha256": "c5fd0dc53371b1e7c88c86c67c4147664fc67f4ad4bff14882faf2b265c035d8",
+   "rows": 26117,
+   "first": "1954-07-01",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dfii10/observations.parquet",
+   "sha256": "73fd1d8cb0c2d545e6242d27bdfd748a4b5b520de5a5b0545922477923d9decc",
+   "rows": 5753,
+   "first": "2003-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dfii5/observations.parquet",
+   "sha256": "6299fba2fa76b865d4dba0fe46aad75de81b3422b0ce1fc1b2e1679b8106a284",
+   "rows": 5753,
+   "first": "2003-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs1/observations.parquet",
+   "sha256": "7f27bc1055b39027ee86fdf643b61ec4b6193d4be807e6acba826409dfeb60d0",
+   "rows": 15984,
+   "first": "1962-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs10/observations.parquet",
+   "sha256": "8c3ec4c208a4824356c9bd42f32dc28fa414b6854e635d8f9f6abb2ac9e60919",
+   "rows": 15984,
+   "first": "1962-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs2/observations.parquet",
+   "sha256": "024b8547164d21ad0f21c5703c0e24eaabcb9bcf700bc91e01aea925d772c2c9",
+   "rows": 12392,
+   "first": "1976-06-01",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs20/observations.parquet",
+   "sha256": "cb8e30ec1b815e68b23e14c7048bcfca68eb410b99e5b7e612647f6bee18d549",
+   "rows": 14295,
+   "first": "1962-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs30/observations.parquet",
+   "sha256": "c9cc2088100a98195a7e21237b0051147e1a31af2bcbb844da2586f051713d72",
+   "rows": 12214,
+   "first": "1977-02-15",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs3mo/observations.parquet",
+   "sha256": "2829a6fa525c05fa3fc29b882f5ba6211c1e5cca8ddd093e9480f7a379e58b4e",
+   "rows": 11082,
+   "first": "1981-09-01",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs5/observations.parquet",
+   "sha256": "6859d1a0a3a8007757624812b2770f21e6f8c87fadf27fbd3c9905139390df30",
+   "rows": 15984,
+   "first": "1962-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dgs7/observations.parquet",
+   "sha256": "3daedd3b85c2e666aecf6ec1f4aa42f106ba9a839287beb33f92b0935af59420",
+   "rows": 14114,
+   "first": "1969-07-01",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dprime/observations.parquet",
+   "sha256": "64938482bef843e654d8281d450f6e55654810b04c6b3c73adb705e357ba261a",
+   "rows": 17944,
+   "first": "1955-08-04",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/dtb3/observations.parquet",
+   "sha256": "d26c46e13060b1e36e97ed2986d8a3f40fd0e137e6ab6478829f4bcafdab845f",
+   "rows": 17990,
+   "first": "1954-01-04",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/fedfunds/observations.parquet",
+   "sha256": "8fdc1a17b2691324e0e6237aa316c70e6345d695e20b9cc148ebec4de1bc795c",
+   "rows": 858,
+   "first": "1954-07-01",
+   "last": "2025-12-01",
+   "median_step_days": 31.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/rates/t10y2y/observations.parquet",
+   "sha256": "3562dd0c9c18f7d0d0ece4fef99ba82d749c4aa192da081c0015fcd567283981",
+   "rows": 12392,
+   "first": "1976-06-01",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/t10y3m/observations.parquet",
+   "sha256": "f2f3095664c4643e40f32afed7577cb34cd19668f47856d5fb25409204162bf4",
+   "rows": 11001,
+   "first": "1982-01-04",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/t10yie/observations.parquet",
+   "sha256": "a2e8ba63c6eeb81cd29c2ae9eae449b2e1ef15ce6c63fff4dd844dca83bd160f",
+   "rows": 5753,
+   "first": "2003-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/t5yie/observations.parquet",
+   "sha256": "5bca4585b55c7fc12aefd79e96ec706300f67d8c5b8fa69493f63d65d7c38275",
+   "rows": 5753,
+   "first": "2003-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/t5yifr/observations.parquet",
+   "sha256": "e262901990ff6f624ac6c8558d82a3d55d634518c99a9f45016b3035163b48a8",
+   "rows": 5753,
+   "first": "2003-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/rates/tb3ms/observations.parquet",
+   "sha256": "3107fd03d7d80ba1f63cac050c649e54848e7ea6e4be28cd8e5978fa75347460",
+   "rows": 1104,
+   "first": "1934-01-01",
+   "last": "2025-12-01",
+   "median_step_days": 31.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/stress/anfci/observations.parquet",
+   "sha256": "9059903bbac18687d4de55fb1103e2def2b41afa6c1850d238161589ebd4e28e",
+   "rows": 2869,
+   "first": "1971-01-08",
+   "last": "2025-12-26",
+   "median_step_days": 7.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/stress/nfci/observations.parquet",
+   "sha256": "1c2555ab75002b67eba5818c39742951868040a6e9e3c29526921a945c53414e",
+   "rows": 2869,
+   "first": "1971-01-08",
+   "last": "2025-12-26",
+   "median_step_days": 7.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/stress/stlfsi4/observations.parquet",
+   "sha256": "9ae8985be57653d3cc589fd793e385fa5ba416b56aa743514e06404603f2a9fc",
+   "rows": 1670,
+   "first": "1993-12-31",
+   "last": "2025-12-26",
+   "median_step_days": 7.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": false
+  },
+  {
+   "path": "macro_economic/fred/stress/tedrate/observations.parquet",
+   "sha256": "e0012d8394c3bb96b7a9fe798296954e2230a06c2a77a944ac95268b161c0cdc",
+   "rows": 8853,
+   "first": "1986-01-02",
+   "last": "2022-01-21",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  },
+  {
+   "path": "macro_economic/fred/stress/vixcls/observations.parquet",
+   "sha256": "011cc2fd32fb23e7d52fd2458d45d5a5384ddc296d5baeeab1c7ffdf37658f57",
+   "rows": 9092,
+   "first": "1990-01-02",
+   "last": "2025-12-31",
+   "median_step_days": 1.0,
+   "realtime_start_values": [
+    "2026-05-01"
+   ],
+   "realtime_start_distinct": 1,
+   "kept": true
+  }
+ ],
+ "excluded": [
+  {
+   "series": "aaa",
+   "reason": "NOT_DAILY (median step 31.0 days): publication and revision timing not established for this slice"
+  },
+  {
+   "series": "baa",
+   "reason": "NOT_DAILY (median step 31.0 days): publication and revision timing not established for this slice"
+  },
+  {
+   "series": "fedfunds",
+   "reason": "NOT_DAILY (median step 31.0 days): publication and revision timing not established for this slice"
+  },
+  {
+   "series": "tb3ms",
+   "reason": "NOT_DAILY (median step 31.0 days): publication and revision timing not established for this slice"
+  },
+  {
+   "series": "anfci",
+   "reason": "NOT_DAILY (median step 7.0 days): publication and revision timing not established for this slice"
+  },
+  {
+   "series": "nfci",
+   "reason": "NOT_DAILY (median step 7.0 days): publication and revision timing not established for this slice"
+  },
+  {
+   "series": "stlfsi4",
+   "reason": "NOT_DAILY (median step 7.0 days): publication and revision timing not established for this slice"
+  }
+ ],
+ "output": {
+  "file": "fred_daily_panel.csv",
+  "sha256": "4216eecf6d87ec379e7a622b585470c29e15ea52ed62e58db265101b20b5e172",
+  "columns": [
+   "fred__aaa10y",
+   "fred__baa10y",
+   "fred__bamlc0a0cm",
+   "fred__bamlc0a0cmey",
+   "fred__bamlh0a0hym2",
+   "fred__bamlh0a0hym2ey",
+   "fred__dtwexafegs",
+   "fred__dtwexb",
+   "fred__dtwexbgs",
+   "fred__dtwexemegs",
+   "fred__dtwexm",
+   "fred__dff",
+   "fred__dfii10",
+   "fred__dfii5",
+   "fred__dgs1",
+   "fred__dgs10",
+   "fred__dgs2",
+   "fred__dgs20",
+   "fred__dgs30",
+   "fred__dgs3mo",
+   "fred__dgs5",
+   "fred__dgs7",
+   "fred__dprime",
+   "fred__dtb3",
+   "fred__t10y2y",
+   "fred__t10y3m",
+   "fred__t10yie",
+   "fred__t5yie",
+   "fred__t5yifr",
+   "fred__tedrate",
+   "fred__vixcls"
+  ],
+  "rows": 26241
+ },
+ "availability_rule": "FRED daily: value dated d treated as usable only from day d+1 (next-business-day publication); realtime_start recorded",
+ "approval": "coordinator standing approval: one bounded read per source family, <=256M, ionice -c3, <=10 min; lake not modified"
+}
