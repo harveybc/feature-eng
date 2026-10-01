@@ -1,0 +1,44 @@
+{
+ "schema": "lane_b_source_access_inventory.v1",
+ "date": "2026-10-01",
+ "rule": "what is actually retained or downloadable with the access we hold; no credential value read, printed or copied; no new download, purchase or terms bypass; promised coverage is not counted",
+ "providers": [
+  {
+   "provider": "FXMacroData",
+   "access_held": "paid plan (owner); key read by connectors from the process environment variable FXMACRODATA_API_KEY",
+   "key_located": "NOT FOUND in any discoverable env/config file on the coordinator or worker_b (checked by variable name only)",
+   "connector": "financial-data stage15_fxmacrodata_worker.py: endpoints data_catalogue/{ccy}, calendar/{ccy}, announcements/{ccy}/{indicator} at fxmacrodata.com/api/v1; point-in-time capture worker (ef0ba661) with our receipt clock",
+   "retained": "announcements.parquet (sha d8dd8c13\u2026, acquired 2026-05-01) and release_calendar.parquet; 8 resampled census appearances; point-in-time store with 737 files (receipt-clocked rows since the capture started 2026-09-25)",
+   "downloadable_under_current_plan": "NOT_ENUMERATED: the data_catalogue endpoint lists it, but it needs the key in the environment of a sanctioned host",
+   "availability": "announcements: OBSERVED_ACTUAL_PUBLICATION (registry 2026-09-26); rows captured since 2026-09-25 also carry OUR receipt clock (point-in-time store); history before the capture has no receipt clock",
+   "exclusions": [
+    "consensus/surprise: NO_CONSENSUS_AT_ALL",
+    "revision features: NO_REVISION_HISTORY"
+   ],
+   "missing_action": "run data_catalogue per currency on a host whose environment carries the key (coordinator approval: the capture worker's environment), store the catalogue as non-secret metadata; then census entries per downloadable indicator"
+  },
+  {
+   "provider": "Alpaca",
+   "access_held": "paper account used by lts (execution); credentials in the lts service EnvironmentFile on the coordinator (path known, contents not read)",
+   "connector": "lts plugins_broker/alpaca_paper_broker.py (execution); NO market-data connector into financial-data",
+   "retained": "none in the lake",
+   "downloadable_under_current_plan": "NOT_ENUMERATED: the market-data feed (IEX vs SIP) of this account is undocumented; one non-trading probe of the data API with the existing EnvironmentFile would answer it",
+   "availability": "n/a (no bytes)",
+   "exclusions": [],
+   "missing_action": "coordinator-approved probe on the coordinator using the lts EnvironmentFile without printing values (bars request with feed=sip vs feed=iex, limit 1); then a governed connector for the declared business assets only"
+  },
+  {
+   "provider": "Yahoo Finance",
+   "access_held": "paid product reported by the owner; no API key exists for yfinance",
+   "connector": "financial-data stage13_omega_light_worker.py: yfinance Ticker.history(period=max, interval=1d, end=2025-12-31, auto_adjust=False) on unofficial endpoints",
+   "retained": "702 files (312 census appearances; 474 profiled columns); daily bars to 2025-12-31",
+   "downloadable_under_current_plan": "UNKNOWN: the paid product is not named; yfinance is not an entitled API, so the plan cannot be enumerated programmatically",
+   "availability": "daily bar date, timezone UNKNOWN; no publication or receipt clock; adjusted values may be rewritten",
+   "exclusions": [
+    "intraday availability cannot be established for daily values propagated to intraday rows: such rows are marked propagated, not observed"
+   ],
+   "missing_action": "owner names the Yahoo product and its terms for programmatic access; until then retained bytes stay DEVELOPMENT"
+  }
+ ],
+ "data_gov": "the data-gov service key (held since 2026-09-14) governs lake deliveries, not vendor plans; no lane B call was made to data-gov in this step"
+}
