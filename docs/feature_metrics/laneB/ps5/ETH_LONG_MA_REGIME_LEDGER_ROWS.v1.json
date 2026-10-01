@@ -1,0 +1,539 @@
+{
+ "schema": "lane_b_stage_outcome.v1",
+ "dataset": "ETH_4h",
+ "families": {},
+ "ledger_rows": [
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [-0.33, 0.6, 0.57] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 1
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [-0.33, 0.93, 0.73] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 1
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [-0.74, 2.33, 0.88] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 1
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [-1.4, 3.37, 0.78] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 1
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_100+sma_100_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [67.13, 0.15, 0.07] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_100+sma_100_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [118.98, 0.69, 0.22] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_100+sma_100_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [160.91, 2.04, 0.42] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_100+sma_100_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [191.34, 2.93, 0.57] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_200+sma_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [73.71, 0.18, 0.07] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_200+sma_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [132.46, 0.84, 0.26] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_200+sma_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [178.93, 2.28, 0.46] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+sma_200+sma_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [207.67, 3.18, 0.54] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+ema_200+ema_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [74.96, 0.16, 0.04] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+ema_200+ema_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [131.38, 0.78, 0.18] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+ema_200+ema_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [176.68, 2.18, 0.36] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+ema_200+ema_200_x_vrl",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [206.96, 3.09, 0.46] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 3
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+3MA+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [66.87, 1.52, 0.09] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 7
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+3MA+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [97.99, 2.83, 0.56] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 7
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+3MA+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [135.22, 4.7, 1.31] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 7
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:VRL+3MA+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [157.65, 6.22, 1.79] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 7
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:A83+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [189.51, 24.6, 24.72] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 86
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:A83+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [186.4, 30.67, 25.93] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 86
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:A83+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [187.93, 36.31, 26.62] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 86
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:A83+3products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [194.71, 45.4, 27.94] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 86
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:secondary:VRL+ratio100+ratio200+products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "72h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [0.94, 0.87, 2.02] percent",
+   "rows": {
+    "val_rows": 6111,
+    "train_rows": 28485,
+    "channels": 5
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:secondary:VRL+ratio100+ratio200+products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "96h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [1.32, 1.57, 2.56] percent",
+   "rows": {
+    "val_rows": 6093,
+    "train_rows": 28467,
+    "channels": 5
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:secondary:VRL+ratio100+ratio200+products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "120h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [1.77, 2.26, 3.24] percent",
+   "rows": {
+    "val_rows": 6075,
+    "train_rows": 28449,
+    "channels": 5
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  },
+  {
+   "dataset": "ETH_4h",
+   "candidate": "PS5_long_ma_x_vrl:secondary:VRL+ratio100+ratio200+products",
+   "target": "Y_l cumulative close log return (elapsed seconds)",
+   "horizon": "144h",
+   "split": "inner_TRAIN",
+   "status": "REJECTED",
+   "reason": "verdict FAIL, stable=False: below both controls in 0 of 3 folds; MAE vs zero naive per fold [1.73, 3.43, 3.23] percent",
+   "rows": {
+    "val_rows": 6057,
+    "train_rows": 28431,
+    "channels": 5
+   },
+   "cost": {
+    "proxy": "ridge, see source",
+    "measured_wall_seconds": null
+   },
+   "source": "ps5/ETH_LONG_MA_REGIME_GATE.v1.json"
+  }
+ ]
+}
