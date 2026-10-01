@@ -1,0 +1,210 @@
+{
+ "schema": "lane_b_eth_variant_c_probe.v1",
+ "transform": "first difference of inputs with outer-TRAIN acf_lag_1 >= 0.99 (from the v2 TRAIN profile); fitted nothing",
+ "persistent_inputs_differenced": [
+  "atr_14",
+  "bb_lower",
+  "bb_middle",
+  "bb_upper",
+  "close_sma_ratio_200",
+  "ema_10",
+  "ema_100",
+  "ema_20",
+  "ema_200",
+  "ema_50",
+  "ema_cross_10_50",
+  "ema_cross_20_100",
+  "hist_vol_60",
+  "macd",
+  "macd_signal",
+  "natr_14",
+  "obv",
+  "realized_var_48",
+  "roll_kurt_ret_252",
+  "roll_mean_ret_252",
+  "roll_skew_ret_252",
+  "roll_std_ret_252",
+  "roll_std_ret_60",
+  "sma_10",
+  "sma_100",
+  "sma_20",
+  "sma_200",
+  "sma_50",
+  "volume_sma_10",
+  "volume_sma_20",
+  "vwap_60"
+ ],
+ "rows": [
+  {
+   "fold": "inner_1",
+   "target": "Y_s@4h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2054,
+   "mae": 0.01602047098586766,
+   "naive_mae": 0.01502230785170851
+  },
+  {
+   "fold": "inner_1",
+   "target": "Y_s@4h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 30,
+   "val_rows": 2054,
+   "mae": 0.015124013672608955,
+   "naive_mae": 0.01502230785170851
+  },
+  {
+   "fold": "inner_1",
+   "target": "Y_l@24h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2049,
+   "mae": 0.044367398420979955,
+   "naive_mae": 0.03767434561100781
+  },
+  {
+   "fold": "inner_1",
+   "target": "Y_l@24h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 30,
+   "val_rows": 2049,
+   "mae": 0.03886300786581654,
+   "naive_mae": 0.03767434561100781
+  },
+  {
+   "fold": "inner_1",
+   "target": "Y_l@144h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2019,
+   "mae": 0.14258545345752532,
+   "naive_mae": 0.09602821757621188
+  },
+  {
+   "fold": "inner_1",
+   "target": "Y_l@144h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 30,
+   "val_rows": 2019,
+   "mae": 0.12578400587813302,
+   "naive_mae": 0.09602821757621188
+  },
+  {
+   "fold": "inner_2",
+   "target": "Y_s@4h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2054,
+   "mae": 0.011651032720047402,
+   "naive_mae": 0.011458247132908616
+  },
+  {
+   "fold": "inner_2",
+   "target": "Y_s@4h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 38,
+   "val_rows": 2054,
+   "mae": 0.011531895602729766,
+   "naive_mae": 0.011458247132908616
+  },
+  {
+   "fold": "inner_2",
+   "target": "Y_l@24h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2049,
+   "mae": 0.032660561299064035,
+   "naive_mae": 0.03136630504882503
+  },
+  {
+   "fold": "inner_2",
+   "target": "Y_l@24h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 38,
+   "val_rows": 2049,
+   "mae": 0.03209323359251854,
+   "naive_mae": 0.03136630504882503
+  },
+  {
+   "fold": "inner_2",
+   "target": "Y_l@144h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2019,
+   "mae": 0.0913699234236521,
+   "naive_mae": 0.08157550400348687
+  },
+  {
+   "fold": "inner_2",
+   "target": "Y_l@144h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 38,
+   "val_rows": 2019,
+   "mae": 0.08805699226258994,
+   "naive_mae": 0.08157550400348687
+  },
+  {
+   "fold": "inner_3",
+   "target": "Y_s@4h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2054,
+   "mae": 0.006734373371056672,
+   "naive_mae": 0.006161951311137904
+  },
+  {
+   "fold": "inner_3",
+   "target": "Y_s@4h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 34,
+   "val_rows": 2054,
+   "mae": 0.006480657514133492,
+   "naive_mae": 0.006161951311137904
+  },
+  {
+   "fold": "inner_3",
+   "target": "Y_l@24h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2049,
+   "mae": 0.01939357203391576,
+   "naive_mae": 0.01655987412615981
+  },
+  {
+   "fold": "inner_3",
+   "target": "Y_l@24h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 34,
+   "val_rows": 2049,
+   "mae": 0.018982438068924256,
+   "naive_mae": 0.01655987412615981
+  },
+  {
+   "fold": "inner_3",
+   "target": "Y_l@144h",
+   "subset": "C_DIFF_ALL",
+   "n_features": 83,
+   "val_rows": 2019,
+   "mae": 0.05282338947500706,
+   "naive_mae": 0.040484703775376496
+  },
+  {
+   "fold": "inner_3",
+   "target": "Y_l@144h",
+   "subset": "C_DIFF_FOLD_TIERS",
+   "n_features": 34,
+   "val_rows": 2019,
+   "mae": 0.05175723970433569,
+   "naive_mae": 0.040484703775376496
+  }
+ ],
+ "mean_mae_by_subset": {
+  "C_DIFF_ALL": 0.04640068613190177,
+  "C_DIFF_FOLD_TIERS": 0.043185942684643354
+ },
+ "naive_mean_mae": 0.03737016182631366,
+ "beats_naive_every_target": {
+  "C_DIFF_ALL": false,
+  "C_DIFF_FOLD_TIERS": false
+ }
+}

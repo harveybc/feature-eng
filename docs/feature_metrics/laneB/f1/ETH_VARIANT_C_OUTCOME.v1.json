@@ -1,0 +1,19 @@
+{
+ "schema": "lane_b_variant_outcome.v1",
+ "task": "ETH 4h",
+ "variant": "C (persistent level inputs first-differenced)",
+ "status": "NOT_FROZEN_SKIPPED_NOT_BETTER_THAN_NAIVE",
+ "evidence": "docs/feature_metrics/laneB/f1/eth_variant_c_probe.json",
+ "differenced_inputs": 31,
+ "mean_mae_by_subset": {
+  "C_DIFF_ALL": 0.04640068613190177,
+  "C_DIFF_FOLD_TIERS": 0.043185942684643354
+ },
+ "naive_mean_mae": 0.03737016182631366,
+ "beats_naive_every_target": {
+  "C_DIFF_ALL": false,
+  "C_DIFF_FOLD_TIERS": false
+ },
+ "reading": "differencing the 31 persistent inputs cuts the probe loss from 0.0717/0.0512 (variant A/B) to 0.0464/0.0432, but every subset still loses to the zero-return naive (0.0374) on every target; nothing is frozen as a selection; variant A remains the frozen control. A linear probe is a diagnostic, not the temporal model",
+ "next": "the temporal-model inner-validation comparison (M01/M04 capacity); PS4 transforms beyond first differences"
+}
