@@ -1,0 +1,110 @@
+{
+ "schema": "lane_b_selection_denominators.v2",
+ "date": "2026-10-01",
+ "supersedes": "SELECTION_DENOMINATORS.v1.json (kept)",
+ "catalogue_channels_v1": {
+  "files": 5279,
+  "candidates": 78067,
+  "profiled": 2372,
+  "screened": 83,
+  "evaluated": 0,
+  "selected": 0,
+  "frozen_controls": 87,
+  "deferred": 72045,
+  "excluded": 3650
+ },
+ "task_datasets": {
+  "count": 5,
+  "names": [
+   "ETH 4h (git-pinned view)",
+   "EURUSD 1h (git-pinned)",
+   "EURUSD 1h (lake HistData)",
+   "BTCUSDT 4h (lake)",
+   "GBPUSD 1h (lake)"
+  ]
+ },
+ "frozen_controls": {
+  "manifests": 5,
+  "channels": 178,
+  "names": [
+   "SELECTED_FEATURE_MANIFEST.btcusdt_4h_lake.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.eth_4h.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.eurusd_1h.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.eurusd_1h_lake.v1.FROZEN_DEVELOPMENT.json",
+   "SELECTED_FEATURE_MANIFEST.gbpusd_1h_lake.v1.FROZEN_DEVELOPMENT.json"
+  ],
+  "note": "variant A, all admissible inputs; a control for pilots, NOT a selection decision"
+ },
+ "horizon_scoped_selections": {
+  "manifests": 3,
+  "detail": {
+   "SELECTED_FEATURE_MANIFEST.eurusd_1h.vD1h.FROZEN_DEVELOPMENT.json": {
+    "valid_horizons": [
+     1
+    ],
+    "features": 3
+   },
+   "SELECTED_FEATURE_MANIFEST.eurusd_1h_lake.vDh.FROZEN_DEVELOPMENT.json": {
+    "valid_horizons": [
+     1,
+     2,
+     3,
+     4
+    ],
+    "features": 3
+   },
+   "SELECTED_FEATURE_MANIFEST.gbpusd_1h_lake.vDh.FROZEN_DEVELOPMENT.json": {
+    "valid_horizons": [
+     8
+    ],
+    "features": 3
+   }
+  },
+  "note": "selected by the declared linear-probe gate (MAE and MSE below the zero-return naive in every fold); valid only at the listed horizons"
+ },
+ "skipped_not_better_than_naive": {
+  "outcomes": 6,
+  "detail": [
+   {
+    "task": "ETH 4h",
+    "variant": "B screen subsets",
+    "file": "f1/ETH_VARIANT_B_OUTCOME.v1.json"
+   },
+   {
+    "task": "ETH 4h",
+    "variant": "C differenced",
+    "file": "f1/ETH_VARIANT_C_OUTCOME.v1.json"
+   },
+   {
+    "task": "ETH 4h",
+    "variant": "D families (wavelet, z-score, realized vol, range)",
+    "file": "f1/ETH_VARIANT_D_FAMILIES_PROBE.v1.json"
+   },
+   {
+    "task": "ETH 4h",
+    "variant": "D-4h horizon-scoped",
+    "file": "f1/ETH_VARIANT_D4H_OUTCOME.v1.json"
+   },
+   {
+    "task": "EURUSD 1d",
+    "variant": "daily horizon-scoped (1..6 d)",
+    "file": "f1/EURUSD_1D_HORIZON_GATE.v1.json"
+   },
+   {
+    "task": "BTCUSDT 4h",
+    "variant": "horizon-scoped range (no horizon passes in both splits)",
+    "file": "btcusdt_4h_lake/probe.json"
+   }
+  ]
+ },
+ "probe_rows": {
+  "rows": 366,
+  "pass": 27,
+  "fail": 312,
+  "mse_not_stored": 27
+ },
+ "variant_A_passes_anywhere": false,
+ "evaluated_by_temporal_model": 0,
+ "selected_by_temporal_model": 0,
+ "summary_file_sha256": "b898077d5bede4e8fa5332f9a3bb0aa63a4f47d31d593dca96b065867c8112d0"
+}
