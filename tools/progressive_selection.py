@@ -394,6 +394,8 @@ def label_rows(target: TargetSeries, end: int, start: int = 0):
 
 
 def _spearman(x, y):
+    if len(x) < 3:
+        return None
     rx, ry = stats.rankdata(x), stats.rankdata(y)
     if np.ptp(rx) == 0 or np.ptp(ry) == 0:
         return None
@@ -506,13 +508,18 @@ def prioritize(X, names, targets, fold, params):
     col = {f: i for i, f in enumerate(names)}
     for (tn, h), t in built.items():
         lr = label_rows(t, b, a)
+        if len(lr) < 30:
+            continue                                  # no synergy evidence without labelled fold rows
         y = t.values[lr]
-        floor = 3 / math.sqrt(max(len(lr), 1))
+        floor = 3 / math.sqrt(len(lr))
         Z = {}
-        for f in set(sum(pairs, ())):
+        for f in sorted(set(sum(pairs, ()))):
             v = X[lr, col[f]]
             Z[f] = (v - np.nanmean(v)) / (np.nanstd(v) or 1.0)
-        indiv = {f: abs(_spearman(Z[f], y) or 0.0) for f in Z}
+        indiv = {}
+        for f in Z:
+            fm = np.isfinite(Z[f])
+            indiv[f] = abs(_spearman(Z[f][fm], y[fm]) or 0.0)
         for p, q in pairs:
             prod = Z[p] * Z[q]
             m = np.isfinite(prod)

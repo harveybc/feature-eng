@@ -1,0 +1,305 @@
+{
+ "schema": "feature_train_manifest.v2",
+ "split": "TRAIN",
+ "dataset_id": "financial_data.project3.ethusdt_4h_tech_stat.model_ready.v1.train",
+ "governance": "LOCAL_FILE",
+ "resource_sha256": "1b447c66e68495e826c53e2ab2b08ecd3922c8fdc735747628f8d0435ebe440f",
+ "path": "examples/data/project3/ethusdt_4h_tech_stat_full_model_ready.csv",
+ "path_note": "relative to a predictor checkout; immutable dataset contract committed in predictor 14a1077f; not a governed lake resource",
+ "registered_rows": 18085,
+ "columns_total": 90,
+ "split_rule": "predictor examples/data/project3/ethusdt_4h_tech_stat_full_model_ready.manifest.json (commit 14a1077f): train 2017-09-28T04:00:00..2023-12-31T23:59:59; TRAIN = first 13699 rows (counted by timestamp, stopping at the first row 2024-01-01 00:00:00; agrees with the config's train_metadata rows 13699); validation 2024 and protected test 2025 are not profiled",
+ "boundaries": {
+  "train": [
+   0,
+   13699
+  ]
+ },
+ "timestamp_column": "DATE_TIME",
+ "timestamp_format": "%Y-%m-%d %H:%M:%S",
+ "step_seconds": 14400,
+ "default_role": "excluded",
+ "target_channels": [],
+ "declared_periods_rows": {
+  "daily": 6,
+  "weekly": 42
+ },
+ "primary_period": "daily",
+ "max_missing_fraction": 0.2,
+ "availability": "bar-close convention assumed (decision after bar t closes); census availability contract UNAVAILABLE; point-in-time NOT certified",
+ "columns": {
+  "typical_price": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_OR_VOLUME_LEVEL_NOT_IN_DATASET_FEATURE_LIST (predictor manifest 14a1077f feature_columns)"
+  },
+  "OPEN": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_OR_VOLUME_LEVEL_NOT_IN_DATASET_FEATURE_LIST (predictor manifest 14a1077f feature_columns)"
+  },
+  "HIGH": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_OR_VOLUME_LEVEL_NOT_IN_DATASET_FEATURE_LIST (predictor manifest 14a1077f feature_columns)"
+  },
+  "LOW": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_OR_VOLUME_LEVEL_NOT_IN_DATASET_FEATURE_LIST (predictor manifest 14a1077f feature_columns)"
+  },
+  "CLOSE": {
+   "role": "target",
+   "reason": "ASSET_PRICE_SOURCE: CLOSE is the declared source of Y_s/Y_l; raw level not in the dataset manifest's feature list"
+  },
+  "VOLUME": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_OR_VOLUME_LEVEL_NOT_IN_DATASET_FEATURE_LIST (predictor manifest 14a1077f feature_columns)"
+  },
+  "return_1": {
+   "role": "feature"
+  },
+  "log_return_1": {
+   "role": "feature"
+  },
+  "return_5": {
+   "role": "feature"
+  },
+  "log_return_5": {
+   "role": "feature"
+  },
+  "return_10": {
+   "role": "feature"
+  },
+  "log_return_10": {
+   "role": "feature"
+  },
+  "return_20": {
+   "role": "feature"
+  },
+  "log_return_20": {
+   "role": "feature"
+  },
+  "return_60": {
+   "role": "feature"
+  },
+  "log_return_60": {
+   "role": "feature"
+  },
+  "sma_10": {
+   "role": "feature"
+  },
+  "ema_10": {
+   "role": "feature"
+  },
+  "close_sma_ratio_10": {
+   "role": "feature"
+  },
+  "sma_20": {
+   "role": "feature"
+  },
+  "ema_20": {
+   "role": "feature"
+  },
+  "close_sma_ratio_20": {
+   "role": "feature"
+  },
+  "sma_50": {
+   "role": "feature"
+  },
+  "ema_50": {
+   "role": "feature"
+  },
+  "close_sma_ratio_50": {
+   "role": "feature"
+  },
+  "sma_100": {
+   "role": "feature"
+  },
+  "ema_100": {
+   "role": "feature"
+  },
+  "close_sma_ratio_100": {
+   "role": "feature"
+  },
+  "sma_200": {
+   "role": "feature"
+  },
+  "ema_200": {
+   "role": "feature"
+  },
+  "close_sma_ratio_200": {
+   "role": "feature"
+  },
+  "macd": {
+   "role": "feature"
+  },
+  "macd_signal": {
+   "role": "feature"
+  },
+  "macd_hist": {
+   "role": "feature"
+  },
+  "rsi_7": {
+   "role": "feature"
+  },
+  "rsi_14": {
+   "role": "feature"
+  },
+  "rsi_21": {
+   "role": "feature"
+  },
+  "stoch_k": {
+   "role": "feature"
+  },
+  "stoch_d": {
+   "role": "feature"
+  },
+  "williams_r_14": {
+   "role": "feature"
+  },
+  "cci_14": {
+   "role": "feature"
+  },
+  "roc_10": {
+   "role": "feature"
+  },
+  "roc_20": {
+   "role": "feature"
+  },
+  "roc_60": {
+   "role": "feature"
+  },
+  "mom_10": {
+   "role": "feature"
+  },
+  "mom_20": {
+   "role": "feature"
+  },
+  "bb_upper": {
+   "role": "feature"
+  },
+  "bb_middle": {
+   "role": "feature"
+  },
+  "bb_lower": {
+   "role": "feature"
+  },
+  "bb_pct_b": {
+   "role": "feature"
+  },
+  "bb_width": {
+   "role": "feature"
+  },
+  "atr_14": {
+   "role": "feature"
+  },
+  "natr_14": {
+   "role": "feature"
+  },
+  "hist_vol_10": {
+   "role": "feature"
+  },
+  "hist_vol_20": {
+   "role": "feature"
+  },
+  "hist_vol_60": {
+   "role": "feature"
+  },
+  "ema_cross_10_50": {
+   "role": "feature"
+  },
+  "ema_cross_20_100": {
+   "role": "feature"
+  },
+  "trend_slope_50": {
+   "role": "feature"
+  },
+  "trend_strength_50": {
+   "role": "feature"
+  },
+  "obv": {
+   "role": "feature"
+  },
+  "obv_delta_20": {
+   "role": "feature"
+  },
+  "volume_sma_10": {
+   "role": "feature"
+  },
+  "volume_sma_20": {
+   "role": "feature"
+  },
+  "volume_ratio_20": {
+   "role": "feature"
+  },
+  "vwap_60": {
+   "role": "feature"
+  },
+  "mfi_14": {
+   "role": "feature"
+  },
+  "statistical__log_return_1": {
+   "role": "feature"
+  },
+  "roll_mean_ret_20": {
+   "role": "feature"
+  },
+  "roll_std_ret_20": {
+   "role": "feature"
+  },
+  "roll_skew_ret_20": {
+   "role": "feature"
+  },
+  "roll_kurt_ret_20": {
+   "role": "feature"
+  },
+  "roll_mean_ret_60": {
+   "role": "feature"
+  },
+  "roll_std_ret_60": {
+   "role": "feature"
+  },
+  "roll_skew_ret_60": {
+   "role": "feature"
+  },
+  "roll_kurt_ret_60": {
+   "role": "feature"
+  },
+  "roll_mean_ret_252": {
+   "role": "feature"
+  },
+  "roll_std_ret_252": {
+   "role": "feature"
+  },
+  "roll_skew_ret_252": {
+   "role": "feature"
+  },
+  "roll_kurt_ret_252": {
+   "role": "feature"
+  },
+  "realized_var_12": {
+   "role": "feature"
+  },
+  "realized_var_48": {
+   "role": "feature"
+  },
+  "autocorr_lag1_100": {
+   "role": "feature"
+  },
+  "autocorr_lag5_100": {
+   "role": "feature"
+  },
+  "sqret_autocorr_lag1_100": {
+   "role": "feature"
+  },
+  "vol_regime_high": {
+   "role": "feature"
+  },
+  "vol_regime_low": {
+   "role": "feature"
+  },
+  "hurst_proxy_200": {
+   "role": "feature"
+  },
+  "zscore_close_100": {
+   "role": "feature"
+  }
+ }
+}
