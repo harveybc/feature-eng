@@ -12,6 +12,8 @@ def main():
     ap.add_argument("--base", required=True); ap.add_argument("--iteration", type=int, required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--extra", nargs="*", default=[], help="additional stage-pipeline outcome files (lane_b_stage_outcome.v1); a later file's rows for a "
                     "(dataset, candidate) supersede an earlier file's horizon='all' PENDING row for the same pair")
+    ap.add_argument("--closure", nargs="*", default=[], help="lane_b_intercept_closure.v1 files (paths under --base); a verdict keyed by "
+                    "(dataset, candidate, horizon, split) decides that row: FEATURE_SIGNAL -> ELIGIBLE, otherwise REJECTED")
     ap.add_argument("--hscoped-v2", nargs="*", default=[], help="DATASET=path pairs: horizon-scoped probe v2 outputs carrying the intercept-only control")
     a = ap.parse_args(); b = Path(a.base); L = lambda p: json.load(open(b / p))
     summ = L("LANE_B_PROBE_SUMMARY.v1.json"); drift = L("macro_daily/DRIFT_CHECK.v1.json")
@@ -23,6 +25,11 @@ def main():
         ds, pth = spec.split("=", 1); d = json.load(open(b / pth)); hz = d["target"].split("@")[1].split()[0]
         for cand, v in d["candidates"].items():
             hs2[(ds, cand, hz)] = (v["verdict"], pth)
+    clo = {}
+    for pth in a.closure:
+        for v in json.load(open(b / pth))["verdicts"]:
+            assert v["reproduces_v1"], (pth, v["candidate"], v["horizon"])
+            clo[(v["dataset"], v["candidate"], v["horizon"], v["split"])] = (v["verdict"], pth)
     rows = []
     def add(**k): k["id"] = len(rows); rows.append(k)
     for r in summ["rows"]:
@@ -30,7 +37,12 @@ def main():
         folds = [f for f in r["folds"] if "mae" in f]
         n_rows = {"val_rows": sum(f.get("val_rows", 0) for f in folds), "folds": len(folds)}
         cost = {"proxy": "features x train_rows not stored per row; see source", "measured_wall_seconds": None}
-        if r["gate"] == "PASS":
+        cv = clo.get((r["asset"], r["candidate"], r["horizon"], r["split"]))
+        if cv:
+            st = "ELIGIBLE" if cv[0] == "FEATURE_SIGNAL" else "REJECTED"
+            why = (f"MAE and MSE below the zero-return naive AND the intercept-only control in every fold; v1 rows reproduced exactly ({cv[1]})" if st == "ELIGIBLE"
+                   else f"closure verdict {cv[0]}: not below both the zero-return naive and the intercept-only control in every fold, MAE and MSE; v1 rows reproduced exactly ({cv[1]})")
+        elif r["gate"] == "PASS":
             ck = case_map.get((r["asset"], r["split"]))
             v2 = hs2.get((r["asset"], r["candidate"], r["horizon"]))
             if v2 and v2[0] == "FEATURE_SIGNAL":
@@ -87,6 +99,7 @@ def main():
            "eligible": [r for r in rows if r["status"] == "ELIGIBLE"],
            "inputs": {**{p: hashlib.sha256((b / p).read_bytes()).hexdigest() for p in ("LANE_B_PROBE_SUMMARY.v1.json", "macro_daily/DRIFT_CHECK.v1.json", "macro_daily/MACRO_DAILY_PROBE.v1.json")},
                       **{spec.split("=", 1)[1]: hashlib.sha256((b / spec.split("=", 1)[1]).read_bytes()).hexdigest() for spec in a.hscoped_v2},
+                      **{pth: hashlib.sha256((b / pth).read_bytes()).hexdigest() for pth in a.closure},
                       **{Path(e).name: hashlib.sha256(Path(e).read_bytes()).hexdigest() for e in a.extra}},
            "rule": __doc__}
     json.dump(doc, open(a.out, "w"), indent=1)

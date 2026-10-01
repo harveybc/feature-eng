@@ -49,7 +49,7 @@ def probe(X):
             trm = tr[np.isfinite(X[tr]).all(1)]; vam = va[np.isfinite(X[va]).all(1)]
             pred = ridge(X[trm], t.values[trm], X[vam]); y = t.values[vam]
             rows.append({"fold": f["name"], "target": f"{tn}@{h}h", "val_rows": int(len(vam)), "train_rows": int(len(trm)),
-                         "mae": float(np.mean(np.abs(pred - y))), "naive_mae": float(np.mean(np.abs(y)))})
+                         "mae": float(np.mean(np.abs(pred - y))), "naive_mae": float(np.mean(np.abs(y))), "mse": float(np.mean((pred - y) ** 2)), "naive_mse": float(np.mean(y ** 2)), "mean_only_mae": float(np.mean(np.abs(float(t.values[trm].mean()) - y))), "mean_only_mse": float(np.mean((float(t.values[trm].mean()) - y) ** 2))})
     return rows
 res = {}
 for name, F in fam.items():
@@ -59,7 +59,7 @@ for name, F in fam.items():
                  "beats_naive_every_fold_target": all(r["mae"] < r["naive_mae"] for r in rows),
                  "targets_beating_naive_all_folds": sorted({r["target"] for r in rows} - {r["target"] for r in rows if r["mae"] >= r["naive_mae"]})}
     res[name]["gate"] = "PASS" if res[name]["beats_naive_every_fold_target"] else "SKIPPED_NOT_BETTER_THAN_NAIVE"
-out = {"schema": "lane_b_eth_variant_d_families.v1", "causality": "every family uses rows <= t only (trailing windows, bar-close convention); wavelet via the native trailing-window producer",
+out = {"schema": "lane_b_eth_variant_d_families.v2", "causality": "every family uses rows <= t only (trailing windows, bar-close convention); wavelet via the native trailing-window producer",
        "wavelet_meta": {k: wmeta[k] for k in ("method_id", "method_name", "library", "version", "window", "level", "mode")},
        "probe": "ridge alpha=1.0, fold-TRAIN standardization, naive zero return", "families": res}
 json.dump(out, open(OUT, "w"), indent=1)

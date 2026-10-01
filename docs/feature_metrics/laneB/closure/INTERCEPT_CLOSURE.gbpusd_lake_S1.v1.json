@@ -1,0 +1,336 @@
+{
+ "schema": "lane_b_intercept_closure.v1",
+ "rule": "Intercept-only closure for published lake range passes. Recomputes the range-family ridge exactly as the lake\nprobes did (same split rows, purge, scored rows filtered on A+range finiteness) and adds the intercept-only\n(fold-TRAIN mean) control on identical rows. Reproduction of the published v1 fold MAE/naive MAE is checked and\nrecorded. Verdict: FEATURE_SIGNAL (below zero naive AND intercept control, MAE and MSE, every fold), DRIFT_ONLY\n(below zero naive only), FAIL.",
+ "purge": 168,
+ "n_train": 90896,
+ "verdicts": [
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "2h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "FEATURE_SIGNAL",
+   "intercept_only_beats_zero": true,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 13393,
+     "mae": 0.0008059480102390842,
+     "naive_mae": 0.0008080011069745283,
+     "mse": 1.5539422800786378e-06,
+     "naive_mse": 1.5561963088985977e-06,
+     "mean_only_mae": 0.0008079906628852235,
+     "mean_only_mse": 1.5561468174356971e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 13402,
+     "mae": 0.0011695691579120396,
+     "naive_mae": 0.0011715622032178396,
+     "mse": 4.014875846615022e-06,
+     "naive_mse": 4.016260342633366e-06,
+     "mean_only_mae": 0.001171547223241827,
+     "mean_only_mse": 4.016142883111619e-06
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 13396,
+     "mae": 0.0009830891226861609,
+     "naive_mae": 0.0009846790088211166,
+     "mse": 2.20830651426365e-06,
+     "naive_mse": 2.2088098942013385e-06,
+     "mean_only_mae": 0.0009846762706895312,
+     "mean_only_mse": 2.208723972930738e-06
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "6h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12914,
+     "mae": 0.0014753342124950275,
+     "naive_mae": 0.001476501369998443,
+     "mse": 4.807802095712903e-06,
+     "naive_mse": 4.810471085080419e-06,
+     "mean_only_mae": 0.0014764974118600955,
+     "mean_only_mse": 4.809497916070721e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12938,
+     "mae": 0.0021405853745354335,
+     "naive_mae": 0.002141740414865323,
+     "mse": 1.273083811795828e-05,
+     "naive_mse": 1.2731005164159367e-05,
+     "mean_only_mae": 0.0021417053366725603,
+     "mean_only_mse": 1.2729675245560087e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12926,
+     "mae": 0.0017865244169687254,
+     "naive_mae": 0.0017877388415970218,
+     "mse": 6.555079303124656e-06,
+     "naive_mse": 6.559245648863484e-06,
+     "mean_only_mae": 0.0017880169669913816,
+     "mean_only_mse": 6.558196570502742e-06
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "7h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "FEATURE_SIGNAL",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12794,
+     "mae": 0.0016099682547954205,
+     "naive_mae": 0.001611080316746269,
+     "mse": 5.662424346610417e-06,
+     "naive_mse": 5.666327088279566e-06,
+     "mean_only_mae": 0.0016111311126118836,
+     "mean_only_mse": 5.664826294938544e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12822,
+     "mae": 0.0023365276765537546,
+     "naive_mae": 0.002337928566432324,
+     "mse": 1.4655828868540075e-05,
+     "naive_mse": 1.4658767032338521e-05,
+     "mean_only_mae": 0.0023378078936382206,
+     "mean_only_mse": 1.4656701279543594e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12808,
+     "mae": 0.0019517061821306008,
+     "naive_mae": 0.0019529164483594662,
+     "mse": 7.652397084039988e-06,
+     "naive_mse": 7.658829078490965e-06,
+     "mean_only_mae": 0.001953315129592345,
+     "mean_only_mse": 7.65730445514504e-06
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "9h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "FEATURE_SIGNAL",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12554,
+     "mae": 0.0018610216964282582,
+     "naive_mae": 0.001861800426934516,
+     "mse": 7.334446296154598e-06,
+     "naive_mse": 7.33822984366185e-06,
+     "mean_only_mae": 0.0018619103663396956,
+     "mean_only_mse": 7.335467715986378e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12590,
+     "mae": 0.002699114832858622,
+     "naive_mae": 0.002701373317684049,
+     "mse": 1.848591095493755e-05,
+     "naive_mse": 1.8497470123665782e-05,
+     "mean_only_mae": 0.002701044321007869,
+     "mean_only_mse": 1.8494038940160608e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12572,
+     "mae": 0.00225562893844773,
+     "naive_mae": 0.002256245318543604,
+     "mse": 9.829307126279985e-06,
+     "naive_mse": 9.836630009349855e-06,
+     "mean_only_mae": 0.0022567876261584707,
+     "mean_only_mse": 9.833509843108686e-06
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "10h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12434,
+     "mae": 0.001978047127938635,
+     "naive_mae": 0.0019788593018984038,
+     "mse": 8.128036082054737e-06,
+     "naive_mse": 8.130043109519267e-06,
+     "mean_only_mae": 0.0019789158109281696,
+     "mean_only_mse": 8.126725738346233e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12475,
+     "mae": 0.002864408881497937,
+     "naive_mae": 0.0028665170133693628,
+     "mse": 2.0410670625621075e-05,
+     "naive_mse": 2.042611758943747e-05,
+     "mean_only_mae": 0.0028660401793495303,
+     "mean_only_mse": 2.0422311604236428e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12454,
+     "mae": 0.002397490295376442,
+     "naive_mae": 0.0023982710483551315,
+     "mse": 1.0944668479517431e-05,
+     "naive_mse": 1.0951938009080014e-05,
+     "mean_only_mae": 0.0023986935483998983,
+     "mean_only_mse": 1.0948073549466142e-05
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "11h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12314,
+     "mae": 0.0020932062570656095,
+     "naive_mae": 0.0020933712959461718,
+     "mse": 8.926857978988165e-06,
+     "naive_mse": 8.927677609188611e-06,
+     "mean_only_mae": 0.0020932429431621434,
+     "mean_only_mse": 8.924093127826673e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12360,
+     "mae": 0.003025700588359092,
+     "naive_mae": 0.003027877771843245,
+     "mse": 2.2387886740691543e-05,
+     "naive_mse": 2.2400838152424895e-05,
+     "mean_only_mae": 0.003027299467629184,
+     "mean_only_mse": 2.2396883481704966e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12336,
+     "mae": 0.002529317410442883,
+     "naive_mae": 0.0025296294132631588,
+     "mse": 1.2026353955573772e-05,
+     "naive_mse": 1.2031214058347057e-05,
+     "mean_only_mae": 0.0025299071906811125,
+     "mean_only_mse": 1.2026726798237486e-05
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "12h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": true,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12194,
+     "mae": 0.00220202234514132,
+     "naive_mae": 0.0022022893435143234,
+     "mse": 9.712986218756298e-06,
+     "naive_mse": 9.713357754930713e-06,
+     "mean_only_mae": 0.0022021258439283986,
+     "mean_only_mse": 9.709428818296542e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12245,
+     "mae": 0.003177690617393045,
+     "naive_mae": 0.0031795142089302095,
+     "mse": 2.4329237944455396e-05,
+     "naive_mse": 2.4342488635092344e-05,
+     "mean_only_mae": 0.0031789612319988083,
+     "mean_only_mse": 2.4338705602365947e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12218,
+     "mae": 0.0026541368914667347,
+     "naive_mae": 0.0026543986331280757,
+     "mse": 1.3082883861423656e-05,
+     "naive_mse": 1.3086462149250251e-05,
+     "mean_only_mae": 0.0026541162724518772,
+     "mean_only_mse": 1.3081295499039874e-05
+    }
+   ]
+  },
+  {
+   "dataset": "GBPUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "96h",
+   "split": "S1_70_15_15",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": true,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 8128,
+     "mae": 0.005063404631285124,
+     "naive_mae": 0.005068902600406823,
+     "mse": 4.43760128397467e-05,
+     "naive_mse": 4.442239613845411e-05,
+     "mean_only_mae": 0.005051625880645362,
+     "mean_only_mse": 4.4220292829314935e-05
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 8036,
+     "mae": 0.008138773930929284,
+     "naive_mae": 0.008181410729771386,
+     "mse": 0.00015044891803784932,
+     "naive_mse": 0.0001521943902764175,
+     "mean_only_mae": 0.008154044949347697,
+     "mean_only_mse": 0.0001515334834359494
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 8053,
+     "mae": 0.006361302349839371,
+     "naive_mae": 0.006366464367119666,
+     "mse": 6.537617258906486e-05,
+     "naive_mse": 6.554586462854622e-05,
+     "mean_only_mae": 0.006353337738151373,
+     "mean_only_mse": 6.524031067210861e-05
+    }
+   ]
+  }
+ ]
+}

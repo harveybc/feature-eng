@@ -41,7 +41,7 @@ for f in folds:
             y = t.values[vam]
             mae, naive = float(np.mean(np.abs(pred - y))), float(np.mean(np.abs(y)))
             rows.append({"fold": f["name"], "target": f"{tn}@{h}h", "subset": name, "n_features": len(cols), "train_rows": int(len(trm)),
-                         "val_rows": int(len(vam)), "mae": mae, "naive_mae": naive, "skill": 1 - mae / naive if naive > 0 else None})
+                         "val_rows": int(len(vam)), "mae": mae, "naive_mae": naive, "mse": float(np.mean((pred - y) ** 2)), "naive_mse": float(np.mean(y ** 2)), "mean_only_mae": float(np.mean(np.abs(float(t.values[trm].mean()) - y))), "mean_only_mse": float(np.mean((float(t.values[trm].mean()) - y) ** 2)), "skill": 1 - mae / naive if naive > 0 else None})
 agg = {}
 for r in rows:
     agg.setdefault((r["subset"], r["target"]), []).append(r["mae"])
@@ -51,7 +51,7 @@ for s in ("C_ALL", "B_SCREEN_UNION", "B_FOLD_TIERS"):
     by_subset[s] = float(np.mean([v for k, v in summary.items() if k.startswith(s + "|")]))
 naive_mean = float(np.mean([r["naive_mae"] for r in rows if r["subset"] == "C_ALL"]))
 winner = min(by_subset, key=by_subset.get)
-out = {"schema": "lane_b_eth_f1_linear_probe.v1", "probe": "ridge alpha=1.0, fold-train standardization, default (declared before measuring)",
+out = {"schema": "lane_b_eth_f1_linear_probe.v2", "probe": "ridge alpha=1.0, fold-train standardization, default (declared before measuring)",
        "targets": ["Y_s@4h", "Y_l@24h", "Y_l@144h"], "rows": rows, "mean_mae_by_subset_target": summary,
        "mean_mae_by_subset": by_subset, "naive_mean_mae": naive_mean, "rule": "strict minimum mean inner-validation MAE across folds and targets",
        "winner": winner, "beats_naive_every_target": {s: all(r["mae"] < r["naive_mae"] for r in rows if r["subset"] == s) for s in by_subset},

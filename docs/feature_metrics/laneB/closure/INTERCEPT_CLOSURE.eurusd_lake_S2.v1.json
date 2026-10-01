@@ -1,0 +1,213 @@
+{
+ "schema": "lane_b_intercept_closure.v1",
+ "rule": "Intercept-only closure for published lake range passes. Recomputes the range-family ridge exactly as the lake\nprobes did (same split rows, purge, scored rows filtered on A+range finiteness) and adds the intercept-only\n(fold-TRAIN mean) control on identical rows. Reproduction of the published v1 fold MAE/naive MAE is checked and\nrecorded. Verdict: FEATURE_SIGNAL (below zero naive AND intercept control, MAE and MSE, every fold), DRIFT_ONLY\n(below zero naive only), FAIL.",
+ "purge": 168,
+ "n_train": 93924,
+ "verdicts": [
+  {
+   "dataset": "EURUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "6h",
+   "split": "S2_prospective_reserve",
+   "reproduces_v1": true,
+   "verdict": "FEATURE_SIGNAL",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 13345,
+     "mae": 0.001735748993817494,
+     "naive_mae": 0.0017361776013710985,
+     "mse": 7.140939890065517e-06,
+     "naive_mse": 7.142287084662469e-06,
+     "mean_only_mae": 0.001736064838125427,
+     "mean_only_mse": 7.1416423900982475e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 13369,
+     "mae": 0.0018579805237681616,
+     "naive_mae": 0.0018586183314583313,
+     "mse": 8.013876899881288e-06,
+     "naive_mse": 8.016255207859546e-06,
+     "mean_only_mae": 0.0018587783526282041,
+     "mean_only_mse": 8.01738480823064e-06
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 13350,
+     "mae": 0.0013727069565080399,
+     "naive_mae": 0.0013734464704614688,
+     "mse": 3.7733224311595832e-06,
+     "naive_mse": 3.7769143890868393e-06,
+     "mean_only_mae": 0.0013734689595305712,
+     "mean_only_mse": 3.776470808752903e-06
+    }
+   ]
+  },
+  {
+   "dataset": "EURUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "7h",
+   "split": "S2_prospective_reserve",
+   "reproduces_v1": true,
+   "verdict": "FEATURE_SIGNAL",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 13221,
+     "mae": 0.0018914792036378181,
+     "naive_mae": 0.0018918709604537683,
+     "mse": 8.358270449359028e-06,
+     "naive_mse": 8.360758117567561e-06,
+     "mean_only_mae": 0.0018916804864551467,
+     "mean_only_mse": 8.359700969254974e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 13249,
+     "mae": 0.002026732705759943,
+     "naive_mae": 0.002027295174602602,
+     "mse": 9.311544847452787e-06,
+     "naive_mse": 9.314104654971869e-06,
+     "mean_only_mae": 0.0020274425335262405,
+     "mean_only_mse": 9.315722189691109e-06
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 13228,
+     "mae": 0.0014949433202608852,
+     "naive_mae": 0.0014962006851417479,
+     "mse": 4.398688530441271e-06,
+     "naive_mse": 4.403965221001618e-06,
+     "mean_only_mae": 0.0014962265307653833,
+     "mean_only_mse": 4.403266735828075e-06
+    }
+   ]
+  },
+  {
+   "dataset": "EURUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "8h",
+   "split": "S2_prospective_reserve",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 13097,
+     "mae": 0.0020437627334293487,
+     "naive_mae": 0.0020442809948909148,
+     "mse": 9.604195500736307e-06,
+     "naive_mse": 9.605606839888402e-06,
+     "mean_only_mae": 0.0020441221753501712,
+     "mean_only_mse": 9.604173965229527e-06
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 13129,
+     "mae": 0.002181309251477583,
+     "naive_mae": 0.0021817061440024526,
+     "mse": 1.0584762750589647e-05,
+     "naive_mse": 1.0586654362316945e-05,
+     "mean_only_mae": 0.0021819864693876155,
+     "mean_only_mse": 1.0588782999391086e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 13105,
+     "mae": 0.0016093368585219357,
+     "naive_mae": 0.0016105125996815895,
+     "mse": 5.0040947678375735e-06,
+     "naive_mse": 5.009536363635689e-06,
+     "mean_only_mae": 0.001610537430031164,
+     "mean_only_mse": 5.0085241858766295e-06
+    }
+   ]
+  },
+  {
+   "dataset": "EURUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "9h",
+   "split": "S2_prospective_reserve",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12973,
+     "mae": 0.0021870837335313197,
+     "naive_mae": 0.0021875994142975174,
+     "mse": 1.0840374214857208e-05,
+     "naive_mse": 1.0841621212590378e-05,
+     "mean_only_mae": 0.0021873254862776496,
+     "mean_only_mse": 1.0839723687434878e-05
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 13009,
+     "mae": 0.002328038575913207,
+     "naive_mae": 0.002328131140651003,
+     "mse": 1.1860251782360953e-05,
+     "naive_mse": 1.1860768365965441e-05,
+     "mean_only_mae": 0.00232848923421912,
+     "mean_only_mse": 1.1863508433939708e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12982,
+     "mae": 0.0017181772822044133,
+     "naive_mae": 0.0017191916806008377,
+     "mse": 5.614950707240259e-06,
+     "naive_mse": 5.620711773929453e-06,
+     "mean_only_mae": 0.0017191219617465627,
+     "mean_only_mse": 5.619365144661347e-06
+    }
+   ]
+  },
+  {
+   "dataset": "EURUSD_1h_lake",
+   "candidate": "range",
+   "horizon": "12h",
+   "split": "S2_prospective_reserve",
+   "reproduces_v1": true,
+   "verdict": "DRIFT_ONLY",
+   "intercept_only_beats_zero": false,
+   "rows": [
+    {
+     "fold": "inner_1",
+     "val_rows": 12601,
+     "mae": 0.0025679846558308507,
+     "naive_mae": 0.002568573781792463,
+     "mse": 1.432534405986941e-05,
+     "naive_mse": 1.4326613050169407e-05,
+     "mean_only_mae": 0.0025683902457502264,
+     "mean_only_mse": 1.4324227041318458e-05
+    },
+    {
+     "fold": "inner_2",
+     "val_rows": 12652,
+     "mae": 0.0027274234968603824,
+     "naive_mae": 0.002727491851707919,
+     "mse": 1.5485015029432053e-05,
+     "naive_mse": 1.548758733396062e-05,
+     "mean_only_mae": 0.002728181645835036,
+     "mean_only_mse": 1.5492014991391785e-05
+    },
+    {
+     "fold": "inner_3",
+     "val_rows": 12613,
+     "mae": 0.002006545564790024,
+     "naive_mae": 0.0020071855024541285,
+     "mse": 7.410273162095958e-06,
+     "naive_mse": 7.416769067775003e-06,
+     "mean_only_mae": 0.002006979376862215,
+     "mean_only_mse": 7.414871419602295e-06
+    }
+   ]
+  }
+ ]
+}

@@ -33,10 +33,10 @@ for f in folds:
             trm = tr[np.isfinite(X[tr][:, idx]).all(1)]; vam = va[np.isfinite(X[va][:, idx]).all(1)]
             pred = ridge(X[trm][:, idx], t.values[trm], X[vam][:, idx]); y = t.values[vam]
             rows.append({"fold": f["name"], "target": f"{tn}@{h}h", "subset": name, "n_features": len(cols), "val_rows": int(len(vam)),
-                         "mae": float(np.mean(np.abs(pred - y))), "naive_mae": float(np.mean(np.abs(y)))})
+                         "mae": float(np.mean(np.abs(pred - y))), "naive_mae": float(np.mean(np.abs(y))), "mse": float(np.mean((pred - y) ** 2)), "naive_mse": float(np.mean(y ** 2)), "mean_only_mae": float(np.mean(np.abs(float(t.values[trm].mean()) - y))), "mean_only_mse": float(np.mean((float(t.values[trm].mean()) - y) ** 2))})
 by = {s: float(np.mean([r["mae"] for r in rows if r["subset"] == s])) for s in ("C_DIFF_ALL", "C_DIFF_FOLD_TIERS")}
 beats = {s: all(r["mae"] < r["naive_mae"] for r in rows if r["subset"] == s) for s in by}
-out = {"schema": "lane_b_eth_variant_c_probe.v1", "transform": "first difference of inputs with outer-TRAIN acf_lag_1 >= 0.99 (from the v2 TRAIN profile); fitted nothing",
+out = {"schema": "lane_b_eth_variant_c_probe.v2", "transform": "first difference of inputs with outer-TRAIN acf_lag_1 >= 0.99 (from the v2 TRAIN profile); fitted nothing",
        "persistent_inputs_differenced": persistent, "rows": rows, "mean_mae_by_subset": by,
        "naive_mean_mae": float(np.mean([r["naive_mae"] for r in rows if r["subset"] == "C_DIFF_ALL"])), "beats_naive_every_target": beats}
 json.dump(out, open(OUT, "w"), indent=1)
