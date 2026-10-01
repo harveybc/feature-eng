@@ -1,0 +1,112 @@
+{
+ "schema": "lane_b_ps0_ps2_run.v1",
+ "dataset_id": "sota_benchmarks.thuml_tsl_electricity.train",
+ "identity": {
+  "dataset_id": "sota_benchmarks.thuml_tsl_electricity.train",
+  "resource_sha256": "7e45845d54c5219bad0ae6bc1b5316cf8ff9cead5d33fa998a5a51c2e4a497ad",
+  "train_prefix_sha256": "d7b6de5ffa440e6fcdf003178c7c62431d535ba1c0cb89fd2bc44af6dfc0ad20",
+  "vintage": "7e45845d54c5219b"
+ },
+ "fold_rule": "TSL Dataset_Custom outer split 0.7/0.1/0.2 (author protocol); inner: 3 expanding chronological folds inside TRAIN, validation 15 percent, purge 816 rows = lookback 96 + max horizon 720 rows",
+ "declaration_sha256": "ca1098ed94a36b972b06e45f381bd192fbd30c436f60532d8674ef8820c0a62f",
+ "declaration_file_sha256": "9f344687aa0703d76cc49910ec94dec15f51203d808397617989389e57ab701b",
+ "code_sha256": "4590e37c1c2dc94ea6a8a49c809efe6aa2c09b175aaae03f8ca03adc182dce25",
+ "params": {
+  "declared_periods_rows": {
+   "daily": 24,
+   "weekly": 168
+  },
+  "primary_period": "daily",
+  "acf_lags": [
+   1,
+   24,
+   48,
+   168
+  ],
+  "redundancy_threshold": 0.95,
+  "top_q": 10,
+  "explore_fraction": 0.1,
+  "explore_min": 2,
+  "max_synergy_pairs": 10,
+  "pair_feature_cap": 64,
+  "seed": 20261001
+ },
+ "folds": [
+  {
+   "name": "outer_train",
+   "train": [
+    0,
+    18412
+   ],
+   "val": null,
+   "purge": 0
+  },
+  {
+   "name": "inner_1",
+   "train": [
+    0,
+    9310
+   ],
+   "val": [
+    10126,
+    12888
+   ],
+   "purge": 816
+  },
+  {
+   "name": "inner_2",
+   "train": [
+    0,
+    12072
+   ],
+   "val": [
+    12888,
+    15650
+   ],
+   "purge": 816
+  },
+  {
+   "name": "inner_3",
+   "train": [
+    0,
+    14834
+   ],
+   "val": [
+    15650,
+    18412
+   ],
+   "purge": 816
+  }
+ ],
+ "features": 321,
+ "cells": 47508,
+ "cells_by_status": {
+  "MEASURED": 41071,
+  "MEASURED_REUSED": 1605,
+  "NOT_RUN": 4832
+ },
+ "basic_complete": 1267,
+ "full_complete": 316,
+ "feature_fold_pairs": 1284,
+ "targets": [
+  {
+   "target": "Y_s/Y_l/Y_b",
+   "horizon_hours": null,
+   "status": "NOT_APPLICABLE",
+   "note": "NOT_APPLICABLE: literature replica; author preprocessing and target protocol preserved; section-3 business targets Y_s/Y_l/Y_b do not apply to this resource"
+  }
+ ],
+ "tiers_by_fold": {
+  "inner_1": {
+   "UNRANKED": 321
+  },
+  "inner_2": {
+   "UNRANKED": 321
+  },
+  "inner_3": {
+   "UNRANKED": 321
+  }
+ },
+ "priority_or_synergy_in_k_of_3_folds": {},
+ "ps1_wall_seconds": 3.908900022506714
+}

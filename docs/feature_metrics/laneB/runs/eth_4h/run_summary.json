@@ -1,0 +1,238 @@
+{
+ "schema": "lane_b_ps0_ps2_run.v1",
+ "dataset_id": "financial_data.project3.ethusdt_4h_tech_stat.model_ready.v1.train",
+ "identity": {
+  "dataset_id": "financial_data.project3.ethusdt_4h_tech_stat.model_ready.v1.train",
+  "resource_sha256": "1b447c66e68495e826c53e2ab2b08ecd3922c8fdc735747628f8d0435ebe440f",
+  "train_prefix_sha256": "ba00b2d49b301fc99e9190af904aa84296b13bf1d5a17b3e786def56a460b2ef",
+  "vintage": "1b447c66e68495e8"
+ },
+ "fold_rule": "immutable predictor contract 14a1077f: train 2017-09-28..2023-12-31, validation 2024, test 2025 (calendar years, not the candidate 4y/1y/1y recipe); inner: 3 expanding folds, validation 15 percent, purge 60 rows = 24-row context + 36 rows (144 h at 4 h bars)",
+ "declaration_sha256": "f3c0becaa1655ac16a567aef6ac0e67ecbb89ddc5b204e05d5a8dac2394b527d",
+ "declaration_file_sha256": "5129f274683561e2971e5ec9c3cea7841876247a90a34a215f87638ac6665c1e",
+ "code_sha256": "4590e37c1c2dc94ea6a8a49c809efe6aa2c09b175aaae03f8ca03adc182dce25",
+ "params": {
+  "declared_periods_rows": {
+   "daily": 6,
+   "weekly": 42
+  },
+  "primary_period": "daily",
+  "acf_lags": [
+   1,
+   6,
+   12,
+   42
+  ],
+  "redundancy_threshold": 0.95,
+  "top_q": 10,
+  "explore_fraction": 0.1,
+  "explore_min": 2,
+  "max_synergy_pairs": 10,
+  "pair_feature_cap": 64,
+  "seed": 20261001
+ },
+ "folds": [
+  {
+   "name": "outer_train",
+   "train": [
+    0,
+    13699
+   ],
+   "val": null,
+   "purge": 0
+  },
+  {
+   "name": "inner_1",
+   "train": [
+    0,
+    7474
+   ],
+   "val": [
+    7534,
+    9589
+   ],
+   "purge": 60
+  },
+  {
+   "name": "inner_2",
+   "train": [
+    0,
+    9529
+   ],
+   "val": [
+    9589,
+    11644
+   ],
+   "purge": 60
+  },
+  {
+   "name": "inner_3",
+   "train": [
+    0,
+    11584
+   ],
+   "val": [
+    11644,
+    13699
+   ],
+   "purge": 60
+  }
+ ],
+ "features": 83,
+ "cells": 12284,
+ "cells_by_status": {
+  "MEASURED": 10616,
+  "MEASURED_REUSED": 415,
+  "NOT_RUN": 1253
+ },
+ "basic_complete": 324,
+ "full_complete": 81,
+ "feature_fold_pairs": 332,
+ "targets": [
+  {
+   "target": "Y_s",
+   "horizon_hours": 1,
+   "status": "NOT_CONSTRUCTIBLE_AT_SAMPLING",
+   "note": "1 h is not a multiple of the 14400 s step"
+  },
+  {
+   "target": "Y_s",
+   "horizon_hours": 2,
+   "status": "NOT_CONSTRUCTIBLE_AT_SAMPLING",
+   "note": "2 h is not a multiple of the 14400 s step"
+  },
+  {
+   "target": "Y_s",
+   "horizon_hours": 3,
+   "status": "NOT_CONSTRUCTIBLE_AT_SAMPLING",
+   "note": "3 h is not a multiple of the 14400 s step"
+  },
+  {
+   "target": "Y_s",
+   "horizon_hours": 4,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 1009 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_s",
+   "horizon_hours": 5,
+   "status": "NOT_CONSTRUCTIBLE_AT_SAMPLING",
+   "note": "5 h is not a multiple of the 14400 s step"
+  },
+  {
+   "target": "Y_s",
+   "horizon_hours": 6,
+   "status": "NOT_CONSTRUCTIBLE_AT_SAMPLING",
+   "note": "6 h is not a multiple of the 14400 s step"
+  },
+  {
+   "target": "Y_l",
+   "horizon_hours": 24,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 6000 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_l",
+   "horizon_hours": 48,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 11994 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_l",
+   "horizon_hours": 72,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_l",
+   "horizon_hours": 96,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_l",
+   "horizon_hours": 120,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_l",
+   "horizon_hours": 144,
+   "status": "CONSTRUCTED",
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
+  },
+  {
+   "target": "Y_b",
+   "horizon_hours": null,
+   "status": "NOT_EVALUATED_NO_VERSIONED_RULE",
+   "note": "candidate rule: S07 heuristic-strategy d08ae00 config_replication_baseline_20260930.json sha256 76447fccf7b98e8367fd50a3247f1d79d72a4b3bd202de1f5ff3b2c706e8d6da exit_variant E; candidate only, NOT_EVALUATED until the owner rules on the hold-out"
+  }
+ ],
+ "tiers_by_fold": {
+  "inner_1": {
+   "DEFERRED": 46,
+   "EXPLORATORY": 5,
+   "REPRESENTATIVE": 10,
+   "SYNERGY": 12,
+   "PRIORITY": 10
+  },
+  "inner_2": {
+   "DEFERRED": 49,
+   "REPRESENTATIVE": 8,
+   "SYNERGY": 11,
+   "PRIORITY": 10,
+   "EXPLORATORY": 5
+  },
+  "inner_3": {
+   "DEFERRED": 47,
+   "REPRESENTATIVE": 8,
+   "SYNERGY": 13,
+   "EXPLORATORY": 5,
+   "PRIORITY": 10
+  }
+ },
+ "priority_or_synergy_in_k_of_3_folds": {
+  "return_10": 3,
+  "ema_20": 3,
+  "sma_50": 3,
+  "ema_50": 3,
+  "sma_100": 1,
+  "ema_100": 1,
+  "sma_200": 1,
+  "ema_200": 1,
+  "close_sma_ratio_200": 1,
+  "macd_hist": 3,
+  "mom_10": 3,
+  "ema_cross_20_100": 1,
+  "obv": 3,
+  "volume_sma_20": 1,
+  "vwap_60": 2,
+  "roll_mean_ret_252": 1,
+  "roll_std_ret_252": 2,
+  "roll_skew_ret_252": 1,
+  "autocorr_lag1_100": 1,
+  "autocorr_lag5_100": 1,
+  "sqret_autocorr_lag1_100": 1,
+  "hurst_proxy_200": 1,
+  "sma_10": 2,
+  "ema_10": 2,
+  "sma_20": 2,
+  "macd": 1,
+  "macd_signal": 1,
+  "stoch_d": 1,
+  "cci_14": 2,
+  "roc_10": 2,
+  "roc_20": 1,
+  "mom_20": 2,
+  "bb_upper": 2,
+  "bb_middle": 2,
+  "bb_lower": 2,
+  "mfi_14": 1,
+  "return_20": 1,
+  "stoch_k": 1,
+  "williams_r_14": 1,
+  "bb_pct_b": 1,
+  "roll_mean_ret_20": 1
+ },
+ "ps1_wall_seconds": 0.8566701412200928
+}

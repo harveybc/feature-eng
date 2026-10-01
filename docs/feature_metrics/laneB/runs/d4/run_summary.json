@@ -1,0 +1,112 @@
+{
+ "schema": "lane_b_ps0_ps2_run.v1",
+ "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+ "identity": {
+  "dataset_id": "predictor.legacy.eurusd.phase1b.normalized_d4.train",
+  "resource_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+  "train_prefix_sha256": "37bac809885952d78f510acb3e1ce6c32750678a988225838778884764154703",
+  "vintage": "37bac809885952d7"
+ },
+ "fold_rule": "dedicated TRAIN file named by the phase-1b config; inner: 3 expanding folds, validation 15 percent, purge 60 rows; rows irregular (weekend gaps), periods in rows",
+ "declaration_sha256": "46646a95f6866cd252254981553f04ba11f8c0df04fcfb996657010cf01766ac",
+ "declaration_file_sha256": "654d14fd699e1b29d4008ee376e5d9875d7c558ee42420a3872be1103d52f9db",
+ "code_sha256": "4590e37c1c2dc94ea6a8a49c809efe6aa2c09b175aaae03f8ca03adc182dce25",
+ "params": {
+  "declared_periods_rows": {
+   "day_rows_nominal": 24,
+   "trading_week_rows_nominal": 120
+  },
+  "primary_period": "day_rows_nominal",
+  "acf_lags": [
+   1,
+   24,
+   48,
+   120
+  ],
+  "redundancy_threshold": 0.95,
+  "top_q": 10,
+  "explore_fraction": 0.1,
+  "explore_min": 2,
+  "max_synergy_pairs": 10,
+  "pair_feature_cap": 64,
+  "seed": 20261001
+ },
+ "folds": [
+  {
+   "name": "outer_train",
+   "train": [
+    0,
+    7656
+   ],
+   "val": null,
+   "purge": 0
+  },
+  {
+   "name": "inner_1",
+   "train": [
+    0,
+    4152
+   ],
+   "val": [
+    4212,
+    5360
+   ],
+   "purge": 60
+  },
+  {
+   "name": "inner_2",
+   "train": [
+    0,
+    5300
+   ],
+   "val": [
+    5360,
+    6508
+   ],
+   "purge": 60
+  },
+  {
+   "name": "inner_3",
+   "train": [
+    0,
+    6448
+   ],
+   "val": [
+    6508,
+    7656
+   ],
+   "purge": 60
+  }
+ ],
+ "features": 23,
+ "cells": 3404,
+ "cells_by_status": {
+  "MEASURED": 2944,
+  "MEASURED_REUSED": 115,
+  "NOT_RUN": 345
+ },
+ "basic_complete": 92,
+ "full_complete": 23,
+ "feature_fold_pairs": 92,
+ "targets": [
+  {
+   "target": "Y_s/Y_l/Y_b",
+   "horizon_hours": null,
+   "status": "NOT_EVALUATED",
+   "note": "NO_ALIGNED_ASSET_PRICE: the declared d4 resource carries indicators and oracle labels but no price column"
+  }
+ ],
+ "tiers_by_fold": {
+  "inner_1": {
+   "UNRANKED": 23
+  },
+  "inner_2": {
+   "UNRANKED": 23
+  },
+  "inner_3": {
+   "UNRANKED": 23
+  }
+ },
+ "priority_or_synergy_in_k_of_3_folds": {},
+ "ps1_wall_seconds": 0.19689393043518066
+}

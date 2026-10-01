@@ -1,0 +1,14 @@
+target,horizon_hours,status,note
+Y_s,1,NOT_CONSTRUCTIBLE_AT_SAMPLING,1 h is not a multiple of the 14400 s step
+Y_s,2,NOT_CONSTRUCTIBLE_AT_SAMPLING,2 h is not a multiple of the 14400 s step
+Y_s,3,NOT_CONSTRUCTIBLE_AT_SAMPLING,3 h is not a multiple of the 14400 s step
+Y_s,4,CONSTRUCTED,elapsed-time label; 1009 rows without a bar at t+h
+Y_s,5,NOT_CONSTRUCTIBLE_AT_SAMPLING,5 h is not a multiple of the 14400 s step
+Y_s,6,NOT_CONSTRUCTIBLE_AT_SAMPLING,6 h is not a multiple of the 14400 s step
+Y_l,24,CONSTRUCTED,elapsed-time label; 6000 rows without a bar at t+h
+Y_l,48,CONSTRUCTED,elapsed-time label; 11994 rows without a bar at t+h
+Y_l,72,CONSTRUCTED,elapsed-time label; 13699 rows without a bar at t+h
+Y_l,96,CONSTRUCTED,elapsed-time label; 13699 rows without a bar at t+h
+Y_l,120,CONSTRUCTED,elapsed-time label; 13699 rows without a bar at t+h
+Y_l,144,CONSTRUCTED,elapsed-time label; 13699 rows without a bar at t+h
+Y_b,,NOT_EVALUATED_NO_VERSIONED_RULE,"candidate rule: S07 heuristic-strategy d08ae00 config_replication_baseline_20260930.json sha256 76447fccf7b98e8367fd50a3247f1d79d72a4b3bd202de1f5ff3b2c706e8d6da exit_variant E; candidate only, NOT_EVALUATED until the owner rules on the hold-out"

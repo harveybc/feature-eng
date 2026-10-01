@@ -1,0 +1,112 @@
+{
+ "schema": "lane_b_ps0_ps2_run.v1",
+ "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+ "identity": {
+  "dataset_id": "sota_benchmarks.thuml_tsl_weather.train",
+  "resource_sha256": "34ee981d07313e51da2a50bb600072c8ae4a69cb4b0651f4cb93a069d7a2ba63",
+  "train_prefix_sha256": "d4a19f6e5cf26486cc9c1f1da2dcfa47edc57550fc81fb9f923b48c6b104fc46",
+  "vintage": "34ee981d07313e51"
+ },
+ "fold_rule": "TSL Dataset_Custom outer split 0.7/0.1/0.2 (author protocol); inner: 3 expanding chronological folds inside TRAIN, validation 15 percent, purge 816 rows = lookback 96 + max horizon 720 rows",
+ "declaration_sha256": "c7e20f15ee824eb5caf9309cb8af2fc93f6e65fdcbcc83b89cef16b9ec58e27e",
+ "declaration_file_sha256": "0dad37fd7edd9fc8c51507d7b84d2c45e6cf2c3049be2e504bfedb56da73a4d3",
+ "code_sha256": "4590e37c1c2dc94ea6a8a49c809efe6aa2c09b175aaae03f8ca03adc182dce25",
+ "params": {
+  "declared_periods_rows": {
+   "daily": 144,
+   "weekly": 1008
+  },
+  "primary_period": "daily",
+  "acf_lags": [
+   1,
+   144,
+   288,
+   1008
+  ],
+  "redundancy_threshold": 0.95,
+  "top_q": 10,
+  "explore_fraction": 0.1,
+  "explore_min": 2,
+  "max_synergy_pairs": 10,
+  "pair_feature_cap": 64,
+  "seed": 20261001
+ },
+ "folds": [
+  {
+   "name": "outer_train",
+   "train": [
+    0,
+    36887
+   ],
+   "val": null,
+   "purge": 0
+  },
+  {
+   "name": "inner_1",
+   "train": [
+    0,
+    19472
+   ],
+   "val": [
+    20288,
+    25821
+   ],
+   "purge": 816
+  },
+  {
+   "name": "inner_2",
+   "train": [
+    0,
+    25005
+   ],
+   "val": [
+    25821,
+    31354
+   ],
+   "purge": 816
+  },
+  {
+   "name": "inner_3",
+   "train": [
+    0,
+    30538
+   ],
+   "val": [
+    31354,
+    36887
+   ],
+   "purge": 816
+  }
+ ],
+ "features": 21,
+ "cells": 3108,
+ "cells_by_status": {
+  "MEASURED": 2671,
+  "MEASURED_REUSED": 105,
+  "NOT_RUN": 332
+ },
+ "basic_complete": 75,
+ "full_complete": 19,
+ "feature_fold_pairs": 84,
+ "targets": [
+  {
+   "target": "Y_s/Y_l/Y_b",
+   "horizon_hours": null,
+   "status": "NOT_APPLICABLE",
+   "note": "NOT_APPLICABLE: literature replica; author preprocessing and target protocol preserved; section-3 business targets Y_s/Y_l/Y_b do not apply to this resource"
+  }
+ ],
+ "tiers_by_fold": {
+  "inner_1": {
+   "UNRANKED": 21
+  },
+  "inner_2": {
+   "UNRANKED": 21
+  },
+  "inner_3": {
+   "UNRANKED": 21
+  }
+ },
+ "priority_or_synergy_in_k_of_3_folds": {},
+ "ps1_wall_seconds": 0.3252112865447998
+}

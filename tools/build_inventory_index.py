@@ -25,7 +25,7 @@ from pathlib import Path
 FIELDS = ["row_id", "source", "bank", "authority", "dataset_id", "column", "column_identity",
           "dataset_identity_sha256", "split_identity", "train_rows", "role", "status", "covered",
           "profile_path", "profile_sha256", "implementation_identity", "families_present",
-          "families_absent", "missing_reason"]
+          "families_absent", "missing_reason", "superseded_by", "family_states"]
 FAMILIES = ("missingness", "distribution", "volatility", "trend", "acf", "spectral", "stationarity", "seasonality")
 # c162 metric name -> family (anything not listed is recorded under "other")
 C162_FAMILY = [("missing_count", "missingness"), ("non_finite_count", "missingness"), ("constant_flag", "missingness"),
@@ -221,9 +221,25 @@ def main():
             reuse_row(v, vid, var["concept_name"], base)
 
     # 2. financial model-ready views (legacy inventory): summaries only, not TRAIN-certified
+    profiled_ids = {json.loads(pj.read_text())["dataset_id"] for pj in a.new_profiles.glob("*/profile.json")}
+    m03_shas = {}
+    for mp in sorted((a.new_profiles.parent / "manifests").glob("*.v2.json")):
+        mm = json.loads(mp.read_text())
+        if mm["dataset_id"] in profiled_ids:              # supersede only when a full-TRAIN profile exists
+            m03_shas[mm["resource_sha256"]] = mm["dataset_id"]
     for ds in inv["datasets"]:
         holdout = "phase1_test" in ds["dataset_id"]
+        sup = m03_shas.get(ds["physical_sha256"]) if not holdout else None
         for var in ds["variables"]:
+            if sup:
+                add(source="dataset_inventory.model_ready_view", bank="FINANCIAL", authority="FINANCIAL_DOMAIN_DEVELOPMENT_ONLY",
+                    dataset_id=ds["dataset_id"], column=var["name"], dataset_identity_sha256=ds["physical_sha256"],
+                    split_identity="CORRECTION: TRAIN contract exists (predictor 14a1077f)", role=var.get("role", ""),
+                    status="SUPERSEDED", superseded_by=sup,
+                    missing_reason=("CORRECTION 2026-10-01: v2 said 'no TRAIN boundary is declared for this view'; WRONG - the "
+                                    "immutable manifest 14a1077f declares train 2017-09-28..2023-12-31; this row is replaced by "
+                                    f"the full-TRAIN row of {sup}"))
+                continue
             add(source="dataset_inventory.model_ready_view", bank="FINANCIAL", authority="FINANCIAL_DOMAIN_DEVELOPMENT_ONLY",
                 dataset_id=ds["dataset_id"], column=var["name"], dataset_identity_sha256=ds["physical_sha256"],
                 split_identity="NONE_DECLARED", role=var.get("role", ""),
@@ -275,6 +291,17 @@ def main():
         if m["dataset_id"] in new:
             pj, p = new[m["dataset_id"]]
             psha = sha_file(pj)
+            fstate = {}
+            ml = pj.parent / "metrics_long.csv"
+            if ml.is_file():
+                acc = collections.defaultdict(list)
+                with ml.open() as fh:
+                    for r in csv.DictReader(fh):
+                        acc[(r["column"], r["family"])].append(r["status"])
+                for (col, fam), st in acc.items():
+                    ok = [x in ("OK", "OK_WITH_WARNING") for x in st]
+                    fstate.setdefault(col, {})[fam] = ("COMPLETE" if all(ok) else "FAILED" if "FAILED" in st
+                                                       else "PARTIAL" if any(ok) else "NOT_RUN")
             for c in p["columns"]:
                 fam_ok = FAMILIES if c["status"] == "PROFILED_ADMISSIBLE" else ()
                 add(source=f"m03.{m['governance'].lower()}", bank="PUBLIC_BENCHMARK" if m["governance"] != "LOCAL_FILE" else "FINANCIAL",
@@ -291,7 +318,8 @@ def main():
                     families_present=";".join(fam_ok) if fam_ok else "",
                     families_absent="" if fam_ok else ";".join(FAMILIES),
                     missing_reason=c.get("exclusion_reason") or ("see metrics_long.csv for per-metric NOT_RUN/FAILED rows"
-                                                                  if fam_ok else ""))
+                                                                  if fam_ok else ""),
+                    family_states=json.dumps(fstate.get(c["column"], {}), sort_keys=True))
         else:
             header = m.get("columns_total")
             add(source=f"m03.{m['governance'].lower()}", bank="PUBLIC_BENCHMARK" if m["governance"] != "LOCAL_FILE" else "FINANCIAL",
@@ -305,6 +333,7 @@ def main():
             dataset_id=gp["dataset_id"] + ".prefix512", column=f["column"], dataset_identity_sha256=gp["consumed_input_sha256"],
             split_identity="TRAIN rows [0,512) of [0,7656)", train_rows="[0, 512]", role=f["role"],
             status="PARTIAL_PREFIX_VERIFIED_REUSED" if f["role"] == "feature" else "EXCLUDED_ROLE", covered=False,
+            superseded_by="predictor.legacy.eurusd.phase1b.normalized_d4.train (full TRAIN)",
             profile_path="docs/feature_metrics/evidence/train_512/profile.json", profile_sha256=gsha,
             implementation_identity=f"profile_train_features {gp['source_code_sha256'][:16]}",
             missing_reason="512 of 7656 TRAIN rows: verified replay, but not full-TRAIN coverage; superseded by the M03 full-TRAIN row when present"
@@ -323,7 +352,32 @@ def main():
     for v in c162.values():
         reuse[("bytes_ok" if v["bytes_ok"] else "bytes_FAIL", "split_ok" if v["split_ok"] else "split_FAIL",
                "impl_ok" if v["impl_ok"] else "impl_FAIL")] += 1
-    summary = {"schema": "m03_inventory_coverage.v1",
+    distinct = [r for r in rows if not r["superseded_by"]]
+    fam_cells = collections.Counter()
+    for r in distinct:
+        if r["family_states"]:
+            st = json.loads(r["family_states"])
+            for f in FAMILIES:
+                fam_cells[(f, st.get(f, "ABSENT"))] += 1
+        elif r["status"] == "MEASURED_TRAIN_VERIFIED_REUSED":
+            pres = set(filter(None, r["families_present"].split(";")))
+            for f in FAMILIES:
+                fam_cells[(f, "PRESENT_REUSED" if f in pres else "ABSENT_IN_REUSED_PROFILE")] += 1
+        else:
+            for f in FAMILIES:
+                fam_cells[(f, "NOT_MEASURED:" + r["status"])] += 1
+    by_family = {}
+    for (f, st), n in fam_cells.items():
+        by_family.setdefault(f, {})[st] = n
+    summary = {"schema": "m03_inventory_coverage.v2",
+               "denominator_distinct_rows": len(distinct),
+               "covered_distinct_rows": sum(r["covered"] for r in distinct),
+               "superseded_rows": len(rows) - len(distinct),
+               "family_denominator_cells": len(distinct) * len(FAMILIES),
+               "families": list(FAMILIES), "by_family_state": by_family,
+               "acceptance_denominator_note": ("MS14 acceptance uses distinct dataset x column rows; FS15 acceptance uses "
+                                               "rows x families (a covered row with ACF but without stationarity is not "
+                                               "complete in that family); superseded rows count in neither"),
                "denominator_rows": len(rows), "covered_rows": sum(r["covered"] for r in rows),
                "covered_definition": "a feature column with a TRAIN-only profile over its full declared TRAIN population whose bytes, split and implementation identities verify (new or reused); excluded-role and partial-prefix rows are accounted but not covered",
                "by_status": dict(by_status), "by_source": {k: dict(v) for k, v in by_source.items()},
@@ -333,7 +387,8 @@ def main():
                           "inherited_profile_sha256": gsha},
                "rule": "metadata only; no data value read here; reused artifacts filtered to partition == train"}
     (a.output / "coverage_summary.json").write_text(json.dumps(summary, indent=1) + "\n")
-    print(json.dumps({k: summary[k] for k in ("denominator_rows", "covered_rows", "by_status")}))
+    print(json.dumps({k: summary[k] for k in ("denominator_rows", "denominator_distinct_rows", "covered_distinct_rows",
+                                              "superseded_rows", "family_denominator_cells", "by_status")}))
 
 
 if __name__ == "__main__":

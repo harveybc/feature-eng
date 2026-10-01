@@ -1,0 +1,148 @@
+{
+ "schema": "m03_inventory_coverage.v2",
+ "denominator_distinct_rows": 15228,
+ "covered_distinct_rows": 3538,
+ "superseded_rows": 118,
+ "family_denominator_cells": 121824,
+ "families": [
+  "missingness",
+  "distribution",
+  "volatility",
+  "trend",
+  "acf",
+  "spectral",
+  "stationarity",
+  "seasonality"
+ ],
+ "by_family_state": {
+  "missingness": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "PRESENT_REUSED": 2228,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "COMPLETE": 1310
+  },
+  "distribution": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "PRESENT_REUSED": 2228,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "COMPLETE": 1301,
+   "PARTIAL": 9
+  },
+  "volatility": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "ABSENT_IN_REUSED_PROFILE": 2228,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "COMPLETE": 1310
+  },
+  "trend": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "ABSENT_IN_REUSED_PROFILE": 2228,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "PARTIAL": 127,
+   "COMPLETE": 1183
+  },
+  "acf": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "PRESENT_REUSED": 2045,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "ABSENT_IN_REUSED_PROFILE": 183,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "COMPLETE": 1253,
+   "PARTIAL": 57
+  },
+  "spectral": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "PRESENT_REUSED": 2228,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "PARTIAL": 127,
+   "COMPLETE": 1183
+  },
+  "stationarity": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "PRESENT_REUSED": 2031,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "ABSENT_IN_REUSED_PROFILE": 197,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "COMPLETE": 1310
+  },
+  "seasonality": {
+   "NOT_MEASURED:NOT_MEASURED": 11468,
+   "ABSENT_IN_REUSED_PROFILE": 2228,
+   "NOT_MEASURED:EXCLUDED_ROLE": 198,
+   "NOT_MEASURED:EXCLUDED_HOLDOUT_FILE": 9,
+   "ABSENT": 15,
+   "COMPLETE": 1310
+  }
+ },
+ "acceptance_denominator_note": "MS14 acceptance uses distinct dataset x column rows; FS15 acceptance uses rows x families (a covered row with ACF but without stationarity is not complete in that family); superseded rows count in neither",
+ "denominator_rows": 15346,
+ "covered_rows": 3538,
+ "covered_definition": "a feature column with a TRAIN-only profile over its full declared TRAIN population whose bytes, split and implementation identities verify (new or reused); excluded-role and partial-prefix rows are accounted but not covered",
+ "by_status": {
+  "NOT_MEASURED": 11468,
+  "MEASURED_TRAIN_VERIFIED_REUSED": 2228,
+  "EXCLUDED_ROLE": 218,
+  "SUPERSEDED": 90,
+  "EXCLUDED_HOLDOUT_FILE": 9,
+  "MEASURED_TRAIN_NEW": 1310,
+  "PARTIAL_PREFIX_VERIFIED_REUSED": 23
+ },
+ "by_source": {
+  "bank_index.financial_appearance_x_variable": {
+   "NOT_MEASURED": 6604,
+   "MEASURED_TRAIN_VERIFIED_REUSED": 1058,
+   "EXCLUDED_ROLE": 198
+  },
+  "dataset_inventory.model_ready_view": {
+   "SUPERSEDED": 90,
+   "EXCLUDED_HOLDOUT_FILE": 9
+  },
+  "bank_index.public_series": {
+   "NOT_MEASURED": 4650
+  },
+  "bank_index.synthetic_generator": {
+   "NOT_MEASURED": 202
+  },
+  "public_panels_c126_v2": {
+   "MEASURED_TRAIN_VERIFIED_REUSED": 537,
+   "NOT_MEASURED": 12
+  },
+  "synthetic_bank_c128_v1": {
+   "MEASURED_TRAIN_VERIFIED_REUSED": 633
+  },
+  "m03.local_file": {
+   "EXCLUDED_ROLE": 12,
+   "MEASURED_TRAIN_NEW": 106
+  },
+  "m03.lake_resource_identity": {
+   "EXCLUDED_ROLE": 3,
+   "MEASURED_TRAIN_NEW": 1204
+  },
+  "inherited.gibbs_dce037b.train_512": {
+   "EXCLUDED_ROLE": 5,
+   "PARTIAL_PREFIX_VERIFIED_REUSED": 23
+  }
+ },
+ "c162_artifact_verification": {
+  "bytes_ok|split_ok|impl_ok": 715
+ },
+ "inputs": {
+  "bank_index_sha256": "d112246d10463669aca99061b70f21ad25fbb9d88c059111a12d5f75e6448768",
+  "financial_contracts_sha256": "4447df439434d017b79e4fc97f405b3dd8d636ae37d7b9c09cc374416364924e",
+  "financial_contracts_bound_by_c161_sync": true,
+  "inherited_profile_sha256": "6ad14de5536acf524cd7e03c8fa663c2ba72bea08329f7f1539d45a6eaf3fde2"
+ },
+ "rule": "metadata only; no data value read here; reused artifacts filtered to partition == train"
+}

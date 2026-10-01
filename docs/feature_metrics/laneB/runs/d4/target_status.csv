@@ -1,0 +1,2 @@
+target,horizon_hours,status,note
+Y_s/Y_l/Y_b,,NOT_EVALUATED,NO_ALIGNED_ASSET_PRICE: the declared d4 resource carries indicators and oracle labels but no price column
