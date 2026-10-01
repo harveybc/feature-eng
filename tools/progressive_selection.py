@@ -347,6 +347,22 @@ class TargetSeries:
         self.status, self.source_column, self.note = status, source_column, note
 
 
+def epoch_seconds(dt):
+    """Integer epoch seconds from a datetime64 Series of ANY resolution (ns, us, ms, s).
+
+    `astype("int64") // 10**9` assumes nanoseconds; pandas >= 3 parses strings to microseconds,
+    which turned every 4 h step into 14 and put each label 1000x past its horizon."""
+    import pandas as pd
+    if dt.isna().any():
+        raise ValueError("unparseable timestamp; refusing to build elapsed-time labels")
+    return ((dt - pd.Timestamp("1970-01-01")) // pd.Timedelta(seconds=1)).to_numpy(dtype=np.int64)
+
+
+def timestamps_to_seconds(stamps, fmt=None):
+    import pandas as pd
+    return epoch_seconds(pd.to_datetime(pd.Series(stamps), format=fmt))
+
+
 def build_targets(price, ts_seconds, asset_column, source_column, horizons, step_seconds, barrier_rule=None):
     """Business targets from the declared asset price only. Y(t,h) = log P(t+h hours) / P(t).
 
@@ -626,7 +642,7 @@ def run_dataset(manifest_path, declaration_path, source_root, out_dir, cache_roo
     targets, target_status = {}, []
     if targets_spec:
         import pandas as pd
-        ts = pd.to_datetime(pd.Series(stamps), format=m.get("timestamp_format")).astype("int64").to_numpy() // 10**9
+        ts = timestamps_to_seconds(stamps, m.get("timestamp_format"))
         price = Xall[:, header.index(targets_spec["asset_column"])]
         targets = build_targets(price, ts, targets_spec["asset_column"], targets_spec["asset_column"],
                                 targets_spec["horizons"], m["step_seconds"], targets_spec.get("barrier_rule"))

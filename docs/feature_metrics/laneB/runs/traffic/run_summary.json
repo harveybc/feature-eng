@@ -10,7 +10,7 @@
  "fold_rule": "TSL Dataset_Custom outer split 0.7/0.1/0.2 (author protocol); inner: 3 expanding chronological folds inside TRAIN, validation 15 percent, purge 816 rows = lookback 96 + max horizon 720 rows",
  "declaration_sha256": "de71cca20d038ca58c8f221d3b1bca2314de2c99a4677f25afccad8d09f54734",
  "declaration_file_sha256": "5c2e7d0fbb30c7466c0f29a97330cb6cd8c3462d2c450e829911dd7fe58e0e85",
- "code_sha256": "4590e37c1c2dc94ea6a8a49c809efe6aa2c09b175aaae03f8ca03adc182dce25",
+ "code_sha256": "d0679a3d8fdcb72114e7708caa602f4cec6a42ea9c3b9e65bdc74f3d1426ba43",
  "params": {
   "declared_periods_rows": {
    "daily": 24,
@@ -108,5 +108,5 @@
   }
  },
  "priority_or_synergy_in_k_of_3_folds": {},
- "ps1_wall_seconds": 10.453957319259644
+ "ps1_wall_seconds": 10.417182207107544
 }

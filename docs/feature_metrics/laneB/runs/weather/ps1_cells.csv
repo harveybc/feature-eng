@@ -26,11 +26,11 @@ p (mbar),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.7372381251454
 p (mbar),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5124112183529723,
 p (mbar),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.10911637419017756,
 p (mbar),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.7712138898778753,
-p (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-p (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-p (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-p (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-p (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+p (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+p (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+p (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+p (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+p (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 p (mbar),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,6.820376622437894e-10,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 p (mbar),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.010710409351218779,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 p (mbar),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,9221.75,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -63,11 +63,11 @@ T (degC),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.8774685542325
 T (degC),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.23059539742446156,
 T (degC),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7370268312732452,
 T (degC),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.46647413623635114,
-T (degC),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-T (degC),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-T (degC),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-T (degC),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-T (degC),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+T (degC),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+T (degC),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+T (degC),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+T (degC),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+T (degC),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 T (degC),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,3.527581182743667e-13,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 T (degC),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 T (degC),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -100,11 +100,11 @@ Tpot (K),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.8690981130220
 Tpot (K),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.2461716503797518,
 Tpot (K),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7208159426596702,
 Tpot (K),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.4959872485646817,
-Tpot (K),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-Tpot (K),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-Tpot (K),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-Tpot (K),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-Tpot (K),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+Tpot (K),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+Tpot (K),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+Tpot (K),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+Tpot (K),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+Tpot (K),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 Tpot (K),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,4.887758899441344e-13,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 Tpot (K),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 Tpot (K),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -137,11 +137,11 @@ Tdew (degC),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.8432245903
 Tdew (degC),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.30507383165831325,
 Tdew (degC),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6830492495715313,
 Tdew (degC),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.6046318785786131,
-Tdew (degC),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-Tdew (degC),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-Tdew (degC),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-Tdew (degC),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-Tdew (degC),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+Tdew (degC),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+Tdew (degC),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+Tdew (degC),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+Tdew (degC),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+Tdew (degC),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 Tdew (degC),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,1.1169446942119778e-05,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 Tdew (degC),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 Tdew (degC),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,18443.5,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -174,11 +174,11 @@ rh (%),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.626817402227490
 rh (%),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.7397700375423729,
 rh (%),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4527405873612998,
 rh (%),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.0684613092739705,
-rh (%),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-rh (%),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-rh (%),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-rh (%),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-rh (%),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+rh (%),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+rh (%),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+rh (%),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+rh (%),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+rh (%),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 rh (%),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 rh (%),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 rh (%),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -211,11 +211,11 @@ VPmax (mbar),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.856450430
 VPmax (mbar),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.27657630017005735,
 VPmax (mbar),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7253169320090299,
 VPmax (mbar),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5076712526925992,
-VPmax (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-VPmax (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-VPmax (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-VPmax (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-VPmax (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+VPmax (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+VPmax (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+VPmax (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+VPmax (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+VPmax (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 VPmax (mbar),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,3.779888329020195e-16,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 VPmax (mbar),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 VPmax (mbar),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -248,11 +248,11 @@ VPact (mbar),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.838329737
 VPact (mbar),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3169144973015103,
 VPact (mbar),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6828820850716543,
 VPact (mbar),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.6128591836231304,
-VPact (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-VPact (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-VPact (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-VPact (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-VPact (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+VPact (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+VPact (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+VPact (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+VPact (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+VPact (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 VPact (mbar),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,7.358262730860467e-06,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 VPact (mbar),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 VPact (mbar),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,7377.400000000001,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -285,11 +285,11 @@ VPdef (mbar),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.698511138
 VPdef (mbar),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5956120887042116,
 VPdef (mbar),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5464499823808971,
 VPdef (mbar),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8806147780815333,
-VPdef (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-VPdef (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-VPdef (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-VPdef (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-VPdef (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+VPdef (mbar),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+VPdef (mbar),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+VPdef (mbar),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+VPdef (mbar),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+VPdef (mbar),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 VPdef (mbar),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,8.244969647140797e-30,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 VPdef (mbar),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 VPdef (mbar),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -322,11 +322,11 @@ sh (g/kg),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.837120766036
 sh (g/kg),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.31936670643425386,
 sh (g/kg),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6799905803059338,
 sh (g/kg),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.6188653420256697,
-sh (g/kg),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-sh (g/kg),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-sh (g/kg),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-sh (g/kg),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-sh (g/kg),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+sh (g/kg),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+sh (g/kg),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+sh (g/kg),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+sh (g/kg),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+sh (g/kg),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 sh (g/kg),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,7.373294623215614e-06,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 sh (g/kg),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 sh (g/kg),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,7377.400000000001,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -359,11 +359,11 @@ H2OC (mmol/mol),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.837307
 H2OC (mmol/mol),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.31896573715956833,
 H2OC (mmol/mol),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6803766903268916,
 H2OC (mmol/mol),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.6179712497673591,
-H2OC (mmol/mol),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 H2OC (mmol/mol),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,7.5445229541998434e-06,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 H2OC (mmol/mol),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 H2OC (mmol/mol),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,7377.400000000001,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -396,11 +396,11 @@ rho (g/m**3),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.850517894
 rho (g/m**3),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.28029994794510205,
 rho (g/m**3),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6534146104248427,
 rho (g/m**3),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.6258260496144543,
-rho (g/m**3),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-rho (g/m**3),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-rho (g/m**3),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-rho (g/m**3),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-rho (g/m**3),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+rho (g/m**3),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+rho (g/m**3),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+rho (g/m**3),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+rho (g/m**3),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+rho (g/m**3),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 rho (g/m**3),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,2.5913608721279538e-11,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 rho (g/m**3),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 rho (g/m**3),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -433,11 +433,11 @@ wv (m/s),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,-2.579196291480
 wv (m/s),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.007886411118874,
 wv (m/s),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,-1.0003603584885933e-05,
 wv (m/s),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.0561789515108204,
-wv (m/s),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-wv (m/s),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-wv (m/s),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-wv (m/s),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-wv (m/s),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+wv (m/s),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+wv (m/s),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+wv (m/s),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+wv (m/s),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+wv (m/s),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 wv (m/s),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 wv (m/s),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.1,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 wv (m/s),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,143.52918287937743,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -470,11 +470,11 @@ max. wv (m/s),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.47181317
 max. wv (m/s),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.0550518755154465,
 max. wv (m/s),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.30670070000205435,
 max. wv (m/s),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.3900592763711705,
-max. wv (m/s),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-max. wv (m/s),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-max. wv (m/s),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-max. wv (m/s),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-max. wv (m/s),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+max. wv (m/s),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+max. wv (m/s),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+max. wv (m/s),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+max. wv (m/s),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+max. wv (m/s),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 max. wv (m/s),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 max. wv (m/s),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 max. wv (m/s),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -507,11 +507,11 @@ wd (deg),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.2171618745333
 wd (deg),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.5673571059985743,
 wd (deg),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.0402114839073362,
 wd (deg),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.9351195432926078,
-wd (deg),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-wd (deg),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-wd (deg),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-wd (deg),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-wd (deg),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+wd (deg),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+wd (deg),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+wd (deg),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+wd (deg),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+wd (deg),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 wd (deg),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,8.734597586256637e-29,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 wd (deg),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 wd (deg),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,36887.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -544,11 +544,11 @@ rain (mm),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,-0.00221393896
 rain (mm),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.012214927130735,
 rain (mm),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.003823790197947865,
 rain (mm),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.041240069770919,
-rain (mm),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-rain (mm),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-rain (mm),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-rain (mm),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-rain (mm),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+rain (mm),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+rain (mm),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+rain (mm),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+rain (mm),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+rain (mm),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 rain (mm),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 rain (mm),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.1,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 rain (mm),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,309.97478991596637,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -581,11 +581,11 @@ raining (s),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.0355605287
 raining (s),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.936055437147112,
 raining (s),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.05389918460992804,
 raining (s),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.9238712889888536,
-raining (s),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-raining (s),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-raining (s),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-raining (s),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-raining (s),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+raining (s),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+raining (s),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+raining (s),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+raining (s),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+raining (s),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 raining (s),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 raining (s),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.1,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 raining (s),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,1756.5238095238094,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -618,11 +618,11 @@ SWDR (W/m�),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.78636819
 SWDR (W/m�),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.4243713218747384,
 SWDR (W/m�),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7228770855993872,
 SWDR (W/m�),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5266120977695334,
-SWDR (W/m�),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-SWDR (W/m�),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-SWDR (W/m�),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-SWDR (W/m�),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-SWDR (W/m�),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+SWDR (W/m�),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+SWDR (W/m�),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+SWDR (W/m�),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+SWDR (W/m�),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+SWDR (W/m�),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 SWDR (W/m�),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 SWDR (W/m�),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 SWDR (W/m�),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -655,11 +655,11 @@ PAR (�mol/m�/s),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.79
 PAR (�mol/m�/s),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.4016685261021734,
 PAR (�mol/m�/s),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7378601665377417,
 PAR (�mol/m�/s),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.49634726630291104,
-PAR (�mol/m�/s),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 PAR (�mol/m�/s),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 PAR (�mol/m�/s),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 PAR (�mol/m�/s),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -692,11 +692,11 @@ max. PAR (�mol/m�/s),outer_train,seasonality,seasonal_acf_daily_144,MEASURED
 max. PAR (�mol/m�/s),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.8103757567248399,
 max. PAR (�mol/m�/s),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5558853684416261,
 max. PAR (�mol/m�/s),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8842655998335248,
-max. PAR (�mol/m�/s),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 max. PAR (�mol/m�/s),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 max. PAR (�mol/m�/s),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 max. PAR (�mol/m�/s),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -729,11 +729,11 @@ Tlog (degC),outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.8813474684
 Tlog (degC),outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.22604904250357188,
 Tlog (degC),outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7652710263807422,
 Tlog (degC),outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.4114710113952871,
-Tlog (degC),outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-Tlog (degC),outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-Tlog (degC),outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-Tlog (degC),outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-Tlog (degC),outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+Tlog (degC),outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+Tlog (degC),outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+Tlog (degC),outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+Tlog (degC),outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+Tlog (degC),outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 Tlog (degC),outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,2.097812987631379e-14,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 Tlog (degC),outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.01,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 Tlog (degC),outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -766,11 +766,11 @@ OT,outer_train,seasonality,seasonal_acf_daily_144,MEASURED,0.0022051271015343177
 OT,outer_train,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.0033677845383893,
 OT,outer_train,seasonality,seasonal_acf_weekly_1008,MEASURED,0.0011049441139525413,
 OT,outer_train,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.05364618716384,
-OT,outer_train,cost,seconds_quality,MEASURED,0.0007242544761904689,process CPU seconds of the batch divided by its features
-OT,outer_train,cost,seconds_distribution,MEASURED,0.002531138809523809,process CPU seconds of the batch divided by its features
-OT,outer_train,cost,seconds_volatility,MEASURED,0.0005132300952380973,process CPU seconds of the batch divided by its features
-OT,outer_train,cost,seconds_acf_selected,MEASURED,0.000273928904761903,process CPU seconds of the batch divided by its features
-OT,outer_train,cost,seconds_seasonality,MEASURED,0.00047918138095237595,process CPU seconds of the batch divided by its features
+OT,outer_train,cost,seconds_quality,MEASURED,0.0007329943333333292,process CPU seconds of the batch divided by its features
+OT,outer_train,cost,seconds_distribution,MEASURED,0.002510697809523806,process CPU seconds of the batch divided by its features
+OT,outer_train,cost,seconds_volatility,MEASURED,0.0005089175238095278,process CPU seconds of the batch divided by its features
+OT,outer_train,cost,seconds_acf_selected,MEASURED,0.00027116947619048356,process CPU seconds of the batch divided by its features
+OT,outer_train,cost,seconds_seasonality,MEASURED,0.00044901695238094445,process CPU seconds of the batch divided by its features
 OT,outer_train,stationarity,adf_c_aic_pvalue,MEASURED_REUSED,0.0,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
 OT,outer_train,stationarity,kpss_c_auto_pvalue,MEASURED_REUSED,0.1,v2 full-TRAIN profile 47e8bed8e2219d78 (OK_WITH_WARNING)
 OT,outer_train,spectral,peak1_period_rows,MEASURED_REUSED,144.08984375,v2 full-TRAIN profile 47e8bed8e2219d78 (OK)
@@ -803,11 +803,11 @@ p (mbar),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7195218637312241,
 p (mbar),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5471892933111439,
 p (mbar),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.15063892404241275,
 p (mbar),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.6993194040410218,
-p (mbar),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-p (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-p (mbar),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-p (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-p (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+p (mbar),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+p (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+p (mbar),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+p (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+p (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 p (mbar),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 p (mbar),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 p (mbar),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -840,11 +840,11 @@ T (degC),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7315092747034261,
 T (degC),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5239540439084794,
 T (degC),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4135293938537275,
 T (degC),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.0740144213847238,
-T (degC),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-T (degC),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-T (degC),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-T (degC),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-T (degC),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+T (degC),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+T (degC),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+T (degC),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+T (degC),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+T (degC),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 T (degC),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 T (degC),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 T (degC),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -877,11 +877,11 @@ Tpot (K),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7216677078657656,
 Tpot (K),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5409887693993576,
 Tpot (K),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.3892547288323538,
 Tpot (K),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.1178766317672137,
-Tpot (K),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-Tpot (K),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-Tpot (K),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-Tpot (K),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-Tpot (K),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+Tpot (K),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+Tpot (K),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+Tpot (K),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+Tpot (K),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+Tpot (K),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 Tpot (K),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tpot (K),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tpot (K),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -914,11 +914,11 @@ Tdew (degC),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.54221949180892
 Tdew (degC),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.9143760976502935,
 Tdew (degC),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.1102930249936987,
 Tdew (degC),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.7673263359423428,
-Tdew (degC),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 Tdew (degC),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tdew (degC),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tdew (degC),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -951,11 +951,11 @@ rh (%),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.6428687000407898,
 rh (%),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.7073979700775807,
 rh (%),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4584960875456364,
 rh (%),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.0265170535336963,
-rh (%),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-rh (%),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-rh (%),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-rh (%),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-rh (%),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+rh (%),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+rh (%),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+rh (%),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+rh (%),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+rh (%),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 rh (%),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rh (%),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rh (%),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -988,11 +988,11 @@ VPmax (mbar),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7303949177622
 VPmax (mbar),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5327141234205245,
 VPmax (mbar),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4281546563027238,
 VPmax (mbar),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.0253522303014702,
-VPmax (mbar),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 VPmax (mbar),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPmax (mbar),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPmax (mbar),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1025,11 +1025,11 @@ VPact (mbar),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.4747540302492
 VPact (mbar),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.0506592204625627,
 VPact (mbar),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.06658097085824977,
 VPact (mbar),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.805677913453767,
-VPact (mbar),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 VPact (mbar),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPact (mbar),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPact (mbar),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1062,11 +1062,11 @@ VPdef (mbar),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7049443005758
 VPdef (mbar),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5875009337908734,
 VPdef (mbar),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.49241212473143875,
 VPdef (mbar),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.9231841176335329,
-VPdef (mbar),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 VPdef (mbar),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPdef (mbar),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPdef (mbar),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1099,11 +1099,11 @@ sh (g/kg),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.4772364860465671
 sh (g/kg),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.0453453338342646,
 sh (g/kg),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.0694031830892767,
 sh (g/kg),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.7963308033386347,
-sh (g/kg),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 sh (g/kg),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 sh (g/kg),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 sh (g/kg),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1136,11 +1136,11 @@ H2OC (mmol/mol),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.4777066585
 H2OC (mmol/mol),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.0443843813127887,
 H2OC (mmol/mol),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.06964627796292289,
 H2OC (mmol/mol),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.7963369100027198,
-H2OC (mmol/mol),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 H2OC (mmol/mol),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 H2OC (mmol/mol),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 H2OC (mmol/mol),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1173,11 +1173,11 @@ rho (g/m**3),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7074052775750
 rho (g/m**3),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5645743656743452,
 rho (g/m**3),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.30925820611717164,
 rho (g/m**3),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.2868803461422686,
-rho (g/m**3),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 rho (g/m**3),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rho (g/m**3),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rho (g/m**3),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1210,11 +1210,11 @@ wv (m/s),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,-0.0001545869944036
 wv (m/s),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.015207742068528,
 wv (m/s),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,-9.378556415781493e-05,
 wv (m/s),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.1093426257525376,
-wv (m/s),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-wv (m/s),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-wv (m/s),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-wv (m/s),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-wv (m/s),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+wv (m/s),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+wv (m/s),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+wv (m/s),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+wv (m/s),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+wv (m/s),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 wv (m/s),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wv (m/s),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wv (m/s),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1247,11 +1247,11 @@ max. wv (m/s),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.430229346469
 max. wv (m/s),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.1369698608841812,
 max. wv (m/s),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.24499606188150727,
 max. wv (m/s),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.517050542240789,
-max. wv (m/s),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 max. wv (m/s),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. wv (m/s),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. wv (m/s),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1284,11 +1284,11 @@ wd (deg),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.2642120730266513,
 wd (deg),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.4559970631955732,
 wd (deg),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.0766666827757834,
 wd (deg),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.8000038996511283,
-wd (deg),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-wd (deg),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-wd (deg),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-wd (deg),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-wd (deg),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+wd (deg),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+wd (deg),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+wd (deg),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+wd (deg),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+wd (deg),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 wd (deg),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wd (deg),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wd (deg),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1321,11 +1321,11 @@ rain (mm),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.0071602343228498
 rain (mm),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.0002199148031643,
 rain (mm),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,-2.0964621843966336e-05,
 rain (mm),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.9550011529232167,
-rain (mm),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-rain (mm),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-rain (mm),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-rain (mm),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-rain (mm),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+rain (mm),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+rain (mm),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+rain (mm),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+rain (mm),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+rain (mm),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 rain (mm),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rain (mm),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rain (mm),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1358,11 +1358,11 @@ raining (s),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.05697178515169
 raining (s),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.899348523617916,
 raining (s),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.06794630545525618,
 raining (s),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.857235785041971,
-raining (s),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-raining (s),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-raining (s),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-raining (s),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-raining (s),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+raining (s),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+raining (s),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+raining (s),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+raining (s),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+raining (s),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 raining (s),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 raining (s),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 raining (s),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1395,11 +1395,11 @@ SWDR (W/m�),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.838585601555
 SWDR (W/m�),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.31882870966801496,
 SWDR (W/m�),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7401487260893733,
 SWDR (W/m�),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.4461212758015584,
-SWDR (W/m�),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 SWDR (W/m�),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 SWDR (W/m�),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 SWDR (W/m�),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1432,11 +1432,11 @@ PAR (�mol/m�/s),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.850494
 PAR (�mol/m�/s),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.29498831878101966,
 PAR (�mol/m�/s),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7558762026953171,
 PAR (�mol/m�/s),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.4107752501007268,
-PAR (�mol/m�/s),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 PAR (�mol/m�/s),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 PAR (�mol/m�/s),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 PAR (�mol/m�/s),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1469,11 +1469,11 @@ max. PAR (�mol/m�/s),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.7
 max. PAR (�mol/m�/s),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.4524969029271063,
 max. PAR (�mol/m�/s),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7168623025686709,
 max. PAR (�mol/m�/s),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.47064326775792487,
-max. PAR (�mol/m�/s),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 max. PAR (�mol/m�/s),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. PAR (�mol/m�/s),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. PAR (�mol/m�/s),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1506,11 +1506,11 @@ Tlog (degC),inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.75287536185595
 Tlog (degC),inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.4862475561932193,
 Tlog (degC),inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5012551981988359,
 Tlog (degC),inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8899085170942069,
-Tlog (degC),inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 Tlog (degC),inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tlog (degC),inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tlog (degC),inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1543,11 +1543,11 @@ OT,inner_1,seasonality,seasonal_acf_daily_144,MEASURED,0.0001845379580462754,
 OT,inner_1,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.014490442435136,
 OT,inner_1,seasonality,seasonal_acf_weekly_1008,MEASURED,-0.0007662161033896586,
 OT,inner_1,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.1104462992877666,
-OT,inner_1,cost,seconds_quality,MEASURED,0.00039022947619047976,process CPU seconds of the batch divided by its features
-OT,inner_1,cost,seconds_distribution,MEASURED,0.0019065852380952396,process CPU seconds of the batch divided by its features
-OT,inner_1,cost,seconds_volatility,MEASURED,0.00031859680952380946,process CPU seconds of the batch divided by its features
-OT,inner_1,cost,seconds_acf_selected,MEASURED,0.0001521211904761981,process CPU seconds of the batch divided by its features
-OT,inner_1,cost,seconds_seasonality,MEASURED,0.0002839263809523839,process CPU seconds of the batch divided by its features
+OT,inner_1,cost,seconds_quality,MEASURED,0.0003913326190476262,process CPU seconds of the batch divided by its features
+OT,inner_1,cost,seconds_distribution,MEASURED,0.0017938383333333317,process CPU seconds of the batch divided by its features
+OT,inner_1,cost,seconds_volatility,MEASURED,0.0002967885714285687,process CPU seconds of the batch divided by its features
+OT,inner_1,cost,seconds_acf_selected,MEASURED,0.00014982047619046694,process CPU seconds of the batch divided by its features
+OT,inner_1,cost,seconds_seasonality,MEASURED,0.00029822766666666645,process CPU seconds of the batch divided by its features
 OT,inner_1,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 OT,inner_1,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 OT,inner_1,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1580,11 +1580,11 @@ p (mbar),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7480504681388112,
 p (mbar),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.4910166339656783,
 p (mbar),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.1307591577927685,
 p (mbar),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.7491239415794282,
-p (mbar),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-p (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-p (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-p (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-p (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+p (mbar),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+p (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+p (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+p (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+p (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 p (mbar),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 p (mbar),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 p (mbar),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1617,11 +1617,11 @@ T (degC),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.807027838944807,
 T (degC),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3562061265439794,
 T (degC),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5421329837568861,
 T (degC),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7763687500045238,
-T (degC),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-T (degC),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-T (degC),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-T (degC),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-T (degC),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+T (degC),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+T (degC),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+T (degC),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+T (degC),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+T (degC),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 T (degC),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 T (degC),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 T (degC),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1654,11 +1654,11 @@ Tpot (K),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7973239640967221,
 Tpot (K),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3755541778982405,
 Tpot (K),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5214361277985815,
 Tpot (K),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8161468104623977,
-Tpot (K),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-Tpot (K),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-Tpot (K),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-Tpot (K),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-Tpot (K),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+Tpot (K),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+Tpot (K),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+Tpot (K),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+Tpot (K),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+Tpot (K),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 Tpot (K),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tpot (K),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tpot (K),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1691,11 +1691,11 @@ Tdew (degC),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.75997625053431
 Tdew (degC),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.45867048262062454,
 Tdew (degC),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4220472451752968,
 Tdew (degC),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.990259344477785,
-Tdew (degC),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 Tdew (degC),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tdew (degC),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tdew (degC),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1728,11 +1728,11 @@ rh (%),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.6212179717532282,
 rh (%),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.7497482603962562,
 rh (%),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4343630603418482,
 rh (%),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.0947989242247764,
-rh (%),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-rh (%),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-rh (%),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-rh (%),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-rh (%),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+rh (%),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+rh (%),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+rh (%),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+rh (%),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+rh (%),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 rh (%),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rh (%),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rh (%),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1765,11 +1765,11 @@ VPmax (mbar),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7922529141968
 VPmax (mbar),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.38237006876154356,
 VPmax (mbar),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.52878196689607,
 VPmax (mbar),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7821665232168021,
-VPmax (mbar),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 VPmax (mbar),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPmax (mbar),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPmax (mbar),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1802,11 +1802,11 @@ VPact (mbar),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7913203027703
 VPact (mbar),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3934186475897333,
 VPact (mbar),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4425512301550296,
 VPact (mbar),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8835264008154344,
-VPact (mbar),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 VPact (mbar),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPact (mbar),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPact (mbar),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1839,11 +1839,11 @@ VPdef (mbar),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.6346682407487
 VPdef (mbar),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.7132811166755085,
 VPdef (mbar),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.447567685540649,
 VPdef (mbar),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.0448237811500702,
-VPdef (mbar),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 VPdef (mbar),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPdef (mbar),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPdef (mbar),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1876,11 +1876,11 @@ sh (g/kg),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7907023382978929
 sh (g/kg),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3953055430970318,
 sh (g/kg),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.44126024678990533,
 sh (g/kg),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8876310690479687,
-sh (g/kg),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 sh (g/kg),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 sh (g/kg),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 sh (g/kg),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1913,11 +1913,11 @@ H2OC (mmol/mol),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7904461222
 H2OC (mmol/mol),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3957981621073415,
 H2OC (mmol/mol),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.44128395661773756,
 H2OC (mmol/mol),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8879315758852554,
-H2OC (mmol/mol),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 H2OC (mmol/mol),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 H2OC (mmol/mol),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 H2OC (mmol/mol),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1950,11 +1950,11 @@ rho (g/m**3),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.7802160597530
 rho (g/m**3),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.41044752082201486,
 rho (g/m**3),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.44203774835823645,
 rho (g/m**3),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.9838944769166361,
-rho (g/m**3),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 rho (g/m**3),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rho (g/m**3),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rho (g/m**3),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -1987,11 +1987,11 @@ wv (m/s),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,-0.0001171051524647
 wv (m/s),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.0118162448216816,
 wv (m/s),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,-5.551592986748567e-05,
 wv (m/s),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.084096160646804,
-wv (m/s),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-wv (m/s),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-wv (m/s),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-wv (m/s),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-wv (m/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+wv (m/s),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+wv (m/s),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+wv (m/s),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+wv (m/s),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+wv (m/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 wv (m/s),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wv (m/s),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wv (m/s),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2024,11 +2024,11 @@ max. wv (m/s),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.444640357110
 max. wv (m/s),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.1085300008896788,
 max. wv (m/s),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.29105498474208247,
 max. wv (m/s),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.4285908651045705,
-max. wv (m/s),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 max. wv (m/s),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. wv (m/s),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. wv (m/s),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2061,11 +2061,11 @@ wd (deg),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.23742925716129337
 wd (deg),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.5229255885710082,
 wd (deg),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.048959770936994766,
 wd (deg),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.9147546219987948,
-wd (deg),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-wd (deg),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-wd (deg),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-wd (deg),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-wd (deg),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+wd (deg),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+wd (deg),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+wd (deg),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+wd (deg),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+wd (deg),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 wd (deg),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wd (deg),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wd (deg),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2098,11 +2098,11 @@ rain (mm),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.0007387658538240
 rain (mm),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.0099936676424837,
 rain (mm),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.005846151577700448,
 rain (mm),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.6023728348224602,
-rain (mm),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-rain (mm),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-rain (mm),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-rain (mm),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-rain (mm),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+rain (mm),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+rain (mm),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+rain (mm),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+rain (mm),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+rain (mm),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 rain (mm),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rain (mm),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rain (mm),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2135,11 +2135,11 @@ raining (s),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.04554478491931
 raining (s),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.9193311875155885,
 raining (s),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.052537135462453415,
 raining (s),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.8943424124623487,
-raining (s),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-raining (s),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-raining (s),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-raining (s),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-raining (s),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+raining (s),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+raining (s),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+raining (s),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+raining (s),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+raining (s),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 raining (s),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 raining (s),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 raining (s),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2172,11 +2172,11 @@ SWDR (W/m�),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.784990421231
 SWDR (W/m�),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.4202338969564474,
 SWDR (W/m�),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6983493282219643,
 SWDR (W/m�),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5461055803161616,
-SWDR (W/m�),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 SWDR (W/m�),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 SWDR (W/m�),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 SWDR (W/m�),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2209,11 +2209,11 @@ PAR (�mol/m�/s),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.795589
 PAR (�mol/m�/s),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3984413673855934,
 PAR (�mol/m�/s),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7117617379126422,
 PAR (�mol/m�/s),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5144079563581948,
-PAR (�mol/m�/s),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 PAR (�mol/m�/s),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 PAR (�mol/m�/s),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 PAR (�mol/m�/s),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2246,11 +2246,11 @@ max. PAR (�mol/m�/s),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.6
 max. PAR (�mol/m�/s),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.6479562702758201,
 max. PAR (�mol/m�/s),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.607986928452197,
 max. PAR (�mol/m�/s),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7199861036460524,
-max. PAR (�mol/m�/s),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 max. PAR (�mol/m�/s),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. PAR (�mol/m�/s),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. PAR (�mol/m�/s),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2283,11 +2283,11 @@ Tlog (degC),inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.80502647735278
 Tlog (degC),inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.362186342124109,
 Tlog (degC),inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5807008716584877,
 Tlog (degC),inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7066758472286787,
-Tlog (degC),inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 Tlog (degC),inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tlog (degC),inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tlog (degC),inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2320,11 +2320,11 @@ OT,inner_2,seasonality,seasonal_acf_daily_144,MEASURED,0.0008910035403391646,
 OT,inner_2,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.0097067673913958,
 OT,inner_2,seasonality,seasonal_acf_weekly_1008,MEASURED,-7.957103270650999e-05,
 OT,inner_2,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.083829531323007,
-OT,inner_2,cost,seconds_quality,MEASURED,0.0004899707619047598,process CPU seconds of the batch divided by its features
-OT,inner_2,cost,seconds_distribution,MEASURED,0.0020142944285714308,process CPU seconds of the batch divided by its features
-OT,inner_2,cost,seconds_volatility,MEASURED,0.0003762581428571491,process CPU seconds of the batch divided by its features
-OT,inner_2,cost,seconds_acf_selected,MEASURED,0.000178008428571429,process CPU seconds of the batch divided by its features
-OT,inner_2,cost,seconds_seasonality,MEASURED,0.0003359927142857224,process CPU seconds of the batch divided by its features
+OT,inner_2,cost,seconds_quality,MEASURED,0.0005597389523809546,process CPU seconds of the batch divided by its features
+OT,inner_2,cost,seconds_distribution,MEASURED,0.0019989206666666684,process CPU seconds of the batch divided by its features
+OT,inner_2,cost,seconds_volatility,MEASURED,0.0003743663333333308,process CPU seconds of the batch divided by its features
+OT,inner_2,cost,seconds_acf_selected,MEASURED,0.00017693542857142414,process CPU seconds of the batch divided by its features
+OT,inner_2,cost,seconds_seasonality,MEASURED,0.0003615458095238132,process CPU seconds of the batch divided by its features
 OT,inner_2,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 OT,inner_2,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 OT,inner_2,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2357,11 +2357,11 @@ p (mbar),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.7387135503917005,
 p (mbar),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5100613325592236,
 p (mbar),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.10453819796727984,
 p (mbar),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.789259546341314,
-p (mbar),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-p (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-p (mbar),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-p (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-p (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+p (mbar),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+p (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+p (mbar),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+p (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+p (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 p (mbar),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 p (mbar),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 p (mbar),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2394,11 +2394,11 @@ T (degC),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8568633359367201,
 T (degC),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.26492203298967726,
 T (degC),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6677751131827024,
 T (degC),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5433886362170744,
-T (degC),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-T (degC),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-T (degC),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-T (degC),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-T (degC),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+T (degC),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+T (degC),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+T (degC),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+T (degC),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+T (degC),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 T (degC),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 T (degC),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 T (degC),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2431,11 +2431,11 @@ Tpot (K),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8466833570475105,
 Tpot (K),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.284390994225201,
 Tpot (K),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6443914050177031,
 Tpot (K),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5853639121027444,
-Tpot (K),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-Tpot (K),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-Tpot (K),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-Tpot (K),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-Tpot (K),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+Tpot (K),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+Tpot (K),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+Tpot (K),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+Tpot (K),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+Tpot (K),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 Tpot (K),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tpot (K),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tpot (K),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2468,11 +2468,11 @@ Tdew (degC),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.80502580140434
 Tdew (degC),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3840121393373701,
 Tdew (degC),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5972478156381483,
 Tdew (degC),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7546937413266043,
-Tdew (degC),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-Tdew (degC),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+Tdew (degC),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 Tdew (degC),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tdew (degC),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tdew (degC),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2505,11 +2505,11 @@ rh (%),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.6174946476559752,
 rh (%),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.7521851987871583,
 rh (%),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.4568110740111515,
 rh (%),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.038544303928613,
-rh (%),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-rh (%),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-rh (%),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-rh (%),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-rh (%),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+rh (%),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+rh (%),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+rh (%),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+rh (%),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+rh (%),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 rh (%),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rh (%),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rh (%),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2542,11 +2542,11 @@ VPmax (mbar),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8422693271243
 VPmax (mbar),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.29368693813828955,
 VPmax (mbar),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6587425083209092,
 VPmax (mbar),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5391249075973988,
-VPmax (mbar),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-VPmax (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+VPmax (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 VPmax (mbar),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPmax (mbar),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPmax (mbar),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2579,11 +2579,11 @@ VPact (mbar),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8044457233710
 VPact (mbar),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3872544220923855,
 VPact (mbar),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6149770988637399,
 VPact (mbar),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7167045044453515,
-VPact (mbar),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-VPact (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+VPact (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 VPact (mbar),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPact (mbar),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPact (mbar),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2616,11 +2616,11 @@ VPdef (mbar),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.6886467401632
 VPdef (mbar),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.5946311569382954,
 VPdef (mbar),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5195710492197553,
 VPdef (mbar),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.81610366400505,
-VPdef (mbar),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-VPdef (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+VPdef (mbar),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 VPdef (mbar),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPdef (mbar),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 VPdef (mbar),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2653,11 +2653,11 @@ sh (g/kg),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8027806621918421
 sh (g/kg),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3905211714152838,
 sh (g/kg),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.610507426539545,
 sh (g/kg),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.725112283756292,
-sh (g/kg),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-sh (g/kg),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+sh (g/kg),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 sh (g/kg),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 sh (g/kg),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 sh (g/kg),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2690,11 +2690,11 @@ H2OC (mmol/mol),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8029162098
 H2OC (mmol/mol),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.39022710264442145,
 H2OC (mmol/mol),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6107064776799026,
 H2OC (mmol/mol),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7246619758678715,
-H2OC (mmol/mol),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-H2OC (mmol/mol),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+H2OC (mmol/mol),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 H2OC (mmol/mol),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 H2OC (mmol/mol),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 H2OC (mmol/mol),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2727,11 +2727,11 @@ rho (g/m**3),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.8242380002682
 rho (g/m**3),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.3280579176464695,
 rho (g/m**3),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5609929181745581,
 rho (g/m**3),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.7554910605062859,
-rho (g/m**3),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-rho (g/m**3),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+rho (g/m**3),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 rho (g/m**3),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rho (g/m**3),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rho (g/m**3),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2764,11 +2764,11 @@ wv (m/s),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,-6.67449222581525e-
 wv (m/s),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.009605856960692,
 wv (m/s),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,-3.114304010825091e-05,
 wv (m/s),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.0683030722073834,
-wv (m/s),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-wv (m/s),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-wv (m/s),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-wv (m/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-wv (m/s),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+wv (m/s),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+wv (m/s),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+wv (m/s),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+wv (m/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+wv (m/s),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 wv (m/s),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wv (m/s),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wv (m/s),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2801,11 +2801,11 @@ max. wv (m/s),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.465566634836
 max. wv (m/s),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.0669095881335016,
 max. wv (m/s),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.30337937711432605,
 max. wv (m/s),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.3992267558998932,
-max. wv (m/s),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-max. wv (m/s),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+max. wv (m/s),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 max. wv (m/s),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. wv (m/s),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. wv (m/s),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2838,11 +2838,11 @@ wd (deg),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.2270811406762145,
 wd (deg),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.543197588761257,
 wd (deg),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.04053651100185561,
 wd (deg),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.9393372099883028,
-wd (deg),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-wd (deg),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-wd (deg),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-wd (deg),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-wd (deg),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+wd (deg),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+wd (deg),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+wd (deg),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+wd (deg),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+wd (deg),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 wd (deg),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wd (deg),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 wd (deg),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2875,11 +2875,11 @@ rain (mm),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.0012046325575017
 rain (mm),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.006977208162783,
 rain (mm),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.005231224893529101,
 rain (mm),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.046842214123488,
-rain (mm),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-rain (mm),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-rain (mm),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-rain (mm),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-rain (mm),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+rain (mm),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+rain (mm),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+rain (mm),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+rain (mm),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+rain (mm),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 rain (mm),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rain (mm),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 rain (mm),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2912,11 +2912,11 @@ raining (s),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.04714680826605
 raining (s),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,1.9142542062178836,
 raining (s),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.06553981037090996,
 raining (s),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,1.9049045693998614,
-raining (s),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-raining (s),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-raining (s),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-raining (s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-raining (s),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+raining (s),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+raining (s),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+raining (s),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+raining (s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+raining (s),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 raining (s),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 raining (s),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 raining (s),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2949,11 +2949,11 @@ SWDR (W/m�),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.785965903760
 SWDR (W/m�),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.41842126968933263,
 SWDR (W/m�),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7171497545854062,
 SWDR (W/m�),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.5226761744227829,
-SWDR (W/m�),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-SWDR (W/m�),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+SWDR (W/m�),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 SWDR (W/m�),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 SWDR (W/m�),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 SWDR (W/m�),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -2986,11 +2986,11 @@ PAR (�mol/m�/s),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.796869
 PAR (�mol/m�/s),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.39590149526891333,
 PAR (�mol/m�/s),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.7305589174583433,
 PAR (�mol/m�/s),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.49283706086847107,
-PAR (�mol/m�/s),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-PAR (�mol/m�/s),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+PAR (�mol/m�/s),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 PAR (�mol/m�/s),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 PAR (�mol/m�/s),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 PAR (�mol/m�/s),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -3023,11 +3023,11 @@ max. PAR (�mol/m�/s),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.5
 max. PAR (�mol/m�/s),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.8688434461633711,
 max. PAR (�mol/m�/s),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.5229211504230739,
 max. PAR (�mol/m�/s),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.8996920797429097,
-max. PAR (�mol/m�/s),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-max. PAR (�mol/m�/s),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+max. PAR (�mol/m�/s),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 max. PAR (�mol/m�/s),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. PAR (�mol/m�/s),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 max. PAR (�mol/m�/s),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -3060,11 +3060,11 @@ Tlog (degC),inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.85659137940676
 Tlog (degC),inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,0.26684996884041995,
 Tlog (degC),inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.6941128017442825,
 Tlog (degC),inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,0.49838492173639964,
-Tlog (degC),inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-Tlog (degC),inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+Tlog (degC),inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 Tlog (degC),inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tlog (degC),inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 Tlog (degC),inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4
@@ -3097,11 +3097,11 @@ OT,inner_3,seasonality,seasonal_acf_daily_144,MEASURED,0.001419168803107808,
 OT,inner_3,seasonality,seasonal_diff_var_ratio_daily_144,MEASURED,2.006596033248606,
 OT,inner_3,seasonality,seasonal_acf_weekly_1008,MEASURED,0.0003791416624516681,
 OT,inner_3,seasonality,seasonal_diff_var_ratio_weekly_1008,MEASURED,2.0672923319890115,
-OT,inner_3,cost,seconds_quality,MEASURED,0.0005889848571428555,process CPU seconds of the batch divided by its features
-OT,inner_3,cost,seconds_distribution,MEASURED,0.002177691714285713,process CPU seconds of the batch divided by its features
-OT,inner_3,cost,seconds_volatility,MEASURED,0.00042818904761904043,process CPU seconds of the batch divided by its features
-OT,inner_3,cost,seconds_acf_selected,MEASURED,0.0002060870000000003,process CPU seconds of the batch divided by its features
-OT,inner_3,cost,seconds_seasonality,MEASURED,0.00036541585714286055,process CPU seconds of the batch divided by its features
+OT,inner_3,cost,seconds_quality,MEASURED,0.0006010440000000029,process CPU seconds of the batch divided by its features
+OT,inner_3,cost,seconds_distribution,MEASURED,0.002169192333333337,process CPU seconds of the batch divided by its features
+OT,inner_3,cost,seconds_volatility,MEASURED,0.000439252476190477,process CPU seconds of the batch divided by its features
+OT,inner_3,cost,seconds_acf_selected,MEASURED,0.0002194778095238101,process CPU seconds of the batch divided by its features
+OT,inner_3,cost,seconds_seasonality,MEASURED,0.00042605457142856694,process CPU seconds of the batch divided by its features
 OT,inner_3,stationarity,adf_c_aic_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 OT,inner_3,stationarity,kpss_c_auto_pvalue,NOT_RUN,,DEFERRED_TO_PS4
 OT,inner_3,spectral,peak1_period_rows,NOT_RUN,,DEFERRED_TO_PS4

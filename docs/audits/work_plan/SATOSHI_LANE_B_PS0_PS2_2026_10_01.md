@@ -139,3 +139,51 @@ The mutation script is `tests/mutation/fs_mutations.sh`. FS03–FS14, FS17, FS18
 - Warehouse/lake lineage of these runs is not written; the profiles are local artifacts (the M06 half of FS19).
 - 11 675 inventory rows remain unmeasured, each with its reason. The financial ones need sealed TRAIN contracts and availability contracts before any profiling.
 - The 20-entry stratified pilot (subplan 10.2) and the three-order comparison (FS18) have not started.
+
+## CORRECTION 2026-10-01 — label unit defect (found by lane A / M01)
+
+**Defect.** `tools/progressive_selection.py` converted timestamps with `pd.to_datetime(...).astype("int64") // 10**9`.
+- Under pandas 3.0.1 (the worker env where the runs executed), parsed stamps are datetime64[us], so the result was kiloseconds: a 4 h step read as 14.
+- `build_targets` then added `h*3600` in those units, so every label sat 1000× past its horizon. Y_s@4h was about 167 days ahead, and Y_l@24h about 1000 days ahead.
+- The FS02 tests did not catch it: they used synthetic integer seconds, not parsed timestamps.
+
+**Fix (`d0679a3d…` profiler code).**
+- `epoch_seconds()` and `timestamps_to_seconds()` compute `(dt - epoch) // Timedelta(seconds=1)`, independent of resolution, and refuse unparseable stamps.
+- New `tests/test_fs02_real_timestamps.py`, 4 tests on real ETH stamps (including the real 32 h gap):
+  - the computed step equals step_seconds under ns, us, ms and s resolution;
+  - Y_s@4h reads exactly the next bar;
+  - a gap leaves the label empty;
+  - Y_l@24h reads row t+6.
+- A mutation that reintroduces the bug turns the file red (`tests/mutation/fs_mutations.sh`, `fs02_unit_bug`).
+- 28/28 pass on the coordinator (pandas 2.2.2) and on the worker (pandas 3.0.1).
+
+**Superseded.**
+- ETH work list `f75260a6e7e30d340d042cb685f5e9889797fd7b0a87b4599ef99d0798670c9a` is now SUPERSEDED_LABEL_UNIT_DEFECT and kept under `docs/feature_metrics/laneB/superseded/eth_4h_SUPERSEDED_LABEL_UNIT_DEFECT/`.
+- `BATCHES.v1.csv` is superseded by `BATCHES.v2.csv`. Only the run code sha changed; PS1 cell counts are identical because PS1 never uses physical time.
+
+**Earlier claims this invalidates** (all ETH PS2 statements in the sections above):
+- the tier counts (PRIORITY 30 / SYNERGY 36 / REPRESENTATIVE 26 / EXPLORATORY 15 / DEFERRED 142);
+- the 44 CAUTION_PERSISTENT_INPUT flags;
+- the seven features "stable in 3/3 folds" (return_10, ema_20, sma_50, ema_50, macd_hist, mom_10, obv);
+- the |ρ| 0.55–0.82 of price-level moving averages;
+- the synergy examples.
+
+All of these correlated inputs with returns about 1000× too far ahead.
+
+**Not invalidated:**
+- PS0 and the inventory;
+- every PS1 cell (no physical time is used; `profile_train_wide.sampling` uses `Timedelta.total_seconds()`, which is unit-safe);
+- TSL and d4 PS2, which have no targets and so are unaffected;
+- FS01/15/16/19.
+
+**Regenerated ETH PS2** (`runs/eth_4h`):
+- `worklist.csv` sha256 `397b67d6f40eaf324c0aa720291f67560c55cf0b216bc53cb9c4886b1ae66175`.
+- `target_status.csv` sha256 `a8cb02f977e43101904dd73cf6caf44af4ee00d23b7a16c3c75f41cedd16fa20`.
+- Rows without a bar at t+h, inside TRAIN: 4h 9, 24h 21, 48h 28, 72h 34, 96h 40, 120h 46, 144h 52. These come from 8 interior gaps (5 double bars, 2 triple, one 32 h) plus labels that would fall past the TRAIN end.
+- Tiers over 3 folds: PRIORITY 30, SYNERGY 24, REPRESENTATIVE 32, EXPLORATORY 16, DEFERRED 147 (each with a rule), DISCARDED 0.
+- 35 CAUTION_PERSISTENT_INPUT flags.
+- Stable PRIORITY/SYNERGY in 3 of 3 folds: close_sma_ratio_100, close_sma_ratio_200, ema_cross_20_100, volume_sma_10, volume_sma_20, hurst_proxy_200, zscore_close_100.
+- Individual |ρ| now 0.07–0.19.
+- This is still a screen, not evidence: overlapping multi-bar labels make the effective sample far smaller than the row count.
+
+Batch list v2: `docs/feature_metrics/laneB/BATCHES.v2.csv`, sha256 `4f66d99b167ef4752375ec37196c52b21a7cdb7ddc5daf52eb9beddd9dd19233`.

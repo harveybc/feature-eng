@@ -10,7 +10,7 @@
  "fold_rule": "immutable predictor contract 14a1077f: train 2017-09-28..2023-12-31, validation 2024, test 2025 (calendar years, not the candidate 4y/1y/1y recipe); inner: 3 expanding folds, validation 15 percent, purge 60 rows = 24-row context + 36 rows (144 h at 4 h bars)",
  "declaration_sha256": "f3c0becaa1655ac16a567aef6ac0e67ecbb89ddc5b204e05d5a8dac2394b527d",
  "declaration_file_sha256": "5129f274683561e2971e5ec9c3cea7841876247a90a34a215f87638ac6665c1e",
- "code_sha256": "d0679a3d8fdcb72114e7708caa602f4cec6a42ea9c3b9e65bdc74f3d1426ba43",
+ "code_sha256": "4590e37c1c2dc94ea6a8a49c809efe6aa2c09b175aaae03f8ca03adc182dce25",
  "params": {
   "declared_periods_rows": {
    "daily": 6,
@@ -111,7 +111,7 @@
    "target": "Y_s",
    "horizon_hours": 4,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 9 rows without a bar at t+h"
+   "note": "elapsed-time label; 1009 rows without a bar at t+h"
   },
   {
    "target": "Y_s",
@@ -129,37 +129,37 @@
    "target": "Y_l",
    "horizon_hours": 24,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 21 rows without a bar at t+h"
+   "note": "elapsed-time label; 6000 rows without a bar at t+h"
   },
   {
    "target": "Y_l",
    "horizon_hours": 48,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 28 rows without a bar at t+h"
+   "note": "elapsed-time label; 11994 rows without a bar at t+h"
   },
   {
    "target": "Y_l",
    "horizon_hours": 72,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 34 rows without a bar at t+h"
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
   },
   {
    "target": "Y_l",
    "horizon_hours": 96,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 40 rows without a bar at t+h"
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
   },
   {
    "target": "Y_l",
    "horizon_hours": 120,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 46 rows without a bar at t+h"
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
   },
   {
    "target": "Y_l",
    "horizon_hours": 144,
    "status": "CONSTRUCTED",
-   "note": "elapsed-time label; 52 rows without a bar at t+h"
+   "note": "elapsed-time label; 13699 rows without a bar at t+h"
   },
   {
    "target": "Y_b",
@@ -170,60 +170,69 @@
  ],
  "tiers_by_fold": {
   "inner_1": {
-   "EXPLORATORY": 6,
-   "DEFERRED": 53,
-   "REPRESENTATIVE": 10,
-   "PRIORITY": 10,
-   "SYNERGY": 4
-  },
-  "inner_2": {
-   "DEFERRED": 45,
-   "REPRESENTATIVE": 11,
-   "SYNERGY": 12,
+   "DEFERRED": 46,
    "EXPLORATORY": 5,
+   "REPRESENTATIVE": 10,
+   "SYNERGY": 12,
    "PRIORITY": 10
   },
-  "inner_3": {
+  "inner_2": {
    "DEFERRED": 49,
-   "REPRESENTATIVE": 11,
-   "EXPLORATORY": 5,
+   "REPRESENTATIVE": 8,
+   "SYNERGY": 11,
    "PRIORITY": 10,
-   "SYNERGY": 8
+   "EXPLORATORY": 5
+  },
+  "inner_3": {
+   "DEFERRED": 47,
+   "REPRESENTATIVE": 8,
+   "SYNERGY": 13,
+   "EXPLORATORY": 5,
+   "PRIORITY": 10
   }
  },
  "priority_or_synergy_in_k_of_3_folds": {
-  "log_return_60": 1,
-  "sma_100": 2,
-  "close_sma_ratio_100": 3,
+  "return_10": 3,
+  "ema_20": 3,
+  "sma_50": 3,
+  "ema_50": 3,
+  "sma_100": 1,
+  "ema_100": 1,
   "sma_200": 1,
   "ema_200": 1,
-  "close_sma_ratio_200": 3,
-  "bb_middle": 2,
-  "ema_cross_20_100": 3,
-  "volume_sma_10": 3,
-  "volume_sma_20": 3,
-  "autocorr_lag1_100": 2,
-  "vol_regime_low": 2,
-  "hurst_proxy_200": 3,
-  "zscore_close_100": 3,
-  "log_return_5": 1,
-  "sma_50": 1,
-  "mom_10": 1,
-  "bb_width": 2,
-  "atr_14": 1,
-  "obv_delta_20": 1,
-  "roll_kurt_ret_20": 1,
+  "close_sma_ratio_200": 1,
+  "macd_hist": 3,
+  "mom_10": 3,
+  "ema_cross_20_100": 1,
+  "obv": 3,
+  "volume_sma_20": 1,
+  "vwap_60": 2,
+  "roll_mean_ret_252": 1,
+  "roll_std_ret_252": 2,
   "roll_skew_ret_252": 1,
-  "roll_kurt_ret_252": 2,
-  "realized_var_48": 2,
-  "sqret_autocorr_lag1_100": 2,
-  "hist_vol_60": 1,
-  "trend_strength_50": 1,
-  "obv": 1,
-  "roll_skew_ret_20": 1,
-  "roll_std_ret_60": 1,
-  "roll_skew_ret_60": 1,
-  "autocorr_lag5_100": 1
+  "autocorr_lag1_100": 1,
+  "autocorr_lag5_100": 1,
+  "sqret_autocorr_lag1_100": 1,
+  "hurst_proxy_200": 1,
+  "sma_10": 2,
+  "ema_10": 2,
+  "sma_20": 2,
+  "macd": 1,
+  "macd_signal": 1,
+  "stoch_d": 1,
+  "cci_14": 2,
+  "roc_10": 2,
+  "roc_20": 1,
+  "mom_20": 2,
+  "bb_upper": 2,
+  "bb_middle": 2,
+  "bb_lower": 2,
+  "mfi_14": 1,
+  "return_20": 1,
+  "stoch_k": 1,
+  "williams_r_14": 1,
+  "bb_pct_b": 1,
+  "roll_mean_ret_20": 1
  },
- "ps1_wall_seconds": 0.8630189895629883
+ "ps1_wall_seconds": 0.8566701412200928
 }
