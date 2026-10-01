@@ -1,0 +1,1369 @@
+{
+ "schema": "lane_b_source_table.v1",
+ "ladder": [
+  "OWNER_REPORTED",
+  "DOCUMENTED_ENTITLEMENT",
+  "FUNCTIONING_CONNECTOR",
+  "RETAINED_BYTES",
+  "POINT_IN_TIME_ADMISSIBLE",
+  "PROFILED",
+  "EVALUATED"
+ ],
+ "rows": [
+  {
+   "provider": "Yahoo Finance",
+   "product": "quotes/history (equity indices, ETFs, commodity futures, EM FX daily, VIX)",
+   "rungs": {
+    "OWNER_REPORTED": true,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 78,
+   "asset_universe_sample": [
+    "daily",
+    "market_data__commodities__agriculture__ct_f__daily",
+    "market_data__commodities__agriculture__kc_f__daily",
+    "market_data__commodities__agriculture__sb_f__daily",
+    "market_data__commodities__agriculture__zc_f__daily",
+    "market_data__commodities__agriculture__zs_f__daily",
+    "market_data__commodities__agriculture__zw_f__daily",
+    "market_data__commodities__energy__bz_f__daily",
+    "market_data__commodities__energy__cl_f__daily",
+    "market_data__commodities__energy__ng_f__daily",
+    "market_data__commodities__energy__rb_f__daily",
+    "market_data__commodities__precious_metals__gc_f__daily",
+    "market_data__commodities__precious_metals__pa_f__daily",
+    "market_data__commodities__precious_metals__pl_f__daily",
+    "market_data__commodities__precious_metals__si_f__daily",
+    "market_data__equities__etfs__agg__daily",
+    "market_data__equities__etfs__bnd__daily",
+    "market_data__equities__etfs__dia__daily",
+    "market_data__equities__etfs__eem__daily",
+    "market_data__equities__etfs__efa__daily",
+    "market_data__equities__etfs__gld__daily",
+    "market_data__equities__etfs__hyg__daily",
+    "market_data__equities__etfs__ief__daily",
+    "market_data__equities__etfs__ivv__daily",
+    "market_data__equities__etfs__iwm__daily"
+   ],
+   "field_families": {
+    "daily": 78,
+    "market_data__commodities__agriculture__ct_f__daily": 8,
+    "market_data__commodities__agriculture__kc_f__daily": 8,
+    "market_data__commodities__agriculture__sb_f__daily": 8,
+    "market_data__commodities__agriculture__zc_f__daily": 8,
+    "market_data__commodities__agriculture__zs_f__daily": 8,
+    "market_data__commodities__agriculture__zw_f__daily": 8,
+    "market_data__commodities__energy__bz_f__daily": 8,
+    "market_data__commodities__energy__cl_f__daily": 8,
+    "market_data__commodities__energy__ng_f__daily": 8,
+    "market_data__commodities__energy__rb_f__daily": 8,
+    "market_data__commodities__precious_metals__gc_f__daily": 8
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "1927-12-30T04:00:00+00:00",
+    "2025-12-30T08:00:00+00:00"
+   ],
+   "entitlement_evidence": "NONE_DOCUMENTED: no product name, plan or API terms on file; a paid Yahoo Finance subscription does not by itself grant a programmatic API",
+   "owner_reported": "paid Yahoo access declared by the owner (addendum 256c61a6)",
+   "connector": "financial-data _scripts/workers/stage13_omega_light_worker.py, stage13_omega_followup_worker.py (yfinance, unofficial public endpoints)",
+   "lake_files": 702,
+   "lake_bytes": 12540187990,
+   "raw_files": 78,
+   "derived_files": 624,
+   "census_appearances": 312,
+   "train_contracts": 58,
+   "clocks": {
+    "event": "daily bar date, timezone UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "no per-row receipt; file mtime only"
+   },
+   "revision_policy": "UNKNOWN (adjusted closes can be rewritten by the vendor)",
+   "license": "UNKNOWN (census INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE)",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 474,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "owner names the exact Yahoo product and its terms for programmatic retrieval; until then no new download; then availability contract (event/publication/receipt) before PIT admission"
+  },
+  {
+   "provider": "Alpaca",
+   "product": "market data (stocks/crypto) via the Alpaca account",
+   "rungs": {
+    "OWNER_REPORTED": true,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": false,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "DOCUMENTED_ENTITLEMENT",
+    "RETAINED_BYTES",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 0,
+   "asset_universe_sample": [],
+   "field_families": {},
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "NONE_DOCUMENTED for market data: plan/feed (IEX vs SIP) not on file",
+   "owner_reported": "declared by the owner (addendum 256c61a6)",
+   "connector": "EXECUTION ONLY: lts app/alpaca_paper_cli.py, plugins_broker/alpaca_paper_broker; services lts-alpaca-model-runner (active) and lts-alpaca-paper-observer.timer; no data connector into financial-data or the lake",
+   "lake_files": 0,
+   "lake_bytes": 0,
+   "raw_files": 0,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "n/a (no retained bytes)",
+    "publication": "n/a",
+    "receipt": "n/a"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "FUNCTIONING_CONNECTOR",
+   "evaluated": "NO",
+   "missing_action": "owner documents the market-data plan/feed; a data connector writes through the governed data-gov route for the declared business assets only; then RETAINED_BYTES"
+  },
+  {
+   "provider": "FXMacroData",
+   "product": "economic calendar: release actuals (announcements) and scheduled release calendar",
+   "rungs": {
+    "OWNER_REPORTED": true,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 2,
+   "asset_universe_sample": [
+    "announcements",
+    "economic_calendar__release_actuals__fxmacrodata__announcements",
+    "economic_calendar__scheduled_events__fxmacrodata__release_calendar",
+    "release_calendar"
+   ],
+   "field_families": {
+    "economic_calendar__release_actuals__fxmacrodata__announcements": 8,
+    "economic_calendar__scheduled_events__fxmacrodata__release_calendar": 8,
+    "announcements": 1,
+    "release_calendar": 1
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2025-01-31T00:00:00+00:00",
+    "2027-07-14T20:00:00+00:00"
+   ],
+   "entitlement_evidence": "paid subscription reported by the owner; connector functioning (bytes retained)",
+   "owner_reported": "paid FXMacroData declared by the owner",
+   "connector": "financial-data _scripts/workers/stage15_fxmacrodata_worker.py; point-in-time capture with our receipt clock started at financial-data ef0ba6612",
+   "lake_files": 18,
+   "lake_bytes": 10911216,
+   "raw_files": 2,
+   "derived_files": 16,
+   "census_appearances": 8,
+   "train_contracts": 8,
+   "clocks": {
+    "event": "release time per row",
+    "publication": "announcements OBSERVED_ACTUAL_PUBLICATION; release_calendar ASSUMED_SCHEDULED_PUBLICATION (data-gov registry 2026-09-26)",
+    "receipt": "per-row receipt clock only from the ef0ba6612 capture onward; none for the retained history"
+   },
+   "revision_policy": "NO_REVISION_HISTORY (registry absence)",
+   "license": "paid subscription; redistribution UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 24,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "availability contract for the raw resources (publication clock is observed for announcements; consensus absent, NO_CONSENSUS_AT_ALL); the 8 resampled census appearances need their resampling producer located before any derived availability; no consensus/first-release vintage may be invented"
+  },
+  {
+   "provider": "HistData",
+   "product": "FX majors intraday bars",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 10,
+   "asset_universe_sample": [
+    "15m",
+    "1h",
+    "4h",
+    "5m",
+    "audusd",
+    "eurgbp",
+    "eurjpy",
+    "eurusd",
+    "full_normalized",
+    "gbpjpy",
+    "gbpusd",
+    "nzdusd",
+    "test",
+    "train",
+    "usdcad",
+    "usdchf",
+    "usdjpy",
+    "validation"
+   ],
+   "field_families": {
+    "ohlc_bars": 40,
+    "emd": 40,
+    "fracdiff": 40,
+    "hilbert": 40,
+    "multitaper": 40,
+    "statistical": 40,
+    "technical": 40,
+    "wavelet": 40,
+    "15m": 10,
+    "1h": 10,
+    "4h": 10,
+    "5m": 10
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2005-01-03T00:00:00+00:00",
+    "2025-12-31T16:55:00+00:00"
+   ],
+   "entitlement_evidence": "free download; terms UNKNOWN on file",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (histdata)",
+   "lake_files": 420,
+   "lake_bytes": 26951186352,
+   "raw_files": 80,
+   "derived_files": 340,
+   "census_appearances": 40,
+   "train_contracts": 12,
+   "clocks": {
+    "event": "bar timestamp, timezone UNKNOWN (not documented on file)",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 48,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "document terms and timestamp convention; availability contract"
+  },
+  {
+   "provider": "Binance",
+   "product": "spot and USD-M futures klines",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 50,
+   "asset_universe_sample": [
+    "15m",
+    "1h",
+    "4h",
+    "5m",
+    "adausdt",
+    "adausdt_perp",
+    "asterusdt",
+    "avaxusdt",
+    "avaxusdt_perp",
+    "bchusdt",
+    "bnbusdt",
+    "bnbusdt_perp",
+    "btcusdt",
+    "btcusdt_perp",
+    "dogeusdt",
+    "dogeusdt_perp",
+    "dotusdt",
+    "ethusdt",
+    "ethusdt_perp",
+    "full_normalized",
+    "funding_rates",
+    "hbarusdt",
+    "linkusdt",
+    "linkusdt_perp",
+    "ltcusdt"
+   ],
+   "field_families": {
+    "ohlc_bars": 160,
+    "emd": 160,
+    "fracdiff": 160,
+    "hilbert": 160,
+    "multitaper": 160,
+    "statistical": 160,
+    "technical": 160,
+    "wavelet": 160,
+    "15m": 40,
+    "1h": 40,
+    "4h": 40,
+    "5m": 40
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2017-08-17T04:00:00+00:00",
+    "2025-12-31T23:55:00+00:00"
+   ],
+   "entitlement_evidence": "public REST market data",
+   "owner_reported": "",
+   "connector": "financial-data _scripts/workers/stage13_dragon_crypto_worker.py (historical REST, END_MS 2025-12-31)",
+   "lake_files": 1626,
+   "lake_bytes": 34200598892,
+   "raw_files": 330,
+   "derived_files": 1296,
+   "census_appearances": 200,
+   "train_contracts": 49,
+   "clocks": {
+    "event": "open_time/close_time UTC in schema",
+    "publication": "UNOBSERVED",
+    "receipt": "BOUNDED_AT_FILE_GRAIN"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 441,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "availability contract (ETH 4h candidate 998e3f80 not installed); licence evidence"
+  },
+  {
+   "provider": "FRED",
+   "product": "macro and rates observations",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 135,
+   "asset_universe_sample": [
+    "actuals",
+    "macro_economic__fred__consumer__a229rx0__observations",
+    "macro_economic__fred__consumer__dpcera3m086sbea__observations",
+    "macro_economic__fred__consumer__dspi__observations",
+    "macro_economic__fred__consumer__hsn1f__observations",
+    "macro_economic__fred__consumer__pcec__observations",
+    "macro_economic__fred__consumer__psavert__observations",
+    "macro_economic__fred__consumer__rrsfs__observations",
+    "macro_economic__fred__consumer__rsafs__observations",
+    "macro_economic__fred__consumer__umcsent__observations",
+    "macro_economic__fred__credit__aaa10y__observations",
+    "macro_economic__fred__credit__aaa__observations",
+    "macro_economic__fred__credit__baa10y__observations",
+    "macro_economic__fred__credit__baa__observations",
+    "macro_economic__fred__credit__bamlc0a0cm__observations",
+    "macro_economic__fred__credit__bamlc0a0cmey__observations",
+    "macro_economic__fred__credit__bamlh0a0hym2__observations",
+    "macro_economic__fred__credit__bamlh0a0hym2ey__observations",
+    "macro_economic__fred__employment__ahetpi__observations",
+    "macro_economic__fred__employment__awhaetp__observations",
+    "macro_economic__fred__employment__ccsa__observations",
+    "macro_economic__fred__employment__ce16ov__observations",
+    "macro_economic__fred__employment__civpart__observations",
+    "macro_economic__fred__employment__emratio__observations",
+    "macro_economic__fred__employment__icsa__observations"
+   ],
+   "field_families": {
+    "observations": 135,
+    "actuals": 10,
+    "macro_economic__fred__consumer__a229rx0__observations": 8,
+    "macro_economic__fred__consumer__dpcera3m086sbea__observations": 8,
+    "macro_economic__fred__consumer__dspi__observations": 8,
+    "macro_economic__fred__consumer__hsn1f__observations": 8,
+    "macro_economic__fred__consumer__pcec__observations": 8,
+    "macro_economic__fred__consumer__psavert__observations": 8,
+    "macro_economic__fred__consumer__rrsfs__observations": 8,
+    "macro_economic__fred__consumer__rsafs__observations": 8,
+    "macro_economic__fred__consumer__umcsent__observations": 8,
+    "macro_economic__fred__credit__aaa10y__observations": 8
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "1900-01-01T00:00:00+00:00",
+    "2025-12-31T00:00:00+00:00"
+   ],
+   "entitlement_evidence": "public API (key-based); key not inspected",
+   "owner_reported": "",
+   "connector": "financial-data stage13 gamma workers",
+   "lake_files": 1225,
+   "lake_bytes": 18593262106,
+   "raw_files": 145,
+   "derived_files": 1080,
+   "census_appearances": 540,
+   "train_contracts": 31,
+   "clocks": {
+    "event": "observation date",
+    "publication": "UNOBSERVED (ALFRED vintages not captured)",
+    "receipt": "file grain"
+   },
+   "revision_policy": "REVISED_SERIES_WITHOUT_VINTAGES: latest values only; first release not available",
+   "license": "public domain for most series; per-series notes not on file",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 31,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "ALFRED vintage capture for any series used point-in-time; without vintages it is retrospective only"
+  },
+  {
+   "provider": "OECD SDMX",
+   "product": "composite leading indicators",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "macro_economic__oecd__cli__monthly",
+    "monthly"
+   ],
+   "field_families": {
+    "macro_economic__oecd__cli__monthly": 8,
+    "monthly": 1
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2000-01-01T00:00:00+00:00",
+    "2025-12-01T00:00:00+00:00"
+   ],
+   "entitlement_evidence": "public",
+   "owner_reported": "",
+   "connector": "stage13 workers",
+   "lake_files": 9,
+   "lake_bytes": 60105981,
+   "raw_files": 1,
+   "derived_files": 8,
+   "census_appearances": 4,
+   "train_contracts": 4,
+   "clocks": {
+    "event": "month",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "REVISED_WITHOUT_VINTAGES",
+   "license": "OECD terms not on file",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 4,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "vintages and availability contract"
+  },
+  {
+   "provider": "CoinMetrics Community",
+   "product": "on-chain BTC/ETH counts",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": true,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 10,
+   "asset_universe_sample": [
+    "AdrActCnt",
+    "BlkCnt",
+    "HashRate",
+    "TxCnt",
+    "TxTfrCnt",
+    "alternative_data__onchain_btc__coinmetrics_community__btc__adractcnt",
+    "alternative_data__onchain_btc__coinmetrics_community__btc__blkcnt",
+    "alternative_data__onchain_btc__coinmetrics_community__btc__hashrate",
+    "alternative_data__onchain_btc__coinmetrics_community__btc__txcnt",
+    "alternative_data__onchain_btc__coinmetrics_community__btc__txtfrcnt",
+    "alternative_data__onchain_eth__coinmetrics_community__eth__adractcnt",
+    "alternative_data__onchain_eth__coinmetrics_community__eth__blkcnt",
+    "alternative_data__onchain_eth__coinmetrics_community__eth__hashrate",
+    "alternative_data__onchain_eth__coinmetrics_community__eth__txcnt",
+    "alternative_data__onchain_eth__coinmetrics_community__eth__txtfrcnt"
+   ],
+   "field_families": {
+    "alternative_data__onchain_btc__coinmetrics_community__btc__adractcnt": 8,
+    "alternative_data__onchain_btc__coinmetrics_community__btc__blkcnt": 8,
+    "alternative_data__onchain_btc__coinmetrics_community__btc__hashrate": 8,
+    "alternative_data__onchain_btc__coinmetrics_community__btc__txcnt": 8,
+    "alternative_data__onchain_btc__coinmetrics_community__btc__txtfrcnt": 8,
+    "alternative_data__onchain_eth__coinmetrics_community__eth__adractcnt": 8,
+    "alternative_data__onchain_eth__coinmetrics_community__eth__blkcnt": 8,
+    "alternative_data__onchain_eth__coinmetrics_community__eth__hashrate": 8,
+    "alternative_data__onchain_eth__coinmetrics_community__eth__txcnt": 8,
+    "alternative_data__onchain_eth__coinmetrics_community__eth__txtfrcnt": 8,
+    "AdrActCnt": 2,
+    "BlkCnt": 2
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2009-01-03T00:00:00+00:00",
+    "2025-12-31T00:00:00+00:00"
+   ],
+   "entitlement_evidence": "community API; terms not on file",
+   "owner_reported": "",
+   "connector": "stage13 gamma workers",
+   "lake_files": 90,
+   "lake_bytes": 420047065,
+   "raw_files": 10,
+   "derived_files": 80,
+   "census_appearances": 40,
+   "train_contracts": 36,
+   "clocks": {
+    "event": "day",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN on file",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 36,
+   "status": "PROFILED",
+   "evaluated": "NO",
+   "missing_action": "licence evidence; availability contract"
+  },
+  {
+   "provider": "Etherscan",
+   "product": "ETH chain statistics",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "alternative_data__onchain_eth__etherscan_free_snapshots__snapshots",
+    "snapshots"
+   ],
+   "field_families": {
+    "alternative_data__onchain_eth__etherscan_free_snapshots__snapshots": 4,
+    "snapshots": 1
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2026-05-01T16:00:00+00:00",
+    "2026-05-01T20:00:00+00:00"
+   ],
+   "entitlement_evidence": "API key (not inspected)",
+   "owner_reported": "",
+   "connector": "stage13 workers",
+   "lake_files": 5,
+   "lake_bytes": 11497,
+   "raw_files": 1,
+   "derived_files": 4,
+   "census_appearances": 4,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "day",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms; availability contract"
+  },
+  {
+   "provider": "CryptoQuant",
+   "product": "exchange flows and on-chain metrics",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 97,
+   "asset_universe_sample": [
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_all_exchange",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_binance",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_bybit",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_coinbase_advanced",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_kraken",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_okx",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_all_exchange",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_binance",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_bybit",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_coinbase_advanced",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_kraken",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_okx",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_outflow_all_exchange",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_outflow_binance",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_outflow_bybit",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_outflow_coinbase_advanced",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_outflow_kraken",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_outflow_okx",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_reserve_all_exchange",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_reserve_binance",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_reserve_bybit",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_reserve_coinbase_advanced",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_reserve_kraken",
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_reserve_okx",
+    "alternative_data__cryptoquant__btc_indicators__btc_estimated_leverage_ratio_all_exchange"
+   ],
+   "field_families": {
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_all_exchange": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_binance": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_bybit": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_coinbase_advanced": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_kraken": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_okx": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_all_exchange": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_binance": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_bybit": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_coinbase_advanced": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_kraken": 4,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_okx": 4
+   },
+   "frequencies": [
+    "15m",
+    "1h",
+    "4h",
+    "5m"
+   ],
+   "coverage_dates": [
+    "2026-01-21T00:00:00+00:00",
+    "2026-05-01T00:00:00+00:00"
+   ],
+   "entitlement_evidence": "UNKNOWN (plan not on file)",
+   "owner_reported": "",
+   "connector": "financial-data _scripts/workers/stage15_cryptoquant_worker.py",
+   "lake_files": 485,
+   "lake_bytes": 38728243,
+   "raw_files": 97,
+   "derived_files": 388,
+   "census_appearances": 388,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "census producer UNRESOLVED for these variables: link provenance; plan/terms; availability contract"
+  },
+  {
+   "provider": "CFTC",
+   "product": "Commitments of Traders (positioning)",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": false,
+    "RETAINED_BYTES": false,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "FUNCTIONING_CONNECTOR",
+    "RETAINED_BYTES",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 0,
+   "asset_universe_sample": [],
+   "field_families": {},
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "public",
+   "owner_reported": "",
+   "connector": "stage3x workers reference cot_reports",
+   "lake_files": 0,
+   "lake_bytes": 0,
+   "raw_files": 0,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "Tuesday as-of",
+    "publication": "Friday release (not captured per row)",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "public",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "NOT_PRESENT",
+   "evaluated": "NO",
+   "missing_action": "publication clock (as-of Tuesday vs Friday release) before any PIT use"
+  },
+  {
+   "provider": "FINRA / short interest",
+   "product": "short interest (positioning)",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": true,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 2,
+   "asset_universe_sample": [
+    "2025",
+    "2025_daily_short_volume"
+   ],
+   "field_families": {
+    "2025_daily_short_volume": 3,
+    "2025": 1
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "public",
+   "owner_reported": "",
+   "connector": "stage13 gamma workers",
+   "lake_files": 4,
+   "lake_bytes": 100259784,
+   "raw_files": 4,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "settlement date",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "publication clock; availability contract"
+  },
+  {
+   "provider": "News",
+   "product": "news/text",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": false,
+    "RETAINED_BYTES": false,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "FUNCTIONING_CONNECTOR",
+    "RETAINED_BYTES",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 0,
+   "asset_universe_sample": [],
+   "field_families": {},
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "NONE",
+   "owner_reported": "",
+   "connector": "NONE in financial-data (only a coverage worker mentions news)",
+   "lake_files": 0,
+   "lake_bytes": 0,
+   "raw_files": 0,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {},
+   "revision_policy": "n/a",
+   "license": "n/a",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "NOT_PRESENT",
+   "evaluated": "NO",
+   "missing_action": "no news source is retained; owner decides whether one is in scope (no purchase implied)"
+  },
+  {
+   "provider": "Blockchain.com",
+   "product": "BTC chain charts",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "daily"
+   ],
+   "field_families": {
+    "daily": 6
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 6,
+   "lake_bytes": 140914,
+   "raw_files": 6,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "mempool.space",
+   "product": "BTC mempool/fees",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "snapshot"
+   ],
+   "field_families": {
+    "snapshot": 3
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 3,
+   "lake_bytes": 17132,
+   "raw_files": 3,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "BEA Data API",
+   "product": "US national accounts",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "quarterly"
+   ],
+   "field_families": {
+    "quarterly": 3
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 3,
+   "lake_bytes": 259220,
+   "raw_files": 3,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "DeFiLlama",
+   "product": "DeFi TVL",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "protocols"
+   ],
+   "field_families": {
+    "protocols": 1
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 1,
+   "lake_bytes": 5459631,
+   "raw_files": 1,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "SEC EDGAR",
+   "product": "filings",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "company_tickers"
+   ],
+   "field_families": {
+    "company_tickers": 1
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 1,
+   "lake_bytes": 277317,
+   "raw_files": 1,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "SEC EDGAR submissions API",
+   "product": "filings metadata",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "filing_metadata"
+   ],
+   "field_families": {
+    "filing_metadata": 1
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 1,
+   "lake_bytes": 5338387,
+   "raw_files": 1,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "fallback calendar generator",
+   "product": "SYNTHETIC/derived calendar (not a market source)",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 1,
+   "asset_universe_sample": [
+    "schedule"
+   ],
+   "field_families": {
+    "schedule": 6
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 6,
+   "lake_bytes": 709402,
+   "raw_files": 6,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "autogenerated_stage13_doc_backfill",
+   "product": "documentation backfill (not a market source)",
+   "rungs": {
+    "OWNER_REPORTED": false,
+    "DOCUMENTED_ENTITLEMENT": false,
+    "FUNCTIONING_CONNECTOR": true,
+    "RETAINED_BYTES": true,
+    "POINT_IN_TIME_ADMISSIBLE": false,
+    "PROFILED": false,
+    "EVALUATED": false
+   },
+   "rung_gaps": [
+    "OWNER_REPORTED",
+    "DOCUMENTED_ENTITLEMENT",
+    "POINT_IN_TIME_ADMISSIBLE",
+    "PROFILED",
+    "EVALUATED"
+   ],
+   "asset_universe_count": 60,
+   "asset_universe_sample": [
+    "btc_estimated_leverage_ratio_all_exchange",
+    "btc_estimated_leverage_ratio_binance",
+    "btc_exchange_inflow_all_exchange",
+    "btc_exchange_inflow_binance",
+    "btc_exchange_inflow_bybit",
+    "btc_exchange_inflow_coinbase_advanced",
+    "btc_exchange_inflow_kraken",
+    "btc_exchange_inflow_okx",
+    "btc_exchange_netflow_all_exchange",
+    "btc_exchange_netflow_binance",
+    "btc_exchange_netflow_bybit",
+    "btc_exchange_netflow_coinbase_advanced",
+    "btc_exchange_netflow_kraken",
+    "btc_exchange_netflow_okx",
+    "btc_exchange_outflow_all_exchange",
+    "btc_exchange_outflow_binance",
+    "btc_exchange_outflow_bybit",
+    "btc_exchange_outflow_coinbase_advanced",
+    "btc_exchange_outflow_kraken",
+    "btc_exchange_outflow_okx",
+    "btc_exchange_reserve_all_exchange",
+    "btc_exchange_reserve_binance",
+    "btc_exchange_reserve_bybit",
+    "btc_exchange_reserve_coinbase_advanced",
+    "btc_exchange_reserve_kraken"
+   ],
+   "field_families": {
+    "btc_exchange_inflow_all_exchange": 1,
+    "btc_exchange_inflow_binance": 1,
+    "btc_exchange_inflow_bybit": 1,
+    "btc_exchange_inflow_coinbase_advanced": 1,
+    "btc_exchange_inflow_kraken": 1,
+    "btc_exchange_inflow_okx": 1,
+    "btc_exchange_netflow_all_exchange": 1,
+    "btc_exchange_netflow_binance": 1,
+    "btc_exchange_netflow_bybit": 1,
+    "btc_exchange_netflow_coinbase_advanced": 1,
+    "btc_exchange_netflow_kraken": 1,
+    "btc_exchange_netflow_okx": 1
+   },
+   "frequencies": [],
+   "coverage_dates": "not in census",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "owner_reported": "",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "lake_files": 97,
+   "lake_bytes": 850946,
+   "raw_files": 97,
+   "derived_files": 0,
+   "census_appearances": 0,
+   "train_contracts": 0,
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "point_in_time": "NOT_ADMISSIBLE: no availability contract instance (census availability UNAVAILABLE; split contracts are not availability)",
+   "lane_b_profiled_columns": 0,
+   "status": "RETAINED_BYTES",
+   "evaluated": "NO",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "UNRESOLVED",
+   "product": "files whose provider is not declared in census lineage",
+   "lake_files": 1052,
+   "lake_bytes": 1112636236,
+   "field_families": {
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_all_exchange": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_binance": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_bybit": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_coinbase_advanced": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_kraken": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_inflow_okx": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_all_exchange": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_binance": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_bybit": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_coinbase_advanced": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_kraken": 8,
+    "alternative_data__cryptoquant__btc_exchange_flows__btc_exchange_netflow_okx": 8
+   },
+   "status": "RETAINED_BYTES",
+   "missing_action": "locate provenance.json or producer; until then no use",
+   "evaluated": "NO"
+  }
+ ]
+}

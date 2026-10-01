@@ -1,0 +1,22 @@
+{
+ "old": {
+  "grain": "dataset x column rows (inventory v3)",
+  "distinct_rows": 15228,
+  "covered": 3538,
+  "source": "feature-eng inventory_v3 coverage_summary.json sha 884b595e"
+ },
+ "new": {
+  "grain": "discovered files in raw and derived directories + declared sources without bytes",
+  "files": 5273,
+  "raw_files": 773,
+  "derived_files": 4500,
+  "sources_without_bytes": 4,
+  "in_census": 1680,
+  "outside_census": 3593,
+  "with_train_contract": 198,
+  "with_lane_b_profiled_columns": 198,
+  "column_slots": 81964,
+  "covered_files": 198
+ },
+ "note": "the two grains are not commensurable: a file is not a column and a column appearance is not an economic signal; both are shown, neither replaces the other"
+}

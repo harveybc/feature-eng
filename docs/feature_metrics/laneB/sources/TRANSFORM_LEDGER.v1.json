@@ -1,0 +1,1493 @@
+{
+ "schema": "lane_b_transform_ledger.v1",
+ "summary": {
+  "rows": 77,
+  "by_state": {
+   "profiled": 15,
+   "applicable": 4,
+   "temporally_verified": 3,
+   "materialized": 6,
+   "deferred": 20,
+   "excluded": 16,
+   "NOT_APPLICABLE": 13
+  },
+  "evaluated": 0,
+  "selected": 0,
+  "temporally_verified": 3,
+  "native_vs_proxy_on_price_bars": {
+   "wavelet_native_dwt": {
+    "state": "NOT_COVERED",
+    "rows": 0,
+    "reason": "no IMPLEMENTED row with a NATIVE_DWT method id; rows present (method id, implemented): NATIVE_DWT_db4 (not implemented) (NO); PROXY_ROLLING_MEAN_MULTISCALE_16_32_64_128 (yes)"
+   },
+   "wavelet_proxy_multiscale": {
+    "state": "COVERED_TO_materialized",
+    "rows": 1,
+    "reason": ""
+   },
+   "emd_native": {
+    "state": "NOT_COVERED",
+    "rows": 0,
+    "reason": "no IMPLEMENTED row with a NATIVE_EMD method id; rows present (method id, implemented): EMD_BACKEND_UNDECLARED (PyEMD or rolling proxy) (yes)"
+   },
+   "emd_proxy": {
+    "state": "NOT_COVERED",
+    "rows": 0,
+    "reason": "no IMPLEMENTED row with a PROXY_ROLLING method id; rows present (method id, implemented): EMD_BACKEND_UNDECLARED (PyEMD or rolling proxy) (yes)"
+   }
+  },
+  "materialized_derived_files_by_family": {
+   "emd": 200,
+   "fracdiff": 200,
+   "hilbert": 200,
+   "multitaper": 200,
+   "statistical": 200,
+   "technical": 200,
+   "wavelet": 200,
+   "learned_cnn": 20,
+   "learned_lstm": 20,
+   "sota_funding_term_structure": 6,
+   "sota_hmm_regime": 10,
+   "sota_intrabar_realized": 10,
+   "sota_pair_spreads": 10
+  }
+ },
+ "rows": [
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "raw",
+   "method_id": "RAW_OHLCV_STAGE21",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "PS2/PS5 evaluation on Y_s/Y_l after availability contract",
+   "evidence": "features/trading_asset_data 200 files; c162 TRAIN profiles for 198 contracted appearances",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "returns_logreturns",
+   "method_id": "STAGE22_TECHNICAL_RETURNS",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "temporal test of the stage22 producer (lane C); profile per asset",
+   "evidence": "technical.parquet return_*/log_return_*; profiled only inside the ETH 4h model-ready view",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "differences",
+   "method_id": "DIFF_1",
+   "state": "applicable",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "no recipe emitted",
+   "owner": "lane B",
+   "next_step": "add to the compact grid (lane B)",
+   "evidence": "not materialized as a channel; used internally by PS1 volatility",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "normalization",
+   "method_id": "TRAIN_FIT_SCALER_PREDICTOR",
+   "state": "temporally_verified",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": true,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "M01/M02",
+   "next_step": "",
+   "evidence": "predictor P3 rules 2026-09-14: scaler fitted on TRAIN does not move; materialized at model time",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "fracdiff",
+   "method_id": "NATIVE_FIXED_WIDTH_FRACDIFF_d0.4_0.6_0.8",
+   "state": "materialized",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane C (temporal test) / lane B (profile)",
+   "next_step": "lane C prefix/restart test, then TRAIN profile",
+   "evidence": "fracdiff.parquet; past-only every bar per financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "technical_trend",
+   "method_id": "STAGE22_TECHNICAL (financial-data) ; FEATURE_ENG_PANDAS_TA (separate producer)",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "temporally_verified false for the materialized producer",
+   "owner": "lane C (temporal) / lane B (profile)",
+   "next_step": "temporal test of stage22 producer; per-asset profile; compact parameter grid",
+   "evidence": "technical.parquet (sma/ema/close_sma_ratio/macd/trend_slope); feature-eng's own pandas_ta set is lookahead-tested (tests/test_real_indicator_causality.py) but that is NOT the producer of the materialized files; profiled only in the ETH 4h view",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "technical_momentum",
+   "method_id": "STAGE22_TECHNICAL (financial-data) ; FEATURE_ENG_PANDAS_TA (separate producer)",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "temporally_verified false for the materialized producer",
+   "owner": "lane C (temporal) / lane B (profile)",
+   "next_step": "temporal test of stage22 producer; per-asset profile; compact parameter grid",
+   "evidence": "technical.parquet (rsi/stoch/williams/cci/roc/mom); feature-eng's own pandas_ta set is lookahead-tested (tests/test_real_indicator_causality.py) but that is NOT the producer of the materialized files; profiled only in the ETH 4h view",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "technical_volatility",
+   "method_id": "STAGE22_TECHNICAL (financial-data) ; FEATURE_ENG_PANDAS_TA (separate producer)",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "temporally_verified false for the materialized producer",
+   "owner": "lane C (temporal) / lane B (profile)",
+   "next_step": "temporal test of stage22 producer; per-asset profile; compact parameter grid",
+   "evidence": "technical.parquet (bb/atr/natr/hist_vol); feature-eng's own pandas_ta set is lookahead-tested (tests/test_real_indicator_causality.py) but that is NOT the producer of the materialized files; profiled only in the ETH 4h view",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "technical_volume",
+   "method_id": "STAGE22_TECHNICAL (financial-data) ; FEATURE_ENG_PANDAS_TA (separate producer)",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "temporally_verified false for the materialized producer",
+   "owner": "lane C (temporal) / lane B (profile)",
+   "next_step": "temporal test of stage22 producer; per-asset profile; compact parameter grid",
+   "evidence": "technical.parquet (obv/volume_sma/vwap/mfi); feature-eng's own pandas_ta set is lookahead-tested (tests/test_real_indicator_causality.py) but that is NOT the producer of the materialized files; profiled only in the ETH 4h view",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "statistical_rolling_moments",
+   "method_id": "STAGE22_STATISTICAL",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "temporal test; per-asset profile",
+   "evidence": "statistical.parquet; profiled only in the ETH 4h view",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "market_state_rule",
+   "method_id": "RULE_VOL_REGIME_HIGH_LOW ; FEATURE_ENG_REGIME_V1_V2_RULES",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not materialized per asset",
+   "owner": "lane B",
+   "next_step": "emit with available history only; durations/transitions not produced",
+   "evidence": "ETH 4h view vol_regime_high/low profiled; no materialized hierarchical state provider",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "market_state_learned_hmm",
+   "method_id": "SOTA_HMM_REGIME (fit provenance UNKNOWN)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "fit period and fold unknown: cannot be admitted to a temporal fold",
+   "owner": "lane C",
+   "next_step": "link fit period; refit per TRAIN fold",
+   "evidence": "sota_hmm_regime.parquet",
+   "materialized_files": 10
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "market_state_learned_gmm",
+   "method_id": "FEATURE_ENG_REGIME_V3_GMM (fixed centroids, 15y EURUSD, forward-return label map)",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "fitted outside any fold and labels chosen from forward returns: refused until refit on fold TRAIN",
+   "owner": "lane C",
+   "next_step": "",
+   "evidence": "feature-eng d081d0f app/regime_detector.py:247-302; LEARNED, fit period UNKNOWN; feature-eng satoshi/c-method-semantics-20261001 5f25cc1 (regime fold-boundary tests); financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "wavelet",
+   "method_id": "NATIVE_DWT_db4 (not implemented)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "NO native wavelet producer exists (NOT_IMPLEMENTED)",
+   "owner": "lane B implement / lane C test",
+   "next_step": "causal trailing-window pywt DWT producer with frozen TRAIN windows, card method block per predictor satoshi/c-contracts-20261001 f509955f (representation_candidate_card.v1 method block); the successor must not keep the worker's hard-coded user-home PROJECT3_ROOT default (line 22), and the existing worker is not edited in place",
+   "evidence": "financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75: pywt imported, wavedec never called",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "wavelet",
+   "method_id": "PROXY_ROLLING_MEAN_MULTISCALE_16_32_64_128",
+   "state": "materialized",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane C (temporal) / lane B",
+   "next_step": "keep with honest method id; never certifies native wavelet",
+   "evidence": "wavelet.parquet; financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75: MULTISCALE_ROLLING_MEAN_PROXY, proxy_of DWT_DB4",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "hilbert",
+   "method_id": "NATIVE_SCIPY_HILBERT_TRAILING_WINDOW (ht_inst_freq == ht_phase_difference, rad/bar)",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "temporal verification VIOLATED for n<1,000 rows and for restart/chunked replay (grid anchored at input start); radians per bar, no physical interval; feature age up to step-1 bars (forward-filled endpoints)",
+   "owner": "lane C",
+   "next_step": "freeze window from TRAIN, prefix/restart invariance test, declare units and feature age",
+   "evidence": "hilbert.parquet; financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "multitaper",
+   "method_id": "NATIVE_DPSS (cycles per bar)",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "temporal verification VIOLATED for n<1,000 rows and restart/chunked replay; cycles per bar, no physical interval; endpoints every 512/256/96/32 bars, feature age up to step-1 bars",
+   "owner": "lane C",
+   "next_step": "freeze windows from TRAIN; restart test",
+   "evidence": "multitaper.parquet; financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "stl",
+   "method_id": "PREDICTOR_STL_PREPROCESSOR",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not materialized as causal channels; a global STL is non-causal",
+   "owner": "lane C",
+   "next_step": "rolling causal STL recipe or explicit exclusion",
+   "evidence": "predictor stl preprocessor exists; M03 profiles compute STL strength descriptively only",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "emd",
+   "method_id": "EMD_BACKEND_UNDECLARED (PyEMD or rolling proxy)",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "method id of the materialized bytes is unknown",
+   "owner": "lane C",
+   "next_step": "record backend per file or regenerate with a declared method",
+   "evidence": "emd.parquet; financial-data satoshi/c-method-semantics-20261001 99766205 METHOD_SEMANTICS_DOSSIER_2026_10_01.md \u00a72 (per-producer table) and \u00a75: silent proxy fallback when PyEMD is absent (absent on the coordinator) or n>80,000; no backend recorded in sidecars or logs",
+   "materialized_files": 200
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "calendar_time",
+   "method_id": "HOD_DOW_SIN_COS",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not materialized per asset in financial-data",
+   "owner": "lane B",
+   "next_step": "emit from the bar timestamp with declared timezone",
+   "evidence": "d4 hod/dow columns profiled",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "event_overlap",
+   "method_id": "CALENDAR_JOIN",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "no admissible calendar availability yet",
+   "owner": "lane C (study) / lane B (feature)",
+   "next_step": "",
+   "evidence": "needs the FXMacroData availability contract",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "learned_cnn_lstm",
+   "method_id": "LEARNED_INPUTS_CNN_LSTM (donor provenance UNKNOWN)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "donor fit period and data unknown",
+   "owner": "M02",
+   "next_step": "link donor manifest and fit fold, else exclude",
+   "evidence": "features/learned_inputs (5 assets) + learned_models",
+   "materialized_files": 80
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "learned_branch_core_ae",
+   "method_id": "PREDICTOR_MODULAR_PRETRAIN (M01/M02)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "no financial donor",
+   "owner": "M02",
+   "next_step": "",
+   "evidence": "tools/modular_pretrain.py; donors trained on TSL/synthetic so far",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "sota_intrabar_realized",
+   "method_id": "SOTA_INTRABAR_REALIZED (producer UNLOCATED)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "producer and recipe not located",
+   "owner": "lane B",
+   "next_step": "locate producer in financial-data _scripts; method id",
+   "evidence": "sota_intrabar_realized.parquet",
+   "materialized_files": 10
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "sota_pair_spreads",
+   "method_id": "SOTA_PAIR_SPREADS (producer UNLOCATED)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "producer and recipe not located",
+   "owner": "lane B",
+   "next_step": "locate producer in financial-data _scripts; method id",
+   "evidence": "sota_pair_spreads.parquet",
+   "materialized_files": 10
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "sota_funding_term_structure",
+   "method_id": "SOTA_FUNDING_TERM_STRUCTURE (producer UNLOCATED)",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "producer and recipe not located",
+   "owner": "lane B",
+   "next_step": "locate producer in financial-data _scripts; method id",
+   "evidence": "sota_funding_term_structure.parquet",
+   "materialized_files": 6
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "surprise",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "a price bar has no consensus/actual; surprise belongs to the event source and reaches bars via event_overlap",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "ohlc_price_bar_intraday (FX G10 HistData, crypto spot/perp Binance; 50 assets x 5m/15m/1h/4h)",
+   "family": "revision",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "a traded price is not revised; vendor corrections are a data-quality matter, not a revision feature",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "raw",
+   "method_id": "CROSS_SOURCE_RESAMPLED_FFILL",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "daily values propagated to intraday rows: propagation is not observation (subplan 4.1)",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "cross_source_features; c162 profiles (474 Yahoo columns)",
+   "materialized_files": 1480
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "returns_logreturns",
+   "method_id": "DAILY_RETURN",
+   "state": "applicable",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "compact grid",
+   "evidence": "not materialized",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "statistical_rolling_moments",
+   "method_id": "CROSS_SOURCE_STATISTICAL",
+   "state": "materialized",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "producer location, temporal test, profile",
+   "evidence": "features/cross_source_statistical",
+   "materialized_files": 1464
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "technical_trend",
+   "method_id": "STAGE22_TECHNICAL",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not in the first compact grid",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "OHLCV exists for indices; not materialized",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "wavelet",
+   "method_id": "NOT_MATERIALIZED",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "daily series; spectral producers read trading assets only",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "hilbert",
+   "method_id": "NOT_MATERIALIZED",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "daily series; spectral producers read trading assets only",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "multitaper",
+   "method_id": "NOT_MATERIALIZED",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "daily series; spectral producers read trading assets only",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "emd",
+   "method_id": "NOT_MATERIALIZED",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "daily series; spectral producers read trading assets only",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "daily_market_series (Yahoo indices/ETFs/commodity futures/EM FX/VIX, resampled into intraday cross-source files)",
+   "family": "surprise",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "index levels are market prices, not scheduled releases with consensus",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "raw",
+   "method_id": "CROSS_SOURCE_RESAMPLED_FFILL",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "latest-vintage values only",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "c162 profiles (FRED 31, OECD 4 columns)",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "differences",
+   "method_id": "PCT_CHANGE",
+   "state": "applicable",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "not materialized",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "statistical_rolling_moments",
+   "method_id": "CROSS_SOURCE_STATISTICAL",
+   "state": "materialized",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "cross_source_statistical",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "revision",
+   "method_id": "ALFRED_VINTAGES",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "REVISED_SERIES_WITHOUT_VINTAGES; first release unknown",
+   "owner": "lane B (source)",
+   "next_step": "ALFRED vintage capture for series used point-in-time",
+   "evidence": "no vintages captured",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "surprise",
+   "method_id": "CONSENSUS_MINUS_ACTUAL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "NO_CONSENSUS_AT_ALL",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "no consensus source overlaps (data-gov registry)",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "technical_trend",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "an OHLC/volume indicator needs open, high, low, close (and volume); this input is a single value per observation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "technical_momentum",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "an OHLC/volume indicator needs open, high, low, close (and volume); this input is a single value per observation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "technical_volatility",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "an OHLC/volume indicator needs open, high, low, close (and volume); this input is a single value per observation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "technical_volume",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "an OHLC/volume indicator needs open, high, low, close (and volume); this input is a single value per observation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "single_macro_value (FRED, OECD, BEA)",
+   "family": "multitaper",
+   "method_id": "NOT_MATERIALIZED",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "monthly/quarterly series give too few TRAIN points for a stable spectrum",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "raw",
+   "method_id": "FXMACRODATA_RAW",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "availability contract absent",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "8 contracted appearances; c162 profiled 24 columns; data-gov registry 2026-09-26",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "release_timing",
+   "method_id": "FEATURE_ENG_ECONOMIC_CALENDAR (CL16: release vs available clocks)",
+   "state": "temporally_verified",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": true,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not materialized on lake data",
+   "owner": "lane B",
+   "next_step": "materialize after the availability contract",
+   "evidence": "feature-eng app/economic_calendar.py with 37 tests (publication and receipt boundaries)",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "surprise",
+   "method_id": "RELEASE_AND_AVAILABLE_SURPRISE",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "NO_CONSENSUS_AT_ALL for FXMacroData; no vintage may be invented",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "feature-eng economic_calendar.py",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "revision",
+   "method_id": "REVISION_SURPRISE",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "NO_REVISION_HISTORY",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "event_overlap",
+   "method_id": "EVENT_WINDOW_FLAGS",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane C",
+   "next_step": "",
+   "evidence": "lane C PS3-C episodes",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "technical_trend",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "irregular event records, not a regularly sampled level: spectral/OHLC transforms are undefined on them",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "wavelet",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "irregular event records, not a regularly sampled level: spectral/OHLC transforms are undefined on them",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "hilbert",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "irregular event records, not a regularly sampled level: spectral/OHLC transforms are undefined on them",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "event_calendar (FXMacroData announcements and release calendar)",
+   "family": "multitaper",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "irregular event records, not a regularly sampled level: spectral/OHLC transforms are undefined on them",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "onchain_count (CoinMetrics, Etherscan, Blockchain.com, mempool.space, CryptoQuant, DeFiLlama)",
+   "family": "raw",
+   "method_id": "CROSS_SOURCE_RESAMPLED_FFILL",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "CryptoQuant producer UNRESOLVED in census",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "CoinMetrics 36 columns profiled; CryptoQuant 388 appearances unprofiled",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "onchain_count (CoinMetrics, Etherscan, Blockchain.com, mempool.space, CryptoQuant, DeFiLlama)",
+   "family": "returns_logreturns",
+   "method_id": "LOG_DIFF",
+   "state": "applicable",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "not materialized",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "onchain_count (CoinMetrics, Etherscan, Blockchain.com, mempool.space, CryptoQuant, DeFiLlama)",
+   "family": "statistical_rolling_moments",
+   "method_id": "CROSS_SOURCE_STATISTICAL",
+   "state": "materialized",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "cross_source_statistical",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "onchain_count (CoinMetrics, Etherscan, Blockchain.com, mempool.space, CryptoQuant, DeFiLlama)",
+   "family": "technical_trend",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "an OHLC/volume indicator needs open, high, low, close (and volume); this input is a single value per observation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "onchain_count (CoinMetrics, Etherscan, Blockchain.com, mempool.space, CryptoQuant, DeFiLlama)",
+   "family": "multitaper",
+   "method_id": "NOT_MATERIALIZED",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not in the first grid",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "positioning (FINRA short volume / short interest; CFTC COT)",
+   "family": "raw",
+   "method_id": "FINRA_FILES (outside census)",
+   "state": "materialized",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "not in census, no TRAIN contract",
+   "owner": "lane B",
+   "next_step": "census entry and publication clock",
+   "evidence": "4 files",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "positioning (FINRA short volume / short interest; CFTC COT)",
+   "family": "raw",
+   "method_id": "CFTC_COT",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "NOT_PRESENT as data files",
+   "owner": "owner decides scope",
+   "next_step": "",
+   "evidence": "no parquet/csv retained",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "positioning (FINRA short volume / short interest; CFTC COT)",
+   "family": "technical_trend",
+   "method_id": "NA",
+   "state": "NOT_APPLICABLE",
+   "states": {},
+   "reason": "an OHLC/volume indicator needs open, high, low, close (and volume); this input is a single value per observation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "raw",
+   "method_id": "RAW_CHANNELS",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "lane B full-TRAIN profiles, 1 204 channels",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "normalization",
+   "method_id": "TSL_TRAIN_STANDARD_SCALER (author)",
+   "state": "temporally_verified",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": false,
+    "temporally_verified": true,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "",
+   "owner": "M04/M06",
+   "next_step": "",
+   "evidence": "author protocol",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "fracdiff",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "technical_trend",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "wavelet",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "hilbert",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "multitaper",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "stl",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "emd",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "market_state_learned_hmm",
+   "method_id": "AUTHOR_PROTOCOL",
+   "state": "excluded",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "literature reproduction keeps the author protocol exactly (orders); alternative transforms are separate variants",
+   "owner": "M04",
+   "next_step": "",
+   "evidence": "",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "public_benchmark_channel (TSL Electricity, Traffic, Weather)",
+   "family": "sentinel_cleaning",
+   "method_id": "WEATHER_MINUS_9999_POLICY",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": false,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "separate variant; M02 proposes, coordinator rules",
+   "owner": "M02",
+   "next_step": "",
+   "evidence": "3 Weather channels hit -9999",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "legacy_derived_views (phase-1b d4 indicators; ETH 4h tech/stat model-ready)",
+   "family": "raw",
+   "method_id": "ALREADY_DERIVED_COLUMNS",
+   "state": "profiled",
+   "states": {
+    "applicable": true,
+    "implemented": true,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": true,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "a screen is not an evaluation",
+   "owner": "lane B",
+   "next_step": "",
+   "evidence": "lane B full-TRAIN profiles (d4 23, ETH 83) and the ETH PS2 screen 397b67d6",
+   "materialized_files": 0
+  },
+  {
+   "input_type": "filings_text (SEC EDGAR)",
+   "family": "raw",
+   "method_id": "SEC_EDGAR_FILES",
+   "state": "deferred",
+   "states": {
+    "applicable": true,
+    "implemented": false,
+    "materialized": true,
+    "temporally_verified": false,
+    "profiled": false,
+    "evaluated": false,
+    "selected": false
+   },
+   "reason": "text features not in scope of this batch",
+   "owner": "owner decides scope",
+   "next_step": "",
+   "evidence": "2 files",
+   "materialized_files": 0
+  }
+ ]
+}

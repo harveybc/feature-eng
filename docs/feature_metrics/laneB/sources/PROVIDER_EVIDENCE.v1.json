@@ -1,0 +1,375 @@
+{
+ "schema": "lane_b_provider_evidence.v1",
+ "date": "2026-10-01",
+ "rule": "Each statement cites where it was read. Nothing here is a credential. OWNER_REPORTED means the owner declared access; it is not a documented entitlement. A split contract alone is not availability.",
+ "providers": [
+  {
+   "provider": "Yahoo Finance",
+   "product": "quotes/history (equity indices, ETFs, commodity futures, EM FX daily, VIX)",
+   "census_names": [
+    "Yahoo Finance"
+   ],
+   "owner_reported": "paid Yahoo access declared by the owner (addendum 256c61a6)",
+   "entitlement_evidence": "NONE_DOCUMENTED: no product name, plan or API terms on file; a paid Yahoo Finance subscription does not by itself grant a programmatic API",
+   "connector": "financial-data _scripts/workers/stage13_omega_light_worker.py, stage13_omega_followup_worker.py (yfinance, unofficial public endpoints)",
+   "clocks": {
+    "event": "daily bar date, timezone UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "no per-row receipt; file mtime only"
+   },
+   "revision_policy": "UNKNOWN (adjusted closes can be rewritten by the vendor)",
+   "license": "UNKNOWN (census INTERNAL_RESEARCH_ONLY_PENDING_EVIDENCE)",
+   "missing_action": "owner names the exact Yahoo product and its terms for programmatic retrieval; until then no new download; then availability contract (event/publication/receipt) before PIT admission"
+  },
+  {
+   "provider": "Alpaca",
+   "product": "market data (stocks/crypto) via the Alpaca account",
+   "census_names": [],
+   "owner_reported": "declared by the owner (addendum 256c61a6)",
+   "entitlement_evidence": "NONE_DOCUMENTED for market data: plan/feed (IEX vs SIP) not on file",
+   "connector": "EXECUTION ONLY: lts app/alpaca_paper_cli.py, plugins_broker/alpaca_paper_broker; services lts-alpaca-model-runner (active) and lts-alpaca-paper-observer.timer; no data connector into financial-data or the lake",
+   "clocks": {
+    "event": "n/a (no retained bytes)",
+    "publication": "n/a",
+    "receipt": "n/a"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "owner documents the market-data plan/feed; a data connector writes through the governed data-gov route for the declared business assets only; then RETAINED_BYTES"
+  },
+  {
+   "provider": "FXMacroData",
+   "product": "economic calendar: release actuals (announcements) and scheduled release calendar",
+   "census_names": [
+    "FXMacroData"
+   ],
+   "owner_reported": "paid FXMacroData declared by the owner",
+   "entitlement_evidence": "paid subscription reported by the owner; connector functioning (bytes retained)",
+   "connector": "financial-data _scripts/workers/stage15_fxmacrodata_worker.py; point-in-time capture with our receipt clock started at financial-data ef0ba6612",
+   "clocks": {
+    "event": "release time per row",
+    "publication": "announcements OBSERVED_ACTUAL_PUBLICATION; release_calendar ASSUMED_SCHEDULED_PUBLICATION (data-gov registry 2026-09-26)",
+    "receipt": "per-row receipt clock only from the ef0ba6612 capture onward; none for the retained history"
+   },
+   "revision_policy": "NO_REVISION_HISTORY (registry absence)",
+   "license": "paid subscription; redistribution UNKNOWN",
+   "missing_action": "availability contract for the raw resources (publication clock is observed for announcements; consensus absent, NO_CONSENSUS_AT_ALL); the 8 resampled census appearances need their resampling producer located before any derived availability; no consensus/first-release vintage may be invented"
+  },
+  {
+   "provider": "HistData",
+   "product": "FX majors intraday bars",
+   "census_names": [
+    "HistData"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "free download; terms UNKNOWN on file",
+   "connector": "financial-data stage13 workers (histdata)",
+   "clocks": {
+    "event": "bar timestamp, timezone UNKNOWN (not documented on file)",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "document terms and timestamp convention; availability contract"
+  },
+  {
+   "provider": "Binance",
+   "product": "spot and USD-M futures klines",
+   "census_names": [
+    "Binance Spot",
+    "Binance Futures"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "public REST market data",
+   "connector": "financial-data _scripts/workers/stage13_dragon_crypto_worker.py (historical REST, END_MS 2025-12-31)",
+   "clocks": {
+    "event": "open_time/close_time UTC in schema",
+    "publication": "UNOBSERVED",
+    "receipt": "BOUNDED_AT_FILE_GRAIN"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "availability contract (ETH 4h candidate 998e3f80 not installed); licence evidence"
+  },
+  {
+   "provider": "FRED",
+   "product": "macro and rates observations",
+   "census_names": [
+    "FRED"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "public API (key-based); key not inspected",
+   "connector": "financial-data stage13 gamma workers",
+   "clocks": {
+    "event": "observation date",
+    "publication": "UNOBSERVED (ALFRED vintages not captured)",
+    "receipt": "file grain"
+   },
+   "revision_policy": "REVISED_SERIES_WITHOUT_VINTAGES: latest values only; first release not available",
+   "license": "public domain for most series; per-series notes not on file",
+   "missing_action": "ALFRED vintage capture for any series used point-in-time; without vintages it is retrospective only"
+  },
+  {
+   "provider": "OECD SDMX",
+   "product": "composite leading indicators",
+   "census_names": [
+    "OECD SDMX"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "public",
+   "connector": "stage13 workers",
+   "clocks": {
+    "event": "month",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "REVISED_WITHOUT_VINTAGES",
+   "license": "OECD terms not on file",
+   "missing_action": "vintages and availability contract"
+  },
+  {
+   "provider": "CoinMetrics Community",
+   "product": "on-chain BTC/ETH counts",
+   "census_names": [
+    "CoinMetrics Community"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "community API; terms not on file",
+   "connector": "stage13 gamma workers",
+   "clocks": {
+    "event": "day",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN on file",
+   "missing_action": "licence evidence; availability contract"
+  },
+  {
+   "provider": "Etherscan",
+   "product": "ETH chain statistics",
+   "census_names": [
+    "Etherscan API V2"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "API key (not inspected)",
+   "connector": "stage13 workers",
+   "clocks": {
+    "event": "day",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms; availability contract"
+  },
+  {
+   "provider": "CryptoQuant",
+   "product": "exchange flows and on-chain metrics",
+   "census_names": [],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (plan not on file)",
+   "connector": "financial-data _scripts/workers/stage15_cryptoquant_worker.py",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "census producer UNRESOLVED for these variables: link provenance; plan/terms; availability contract"
+  },
+  {
+   "provider": "CFTC",
+   "product": "Commitments of Traders (positioning)",
+   "census_names": [],
+   "owner_reported": "",
+   "entitlement_evidence": "public",
+   "connector": "stage3x workers reference cot_reports",
+   "clocks": {
+    "event": "Tuesday as-of",
+    "publication": "Friday release (not captured per row)",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "public",
+   "missing_action": "publication clock (as-of Tuesday vs Friday release) before any PIT use"
+  },
+  {
+   "provider": "FINRA / short interest",
+   "product": "short interest (positioning)",
+   "census_names": [
+    "FINRA Reg SHO Daily Short Sale Volume",
+    "FINRA Query API consolidatedShortInterest"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "public",
+   "connector": "stage13 gamma workers",
+   "clocks": {
+    "event": "settlement date",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "publication clock; availability contract"
+  },
+  {
+   "provider": "News",
+   "product": "news/text",
+   "census_names": [],
+   "owner_reported": "",
+   "entitlement_evidence": "NONE",
+   "connector": "NONE in financial-data (only a coverage worker mentions news)",
+   "clocks": {},
+   "revision_policy": "n/a",
+   "license": "n/a",
+   "missing_action": "no news source is retained; owner decides whether one is in scope (no purchase implied)"
+  },
+  {
+   "provider": "Blockchain.com",
+   "product": "BTC chain charts",
+   "census_names": [
+    "Blockchain.com"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "mempool.space",
+   "product": "BTC mempool/fees",
+   "census_names": [
+    "mempool.space"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "BEA Data API",
+   "product": "US national accounts",
+   "census_names": [
+    "BEA Data API"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "DeFiLlama",
+   "product": "DeFi TVL",
+   "census_names": [
+    "DeFiLlama"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "SEC EDGAR",
+   "product": "filings",
+   "census_names": [
+    "SEC EDGAR"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "SEC EDGAR submissions API",
+   "product": "filings metadata",
+   "census_names": [
+    "SEC EDGAR submissions API"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "fallback calendar generator",
+   "product": "SYNTHETIC/derived calendar (not a market source)",
+   "census_names": [
+    "fallback calendar generator"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  },
+  {
+   "provider": "autogenerated_stage13_doc_backfill",
+   "product": "documentation backfill (not a market source)",
+   "census_names": [
+    "autogenerated_stage13_doc_backfill"
+   ],
+   "owner_reported": "",
+   "entitlement_evidence": "UNKNOWN (not on file)",
+   "connector": "financial-data stage13 workers (provenance.json names this source)",
+   "clocks": {
+    "event": "UNKNOWN",
+    "publication": "UNOBSERVED",
+    "receipt": "file grain"
+   },
+   "revision_policy": "UNKNOWN",
+   "license": "UNKNOWN",
+   "missing_action": "terms/licence evidence; availability contract; census entry if outside the census"
+  }
+ ]
+}

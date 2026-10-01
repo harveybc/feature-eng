@@ -1,0 +1,223 @@
+{
+ "schema": "lane_b_fxmacrodata_resolution.v1",
+ "registrations_sha256": "49a7fae8ca5fa30cb0379e397b445a0ee7c4a38edb346dac3c0698cf78456fd0",
+ "records": [
+  {
+   "appearance_id": "app_00d9ca6795590c026b56d208",
+   "entity": "economic_calendar__release_actuals__fxmacrodata__announcements",
+   "frequency": "4h",
+   "relative_path": "features/cross_source_features/4h/economic_calendar__release_actuals__fxmacrodata__announcements.parquet",
+   "physical_sha256": "59b6472fc599da22bde0158e9f6656927917f1ff53104eda69258711cadb8541",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "5313fd90c1f077345419a87b6f4bacbc7d2a341debcfed0268f206843539c767",
+   "train_boundaries": {
+    "calibration": [
+     1635,
+     2180
+    ],
+    "confirmation": [
+     2180,
+     2725
+    ],
+    "train": [
+     0,
+     1635
+    ]
+   },
+   "raw_parent": "economic_calendar/release_actuals/fxmacrodata/announcements.parquet",
+   "raw_parent_registry": "OBSERVED_ACTUAL_PUBLICATION; absences incl. NO_CONSENSUS_AT_ALL, NO_AVAILABILITY_CONTRACT, NO_REVISION_HISTORY",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_097b81b87cca7baebe3b568e",
+   "entity": "economic_calendar__release_actuals__fxmacrodata__announcements",
+   "frequency": "15m",
+   "relative_path": "features/cross_source_features/15m/economic_calendar__release_actuals__fxmacrodata__announcements.parquet",
+   "physical_sha256": "fd037af6b3b7f0bdac3ae856c935e0690926c36a036db57c2f4e63b345328bb0",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "6562673e12a94d739284c054b6f5207e663c390414738a077ed15f9e81ccbb3c",
+   "train_boundaries": {
+    "calibration": [
+     26151,
+     34868
+    ],
+    "confirmation": [
+     34868,
+     43585
+    ],
+    "train": [
+     0,
+     26151
+    ]
+   },
+   "raw_parent": "economic_calendar/release_actuals/fxmacrodata/announcements.parquet",
+   "raw_parent_registry": "OBSERVED_ACTUAL_PUBLICATION; absences incl. NO_CONSENSUS_AT_ALL, NO_AVAILABILITY_CONTRACT, NO_REVISION_HISTORY",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_127800fd0387cde9c556ad7f",
+   "entity": "economic_calendar__release_actuals__fxmacrodata__announcements",
+   "frequency": "5m",
+   "relative_path": "features/cross_source_features/5m/economic_calendar__release_actuals__fxmacrodata__announcements.parquet",
+   "physical_sha256": "dc14a795637581c5e1f5c07b44e80a0f911172be8607f4d2907c41234d93b529",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "2c75a16f1be9d0d466efcc81cd6af4139fca6c1606cb2400e68ac813b80bacbc",
+   "train_boundaries": {
+    "calibration": [
+     78451,
+     104602
+    ],
+    "confirmation": [
+     104602,
+     130753
+    ],
+    "train": [
+     0,
+     78451
+    ]
+   },
+   "raw_parent": "economic_calendar/release_actuals/fxmacrodata/announcements.parquet",
+   "raw_parent_registry": "OBSERVED_ACTUAL_PUBLICATION; absences incl. NO_CONSENSUS_AT_ALL, NO_AVAILABILITY_CONTRACT, NO_REVISION_HISTORY",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_1e0e9734d322dd79f7947475",
+   "entity": "economic_calendar__scheduled_events__fxmacrodata__release_calendar",
+   "frequency": "4h",
+   "relative_path": "features/cross_source_features/4h/economic_calendar__scheduled_events__fxmacrodata__release_calendar.parquet",
+   "physical_sha256": "b546953e2977596e8cd9b2111abbd845cc706cc8cb269aee5510c169b72cc9c3",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "c27c0abbc2370f493d6297d5831f2ad900485f13db893e721e094d1d973748d6",
+   "train_boundaries": {
+    "calibration": [
+     1888,
+     2517
+    ],
+    "confirmation": [
+     2517,
+     3147
+    ],
+    "train": [
+     0,
+     1888
+    ]
+   },
+   "raw_parent": "economic_calendar/scheduled_events/fxmacrodata/release_calendar.parquet",
+   "raw_parent_registry": "ASSUMED_SCHEDULED_PUBLICATION; forward schedule with 0 values; NO_AVAILABILITY_CONTRACT",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_39af0885ed58fa37590516c4",
+   "entity": "economic_calendar__scheduled_events__fxmacrodata__release_calendar",
+   "frequency": "5m",
+   "relative_path": "features/cross_source_features/5m/economic_calendar__scheduled_events__fxmacrodata__release_calendar.parquet",
+   "physical_sha256": "6da230b384d6bea5bdd69eddf9173cceb1f9f1664df0d9d86f9ed9e3a9c71003",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "8f80a6f38d937cf5d5431f0febf77891c10b1b9cbf4e4420e62d6be025084b57",
+   "train_boundaries": {
+    "calibration": [
+     90591,
+     120788
+    ],
+    "confirmation": [
+     120788,
+     150985
+    ],
+    "train": [
+     0,
+     90591
+    ]
+   },
+   "raw_parent": "economic_calendar/scheduled_events/fxmacrodata/release_calendar.parquet",
+   "raw_parent_registry": "ASSUMED_SCHEDULED_PUBLICATION; forward schedule with 0 values; NO_AVAILABILITY_CONTRACT",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_b9a69fd56e76d6a616abdd6f",
+   "entity": "economic_calendar__scheduled_events__fxmacrodata__release_calendar",
+   "frequency": "15m",
+   "relative_path": "features/cross_source_features/15m/economic_calendar__scheduled_events__fxmacrodata__release_calendar.parquet",
+   "physical_sha256": "59f7e44e4222c63f05c454eb8f06720c2f7451ed69d80c04488b075bb2313927",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "714f0553b11627fcb4d5d7f59ac365028c6fe61b7c2d0e5d561e3549a458c1b4",
+   "train_boundaries": {
+    "calibration": [
+     30197,
+     40263
+    ],
+    "confirmation": [
+     40263,
+     50329
+    ],
+    "train": [
+     0,
+     30197
+    ]
+   },
+   "raw_parent": "economic_calendar/scheduled_events/fxmacrodata/release_calendar.parquet",
+   "raw_parent_registry": "ASSUMED_SCHEDULED_PUBLICATION; forward schedule with 0 values; NO_AVAILABILITY_CONTRACT",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_bbf65babf1e72ee5b9ad636f",
+   "entity": "economic_calendar__scheduled_events__fxmacrodata__release_calendar",
+   "frequency": "1h",
+   "relative_path": "features/cross_source_features/1h/economic_calendar__scheduled_events__fxmacrodata__release_calendar.parquet",
+   "physical_sha256": "4260dad5efec41cb2569142fbbdd38c4d3dec152375ade9cfc204396a61b0bc6",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "4df8cdaeae6516d64713d61d2299eb7559025848e79cdde5bcba6c52bc2bc848",
+   "train_boundaries": {
+    "calibration": [
+     7549,
+     10066
+    ],
+    "confirmation": [
+     10066,
+     12583
+    ],
+    "train": [
+     0,
+     7549
+    ]
+   },
+   "raw_parent": "economic_calendar/scheduled_events/fxmacrodata/release_calendar.parquet",
+   "raw_parent_registry": "ASSUMED_SCHEDULED_PUBLICATION; forward schedule with 0 values; NO_AVAILABILITY_CONTRACT",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  },
+  {
+   "appearance_id": "app_de5da68259bfc69b6be1744f",
+   "entity": "economic_calendar__release_actuals__fxmacrodata__announcements",
+   "frequency": "1h",
+   "relative_path": "features/cross_source_features/1h/economic_calendar__release_actuals__fxmacrodata__announcements.parquet",
+   "physical_sha256": "a39128481f15fdd61aa04c060d3ef1a76f361116fe726c5702271a78eddbf681",
+   "census_availability": "UNAVAILABLE (census 2026-09-10)",
+   "train_contract": "103504e8bbc73ba9bbe4bfa8515a000432361c1d8966c7e1ed752894e0fe23fb",
+   "train_boundaries": {
+    "calibration": [
+     6538,
+     8717
+    ],
+    "confirmation": [
+     8717,
+     10897
+    ],
+    "train": [
+     0,
+     6538
+    ]
+   },
+   "raw_parent": "economic_calendar/release_actuals/fxmacrodata/announcements.parquet",
+   "raw_parent_registry": "OBSERVED_ACTUAL_PUBLICATION; absences incl. NO_CONSENSUS_AT_ALL, NO_AVAILABILITY_CONTRACT, NO_REVISION_HISTORY",
+   "resolution": "STALE_STRING_SUPERSEDED_FOR_THE_RAW_PARENT_BUT_DERIVED_STILL_UNAVAILABLE: the parent's publication clock is now a registered fact (data-gov registry 2026-09-26), yet this resampled appearance's producer is not located, so no derived earliest-available time exists; the TRAIN contract is a split, not availability",
+   "not_invented": "no consensus and no first-release vintage exist for this source; none is assumed"
+  }
+ ],
+ "count": 8
+}
