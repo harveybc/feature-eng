@@ -1,0 +1,26 @@
+{
+ "schema": "lane_b_derivative_view.v1",
+ "availability_class": "DEVELOPMENT",
+ "source_state": "BOUNDED_AT_FILE_GRAIN",
+ "source": {
+  "lake_relative_path": "features/trading_asset_data/eurusd/5m.parquet",
+  "sha256": "c746f344ac743768e8c7f20e2e4ef3b7fb8222d96b3660f196c0a1d74039f327",
+  "census_appearance": "app_ae9142c201e6694a3b1e1fde",
+  "raw_parent": "market_data/forex/g10/eurusd/5m.parquet (HistData; raw provenance sha d527b46a\u2026)",
+  "rows_5m": 1552028
+ },
+ "transform": {
+  "resample": "1h, closed=left, label=right (stamp = bar completion)",
+  "ohlc": "first/max/min/last of 5m bars",
+  "n_5m_bars_column": "N_5M_BARS",
+  "timezone": "as stored (UTC-parsed; source timezone undocumented)"
+ },
+ "output": {
+  "file": "eurusd_1h_from_lake_5m.csv",
+  "sha256": "ab0ada2840e1c6c14941f3109069d91efb5a1358fdf603aeca25caf84a267f80",
+  "rows": 129873,
+  "first": "2005-01-03 02:00:00+00:00",
+  "last": "2025-12-31 17:00:00+00:00"
+ },
+ "approval": "coordinator, 2026-10-01: one bounded read, <=256M, ionice -c3, <=10 min; lake not modified"
+}
