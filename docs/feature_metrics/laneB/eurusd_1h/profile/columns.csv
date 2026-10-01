@@ -1,0 +1,6 @@
+column,position,role,target_channel,status,exclusion_reason,declared_reason
+DATE_TIME,0,timestamp,False,EXCLUDED,time index; never a branch input,time index; never a branch input
+OPEN,1,feature,False,PROFILED_ADMISSIBLE,,
+LOW,2,feature,False,PROFILED_ADMISSIBLE,,
+HIGH,3,feature,False,PROFILED_ADMISSIBLE,,
+CLOSE,4,feature,False,PROFILED_ADMISSIBLE,,

@@ -1,0 +1,322 @@
+{
+ "schema": "feature_train_profile.v2",
+ "dataset_id": "heuristic_strategy.tests_data.eurusd_hour_2005_2020.train",
+ "split": "TRAIN",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "manifest": {
+  "schema": "feature_train_manifest.v2",
+  "split": "TRAIN",
+  "dataset_id": "heuristic_strategy.tests_data.eurusd_hour_2005_2020.train",
+  "governance": "LOCAL_FILE",
+  "resource_sha256": "72b8271d2a6ab7fc5de8c64dc626f128dbb11a1127c333e4039edecbdcc41783",
+  "path": "tests/data/eurusd_hour_2005_2020.csv",
+  "path_note": "git-pinned heuristic-strategy 939f5e6e9819c976a6bbb07876cb195bf1374c35",
+  "registered_rows": 93084,
+  "columns_total": 5,
+  "split_rule": "DEVELOPMENT ruling (coordinator, Q13): no C127 contract for this file, so 70/15/15 chronological row blocks; TRAIN [0,65158), validation [65158,79121), test [79121,93084); purge 144 h between blocks",
+  "boundaries": {
+   "train": [
+    0,
+    65158
+   ]
+  },
+  "timestamp_column": "DATE_TIME",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S",
+  "step_seconds": 3600,
+  "default_role": "feature",
+  "target_channels": [],
+  "declared_periods_rows": {
+   "day_rows_nominal": 24,
+   "trading_week_rows_nominal": 120
+  },
+  "primary_period": "day_rows_nominal",
+  "max_missing_fraction": 0.2,
+  "columns": {}
+ },
+ "manifest_sha256": "e80e935b7fb82f312fed6b349482c7293f36c63ec370b0b6fa34e5a49430fdb1",
+ "resource_identity": {
+  "sha256": "72b8271d2a6ab7fc5de8c64dc626f128dbb11a1127c333e4039edecbdcc41783",
+  "bytes": 4793588,
+  "records": 93084,
+  "verified_against_declared": true,
+  "note": "every byte hashed for identity; no value past the TRAIN boundary parsed"
+ },
+ "train_prefix": {
+  "rows": [
+   0,
+   65158
+  ],
+  "bytes_parsed": 3353980,
+  "prefix_sha256": "63d5c7ee0db153a3699ed5d2d9961d8ae701ad1779f7cce808aa27b77afb69af",
+  "split_rule": "DEVELOPMENT ruling (coordinator, Q13): no C127 contract for this file, so 70/15/15 chronological row blocks; TRAIN [0,65158), validation [65158,79121), test [79121,93084); purge 144 h between blocks",
+  "full_train_coverage": true
+ },
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "invalid_count": 0,
+  "first": "2005-05-02 00:00:00",
+  "last": "2015-10-16 20:00:00",
+  "median_step_seconds": 3600.0,
+  "top_steps_seconds": {
+   "3600.0": 64596,
+   "176400.0": 522,
+   "180000.0": 10,
+   "172800.0": 10,
+   "100800.0": 4
+  },
+  "non_positive_steps": 0,
+  "declared_step_seconds": 3600,
+  "verified_step_seconds": null,
+  "consequence": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only"
+ },
+ "columns": [
+  {
+   "column": "DATE_TIME",
+   "position": 0,
+   "role": "timestamp",
+   "declared_reason": "time index; never a branch input",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "time index; never a branch input"
+  },
+  {
+   "column": "OPEN",
+   "position": 1,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "LOW",
+   "position": 2,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "HIGH",
+   "position": 3,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "CLOSE",
+   "position": 4,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  }
+ ],
+ "branches": [
+  {
+   "branch": 0,
+   "columns": [
+    "OPEN"
+   ]
+  },
+  {
+   "branch": 1,
+   "columns": [
+    "LOW"
+   ]
+  },
+  {
+   "branch": 2,
+   "columns": [
+    "HIGH"
+   ]
+  },
+  {
+   "branch": 3,
+   "columns": [
+    "CLOSE"
+   ]
+  }
+ ],
+ "grouping": "one admissible feature per branch; metrics propose, inner validation decides",
+ "redundancy": {
+  "rule": "Pearson on TRAIN rows with every selected column finite; descriptive, never merges",
+  "columns": 4,
+  "rows_used": 65158,
+  "status": "OK",
+  "pairs": 6,
+  "pairs_abs_ge_0_95": 6,
+  "pairs_abs_ge_0_99": 6,
+  "abs_corr_quantiles": {
+   "0.5": 0.999917816297911,
+   "0.9": 0.9999282155763353,
+   "0.99": 0.9999292284999766
+  },
+  "components_abs_ge_0.95": {
+   "count_multi_member": 1,
+   "largest": 4,
+   "members": [
+    [
+     "OPEN",
+     "LOW",
+     "HIGH",
+     "CLOSE"
+    ]
+   ]
+  },
+  "components_abs_ge_0.99": {
+   "count_multi_member": 1,
+   "largest": 4,
+   "members": [
+    [
+     "OPEN",
+     "LOW",
+     "HIGH",
+     "CLOSE"
+    ]
+   ]
+  },
+  "redundant_pairs_abs_ge_0_95": [
+   [
+    "LOW",
+    "CLOSE",
+    0.9999293410470478
+   ],
+   [
+    "HIGH",
+    "CLOSE",
+    0.9999270901056228
+   ],
+   [
+    "OPEN",
+    "LOW",
+    0.9999185410812079
+   ],
+   [
+    "OPEN",
+    "HIGH",
+    0.9999170915146139
+   ],
+   [
+    "OPEN",
+    "CLOSE",
+    0.999867257989726
+   ],
+   [
+    "LOW",
+    "HIGH",
+    0.9998582557542643
+   ]
+  ],
+  "lagged": {
+   "status": "OK",
+   "rule": "max |corr(x_i(t), x_j(t-lag))| over lags 1..120; leader first",
+   "pairs": [
+    [
+     "CLOSE",
+     "OPEN",
+     1,
+     0.9999851254092359
+    ],
+    [
+     "LOW",
+     "OPEN",
+     1,
+     0.9999149655201974
+    ],
+    [
+     "HIGH",
+     "OPEN",
+     1,
+     0.9999125405618124
+    ],
+    [
+     "CLOSE",
+     "LOW",
+     1,
+     0.9999041167089897
+    ],
+    [
+     "CLOSE",
+     "HIGH",
+     1,
+     0.9999024254631343
+    ],
+    [
+     "LOW",
+     "HIGH",
+     1,
+     0.999792053857711
+    ],
+    [
+     "HIGH",
+     "LOW",
+     1,
+     0.9997905956445899
+    ],
+    [
+     "LOW",
+     "CLOSE",
+     1,
+     0.9997852608078283
+    ],
+    [
+     "HIGH",
+     "CLOSE",
+     1,
+     0.9997819256742887
+    ],
+    [
+     "OPEN",
+     "LOW",
+     1,
+     0.9997683038816334
+    ],
+    [
+     "OPEN",
+     "HIGH",
+     1,
+     0.9997681595712423
+    ],
+    [
+     "OPEN",
+     "CLOSE",
+     1,
+     0.9997232481219114
+    ]
+   ]
+  }
+ },
+ "implementation": {
+  "tool": "tools/profile_train_wide.py",
+  "sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "versions": {
+   "python": "3.12.13",
+   "numpy": "2.4.3",
+   "scipy": "1.17.1",
+   "pandas": "3.0.1",
+   "statsmodels": "0.14.6"
+  },
+  "limits": {
+   "max_columns": 4096,
+   "max_train_rows": 200000,
+   "max_train_cells": 25000000,
+   "max_resource_bytes": 1073741824,
+   "max_pair_lag_columns": 64
+  }
+ },
+ "assumptions": [
+  "No imputation; temporal metrics use the longest contiguous finite run",
+  "Values are profiled as stored (no scaler); TSL loaders standardize with a TRAIN-fitted scaler later",
+  "ADF/KPSS p-values are descriptive and unadjusted for multiple testing",
+  "Point-in-time availability is not certified by this profile",
+  "No target, no model and no holdout value enters any statistic"
+ ],
+ "wall_seconds": 27.354675609996775
+}

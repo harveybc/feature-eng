@@ -1,0 +1,114 @@
+{
+ "schema": "selected_feature_manifest.v1",
+ "version": "1",
+ "status": "FROZEN_DEVELOPMENT",
+ "frozen_at": "2026-10-01",
+ "frozen_by": "Satoshi, successor technical lead (lane B / M03), owner standing order 2026-10-01 and coordinator rulings (Q13 DEVELOPMENT)",
+ "variant": "A_all_admissible_control",
+ "task": {
+  "asset": "EURUSD",
+  "bar": "1h (irregular: weekend gaps)",
+  "decision_time": "after bar t closes (convention, uncertified)",
+  "targets": "Y_s@1..6h and Y_l@24..144h located by elapsed seconds (FS02); Y_b NOT_EVALUATED (S07 variant E config 76447fcc is the candidate rule)",
+  "consumer": "M05 strategy evidence (heuristic-strategy S07)"
+ },
+ "resource": {
+  "availability_class": "DEVELOPMENT",
+  "reference_kind": "GIT_PINNED",
+  "repo": "heuristic-strategy",
+  "commit": "939f5e6e9819c976a6bbb07876cb195bf1374c35",
+  "path": "tests/data/eurusd_hour_2005_2020.csv",
+  "sha256": "72b8271d2a6ab7fc5de8c64dc626f128dbb11a1127c333e4039edecbdcc41783",
+  "rows": 93084,
+  "columns_total": 5,
+  "timestamp_column": "DATE_TIME",
+  "period": [
+   "2005-05-02 00:00:00",
+   "2020-04-29 22:00:00"
+  ],
+  "point_in_time": {
+   "stamp": "commit time of 939f5e6 (git-pinned bytes)",
+   "meaning": "DEVELOPMENT stamp, not an observed publication or receipt clock"
+  },
+  "resolvable_without_coordinator": "verified on worker_b 2026-10-01 (sha 72b8271d)",
+  "governed_resource_id": "NONE (git-pinned DEVELOPMENT reference)",
+  "lake_relation": "the lake's EURUSD appearances (census app_ae9142c2 5m, sha c746f344; HistData raw d527b46a) are a different product; the sealing request 5d12e88 stands for them"
+ },
+ "split": {
+  "declared_by": "coordinator ruling: no C127 contract for this file, so 70/15/15 chronological row blocks with a 144 h purge",
+  "train": {
+   "rows": [
+    0,
+    65158
+   ],
+   "period": [
+    "2005-05-02 00:00:00",
+    "2015-10-16 20:00:00"
+   ]
+  },
+  "validation": {
+   "rows": [
+    65158,
+    79121
+   ],
+   "period": [
+    "2015-10-18 21:00:00",
+    "2018-01-26 00:00:00"
+   ]
+  },
+  "test": {
+   "rows": [
+    79121,
+    93084
+   ],
+   "period": [
+    "2018-01-26 01:00:00",
+    "2020-04-29 22:00:00"
+   ],
+   "use": "protected; never selects"
+  },
+  "purge": "144 h (maximum Y_l support) between blocks; inner folds: 3 expanding inside TRAIN, validation 15 percent, purge 24-row context + 144 h by elapsed seconds",
+  "s07_note": "S07 declares reserved_start 2019-05-16 inside this test block; that reserve was already read (development evidence, not fresh confirmation)"
+ },
+ "train_profile": {
+  "profile_sha256": "d5a6a32a32a5ed1fed8f7c86f863080fc28e17c8e16b3563c89d910e99112cf9",
+  "profiler_sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "sampling": {
+   "status": "IRREGULAR_OR_INVALID",
+   "verified_step_seconds": null,
+   "median_step_seconds": 3600.0
+  }
+ },
+ "admissible_declaration_sha256": "6f8fed4197c0d1824969768b5bd69521da115bc7122f49ccd79f897f74e9ccf0",
+ "admissible_declaration_file_sha256": "78bd3b8adb3282523e2f20575801c93f772e93237cd1fcec46f845e4fd01f901",
+ "feature_order": "exactly all_admissible_control of the admissible declaration",
+ "features": [
+  "OPEN",
+  "LOW",
+  "HIGH",
+  "CLOSE"
+ ],
+ "feature_count": 4,
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  }
+ ],
+ "quality_flags": [],
+ "blockers": {
+  "B1_point_in_time": "RECORDED_NOT_CLEARED: DEVELOPMENT class by ruling (Q13); no observed availability contract",
+  "B2_lake_resource": "RECORDED_NOT_CLEARED: not a governed lake resource; provider/licence of this file undocumented",
+  "B3_split": "declared here (70/15/15 + 144 h purge)",
+  "B4_selection": "NOT_APPLICABLE to variant A"
+ },
+ "use": "M05 strategy evidence and forecast/RL cost pilots; development evidence only",
+ "not_claimed": [
+  "point-in-time admissibility",
+  "utility",
+  "financial performance",
+  "naive-gate pass"
+ ],
+ "manifest_sha256_canonical": "326aee0c77134f09bd704ea79918616edb9eb187d770e37f7006dc7e1aef0a14"
+}
