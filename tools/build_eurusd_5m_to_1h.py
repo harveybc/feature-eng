@@ -10,6 +10,8 @@ import numpy as np, pyarrow.parquet as pq, pandas as pd
 ap = argparse.ArgumentParser()
 ap.add_argument("--lake-root", required=True); ap.add_argument("--rel", required=True); ap.add_argument("--expect-sha", required=True)
 ap.add_argument("--out-dir", required=True)
+ap.add_argument("--asset", default="eurusd"); ap.add_argument("--census-appearance", default="app_ae9142c201e6694a3b1e1fde")
+ap.add_argument("--raw-parent", default="market_data/forex/g10/eurusd/5m.parquet (HistData; raw provenance sha d527b46a…)")
 a = ap.parse_args()
 src = Path(a.lake_root) / a.rel
 h = hashlib.sha256()
@@ -28,12 +30,12 @@ out = pd.DataFrame({"OPEN": r["open"].first(), "HIGH": r["high"].max(), "LOW": r
 out = out[out["N_5M_BARS"] > 0]
 out.index.name = "DATE_TIME"
 od = Path(a.out_dir); od.mkdir(parents=True, exist_ok=False)
-csvp = od / "eurusd_1h_from_lake_5m.csv"
+csvp = od / f"{a.asset}_1h_from_lake_5m.csv"
 out.reset_index().assign(DATE_TIME=lambda d: d["DATE_TIME"].dt.strftime("%Y-%m-%d %H:%M:%S")).to_csv(csvp, index=False)
 csv_sha = hashlib.sha256(csvp.read_bytes()).hexdigest()
 prov = {"schema": "lane_b_derivative_view.v1", "availability_class": "DEVELOPMENT", "source_state": "BOUNDED_AT_FILE_GRAIN",
-        "source": {"lake_relative_path": a.rel, "sha256": a.expect_sha, "census_appearance": "app_ae9142c201e6694a3b1e1fde",
-                   "raw_parent": "market_data/forex/g10/eurusd/5m.parquet (HistData; raw provenance sha d527b46a…)", "rows_5m": int(len(df))},
+        "source": {"lake_relative_path": a.rel, "sha256": a.expect_sha, "census_appearance": a.census_appearance,
+                   "raw_parent": a.raw_parent, "rows_5m": int(len(df))},
         "transform": {"resample": "1h, closed=left, label=right (stamp = bar completion)", "ohlc": "first/max/min/last of 5m bars", "n_5m_bars_column": "N_5M_BARS",
                       "timezone": "as stored (UTC-parsed; source timezone undocumented)"},
         "output": {"file": csvp.name, "sha256": csv_sha, "rows": int(len(out)), "first": str(out.index[0]), "last": str(out.index[-1])},

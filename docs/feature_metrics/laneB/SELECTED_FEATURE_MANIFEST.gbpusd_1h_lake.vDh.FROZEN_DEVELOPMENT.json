@@ -1,0 +1,172 @@
+{
+ "schema": "selected_feature_manifest.v1",
+ "status": "FROZEN_DEVELOPMENT",
+ "frozen_at": "2026-10-01",
+ "frozen_by": "Satoshi, successor technical lead (lane B / M03)",
+ "variant": "Dh_horizon_scoped:range",
+ "task": {
+  "asset": "GBPUSD",
+  "bar": "1h (resampled from lake 5m)",
+  "decision_time": "after bar completion",
+  "targets": "elapsed-second log returns at 1..24 h and 48..144 h"
+ },
+ "resource": {
+  "availability_class": "DEVELOPMENT",
+  "source_state": "BOUNDED_AT_FILE_GRAIN",
+  "reference_kind": "LANE_B_DERIVATIVE_ON_WORKER_B",
+  "path": "~/.local/state/crispdm-data-foundation/m03_feature_inventory_20260930/gbpusd_lake_5m_to_1h/gbpusd_1h_from_lake_5m.csv (worker_b)",
+  "sha256": "3cd8437ebfa157db0b16fe657699f611ddbec0b2f779bf2cb3abc1b89754b5de",
+  "rows": 129852,
+  "timestamp_column": "DATE_TIME",
+  "period": [
+   "2005-01-03 02:00:00",
+   "2025-12-31 17:00:00"
+  ],
+  "provenance_file_sha256": "170c1a5f7f05dc0f9f1a12d79d392481c4e1eadef8be1fc285651452ef8acc01",
+  "provenance": {
+   "source": {
+    "lake_relative_path": "features/trading_asset_data/gbpusd/5m.parquet",
+    "sha256": "dc4b46fa9dee2eac6d59dddd732e99fff17380a9c5d343d7e98ce9babfae98f0",
+    "census_appearance": "app_c0ab9f9cead937162cccaa27",
+    "raw_parent": "market_data/forex/g10/gbpusd/5m.parquet (HistData by Stage 2.1 provenance convention; raw provenance not re-read)",
+    "rows_5m": 1550119
+   },
+   "transform": {
+    "resample": "1h, closed=left, label=right (stamp = bar completion)",
+    "ohlc": "first/max/min/last of 5m bars",
+    "n_5m_bars_column": "N_5M_BARS",
+    "timezone": "as stored (UTC-parsed; source timezone undocumented)"
+   }
+  },
+  "governed_resource_id": "NONE (lane B derivative; not registered in data-gov)"
+ },
+ "split_variants": {
+  "S1_70_15_15": {
+   "train": {
+    "rows": [
+     0,
+     90896
+    ],
+    "period": [
+     "2005-01-03 02:00:00",
+     "2019-08-12 18:00:00"
+    ]
+   },
+   "validation": {
+    "rows": [
+     90896,
+     110374
+    ],
+    "period": [
+     "2019-08-12 19:00:00",
+     "2022-09-28 07:00:00"
+    ]
+   },
+   "test": {
+    "rows": [
+     110374,
+     129852
+    ],
+    "period": [
+     "2022-09-28 08:00:00",
+     "2025-12-31 17:00:00"
+    ],
+    "use": "protected"
+   },
+   "purge": "144 h between blocks"
+  },
+  "S2_prospective_reserve": {
+   "train": {
+    "rows": [
+     0,
+     93907
+    ],
+    "period": [
+     "2005-01-03 02:00:00",
+     "2020-02-05 19:00:00"
+    ]
+   },
+   "validation": {
+    "rows": [
+     93907,
+     117384
+    ],
+    "period": [
+     "2020-02-05 20:00:00",
+     "2023-12-29 17:00:00"
+    ]
+   },
+   "reserve": {
+    "rows": [
+     117384,
+     129852
+    ],
+    "period": [
+     "2024-01-01 18:00:00",
+     "2025-12-31 17:00:00"
+    ],
+    "status": "PROSPECTIVE_CONFIRMATION_PROTECTED",
+    "never_read_statement": "no value of this block has entered any statistic, profile, probe or model; its bytes were read only by the bounded build and a timestamp scan locating 2024-01-01"
+   },
+   "purge": "144 h between blocks",
+   "rule": "rows before 2024-01-01 split 80/20 chronologically; 2024-01-01..2025-12-31 reserved"
+  }
+ },
+ "admissible_declaration_sha256": "7867917d29fb95619db319c42b40c6d579a8bf109d70bb834baf02bbba507ecd",
+ "admissible_declaration_file_sha256": "9528464058264cb73b70bdd2e8a8cd934f9f780091d1df7cdae3674a7edd025b",
+ "features": [
+  "log_high_low",
+  "close_location",
+  "log_close_open"
+ ],
+ "feature_count": 3,
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  },
+  {
+   "column": "N_5M_BARS",
+   "status": "EXCLUDED",
+   "reason": "DATA_COMPLETENESS_COUNT: a quality field, not a market feature"
+  }
+ ],
+ "probe_file_sha256": "7099cd00b28aa81c8e2bc37aa837cba25dd25494c9042aa9ddd5b59a4840672a",
+ "blockers": {
+  "B1_point_in_time": "RECORDED_NOT_CLEARED (DEVELOPMENT)",
+  "B2_lake_resource": "RECORDED_NOT_CLEARED (derivative not registered in data-gov)"
+ },
+ "not_claimed": [
+  "temporal-model performance",
+  "trading utility",
+  "point-in-time admissibility"
+ ],
+ "version": "vDh",
+ "valid_horizons_hours": [
+  8
+ ],
+ "valid_horizons_rule": "range passes the MAE-and-MSE naive gate in all 3 folds in BOTH splits",
+ "feature_recipes": {
+  "log_high_low": "ln(HIGH_t / LOW_t)",
+  "close_location": "(CLOSE_t - LOW_t) / (HIGH_t - LOW_t)",
+  "log_close_open": "ln(CLOSE_t / OPEN_t)"
+ },
+ "probe_outcome": {
+  "S1_70_15_15": [
+   "2h",
+   "6h",
+   "7h",
+   "8h",
+   "9h",
+   "10h",
+   "11h",
+   "12h",
+   "96h"
+  ],
+  "S2_prospective_reserve": [
+   "8h"
+  ]
+ },
+ "manifest_sha256_canonical": "108db93fda4d505c8f28bc0b8c852383452232e8b1e2efc6c68953beb34c9736"
+}

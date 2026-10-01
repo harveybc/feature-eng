@@ -1,0 +1,7 @@
+column,position,role,target_channel,status,exclusion_reason,declared_reason
+DATE_TIME,0,timestamp,False,EXCLUDED,time index; never a branch input,time index; never a branch input
+OPEN,1,feature,False,PROFILED_ADMISSIBLE,,
+HIGH,2,feature,False,PROFILED_ADMISSIBLE,,
+LOW,3,feature,False,PROFILED_ADMISSIBLE,,
+CLOSE,4,feature,False,PROFILED_ADMISSIBLE,,
+N_5M_BARS,5,excluded,False,EXCLUDED,"DATA_COMPLETENESS_COUNT: a quality field, not a market feature","DATA_COMPLETENESS_COUNT: a quality field, not a market feature"

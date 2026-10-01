@@ -1,0 +1,27 @@
+{
+ "schema": "lane_b_derivative_view.v1",
+ "availability_class": "DEVELOPMENT",
+ "source_state": "BOUNDED_AT_FILE_GRAIN",
+ "source": {
+  "lake_relative_path": "features/trading_asset_data/gbpusd/5m.parquet",
+  "sha256": "dc4b46fa9dee2eac6d59dddd732e99fff17380a9c5d343d7e98ce9babfae98f0",
+  "census_appearance": "app_c0ab9f9cead937162cccaa27",
+  "raw_parent": "market_data/forex/g10/gbpusd/5m.parquet (HistData by Stage 2.1 provenance convention; raw provenance not re-read)",
+  "rows_5m": 1550119
+ },
+ "transform": {
+  "resample": "1h, closed=left, label=right (stamp = bar completion)",
+  "ohlc": "first/max/min/last of 5m bars",
+  "n_5m_bars_column": "N_5M_BARS",
+  "timezone": "as stored (UTC-parsed; source timezone undocumented)"
+ },
+ "output": {
+  "file": "gbpusd_1h_from_lake_5m.csv",
+  "sha256": "3cd8437ebfa157db0b16fe657699f611ddbec0b2f779bf2cb3abc1b89754b5de",
+  "rows": 129852,
+  "first": "2005-01-03 02:00:00+00:00",
+  "last": "2025-12-31 17:00:00+00:00"
+ },
+ "approval": "coordinator, 2026-10-01: one bounded read, <=256M, ionice -c3, <=10 min; lake not modified",
+ "correction": "builder defaults named the output and raw parent after EURUSD; corrected from the census appearance of the declared path; bytes unchanged (same sha); no second read"
+}

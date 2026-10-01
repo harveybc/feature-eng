@@ -1,0 +1,34 @@
+{
+ "schema": "lane_b_derivative_view.v1",
+ "availability_class": "DEVELOPMENT",
+ "source_state": "BOUNDED_AT_FILE_GRAIN",
+ "sources": {
+  "bars": {
+   "lake_relative_path": "features/trading_asset_data/btcusdt/4h.parquet",
+   "sha256": "83eaaefccabd08fcce968891a9391cc9fdda8e8404d63816119ca21aa5358758"
+  },
+  "technical": {
+   "lake_relative_path": "features/trading_asset_features/btcusdt/4h/technical.parquet",
+   "sha256": "37a569c668f32f623e46bd6818a188d4a46ffff1e7a8880934a015ab13faee66"
+  },
+  "statistical": {
+   "lake_relative_path": "features/trading_asset_features/btcusdt/4h/statistical.parquet",
+   "sha256": "136ba338bcd1560eeced086ba383505c48e3549d67ef95c8fb95e45a512c3322"
+  }
+ },
+ "raw_parent": "market_data/crypto/spot_top50/btcusdt/4h.parquet (Binance Spot)",
+ "producer_of_features": "financial-data stage22_trading_features_worker.py (technical/statistical; NOT temporally verified)",
+ "transform": {
+  "join": "left join of technical and statistical on the bar timestamp; statistical log_return_1 renamed statistical__log_return_1",
+  "feature_order": "the ETH view's 83-feature order (eth_4h v1 manifest)",
+  "warm_up": "kept; NaN rows reported by the profile"
+ },
+ "output": {
+  "file": "btcusdt_4h_tech_stat.csv",
+  "sha256": "0f8495194dfbd15c9b9631ef0ec580f09e0d97dfc577f891c7a2677a00461868",
+  "rows": 18337,
+  "first": "2017-08-17 04:00:00+00:00",
+  "last": "2025-12-31 20:00:00+00:00"
+ },
+ "approval": "coordinator, 2026-10-01: one bounded read per source, <=256M, ionice -c3, <=10 min; lake not modified"
+}

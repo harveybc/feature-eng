@@ -1,0 +1,511 @@
+{
+ "schema": "m03_admissible_inputs.v1",
+ "dataset_id": "lake_derived.btcusdt_4h_tech_stat.train",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "resource_sha256": "0f8495194dfbd15c9b9631ef0ec580f09e0d97dfc577f891c7a2677a00461868",
+ "train_rows": [
+  0,
+  12835
+ ],
+ "train_prefix_sha256": "921766f2903a70eba6f8031824db0b6cf81a4be013fa0aca190d8677e1ed2ead",
+ "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,12835) (ends before 2024, inside S2 TRAIN+validation)",
+ "manifest_sha256": "364c4919b218bdb20543310b9dd3f64c4b304f8fd57af7ada0199427a87224ee",
+ "profile_sha256": "7c6f8c68675f5101b797d7063a232e9dff75ce84d9cdd57dcd572fe3124f6d26",
+ "profiler_sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "verified_step_seconds": null,
+  "median_step_seconds": 14400.0
+ },
+ "target_channels": [],
+ "admissible_count": 83,
+ "columns_total": 89,
+ "branches_one_feature_each": [
+  {
+   "branch": 0,
+   "feature": "return_1"
+  },
+  {
+   "branch": 1,
+   "feature": "log_return_1"
+  },
+  {
+   "branch": 2,
+   "feature": "return_5"
+  },
+  {
+   "branch": 3,
+   "feature": "log_return_5"
+  },
+  {
+   "branch": 4,
+   "feature": "return_10"
+  },
+  {
+   "branch": 5,
+   "feature": "log_return_10"
+  },
+  {
+   "branch": 6,
+   "feature": "return_20"
+  },
+  {
+   "branch": 7,
+   "feature": "log_return_20"
+  },
+  {
+   "branch": 8,
+   "feature": "return_60"
+  },
+  {
+   "branch": 9,
+   "feature": "log_return_60"
+  },
+  {
+   "branch": 10,
+   "feature": "sma_10"
+  },
+  {
+   "branch": 11,
+   "feature": "ema_10"
+  },
+  {
+   "branch": 12,
+   "feature": "close_sma_ratio_10"
+  },
+  {
+   "branch": 13,
+   "feature": "sma_20"
+  },
+  {
+   "branch": 14,
+   "feature": "ema_20"
+  },
+  {
+   "branch": 15,
+   "feature": "close_sma_ratio_20"
+  },
+  {
+   "branch": 16,
+   "feature": "sma_50"
+  },
+  {
+   "branch": 17,
+   "feature": "ema_50"
+  },
+  {
+   "branch": 18,
+   "feature": "close_sma_ratio_50"
+  },
+  {
+   "branch": 19,
+   "feature": "sma_100"
+  },
+  {
+   "branch": 20,
+   "feature": "ema_100"
+  },
+  {
+   "branch": 21,
+   "feature": "close_sma_ratio_100"
+  },
+  {
+   "branch": 22,
+   "feature": "sma_200"
+  },
+  {
+   "branch": 23,
+   "feature": "ema_200"
+  },
+  {
+   "branch": 24,
+   "feature": "close_sma_ratio_200"
+  },
+  {
+   "branch": 25,
+   "feature": "macd"
+  },
+  {
+   "branch": 26,
+   "feature": "macd_signal"
+  },
+  {
+   "branch": 27,
+   "feature": "macd_hist"
+  },
+  {
+   "branch": 28,
+   "feature": "rsi_7"
+  },
+  {
+   "branch": 29,
+   "feature": "rsi_14"
+  },
+  {
+   "branch": 30,
+   "feature": "rsi_21"
+  },
+  {
+   "branch": 31,
+   "feature": "stoch_k"
+  },
+  {
+   "branch": 32,
+   "feature": "stoch_d"
+  },
+  {
+   "branch": 33,
+   "feature": "williams_r_14"
+  },
+  {
+   "branch": 34,
+   "feature": "cci_14"
+  },
+  {
+   "branch": 35,
+   "feature": "roc_10"
+  },
+  {
+   "branch": 36,
+   "feature": "roc_20"
+  },
+  {
+   "branch": 37,
+   "feature": "roc_60"
+  },
+  {
+   "branch": 38,
+   "feature": "mom_10"
+  },
+  {
+   "branch": 39,
+   "feature": "mom_20"
+  },
+  {
+   "branch": 40,
+   "feature": "bb_upper"
+  },
+  {
+   "branch": 41,
+   "feature": "bb_middle"
+  },
+  {
+   "branch": 42,
+   "feature": "bb_lower"
+  },
+  {
+   "branch": 43,
+   "feature": "bb_pct_b"
+  },
+  {
+   "branch": 44,
+   "feature": "bb_width"
+  },
+  {
+   "branch": 45,
+   "feature": "atr_14"
+  },
+  {
+   "branch": 46,
+   "feature": "natr_14"
+  },
+  {
+   "branch": 47,
+   "feature": "hist_vol_10"
+  },
+  {
+   "branch": 48,
+   "feature": "hist_vol_20"
+  },
+  {
+   "branch": 49,
+   "feature": "hist_vol_60"
+  },
+  {
+   "branch": 50,
+   "feature": "ema_cross_10_50"
+  },
+  {
+   "branch": 51,
+   "feature": "ema_cross_20_100"
+  },
+  {
+   "branch": 52,
+   "feature": "trend_slope_50"
+  },
+  {
+   "branch": 53,
+   "feature": "trend_strength_50"
+  },
+  {
+   "branch": 54,
+   "feature": "obv"
+  },
+  {
+   "branch": 55,
+   "feature": "obv_delta_20"
+  },
+  {
+   "branch": 56,
+   "feature": "volume_sma_10"
+  },
+  {
+   "branch": 57,
+   "feature": "volume_sma_20"
+  },
+  {
+   "branch": 58,
+   "feature": "volume_ratio_20"
+  },
+  {
+   "branch": 59,
+   "feature": "vwap_60"
+  },
+  {
+   "branch": 60,
+   "feature": "mfi_14"
+  },
+  {
+   "branch": 61,
+   "feature": "statistical__log_return_1"
+  },
+  {
+   "branch": 62,
+   "feature": "roll_mean_ret_20"
+  },
+  {
+   "branch": 63,
+   "feature": "roll_std_ret_20"
+  },
+  {
+   "branch": 64,
+   "feature": "roll_skew_ret_20"
+  },
+  {
+   "branch": 65,
+   "feature": "roll_kurt_ret_20"
+  },
+  {
+   "branch": 66,
+   "feature": "roll_mean_ret_60"
+  },
+  {
+   "branch": 67,
+   "feature": "roll_std_ret_60"
+  },
+  {
+   "branch": 68,
+   "feature": "roll_skew_ret_60"
+  },
+  {
+   "branch": 69,
+   "feature": "roll_kurt_ret_60"
+  },
+  {
+   "branch": 70,
+   "feature": "roll_mean_ret_252"
+  },
+  {
+   "branch": 71,
+   "feature": "roll_std_ret_252"
+  },
+  {
+   "branch": 72,
+   "feature": "roll_skew_ret_252"
+  },
+  {
+   "branch": 73,
+   "feature": "roll_kurt_ret_252"
+  },
+  {
+   "branch": 74,
+   "feature": "realized_var_12"
+  },
+  {
+   "branch": 75,
+   "feature": "realized_var_48"
+  },
+  {
+   "branch": 76,
+   "feature": "autocorr_lag1_100"
+  },
+  {
+   "branch": 77,
+   "feature": "autocorr_lag5_100"
+  },
+  {
+   "branch": 78,
+   "feature": "sqret_autocorr_lag1_100"
+  },
+  {
+   "branch": 79,
+   "feature": "vol_regime_high"
+  },
+  {
+   "branch": 80,
+   "feature": "vol_regime_low"
+  },
+  {
+   "branch": 81,
+   "feature": "hurst_proxy_200"
+  },
+  {
+   "branch": 82,
+   "feature": "zscore_close_100"
+  }
+ ],
+ "all_admissible_control": [
+  "return_1",
+  "log_return_1",
+  "return_5",
+  "log_return_5",
+  "return_10",
+  "log_return_10",
+  "return_20",
+  "log_return_20",
+  "return_60",
+  "log_return_60",
+  "sma_10",
+  "ema_10",
+  "close_sma_ratio_10",
+  "sma_20",
+  "ema_20",
+  "close_sma_ratio_20",
+  "sma_50",
+  "ema_50",
+  "close_sma_ratio_50",
+  "sma_100",
+  "ema_100",
+  "close_sma_ratio_100",
+  "sma_200",
+  "ema_200",
+  "close_sma_ratio_200",
+  "macd",
+  "macd_signal",
+  "macd_hist",
+  "rsi_7",
+  "rsi_14",
+  "rsi_21",
+  "stoch_k",
+  "stoch_d",
+  "williams_r_14",
+  "cci_14",
+  "roc_10",
+  "roc_20",
+  "roc_60",
+  "mom_10",
+  "mom_20",
+  "bb_upper",
+  "bb_middle",
+  "bb_lower",
+  "bb_pct_b",
+  "bb_width",
+  "atr_14",
+  "natr_14",
+  "hist_vol_10",
+  "hist_vol_20",
+  "hist_vol_60",
+  "ema_cross_10_50",
+  "ema_cross_20_100",
+  "trend_slope_50",
+  "trend_strength_50",
+  "obv",
+  "obv_delta_20",
+  "volume_sma_10",
+  "volume_sma_20",
+  "volume_ratio_20",
+  "vwap_60",
+  "mfi_14",
+  "statistical__log_return_1",
+  "roll_mean_ret_20",
+  "roll_std_ret_20",
+  "roll_skew_ret_20",
+  "roll_kurt_ret_20",
+  "roll_mean_ret_60",
+  "roll_std_ret_60",
+  "roll_skew_ret_60",
+  "roll_kurt_ret_60",
+  "roll_mean_ret_252",
+  "roll_std_ret_252",
+  "roll_skew_ret_252",
+  "roll_kurt_ret_252",
+  "realized_var_12",
+  "realized_var_48",
+  "autocorr_lag1_100",
+  "autocorr_lag5_100",
+  "sqret_autocorr_lag1_100",
+  "vol_regime_high",
+  "vol_regime_low",
+  "hurst_proxy_200",
+  "zscore_close_100"
+ ],
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  },
+  {
+   "column": "OPEN",
+   "status": "EXCLUDED",
+   "reason": "RAW_PRICE_LEVEL (recipe parity with the ETH view)"
+  },
+  {
+   "column": "HIGH",
+   "status": "EXCLUDED",
+   "reason": "RAW_PRICE_LEVEL"
+  },
+  {
+   "column": "LOW",
+   "status": "EXCLUDED",
+   "reason": "RAW_PRICE_LEVEL"
+  },
+  {
+   "column": "CLOSE",
+   "status": "EXCLUDED",
+   "reason": "ASSET_PRICE_SOURCE for the targets"
+  },
+  {
+   "column": "VOLUME",
+   "status": "EXCLUDED",
+   "reason": "RAW_VOLUME_LEVEL"
+  }
+ ],
+ "admissibility_rule": "role=feature AND every TRAIN cell numeric AND at least one finite value AND not constant on TRAIN AND nonfinite fraction <= manifest max_missing_fraction",
+ "not_established": [
+  "point-in-time availability",
+  "upstream causality of derived columns",
+  "which features or groups help a model (inner validation decides)"
+ ],
+ "authority": "LOCAL development file; not governed",
+ "quality_flags": [
+  {
+   "column": "mom_10",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -11703.33,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  },
+  {
+   "column": "mom_20",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -12056.76,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  },
+  {
+   "column": "obv",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -958022.4,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  },
+  {
+   "column": "obv_delta_20",
+   "flag": "SENTINEL_LIKE_MINIMUM",
+   "value": -1249619.0,
+   "consequence": "kept admissible; a sentinel policy must be declared before fitting, not inferred here"
+  }
+ ],
+ "sampling_note": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only",
+ "declaration_sha256": "ef5a9a5b5299cca98400fa9eed4c673245a1d309eeaed085a36689c4de637932"
+}

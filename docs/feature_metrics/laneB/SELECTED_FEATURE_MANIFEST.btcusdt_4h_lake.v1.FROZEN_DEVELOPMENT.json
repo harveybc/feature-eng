@@ -1,0 +1,259 @@
+{
+ "schema": "selected_feature_manifest.v1",
+ "status": "FROZEN_DEVELOPMENT",
+ "frozen_at": "2026-10-01",
+ "frozen_by": "Satoshi, successor technical lead (lane B / M03)",
+ "variant": "A_all_admissible_control",
+ "task": {
+  "asset": "BTCUSDT spot",
+  "bar": "4h",
+  "decision_time": "after bar t closes",
+  "targets": "elapsed-second log returns at 4..24 h and 48..144 h"
+ },
+ "resource": {
+  "availability_class": "DEVELOPMENT",
+  "source_state": "BOUNDED_AT_FILE_GRAIN",
+  "reference_kind": "LANE_B_DERIVATIVE_ON_WORKER_B",
+  "path": "~/.local/state/crispdm-data-foundation/m03_feature_inventory_20260930/btcusdt_4h_lake/btcusdt_4h_tech_stat.csv (worker_b)",
+  "sha256": "0f8495194dfbd15c9b9631ef0ec580f09e0d97dfc577f891c7a2677a00461868",
+  "rows": 18337,
+  "timestamp_column": "DATE_TIME",
+  "period": [
+   "2017-08-17 04:00:00",
+   "2025-12-31 20:00:00"
+  ],
+  "provenance_file_sha256": "8fbcfa4be015306e1a2c1ea1a7ca280bbdf0e855aaa3e6f7a33c7adbd6690151",
+  "provenance": {
+   "sources": {
+    "bars": {
+     "lake_relative_path": "features/trading_asset_data/btcusdt/4h.parquet",
+     "sha256": "83eaaefccabd08fcce968891a9391cc9fdda8e8404d63816119ca21aa5358758"
+    },
+    "technical": {
+     "lake_relative_path": "features/trading_asset_features/btcusdt/4h/technical.parquet",
+     "sha256": "37a569c668f32f623e46bd6818a188d4a46ffff1e7a8880934a015ab13faee66"
+    },
+    "statistical": {
+     "lake_relative_path": "features/trading_asset_features/btcusdt/4h/statistical.parquet",
+     "sha256": "136ba338bcd1560eeced086ba383505c48e3549d67ef95c8fb95e45a512c3322"
+    }
+   },
+   "raw_parent": "market_data/crypto/spot_top50/btcusdt/4h.parquet (Binance Spot)",
+   "producer_of_features": "financial-data stage22_trading_features_worker.py (technical/statistical; NOT temporally verified)",
+   "transform": {
+    "join": "left join of technical and statistical on the bar timestamp; statistical log_return_1 renamed statistical__log_return_1",
+    "feature_order": "the ETH view's 83-feature order (eth_4h v1 manifest)",
+    "warm_up": "kept; NaN rows reported by the profile"
+   }
+  },
+  "governed_resource_id": "NONE (lane B derivative; not registered in data-gov)"
+ },
+ "split_variants": {
+  "S1_70_15_15": {
+   "train": {
+    "rows": [
+     0,
+     12835
+    ],
+    "period": [
+     "2017-08-17 04:00:00",
+     "2023-06-28 20:00:00"
+    ]
+   },
+   "validation": {
+    "rows": [
+     12835,
+     15586
+    ],
+    "period": [
+     "2023-06-29 00:00:00",
+     "2024-09-29 08:00:00"
+    ]
+   },
+   "test": {
+    "rows": [
+     15586,
+     18337
+    ],
+    "period": [
+     "2024-09-29 12:00:00",
+     "2025-12-31 20:00:00"
+    ],
+    "use": "protected"
+   },
+   "purge": "144 h between blocks"
+  },
+  "S2_prospective_reserve": {
+   "train": {
+    "rows": [
+     0,
+     11160
+    ],
+    "period": [
+     "2017-08-17 04:00:00",
+     "2022-09-22 16:00:00"
+    ]
+   },
+   "validation": {
+    "rows": [
+     11160,
+     13951
+    ],
+    "period": [
+     "2022-09-22 20:00:00",
+     "2023-12-31 20:00:00"
+    ]
+   },
+   "reserve": {
+    "rows": [
+     13951,
+     18337
+    ],
+    "period": [
+     "2024-01-01 00:00:00",
+     "2025-12-31 20:00:00"
+    ],
+    "status": "PROSPECTIVE_CONFIRMATION_PROTECTED",
+    "never_read_statement": "no value of this block has entered any statistic, profile, probe or model; its bytes were read only by the bounded build and a timestamp scan locating 2024-01-01"
+   },
+   "purge": "144 h between blocks",
+   "rule": "rows before 2024-01-01 split 80/20 chronologically; 2024-01-01..2025-12-31 reserved"
+  }
+ },
+ "admissible_declaration_sha256": "ef5a9a5b5299cca98400fa9eed4c673245a1d309eeaed085a36689c4de637932",
+ "admissible_declaration_file_sha256": "bd86c777832830aea78a3564297c1275349281d9e4a630c4193c5e8a92f8ef7b",
+ "features": [
+  "return_1",
+  "log_return_1",
+  "return_5",
+  "log_return_5",
+  "return_10",
+  "log_return_10",
+  "return_20",
+  "log_return_20",
+  "return_60",
+  "log_return_60",
+  "sma_10",
+  "ema_10",
+  "close_sma_ratio_10",
+  "sma_20",
+  "ema_20",
+  "close_sma_ratio_20",
+  "sma_50",
+  "ema_50",
+  "close_sma_ratio_50",
+  "sma_100",
+  "ema_100",
+  "close_sma_ratio_100",
+  "sma_200",
+  "ema_200",
+  "close_sma_ratio_200",
+  "macd",
+  "macd_signal",
+  "macd_hist",
+  "rsi_7",
+  "rsi_14",
+  "rsi_21",
+  "stoch_k",
+  "stoch_d",
+  "williams_r_14",
+  "cci_14",
+  "roc_10",
+  "roc_20",
+  "roc_60",
+  "mom_10",
+  "mom_20",
+  "bb_upper",
+  "bb_middle",
+  "bb_lower",
+  "bb_pct_b",
+  "bb_width",
+  "atr_14",
+  "natr_14",
+  "hist_vol_10",
+  "hist_vol_20",
+  "hist_vol_60",
+  "ema_cross_10_50",
+  "ema_cross_20_100",
+  "trend_slope_50",
+  "trend_strength_50",
+  "obv",
+  "obv_delta_20",
+  "volume_sma_10",
+  "volume_sma_20",
+  "volume_ratio_20",
+  "vwap_60",
+  "mfi_14",
+  "statistical__log_return_1",
+  "roll_mean_ret_20",
+  "roll_std_ret_20",
+  "roll_skew_ret_20",
+  "roll_kurt_ret_20",
+  "roll_mean_ret_60",
+  "roll_std_ret_60",
+  "roll_skew_ret_60",
+  "roll_kurt_ret_60",
+  "roll_mean_ret_252",
+  "roll_std_ret_252",
+  "roll_skew_ret_252",
+  "roll_kurt_ret_252",
+  "realized_var_12",
+  "realized_var_48",
+  "autocorr_lag1_100",
+  "autocorr_lag5_100",
+  "sqret_autocorr_lag1_100",
+  "vol_regime_high",
+  "vol_regime_low",
+  "hurst_proxy_200",
+  "zscore_close_100"
+ ],
+ "feature_count": 83,
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  },
+  {
+   "column": "OPEN",
+   "status": "EXCLUDED",
+   "reason": "RAW_PRICE_LEVEL (recipe parity with the ETH view)"
+  },
+  {
+   "column": "HIGH",
+   "status": "EXCLUDED",
+   "reason": "RAW_PRICE_LEVEL"
+  },
+  {
+   "column": "LOW",
+   "status": "EXCLUDED",
+   "reason": "RAW_PRICE_LEVEL"
+  },
+  {
+   "column": "CLOSE",
+   "status": "EXCLUDED",
+   "reason": "ASSET_PRICE_SOURCE for the targets"
+  },
+  {
+   "column": "VOLUME",
+   "status": "EXCLUDED",
+   "reason": "RAW_VOLUME_LEVEL"
+  }
+ ],
+ "probe_file_sha256": "f739ae514e54baf5638e2937637a7e15228c4341353e3f8463e588424a693fd2",
+ "blockers": {
+  "B1_point_in_time": "RECORDED_NOT_CLEARED (DEVELOPMENT)",
+  "B2_lake_resource": "RECORDED_NOT_CLEARED (derivative not registered in data-gov)"
+ },
+ "not_claimed": [
+  "temporal-model performance",
+  "trading utility",
+  "point-in-time admissibility"
+ ],
+ "version": "v1",
+ "probe_outcome": {
+  "S1_70_15_15": [],
+  "S2_prospective_reserve": []
+ },
+ "manifest_sha256_canonical": "db342710686d2fca0379f87a721acba0090403e4d0c130cd2a8879bd5b094f70"
+}

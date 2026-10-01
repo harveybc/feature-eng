@@ -1,0 +1,71 @@
+{
+ "schema": "m03_admissible_inputs.v1",
+ "dataset_id": "lake_derived.gbpusd_1h_from_histdata_5m.train",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "resource_sha256": "3cd8437ebfa157db0b16fe657699f611ddbec0b2f779bf2cb3abc1b89754b5de",
+ "train_rows": [
+  0,
+  90896
+ ],
+ "train_prefix_sha256": "d37e1b963008a2cffd46f708e7629b98345738aaf812f812bd99b342d2f4bbc2",
+ "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,90896) (ends before 2024, inside S2 TRAIN+validation)",
+ "manifest_sha256": "caeb2a09597a653fc83200d44cc6c82a0b0140873dabf710311d44e70768affd",
+ "profile_sha256": "9f4d70c01f5b4b520ad6f673191ca410d676d88a098c57d4c8fc6347b2238e56",
+ "profiler_sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "verified_step_seconds": null,
+  "median_step_seconds": 3600.0
+ },
+ "target_channels": [],
+ "admissible_count": 4,
+ "columns_total": 6,
+ "branches_one_feature_each": [
+  {
+   "branch": 0,
+   "feature": "OPEN"
+  },
+  {
+   "branch": 1,
+   "feature": "HIGH"
+  },
+  {
+   "branch": 2,
+   "feature": "LOW"
+  },
+  {
+   "branch": 3,
+   "feature": "CLOSE"
+  }
+ ],
+ "all_admissible_control": [
+  "OPEN",
+  "HIGH",
+  "LOW",
+  "CLOSE"
+ ],
+ "exclusions": [
+  {
+   "column": "DATE_TIME",
+   "status": "EXCLUDED",
+   "reason": "time index; never a branch input"
+  },
+  {
+   "column": "N_5M_BARS",
+   "status": "EXCLUDED",
+   "reason": "DATA_COMPLETENESS_COUNT: a quality field, not a market feature"
+  }
+ ],
+ "admissibility_rule": "role=feature AND every TRAIN cell numeric AND at least one finite value AND not constant on TRAIN AND nonfinite fraction <= manifest max_missing_fraction",
+ "not_established": [
+  "point-in-time availability",
+  "upstream causality of derived columns",
+  "which features or groups help a model (inner validation decides)"
+ ],
+ "authority": "LOCAL development file; not governed",
+ "quality_flags": [],
+ "sampling_note": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only",
+ "declaration_sha256": "7867917d29fb95619db319c42b40c6d579a8bf109d70bb834baf02bbba507ecd"
+}

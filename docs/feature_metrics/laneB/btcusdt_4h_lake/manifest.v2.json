@@ -1,0 +1,300 @@
+{
+ "schema": "feature_train_manifest.v2",
+ "split": "TRAIN",
+ "dataset_id": "lake_derived.btcusdt_4h_tech_stat.train",
+ "governance": "LOCAL_FILE",
+ "resource_sha256": "0f8495194dfbd15c9b9631ef0ec580f09e0d97dfc577f891c7a2677a00461868",
+ "path": "btcusdt_4h_tech_stat.csv",
+ "path_note": "lane B derivative: lake btcusdt 4h bars (83eaaefc) + stage22 technical (37a569c6) / statistical (136ba338), ETH 83-feature recipe",
+ "registered_rows": 18337,
+ "columns_total": 89,
+ "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,12835) (ends before 2024, inside S2 TRAIN+validation)",
+ "boundaries": {
+  "train": [
+   0,
+   12835
+  ]
+ },
+ "timestamp_column": "DATE_TIME",
+ "timestamp_format": "%Y-%m-%d %H:%M:%S",
+ "step_seconds": 14400,
+ "default_role": "excluded",
+ "target_channels": [],
+ "declared_periods_rows": {
+  "daily": 6,
+  "weekly": 42
+ },
+ "primary_period": "daily",
+ "max_missing_fraction": 0.2,
+ "columns": {
+  "OPEN": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_LEVEL (recipe parity with the ETH view)"
+  },
+  "HIGH": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_LEVEL"
+  },
+  "LOW": {
+   "role": "excluded",
+   "reason": "RAW_PRICE_LEVEL"
+  },
+  "CLOSE": {
+   "role": "excluded",
+   "reason": "ASSET_PRICE_SOURCE for the targets"
+  },
+  "VOLUME": {
+   "role": "excluded",
+   "reason": "RAW_VOLUME_LEVEL"
+  },
+  "return_1": {
+   "role": "feature"
+  },
+  "log_return_1": {
+   "role": "feature"
+  },
+  "return_5": {
+   "role": "feature"
+  },
+  "log_return_5": {
+   "role": "feature"
+  },
+  "return_10": {
+   "role": "feature"
+  },
+  "log_return_10": {
+   "role": "feature"
+  },
+  "return_20": {
+   "role": "feature"
+  },
+  "log_return_20": {
+   "role": "feature"
+  },
+  "return_60": {
+   "role": "feature"
+  },
+  "log_return_60": {
+   "role": "feature"
+  },
+  "sma_10": {
+   "role": "feature"
+  },
+  "ema_10": {
+   "role": "feature"
+  },
+  "close_sma_ratio_10": {
+   "role": "feature"
+  },
+  "sma_20": {
+   "role": "feature"
+  },
+  "ema_20": {
+   "role": "feature"
+  },
+  "close_sma_ratio_20": {
+   "role": "feature"
+  },
+  "sma_50": {
+   "role": "feature"
+  },
+  "ema_50": {
+   "role": "feature"
+  },
+  "close_sma_ratio_50": {
+   "role": "feature"
+  },
+  "sma_100": {
+   "role": "feature"
+  },
+  "ema_100": {
+   "role": "feature"
+  },
+  "close_sma_ratio_100": {
+   "role": "feature"
+  },
+  "sma_200": {
+   "role": "feature"
+  },
+  "ema_200": {
+   "role": "feature"
+  },
+  "close_sma_ratio_200": {
+   "role": "feature"
+  },
+  "macd": {
+   "role": "feature"
+  },
+  "macd_signal": {
+   "role": "feature"
+  },
+  "macd_hist": {
+   "role": "feature"
+  },
+  "rsi_7": {
+   "role": "feature"
+  },
+  "rsi_14": {
+   "role": "feature"
+  },
+  "rsi_21": {
+   "role": "feature"
+  },
+  "stoch_k": {
+   "role": "feature"
+  },
+  "stoch_d": {
+   "role": "feature"
+  },
+  "williams_r_14": {
+   "role": "feature"
+  },
+  "cci_14": {
+   "role": "feature"
+  },
+  "roc_10": {
+   "role": "feature"
+  },
+  "roc_20": {
+   "role": "feature"
+  },
+  "roc_60": {
+   "role": "feature"
+  },
+  "mom_10": {
+   "role": "feature"
+  },
+  "mom_20": {
+   "role": "feature"
+  },
+  "bb_upper": {
+   "role": "feature"
+  },
+  "bb_middle": {
+   "role": "feature"
+  },
+  "bb_lower": {
+   "role": "feature"
+  },
+  "bb_pct_b": {
+   "role": "feature"
+  },
+  "bb_width": {
+   "role": "feature"
+  },
+  "atr_14": {
+   "role": "feature"
+  },
+  "natr_14": {
+   "role": "feature"
+  },
+  "hist_vol_10": {
+   "role": "feature"
+  },
+  "hist_vol_20": {
+   "role": "feature"
+  },
+  "hist_vol_60": {
+   "role": "feature"
+  },
+  "ema_cross_10_50": {
+   "role": "feature"
+  },
+  "ema_cross_20_100": {
+   "role": "feature"
+  },
+  "trend_slope_50": {
+   "role": "feature"
+  },
+  "trend_strength_50": {
+   "role": "feature"
+  },
+  "obv": {
+   "role": "feature"
+  },
+  "obv_delta_20": {
+   "role": "feature"
+  },
+  "volume_sma_10": {
+   "role": "feature"
+  },
+  "volume_sma_20": {
+   "role": "feature"
+  },
+  "volume_ratio_20": {
+   "role": "feature"
+  },
+  "vwap_60": {
+   "role": "feature"
+  },
+  "mfi_14": {
+   "role": "feature"
+  },
+  "statistical__log_return_1": {
+   "role": "feature"
+  },
+  "roll_mean_ret_20": {
+   "role": "feature"
+  },
+  "roll_std_ret_20": {
+   "role": "feature"
+  },
+  "roll_skew_ret_20": {
+   "role": "feature"
+  },
+  "roll_kurt_ret_20": {
+   "role": "feature"
+  },
+  "roll_mean_ret_60": {
+   "role": "feature"
+  },
+  "roll_std_ret_60": {
+   "role": "feature"
+  },
+  "roll_skew_ret_60": {
+   "role": "feature"
+  },
+  "roll_kurt_ret_60": {
+   "role": "feature"
+  },
+  "roll_mean_ret_252": {
+   "role": "feature"
+  },
+  "roll_std_ret_252": {
+   "role": "feature"
+  },
+  "roll_skew_ret_252": {
+   "role": "feature"
+  },
+  "roll_kurt_ret_252": {
+   "role": "feature"
+  },
+  "realized_var_12": {
+   "role": "feature"
+  },
+  "realized_var_48": {
+   "role": "feature"
+  },
+  "autocorr_lag1_100": {
+   "role": "feature"
+  },
+  "autocorr_lag5_100": {
+   "role": "feature"
+  },
+  "sqret_autocorr_lag1_100": {
+   "role": "feature"
+  },
+  "vol_regime_high": {
+   "role": "feature"
+  },
+  "vol_regime_low": {
+   "role": "feature"
+  },
+  "hurst_proxy_200": {
+   "role": "feature"
+  },
+  "zscore_close_100": {
+   "role": "feature"
+  }
+ }
+}

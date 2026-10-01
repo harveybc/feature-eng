@@ -1,0 +1,2406 @@
+{
+ "schema": "feature_train_profile.v2",
+ "dataset_id": "lake_derived.btcusdt_4h_tech_stat.train",
+ "split": "TRAIN",
+ "governance": "LOCAL_FILE",
+ "lake": null,
+ "resource": null,
+ "manifest": {
+  "schema": "feature_train_manifest.v2",
+  "split": "TRAIN",
+  "dataset_id": "lake_derived.btcusdt_4h_tech_stat.train",
+  "governance": "LOCAL_FILE",
+  "resource_sha256": "0f8495194dfbd15c9b9631ef0ec580f09e0d97dfc577f891c7a2677a00461868",
+  "path": "btcusdt_4h_tech_stat.csv",
+  "path_note": "lane B derivative: lake btcusdt 4h bars (83eaaefc) + stage22 technical (37a569c6) / statistical (136ba338), ETH 83-feature recipe",
+  "registered_rows": 18337,
+  "columns_total": 89,
+  "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,12835) (ends before 2024, inside S2 TRAIN+validation)",
+  "boundaries": {
+   "train": [
+    0,
+    12835
+   ]
+  },
+  "timestamp_column": "DATE_TIME",
+  "timestamp_format": "%Y-%m-%d %H:%M:%S",
+  "step_seconds": 14400,
+  "default_role": "excluded",
+  "target_channels": [],
+  "declared_periods_rows": {
+   "daily": 6,
+   "weekly": 42
+  },
+  "primary_period": "daily",
+  "max_missing_fraction": 0.2,
+  "columns": {
+   "OPEN": {
+    "role": "excluded",
+    "reason": "RAW_PRICE_LEVEL (recipe parity with the ETH view)"
+   },
+   "HIGH": {
+    "role": "excluded",
+    "reason": "RAW_PRICE_LEVEL"
+   },
+   "LOW": {
+    "role": "excluded",
+    "reason": "RAW_PRICE_LEVEL"
+   },
+   "CLOSE": {
+    "role": "excluded",
+    "reason": "ASSET_PRICE_SOURCE for the targets"
+   },
+   "VOLUME": {
+    "role": "excluded",
+    "reason": "RAW_VOLUME_LEVEL"
+   },
+   "return_1": {
+    "role": "feature"
+   },
+   "log_return_1": {
+    "role": "feature"
+   },
+   "return_5": {
+    "role": "feature"
+   },
+   "log_return_5": {
+    "role": "feature"
+   },
+   "return_10": {
+    "role": "feature"
+   },
+   "log_return_10": {
+    "role": "feature"
+   },
+   "return_20": {
+    "role": "feature"
+   },
+   "log_return_20": {
+    "role": "feature"
+   },
+   "return_60": {
+    "role": "feature"
+   },
+   "log_return_60": {
+    "role": "feature"
+   },
+   "sma_10": {
+    "role": "feature"
+   },
+   "ema_10": {
+    "role": "feature"
+   },
+   "close_sma_ratio_10": {
+    "role": "feature"
+   },
+   "sma_20": {
+    "role": "feature"
+   },
+   "ema_20": {
+    "role": "feature"
+   },
+   "close_sma_ratio_20": {
+    "role": "feature"
+   },
+   "sma_50": {
+    "role": "feature"
+   },
+   "ema_50": {
+    "role": "feature"
+   },
+   "close_sma_ratio_50": {
+    "role": "feature"
+   },
+   "sma_100": {
+    "role": "feature"
+   },
+   "ema_100": {
+    "role": "feature"
+   },
+   "close_sma_ratio_100": {
+    "role": "feature"
+   },
+   "sma_200": {
+    "role": "feature"
+   },
+   "ema_200": {
+    "role": "feature"
+   },
+   "close_sma_ratio_200": {
+    "role": "feature"
+   },
+   "macd": {
+    "role": "feature"
+   },
+   "macd_signal": {
+    "role": "feature"
+   },
+   "macd_hist": {
+    "role": "feature"
+   },
+   "rsi_7": {
+    "role": "feature"
+   },
+   "rsi_14": {
+    "role": "feature"
+   },
+   "rsi_21": {
+    "role": "feature"
+   },
+   "stoch_k": {
+    "role": "feature"
+   },
+   "stoch_d": {
+    "role": "feature"
+   },
+   "williams_r_14": {
+    "role": "feature"
+   },
+   "cci_14": {
+    "role": "feature"
+   },
+   "roc_10": {
+    "role": "feature"
+   },
+   "roc_20": {
+    "role": "feature"
+   },
+   "roc_60": {
+    "role": "feature"
+   },
+   "mom_10": {
+    "role": "feature"
+   },
+   "mom_20": {
+    "role": "feature"
+   },
+   "bb_upper": {
+    "role": "feature"
+   },
+   "bb_middle": {
+    "role": "feature"
+   },
+   "bb_lower": {
+    "role": "feature"
+   },
+   "bb_pct_b": {
+    "role": "feature"
+   },
+   "bb_width": {
+    "role": "feature"
+   },
+   "atr_14": {
+    "role": "feature"
+   },
+   "natr_14": {
+    "role": "feature"
+   },
+   "hist_vol_10": {
+    "role": "feature"
+   },
+   "hist_vol_20": {
+    "role": "feature"
+   },
+   "hist_vol_60": {
+    "role": "feature"
+   },
+   "ema_cross_10_50": {
+    "role": "feature"
+   },
+   "ema_cross_20_100": {
+    "role": "feature"
+   },
+   "trend_slope_50": {
+    "role": "feature"
+   },
+   "trend_strength_50": {
+    "role": "feature"
+   },
+   "obv": {
+    "role": "feature"
+   },
+   "obv_delta_20": {
+    "role": "feature"
+   },
+   "volume_sma_10": {
+    "role": "feature"
+   },
+   "volume_sma_20": {
+    "role": "feature"
+   },
+   "volume_ratio_20": {
+    "role": "feature"
+   },
+   "vwap_60": {
+    "role": "feature"
+   },
+   "mfi_14": {
+    "role": "feature"
+   },
+   "statistical__log_return_1": {
+    "role": "feature"
+   },
+   "roll_mean_ret_20": {
+    "role": "feature"
+   },
+   "roll_std_ret_20": {
+    "role": "feature"
+   },
+   "roll_skew_ret_20": {
+    "role": "feature"
+   },
+   "roll_kurt_ret_20": {
+    "role": "feature"
+   },
+   "roll_mean_ret_60": {
+    "role": "feature"
+   },
+   "roll_std_ret_60": {
+    "role": "feature"
+   },
+   "roll_skew_ret_60": {
+    "role": "feature"
+   },
+   "roll_kurt_ret_60": {
+    "role": "feature"
+   },
+   "roll_mean_ret_252": {
+    "role": "feature"
+   },
+   "roll_std_ret_252": {
+    "role": "feature"
+   },
+   "roll_skew_ret_252": {
+    "role": "feature"
+   },
+   "roll_kurt_ret_252": {
+    "role": "feature"
+   },
+   "realized_var_12": {
+    "role": "feature"
+   },
+   "realized_var_48": {
+    "role": "feature"
+   },
+   "autocorr_lag1_100": {
+    "role": "feature"
+   },
+   "autocorr_lag5_100": {
+    "role": "feature"
+   },
+   "sqret_autocorr_lag1_100": {
+    "role": "feature"
+   },
+   "vol_regime_high": {
+    "role": "feature"
+   },
+   "vol_regime_low": {
+    "role": "feature"
+   },
+   "hurst_proxy_200": {
+    "role": "feature"
+   },
+   "zscore_close_100": {
+    "role": "feature"
+   }
+  }
+ },
+ "manifest_sha256": "364c4919b218bdb20543310b9dd3f64c4b304f8fd57af7ada0199427a87224ee",
+ "resource_identity": {
+  "sha256": "0f8495194dfbd15c9b9631ef0ec580f09e0d97dfc577f891c7a2677a00461868",
+  "bytes": 17668398,
+  "records": 18337,
+  "verified_against_declared": true,
+  "note": "every byte hashed for identity; no value past the TRAIN boundary parsed"
+ },
+ "train_prefix": {
+  "rows": [
+   0,
+   12835
+  ],
+  "bytes_parsed": 12314960,
+  "prefix_sha256": "921766f2903a70eba6f8031824db0b6cf81a4be013fa0aca190d8677e1ed2ead",
+  "split_rule": "S1 70/15/15 chronological rows: TRAIN [0,12835) (ends before 2024, inside S2 TRAIN+validation)",
+  "full_train_coverage": true
+ },
+ "sampling": {
+  "status": "IRREGULAR_OR_INVALID",
+  "invalid_count": 0,
+  "first": "2017-08-17 04:00:00",
+  "last": "2023-06-28 20:00:00",
+  "median_step_seconds": 14400.0,
+  "top_steps_seconds": {
+   "14400.0": 12826,
+   "28800.0": 5,
+   "43200.0": 2,
+   "115200.0": 1
+  },
+  "non_positive_steps": 0,
+  "declared_step_seconds": 14400,
+  "verified_step_seconds": null,
+  "consequence": "physical-time units (per-day slope, period hours) are UNSUPPORTED; row units only"
+ },
+ "columns": [
+  {
+   "column": "DATE_TIME",
+   "position": 0,
+   "role": "timestamp",
+   "declared_reason": "time index; never a branch input",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "time index; never a branch input"
+  },
+  {
+   "column": "OPEN",
+   "position": 1,
+   "role": "excluded",
+   "declared_reason": "RAW_PRICE_LEVEL (recipe parity with the ETH view)",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "RAW_PRICE_LEVEL (recipe parity with the ETH view)"
+  },
+  {
+   "column": "HIGH",
+   "position": 2,
+   "role": "excluded",
+   "declared_reason": "RAW_PRICE_LEVEL",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "RAW_PRICE_LEVEL"
+  },
+  {
+   "column": "LOW",
+   "position": 3,
+   "role": "excluded",
+   "declared_reason": "RAW_PRICE_LEVEL",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "RAW_PRICE_LEVEL"
+  },
+  {
+   "column": "CLOSE",
+   "position": 4,
+   "role": "excluded",
+   "declared_reason": "ASSET_PRICE_SOURCE for the targets",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "ASSET_PRICE_SOURCE for the targets"
+  },
+  {
+   "column": "VOLUME",
+   "position": 5,
+   "role": "excluded",
+   "declared_reason": "RAW_VOLUME_LEVEL",
+   "target_channel": false,
+   "status": "EXCLUDED",
+   "exclusion_reason": "RAW_VOLUME_LEVEL"
+  },
+  {
+   "column": "return_1",
+   "position": 6,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "log_return_1",
+   "position": 7,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "return_5",
+   "position": 8,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "log_return_5",
+   "position": 9,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "return_10",
+   "position": 10,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "log_return_10",
+   "position": 11,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "return_20",
+   "position": 12,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "log_return_20",
+   "position": 13,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "return_60",
+   "position": 14,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "log_return_60",
+   "position": 15,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sma_10",
+   "position": 16,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_10",
+   "position": 17,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "close_sma_ratio_10",
+   "position": 18,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sma_20",
+   "position": 19,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_20",
+   "position": 20,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "close_sma_ratio_20",
+   "position": 21,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sma_50",
+   "position": 22,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_50",
+   "position": 23,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "close_sma_ratio_50",
+   "position": 24,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sma_100",
+   "position": 25,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_100",
+   "position": 26,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "close_sma_ratio_100",
+   "position": 27,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sma_200",
+   "position": 28,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_200",
+   "position": 29,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "close_sma_ratio_200",
+   "position": 30,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "macd",
+   "position": 31,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "macd_signal",
+   "position": 32,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "macd_hist",
+   "position": 33,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rsi_7",
+   "position": 34,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rsi_14",
+   "position": 35,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "rsi_21",
+   "position": 36,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "stoch_k",
+   "position": 37,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "stoch_d",
+   "position": 38,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "williams_r_14",
+   "position": 39,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "cci_14",
+   "position": 40,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roc_10",
+   "position": 41,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roc_20",
+   "position": 42,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roc_60",
+   "position": 43,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "mom_10",
+   "position": 44,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "mom_20",
+   "position": 45,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "bb_upper",
+   "position": 46,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "bb_middle",
+   "position": 47,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "bb_lower",
+   "position": 48,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "bb_pct_b",
+   "position": 49,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "bb_width",
+   "position": 50,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "atr_14",
+   "position": 51,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "natr_14",
+   "position": 52,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "hist_vol_10",
+   "position": 53,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "hist_vol_20",
+   "position": 54,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "hist_vol_60",
+   "position": 55,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_cross_10_50",
+   "position": 56,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "ema_cross_20_100",
+   "position": 57,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "trend_slope_50",
+   "position": 58,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "trend_strength_50",
+   "position": 59,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "obv",
+   "position": 60,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "obv_delta_20",
+   "position": 61,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "volume_sma_10",
+   "position": 62,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "volume_sma_20",
+   "position": 63,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "volume_ratio_20",
+   "position": 64,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "vwap_60",
+   "position": 65,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "mfi_14",
+   "position": 66,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "statistical__log_return_1",
+   "position": 67,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_mean_ret_20",
+   "position": 68,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_std_ret_20",
+   "position": 69,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_skew_ret_20",
+   "position": 70,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_kurt_ret_20",
+   "position": 71,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_mean_ret_60",
+   "position": 72,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_std_ret_60",
+   "position": 73,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_skew_ret_60",
+   "position": 74,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_kurt_ret_60",
+   "position": 75,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_mean_ret_252",
+   "position": 76,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_std_ret_252",
+   "position": 77,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_skew_ret_252",
+   "position": 78,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "roll_kurt_ret_252",
+   "position": 79,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "realized_var_12",
+   "position": 80,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "realized_var_48",
+   "position": 81,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "autocorr_lag1_100",
+   "position": 82,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "autocorr_lag5_100",
+   "position": 83,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "sqret_autocorr_lag1_100",
+   "position": 84,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "vol_regime_high",
+   "position": 85,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "vol_regime_low",
+   "position": 86,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "hurst_proxy_200",
+   "position": 87,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  },
+  {
+   "column": "zscore_close_100",
+   "position": 88,
+   "role": "feature",
+   "declared_reason": "",
+   "target_channel": false,
+   "status": "PROFILED_ADMISSIBLE",
+   "exclusion_reason": ""
+  }
+ ],
+ "branches": [
+  {
+   "branch": 0,
+   "columns": [
+    "return_1"
+   ]
+  },
+  {
+   "branch": 1,
+   "columns": [
+    "log_return_1"
+   ]
+  },
+  {
+   "branch": 2,
+   "columns": [
+    "return_5"
+   ]
+  },
+  {
+   "branch": 3,
+   "columns": [
+    "log_return_5"
+   ]
+  },
+  {
+   "branch": 4,
+   "columns": [
+    "return_10"
+   ]
+  },
+  {
+   "branch": 5,
+   "columns": [
+    "log_return_10"
+   ]
+  },
+  {
+   "branch": 6,
+   "columns": [
+    "return_20"
+   ]
+  },
+  {
+   "branch": 7,
+   "columns": [
+    "log_return_20"
+   ]
+  },
+  {
+   "branch": 8,
+   "columns": [
+    "return_60"
+   ]
+  },
+  {
+   "branch": 9,
+   "columns": [
+    "log_return_60"
+   ]
+  },
+  {
+   "branch": 10,
+   "columns": [
+    "sma_10"
+   ]
+  },
+  {
+   "branch": 11,
+   "columns": [
+    "ema_10"
+   ]
+  },
+  {
+   "branch": 12,
+   "columns": [
+    "close_sma_ratio_10"
+   ]
+  },
+  {
+   "branch": 13,
+   "columns": [
+    "sma_20"
+   ]
+  },
+  {
+   "branch": 14,
+   "columns": [
+    "ema_20"
+   ]
+  },
+  {
+   "branch": 15,
+   "columns": [
+    "close_sma_ratio_20"
+   ]
+  },
+  {
+   "branch": 16,
+   "columns": [
+    "sma_50"
+   ]
+  },
+  {
+   "branch": 17,
+   "columns": [
+    "ema_50"
+   ]
+  },
+  {
+   "branch": 18,
+   "columns": [
+    "close_sma_ratio_50"
+   ]
+  },
+  {
+   "branch": 19,
+   "columns": [
+    "sma_100"
+   ]
+  },
+  {
+   "branch": 20,
+   "columns": [
+    "ema_100"
+   ]
+  },
+  {
+   "branch": 21,
+   "columns": [
+    "close_sma_ratio_100"
+   ]
+  },
+  {
+   "branch": 22,
+   "columns": [
+    "sma_200"
+   ]
+  },
+  {
+   "branch": 23,
+   "columns": [
+    "ema_200"
+   ]
+  },
+  {
+   "branch": 24,
+   "columns": [
+    "close_sma_ratio_200"
+   ]
+  },
+  {
+   "branch": 25,
+   "columns": [
+    "macd"
+   ]
+  },
+  {
+   "branch": 26,
+   "columns": [
+    "macd_signal"
+   ]
+  },
+  {
+   "branch": 27,
+   "columns": [
+    "macd_hist"
+   ]
+  },
+  {
+   "branch": 28,
+   "columns": [
+    "rsi_7"
+   ]
+  },
+  {
+   "branch": 29,
+   "columns": [
+    "rsi_14"
+   ]
+  },
+  {
+   "branch": 30,
+   "columns": [
+    "rsi_21"
+   ]
+  },
+  {
+   "branch": 31,
+   "columns": [
+    "stoch_k"
+   ]
+  },
+  {
+   "branch": 32,
+   "columns": [
+    "stoch_d"
+   ]
+  },
+  {
+   "branch": 33,
+   "columns": [
+    "williams_r_14"
+   ]
+  },
+  {
+   "branch": 34,
+   "columns": [
+    "cci_14"
+   ]
+  },
+  {
+   "branch": 35,
+   "columns": [
+    "roc_10"
+   ]
+  },
+  {
+   "branch": 36,
+   "columns": [
+    "roc_20"
+   ]
+  },
+  {
+   "branch": 37,
+   "columns": [
+    "roc_60"
+   ]
+  },
+  {
+   "branch": 38,
+   "columns": [
+    "mom_10"
+   ]
+  },
+  {
+   "branch": 39,
+   "columns": [
+    "mom_20"
+   ]
+  },
+  {
+   "branch": 40,
+   "columns": [
+    "bb_upper"
+   ]
+  },
+  {
+   "branch": 41,
+   "columns": [
+    "bb_middle"
+   ]
+  },
+  {
+   "branch": 42,
+   "columns": [
+    "bb_lower"
+   ]
+  },
+  {
+   "branch": 43,
+   "columns": [
+    "bb_pct_b"
+   ]
+  },
+  {
+   "branch": 44,
+   "columns": [
+    "bb_width"
+   ]
+  },
+  {
+   "branch": 45,
+   "columns": [
+    "atr_14"
+   ]
+  },
+  {
+   "branch": 46,
+   "columns": [
+    "natr_14"
+   ]
+  },
+  {
+   "branch": 47,
+   "columns": [
+    "hist_vol_10"
+   ]
+  },
+  {
+   "branch": 48,
+   "columns": [
+    "hist_vol_20"
+   ]
+  },
+  {
+   "branch": 49,
+   "columns": [
+    "hist_vol_60"
+   ]
+  },
+  {
+   "branch": 50,
+   "columns": [
+    "ema_cross_10_50"
+   ]
+  },
+  {
+   "branch": 51,
+   "columns": [
+    "ema_cross_20_100"
+   ]
+  },
+  {
+   "branch": 52,
+   "columns": [
+    "trend_slope_50"
+   ]
+  },
+  {
+   "branch": 53,
+   "columns": [
+    "trend_strength_50"
+   ]
+  },
+  {
+   "branch": 54,
+   "columns": [
+    "obv"
+   ]
+  },
+  {
+   "branch": 55,
+   "columns": [
+    "obv_delta_20"
+   ]
+  },
+  {
+   "branch": 56,
+   "columns": [
+    "volume_sma_10"
+   ]
+  },
+  {
+   "branch": 57,
+   "columns": [
+    "volume_sma_20"
+   ]
+  },
+  {
+   "branch": 58,
+   "columns": [
+    "volume_ratio_20"
+   ]
+  },
+  {
+   "branch": 59,
+   "columns": [
+    "vwap_60"
+   ]
+  },
+  {
+   "branch": 60,
+   "columns": [
+    "mfi_14"
+   ]
+  },
+  {
+   "branch": 61,
+   "columns": [
+    "statistical__log_return_1"
+   ]
+  },
+  {
+   "branch": 62,
+   "columns": [
+    "roll_mean_ret_20"
+   ]
+  },
+  {
+   "branch": 63,
+   "columns": [
+    "roll_std_ret_20"
+   ]
+  },
+  {
+   "branch": 64,
+   "columns": [
+    "roll_skew_ret_20"
+   ]
+  },
+  {
+   "branch": 65,
+   "columns": [
+    "roll_kurt_ret_20"
+   ]
+  },
+  {
+   "branch": 66,
+   "columns": [
+    "roll_mean_ret_60"
+   ]
+  },
+  {
+   "branch": 67,
+   "columns": [
+    "roll_std_ret_60"
+   ]
+  },
+  {
+   "branch": 68,
+   "columns": [
+    "roll_skew_ret_60"
+   ]
+  },
+  {
+   "branch": 69,
+   "columns": [
+    "roll_kurt_ret_60"
+   ]
+  },
+  {
+   "branch": 70,
+   "columns": [
+    "roll_mean_ret_252"
+   ]
+  },
+  {
+   "branch": 71,
+   "columns": [
+    "roll_std_ret_252"
+   ]
+  },
+  {
+   "branch": 72,
+   "columns": [
+    "roll_skew_ret_252"
+   ]
+  },
+  {
+   "branch": 73,
+   "columns": [
+    "roll_kurt_ret_252"
+   ]
+  },
+  {
+   "branch": 74,
+   "columns": [
+    "realized_var_12"
+   ]
+  },
+  {
+   "branch": 75,
+   "columns": [
+    "realized_var_48"
+   ]
+  },
+  {
+   "branch": 76,
+   "columns": [
+    "autocorr_lag1_100"
+   ]
+  },
+  {
+   "branch": 77,
+   "columns": [
+    "autocorr_lag5_100"
+   ]
+  },
+  {
+   "branch": 78,
+   "columns": [
+    "sqret_autocorr_lag1_100"
+   ]
+  },
+  {
+   "branch": 79,
+   "columns": [
+    "vol_regime_high"
+   ]
+  },
+  {
+   "branch": 80,
+   "columns": [
+    "vol_regime_low"
+   ]
+  },
+  {
+   "branch": 81,
+   "columns": [
+    "hurst_proxy_200"
+   ]
+  },
+  {
+   "branch": 82,
+   "columns": [
+    "zscore_close_100"
+   ]
+  }
+ ],
+ "grouping": "one admissible feature per branch; metrics propose, inner validation decides",
+ "redundancy": {
+  "rule": "Pearson on TRAIN rows with every selected column finite; descriptive, never merges",
+  "columns": 83,
+  "rows_used": 12583,
+  "status": "OK",
+  "pairs": 3403,
+  "pairs_abs_ge_0_95": 116,
+  "pairs_abs_ge_0_99": 96,
+  "abs_corr_quantiles": {
+   "0.5": 0.06686859648737463,
+   "0.9": 0.7162304326489513,
+   "0.99": 0.9986687173229416
+  },
+  "components_abs_ge_0.95": {
+   "count_multi_member": 12,
+   "largest": 14,
+   "members": [
+    [
+     "sma_10",
+     "ema_10",
+     "sma_20",
+     "ema_20",
+     "sma_50",
+     "ema_50",
+     "sma_100",
+     "ema_100",
+     "sma_200",
+     "ema_200",
+     "bb_upper",
+     "bb_middle",
+     "bb_lower",
+     "vwap_60"
+    ],
+    [
+     "return_20",
+     "log_return_20",
+     "roc_20",
+     "roll_mean_ret_20"
+    ],
+    [
+     "return_60",
+     "log_return_60",
+     "roc_60",
+     "roll_mean_ret_60"
+    ],
+    [
+     "return_1",
+     "log_return_1",
+     "statistical__log_return_1"
+    ],
+    [
+     "return_10",
+     "log_return_10",
+     "roc_10"
+    ],
+    [
+     "return_5",
+     "log_return_5"
+    ],
+    [
+     "macd",
+     "macd_signal"
+    ],
+    [
+     "rsi_14",
+     "rsi_21"
+    ],
+    [
+     "stoch_k",
+     "williams_r_14"
+    ],
+    [
+     "hist_vol_20",
+     "roll_std_ret_20"
+    ],
+    [
+     "hist_vol_60",
+     "roll_std_ret_60"
+    ],
+    [
+     "volume_sma_10",
+     "volume_sma_20"
+    ]
+   ]
+  },
+  "components_abs_ge_0.99": {
+   "count_multi_member": 9,
+   "largest": 14,
+   "members": [
+    [
+     "sma_10",
+     "ema_10",
+     "sma_20",
+     "ema_20",
+     "sma_50",
+     "ema_50",
+     "sma_100",
+     "ema_100",
+     "sma_200",
+     "ema_200",
+     "bb_upper",
+     "bb_middle",
+     "bb_lower",
+     "vwap_60"
+    ],
+    [
+     "return_20",
+     "log_return_20",
+     "roc_20",
+     "roll_mean_ret_20"
+    ],
+    [
+     "return_60",
+     "log_return_60",
+     "roc_60",
+     "roll_mean_ret_60"
+    ],
+    [
+     "return_1",
+     "log_return_1",
+     "statistical__log_return_1"
+    ],
+    [
+     "return_10",
+     "log_return_10",
+     "roc_10"
+    ],
+    [
+     "return_5",
+     "log_return_5"
+    ],
+    [
+     "stoch_k",
+     "williams_r_14"
+    ],
+    [
+     "hist_vol_20",
+     "roll_std_ret_20"
+    ],
+    [
+     "hist_vol_60",
+     "roll_std_ret_60"
+    ]
+   ]
+  },
+  "redundant_pairs_abs_ge_0_95": [
+   [
+    "log_return_1",
+    "statistical__log_return_1",
+    1.0
+   ],
+   [
+    "return_10",
+    "roc_10",
+    1.0
+   ],
+   [
+    "return_20",
+    "roc_20",
+    1.0
+   ],
+   [
+    "return_60",
+    "roc_60",
+    1.0
+   ],
+   [
+    "sma_20",
+    "bb_middle",
+    0.9999999999999999
+   ],
+   [
+    "log_return_20",
+    "roll_mean_ret_20",
+    0.9999999999999989
+   ],
+   [
+    "log_return_60",
+    "roll_mean_ret_60",
+    0.9999999999999988
+   ],
+   [
+    "hist_vol_20",
+    "roll_std_ret_20",
+    0.9999999999999961
+   ],
+   [
+    "hist_vol_60",
+    "roll_std_ret_60",
+    0.9999999999999958
+   ],
+   [
+    "stoch_k",
+    "williams_r_14",
+    0.9999999999999954
+   ],
+   [
+    "sma_10",
+    "ema_10",
+    0.9999477910171928
+   ],
+   [
+    "sma_20",
+    "ema_20",
+    0.9999065939583133
+   ],
+   [
+    "ema_20",
+    "bb_middle",
+    0.9999065939583132
+   ],
+   [
+    "sma_50",
+    "vwap_60",
+    0.9998607025150389
+   ],
+   [
+    "sma_50",
+    "ema_50",
+    0.9997750502983307
+   ],
+   [
+    "ema_10",
+    "ema_20",
+    0.9997488138657057
+   ],
+   [
+    "ema_50",
+    "vwap_60",
+    0.9997288666479732
+   ],
+   [
+    "sma_10",
+    "ema_20",
+    0.9997061666590701
+   ],
+   [
+    "sma_100",
+    "ema_100",
+    0.9995151521723211
+   ],
+   [
+    "ema_10",
+    "sma_20",
+    0.9995133053902718
+   ],
+   [
+    "ema_10",
+    "bb_middle",
+    0.9995133053902718
+   ],
+   [
+    "return_1",
+    "log_return_1",
+    0.9995031517197644
+   ],
+   [
+    "return_1",
+    "statistical__log_return_1",
+    0.9995031517197644
+   ],
+   [
+    "sma_10",
+    "sma_20",
+    0.9994989129899682
+   ],
+   [
+    "sma_10",
+    "bb_middle",
+    0.9994989129899682
+   ],
+   [
+    "sma_200",
+    "ema_200",
+    0.9991247384963923
+   ],
+   [
+    "ema_20",
+    "ema_50",
+    0.998995699807173
+   ],
+   [
+    "sma_20",
+    "bb_upper",
+    0.998969286606329
+   ],
+   [
+    "bb_upper",
+    "bb_middle",
+    0.998969286606329
+   ],
+   [
+    "sma_20",
+    "ema_50",
+    0.9988923812877197
+   ],
+   [
+    "ema_50",
+    "bb_middle",
+    0.9988923812877197
+   ],
+   [
+    "ema_20",
+    "bb_upper",
+    0.9988817908840368
+   ],
+   [
+    "sma_20",
+    "bb_lower",
+    0.9987396365643765
+   ],
+   [
+    "bb_middle",
+    "bb_lower",
+    0.9987396365643765
+   ],
+   [
+    "ema_100",
+    "vwap_60",
+    0.998669305035282
+   ],
+   [
+    "ema_20",
+    "bb_lower",
+    0.9986399194182639
+   ],
+   [
+    "ema_50",
+    "ema_100",
+    0.9986342526449887
+   ],
+   [
+    "return_5",
+    "log_return_5",
+    0.9985860551602211
+   ],
+   [
+    "sma_50",
+    "ema_100",
+    0.9984272478474295
+   ],
+   [
+    "ema_10",
+    "bb_upper",
+    0.9983873141819535
+   ],
+   [
+    "sma_10",
+    "bb_upper",
+    0.9983627501925597
+   ],
+   [
+    "ema_10",
+    "bb_lower",
+    0.9983594627433261
+   ],
+   [
+    "sma_10",
+    "bb_lower",
+    0.9983563520365424
+   ],
+   [
+    "ema_20",
+    "sma_50",
+    0.9982925020650397
+   ],
+   [
+    "sma_20",
+    "sma_50",
+    0.998201361620365
+   ],
+   [
+    "sma_50",
+    "bb_middle",
+    0.998201361620365
+   ],
+   [
+    "ema_20",
+    "vwap_60",
+    0.9980977574626918
+   ],
+   [
+    "ema_50",
+    "bb_upper",
+    0.9980527677303335
+   ],
+   [
+    "sma_20",
+    "vwap_60",
+    0.9979551074805165
+   ],
+   [
+    "bb_middle",
+    "vwap_60",
+    0.9979551074805165
+   ],
+   [
+    "ema_10",
+    "ema_50",
+    0.9979350780641897
+   ],
+   [
+    "sma_10",
+    "ema_50",
+    0.9978280722436965
+   ],
+   [
+    "return_10",
+    "log_return_10",
+    0.9977744321764402
+   ],
+   [
+    "log_return_10",
+    "roc_10",
+    0.9977744321764402
+   ],
+   [
+    "sma_100",
+    "vwap_60",
+    0.9977504401803194
+   ],
+   [
+    "sma_50",
+    "bb_upper",
+    0.9974658723486441
+   ],
+   [
+    "ema_50",
+    "bb_lower",
+    0.9974233691476041
+   ],
+   [
+    "ema_50",
+    "sma_100",
+    0.9974038116186571
+   ],
+   [
+    "sma_50",
+    "sma_100",
+    0.9973520605119954
+   ],
+   [
+    "return_20",
+    "log_return_20",
+    0.9970339871375875
+   ],
+   [
+    "log_return_20",
+    "roc_20",
+    0.9970339871375875
+   ],
+   [
+    "return_20",
+    "roll_mean_ret_20",
+    0.9970339870365141
+   ],
+   [
+    "roc_20",
+    "roll_mean_ret_20",
+    0.9970339870365141
+   ],
+   [
+    "bb_upper",
+    "vwap_60",
+    0.9970306033344148
+   ],
+   [
+    "ema_100",
+    "ema_200",
+    0.9969952233541675
+   ],
+   [
+    "ema_10",
+    "sma_50",
+    0.996914901612925
+   ],
+   [
+    "sma_10",
+    "sma_50",
+    0.9967768970383829
+   ],
+   [
+    "ema_10",
+    "vwap_60",
+    0.9967555809778695
+   ],
+   [
+    "sma_50",
+    "bb_lower",
+    0.996618873342922
+   ],
+   [
+    "sma_10",
+    "vwap_60",
+    0.9966097898788704
+   ],
+   [
+    "sma_100",
+    "ema_200",
+    0.9966051874395179
+   ],
+   [
+    "bb_lower",
+    "vwap_60",
+    0.9965822120229008
+   ],
+   [
+    "ema_20",
+    "ema_100",
+    0.995704098025441
+   ],
+   [
+    "sma_20",
+    "ema_100",
+    0.9954920805034118
+   ],
+   [
+    "ema_100",
+    "bb_middle",
+    0.9954920805034118
+   ],
+   [
+    "bb_upper",
+    "bb_lower",
+    0.9954319898088787
+   ],
+   [
+    "ema_100",
+    "sma_200",
+    0.994754546624946
+   ],
+   [
+    "ema_100",
+    "bb_upper",
+    0.9947127016427252
+   ],
+   [
+    "sma_100",
+    "sma_200",
+    0.9945884131001302
+   ],
+   [
+    "ema_10",
+    "ema_100",
+    0.994109330642814
+   ],
+   [
+    "ema_100",
+    "bb_lower",
+    0.9939646254373905
+   ],
+   [
+    "sma_10",
+    "ema_100",
+    0.993950894848398
+   ],
+   [
+    "ema_20",
+    "sma_100",
+    0.9935170548074195
+   ],
+   [
+    "sma_20",
+    "sma_100",
+    0.993234956150614
+   ],
+   [
+    "sma_100",
+    "bb_middle",
+    0.993234956150614
+   ],
+   [
+    "return_60",
+    "roll_mean_ret_60",
+    0.9925666805113648
+   ],
+   [
+    "roc_60",
+    "roll_mean_ret_60",
+    0.9925666805113648
+   ],
+   [
+    "return_60",
+    "log_return_60",
+    0.9925666804923194
+   ],
+   [
+    "log_return_60",
+    "roc_60",
+    0.9925666804923194
+   ],
+   [
+    "sma_100",
+    "bb_upper",
+    0.9925647260774761
+   ],
+   [
+    "ema_200",
+    "vwap_60",
+    0.9922273473031107
+   ],
+   [
+    "ema_50",
+    "ema_200",
+    0.9921302613184363
+   ],
+   [
+    "sma_50",
+    "ema_200",
+    0.9916814377887142
+   ],
+   [
+    "ema_10",
+    "sma_100",
+    0.991627455360561
+   ],
+   [
+    "sma_100",
+    "bb_lower",
+    0.9915922279185224
+   ],
+   [
+    "sma_10",
+    "sma_100",
+    0.9914376798654165
+   ],
+   [
+    "sma_200",
+    "vwap_60",
+    0.988592026067896
+   ],
+   [
+    "ema_50",
+    "sma_200",
+    0.988504693072726
+   ],
+   [
+    "sma_50",
+    "sma_200",
+    0.9878801325779469
+   ],
+   [
+    "ema_20",
+    "ema_200",
+    0.9873439304267184
+   ],
+   [
+    "sma_20",
+    "ema_200",
+    0.9870306382636022
+   ],
+   [
+    "ema_200",
+    "bb_middle",
+    0.987030638263602
+   ],
+   [
+    "ema_200",
+    "bb_upper",
+    0.9861796505706092
+   ],
+   [
+    "ema_200",
+    "bb_lower",
+    0.9856026724524467
+   ],
+   [
+    "ema_10",
+    "ema_200",
+    0.9853182466147854
+   ],
+   [
+    "sma_10",
+    "ema_200",
+    0.9851263306525964
+   ],
+   [
+    "ema_20",
+    "sma_200",
+    0.9829688890681485
+   ],
+   [
+    "sma_20",
+    "sma_200",
+    0.9825961467177431
+   ],
+   [
+    "sma_200",
+    "bb_middle",
+    0.9825961467177431
+   ],
+   [
+    "sma_200",
+    "bb_upper",
+    0.9817454705081066
+   ],
+   [
+    "sma_200",
+    "bb_lower",
+    0.9811784796075591
+   ],
+   [
+    "ema_10",
+    "sma_200",
+    0.980813288487334
+   ],
+   [
+    "sma_10",
+    "sma_200",
+    0.9806031487687095
+   ],
+   [
+    "rsi_14",
+    "rsi_21",
+    0.9790635487043292
+   ],
+   [
+    "volume_sma_10",
+    "volume_sma_20",
+    0.9687320729838285
+   ],
+   [
+    "macd",
+    "macd_signal",
+    0.955753415998489
+   ]
+  ],
+  "lagged": {
+   "status": "NOT_RUN",
+   "reason": "COLUMNS_OVER_LAG_SCAN_CAP_64",
+   "consequence": "lag-informed grouping must be fitted inside inner folds (protocol step G3)"
+  }
+ },
+ "implementation": {
+  "tool": "tools/profile_train_wide.py",
+  "sha256": "7503263a97e178b8546a2b26223192154a3f7ecbd9b02649924d1e912fed21e6",
+  "versions": {
+   "python": "3.12.13",
+   "numpy": "2.4.3",
+   "scipy": "1.17.1",
+   "pandas": "3.0.1",
+   "statsmodels": "0.14.6"
+  },
+  "limits": {
+   "max_columns": 4096,
+   "max_train_rows": 200000,
+   "max_train_cells": 25000000,
+   "max_resource_bytes": 1073741824,
+   "max_pair_lag_columns": 64
+  }
+ },
+ "assumptions": [
+  "No imputation; temporal metrics use the longest contiguous finite run",
+  "Values are profiled as stored (no scaler); TSL loaders standardize with a TRAIN-fitted scaler later",
+  "ADF/KPSS p-values are descriptive and unadjusted for multiple testing",
+  "Point-in-time availability is not certified by this profile",
+  "No target, no model and no holdout value enters any statistic"
+ ],
+ "wall_seconds": 25.967159197025467
+}
