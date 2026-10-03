@@ -83,6 +83,9 @@ DEFAULT_PARAMS = {
     "exploration_min": 2,
     "exploration_seed": 20261003,
     "leak_alarm_abs_spearman": 0.98,
+    # MI-only robust association on return targets (Y_s/Y_l) mostly reflects scale/volatility
+    # co-movement, not the conditional mean; recorded, but it no longer promotes there by itself.
+    "mi_only_promotes_returns": False,
 }
 
 
@@ -800,8 +803,13 @@ def _decide(b, names, adm, tech, cells, groups_rows, syn_rows, folds, targets, p
             if meas and len(qs) >= min(maj, len(meas)):
                 reasons.append("S_ASSOC_ROBUST")
                 # monotone (Spearman) versus dependence seen only by MI (e.g. volatility vs |return|)
-                reasons.append("S_ASSOC_MONOTONE" if len(qs_s) >= min(maj, len(meas))
-                               else "S_ASSOC_MI_ONLY")
+                if len(qs_s) >= min(maj, len(meas)):
+                    reasons.append("S_ASSOC_MONOTONE")
+                elif tn.startswith("Y_b") or p.get("mi_only_promotes_returns", True):
+                    reasons.append("S_ASSOC_MI_ONLY")
+                else:
+                    reasons.remove("S_ASSOC_ROBUST")
+                    reasons.append("LP_ASSOC_MI_ONLY_SCALE_DEPENDENCE")
             partners = {o: fl for o, fl in syn.get((f, tn, h), {}).items()
                         if len(fl) >= min(int(p["synergy_fold_min"]), len(folds))}
             if partners:
@@ -817,7 +825,8 @@ def _decide(b, names, adm, tech, cells, groups_rows, syn_rows, folds, targets, p
                 if meas and "S_OOF_UTILITY" not in reasons and \
                         "LP_OOF_GAIN_NOT_CALIBRATED" not in reasons:
                     reasons.append("LP_NO_ROBUST_OOF_GAIN")
-                if meas and "S_ASSOC_ROBUST" not in reasons:
+                if meas and "S_ASSOC_ROBUST" not in reasons and \
+                        "LP_ASSOC_MI_ONLY_SCALE_DEPENDENCE" not in reasons:
                     reasons.append("LP_ASSOC_NOT_ROBUST")
             r["status"] = "PROVISIONAL_SURVIVOR" if surv else "PROVISIONAL_LOW_PRIORITY"
             r["reasons"] = reasons
@@ -919,8 +928,10 @@ def write(res: dict, out_dir: str, ready: bool = True, extra_ready: dict | None 
                 "interaction_null_p", "n_null", "pairs_evaluated_in_cell", "pair_rule"])
     with open(os.path.join(out_dir, "ps2_exploration.json"), "w", encoding="utf-8") as fh:
         json.dump(res["exploration"], fh, indent=1, sort_keys=True)
-    for fn in ("ps2_status.csv", "ps2_fold_cells.csv", "ps2_groups.csv", "ps2_synergy.csv",
-               "ps2_exploration.json"):
+    extra = [fn for fn in ("ps2_extractor_priority.json", "ps2_candidates_lane_c.json",
+                           "batch_manifest.json") if os.path.isfile(os.path.join(out_dir, fn))]
+    for fn in ["ps2_status.csv", "ps2_fold_cells.csv", "ps2_groups.csv", "ps2_synergy.csv",
+               "ps2_exploration.json"] + extra:
         with open(os.path.join(out_dir, fn), "rb") as fh:
             files[fn] = _sha(fh.read())
     surv = {}
@@ -1125,6 +1136,10 @@ def run_lane_a(batch_dir, out_dir, params=None, log=None):
     lc = lane_c_candidates(b, res)
     with open(os.path.join(out_dir, "ps2_candidates_lane_c.json"), "w", encoding="utf-8") as fh:
         json.dump(lc, fh, indent=1, sort_keys=True)
+    pri = extractor_priority(res["status"], res["parameters"]["fdr_q"],
+                             res["parameters"]["fold_majority"])
+    with open(os.path.join(out_dir, "ps2_extractor_priority.json"), "w", encoding="utf-8") as fh:
+        json.dump(pri, fh, indent=1, sort_keys=True)
     w = write(res, out_dir, extra_ready={"batch_manifest_sha256": v1["batch_manifest_sha256"]})
     w["ps2_batch_v1"] = v1
     return res, w
@@ -1221,6 +1236,42 @@ def write_ps2_batch_v1(b: Batch, res: dict, out_dir: str) -> dict:
             "folds": folds}
 
 
+def extractor_priority(status_rows, fdr_q=0.10, fold_majority=3) -> dict:
+    """Order the hand-off for the GPU lanes without changing any status (reads the status table).
+
+    tier_1: survivor in some cell through OOF utility or monotone (Spearman) association;
+    tier_2: survivor only through synergy or group contribution;
+    tier_3: survivor only through MI-only association (scale dependence);
+    exploration: the recorded exploration sample, always kept regardless of tier."""
+    def monotone(r):
+        q = r.get("spearman_q_by_fold") or {}
+        if isinstance(q, str):
+            q = json.loads(q) if q else {}
+        return sum(1 for v in q.values() if v is not None and v <= fdr_q) >= fold_majority
+    best, expl, fam = {}, set(), {}
+    for r in status_rows:
+        f = r["feature"]
+        fam[f] = r.get("domain")
+        reasons = r["reasons"].split(";") if isinstance(r["reasons"], str) else r["reasons"]
+        ex = r.get("exploration_sample")
+        if ex is True or ex == "true":
+            expl.add(f)
+        if r["status"] != "PROVISIONAL_SURVIVOR":
+            continue
+        if "S_OOF_UTILITY" in reasons or ("S_ASSOC_ROBUST" in reasons and monotone(r)):
+            t = 1
+        elif "S_SYNERGY_PAIR" in reasons or "S_GROUP_CONTRIBUTION" in reasons:
+            t = 2
+        else:
+            t = 3
+        best[f] = min(best.get(f, 9), t)
+    tiers = {k: sorted(f for f, t in best.items() if t == i)
+             for i, k in ((1, "tier_1"), (2, "tier_2"), (3, "tier_3"))}
+    return {"schema": "ps2_extractor_priority.v1", **tiers, "exploration": sorted(expl),
+            "rule": extractor_priority.__doc__.strip(), "statuses_changed": False,
+            "fdr_q": fdr_q, "fold_majority": fold_majority}
+
+
 def lane_c_candidates(b: Batch, res: dict) -> dict:
     """Per candidate the stable id and per target/horizon context lane C needs for its dossier."""
     out = {}
@@ -1256,7 +1307,19 @@ def main(argv=None) -> int:
     ap.add_argument("--batch-id", default="batch")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--no-ready", action="store_true")
+    ap.add_argument("--priority-from", default=None,
+                    help="write ps2_extractor_priority.json for an already published PS2 batch dir")
     a = ap.parse_args(argv)
+    if a.priority_from:
+        import csv
+        rows = list(csv.DictReader(open(os.path.join(a.priority_from, "ps2_status.csv"))))
+        man = json.load(open(os.path.join(a.priority_from, "ps2_manifest.json")))
+        pri = extractor_priority(rows, man["parameters"]["fdr_q"], man["parameters"]["fold_majority"])
+        pri["applied_after_publication"] = True
+        with open(os.path.join(a.priority_from, "ps2_extractor_priority.json"), "w") as fh:
+            json.dump(pri, fh, indent=1, sort_keys=True)
+        print(json.dumps({k: len(pri[k]) for k in ("tier_1", "tier_2", "tier_3", "exploration")}))
+        return 0
     if a.lane_a_batch:
         params = json.load(open(a.params_json)) if a.params_json else None
         res, w = run_lane_a(a.lane_a_batch, a.out_dir, params, log=lambda s: print(s, flush=True))

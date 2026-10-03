@@ -516,3 +516,41 @@ def test_incremental_batch_uses_digest_pinned_base(tmp_path):
     t.to_parquet(root / "batch_001" / "targets_train.parquet", index=False)
     with pytest.raises(ps2.PS2Error, match="digest"):
         ps2.load_lane_a_batch(str(inc))
+
+
+def test_mi_only_does_not_promote_returns_but_is_recorded():
+    rows = None
+    p = dict(SMALL)
+    df = _frame()
+    b = ps2.batch_from_frame(df, "ts", "close", FEATS, _train_end(df), DOMAINS, DECLARED)
+    real = ps2.emp_p
+    # make every MI p tiny and every Spearman p large: MI-only evidence everywhere
+    import unittest.mock as um
+    with um.patch.object(ps2, "spearman_null", lambda x, y, sh: (0.0, np.ones(len(sh)))), \
+            um.patch.object(ps2, "mi_null", lambda x, y, sh, B, c=False: (1.0, np.zeros(len(sh)))), \
+            um.patch.object(ps2, "_synergy", lambda *a, **k: []), \
+            um.patch.object(ps2, "_groups", lambda *a, **k: []):
+        res = ps2.build(b, dict(p, util_null_p=0.0))
+    rows = [r for r in res["status"] if r["status"] != "TECHNICAL_REJECT"]
+    for r in rows:
+        if r["target"].startswith("Y_b"):
+            continue
+        assert "S_ASSOC_MI_ONLY" not in r["reasons"]
+        if "LP_ASSOC_MI_ONLY_SCALE_DEPENDENCE" in r["reasons"]:
+            assert r["status"] != "PROVISIONAL_SURVIVOR"
+    assert real is ps2.emp_p
+    assert any("LP_ASSOC_MI_ONLY_SCALE_DEPENDENCE" in r["reasons"] for r in rows)
+    assert any("S_ASSOC_MI_ONLY" in r["reasons"] for r in rows if r["target"].startswith("Y_b"))
+
+
+def test_extractor_priority_tiers_never_change_status(base):
+    res, _, _, _ = base
+    before = [(r["feature"], r["target"], r["horizon"], r["status"]) for r in res["status"]]
+    pri = ps2.extractor_priority(res["status"], 0.10, 2)
+    after = [(r["feature"], r["target"], r["horizon"], r["status"]) for r in res["status"]]
+    assert before == after and pri["statuses_changed"] is False
+    allt = pri["tier_1"] + pri["tier_2"] + pri["tier_3"]
+    assert len(allt) == len(set(allt))
+    surv = {r["feature"] for r in res["status"] if r["status"] == "PROVISIONAL_SURVIVOR"}
+    assert set(allt) == surv and pri["exploration"] == res["exploration"]["sample"]
+    assert "sig_level" in pri["tier_1"]
