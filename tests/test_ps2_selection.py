@@ -391,6 +391,7 @@ def _lane_a_dir(tmp, tamper=False, late_row=False):
     meta = [{"feature_id": f, "family": DOMAINS.get(f, f.split("_")[0]),
              "admissibility": "ADMISSIBLE"} for f in feats]
     meta[feats.index("bad_declared")]["admissibility"] = "EXCLUDED_ROLE:quality_excluded"
+    meta[feats.index("noise_5")]["family"] = "event_surprise"  # economic-calendar column
     json.dump({"features": meta}, open(d / "admissible_features.json", "w"))
     n = len(df)
     folds = []
@@ -433,3 +434,44 @@ def test_lane_a_adapter_refuses_tampered_or_late_rows(tmp_path):
         ps2.load_lane_a_batch(str(_lane_a_dir(tmp_path / "x", tamper=True)))
     with pytest.raises(ps2.PS2Error, match="READ_END"):
         ps2.load_lane_a_batch(str(_lane_a_dir(tmp_path / "y", late_row=True)))
+
+
+def test_selector_episode_sources_excluded_and_reported(tmp_path):
+    d = _lane_a_dir(tmp_path)
+    b = ps2.load_lane_a_batch(str(d))
+    assert "noise_5" not in b.names
+    sel = b.provenance["selector_episode_sources"]
+    assert [x["feature_id"] for x in sel] == ["noise_5"]
+    assert sel[0]["status"] == "SELECTOR_EPISODE_SOURCE"
+
+
+def test_ps2_batch_v1_contract_for_extractor_lanes(tmp_path):
+    import hashlib
+    d = _lane_a_dir(tmp_path)
+    out = tmp_path / "batch_001"
+    res, w = ps2.run_lane_a(str(d), str(out), dict(SMALL, fold_majority=2, synergy_fold_min=3))
+    man = json.loads((out / "batch_manifest.json").read_text())
+    assert man["schema"] == "ps2_batch.v1" and man["sampling_period_seconds"] == 3600
+    for part in ("series", "targets"):
+        assert hashlib.sha256((out / man[part]["file"]).read_bytes()).hexdigest() == man[part]["sha256"]
+    s, t = np.load(out / "series.npz"), np.load(out / "targets.npz")
+    ts = s["timestamps"]
+    assert np.all(np.diff(ts) == 3600) and np.array_equal(t["timestamps"], ts)
+    assert ts[-1] == man["train_end_ts"]
+    assert t["Y_s"].shape == (len(ts), 2) and t["Y_l"].shape == (len(ts), 1)
+    assert t["Y_b"].dtype.kind == "i" and set(np.unique(t["Y_b"])) <= {-1, 0, 1, 2}
+    assert (t["Y_b"] == 0).any()  # SL-first class survives the re-encoding (raw -1 is not 'no support')
+    surv = {r["feature"] for r in res["status"] if r["status"] in ("PROVISIONAL_SURVIVOR", "EXPLORATION")}
+    assert set(man["features"]) == surv and "noise_5" not in man["features"]
+    for f in man["features"]:
+        assert ("x__" + f) in s.files and s["x__" + f].dtype == np.float32
+    for fd in man["folds"]:
+        fi = np.nonzero((ts >= fd["fit"][0]) & (ts <= fd["fit"][1]))[0]
+        vi = np.nonzero((ts >= fd["val"][0]) & (ts <= fd["val"][1]))[0]
+        assert fd["split"] == "train" and fd["val"][1] <= man["train_end_ts"]
+        assert vi.min() - fi.max() > 720 and fi.min() >= 720
+    ready = json.loads((out / "READY").read_text())
+    assert ready["batch_manifest_sha256"] == hashlib.sha256(
+        (out / "batch_manifest.json").read_bytes()).hexdigest()
+    lc = json.loads((out / "ps2_candidates_lane_c.json").read_text())
+    assert {c["feature_id"] for c in lc["candidates"]} == surv

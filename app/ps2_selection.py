@@ -894,7 +894,7 @@ def _write_csv(path, rows, cols):
                         for c in cols])
 
 
-def write(res: dict, out_dir: str, ready: bool = True) -> dict:
+def write(res: dict, out_dir: str, ready: bool = True, extra_ready: dict | None = None) -> dict:
     os.makedirs(out_dir, exist_ok=True)
     files = {}
     srt = sorted(res["status"], key=lambda r: (r["target"], r["horizon"], r["feature"]))
@@ -928,6 +928,8 @@ def write(res: dict, out_dir: str, ready: bool = True) -> dict:
                                "fold_clusters", "multiplicity", "counts", "status_policy",
                                "reincorporation")}
     man["exploration_sample"] = res["exploration"]["sample"]
+    man["selector_episode_sources_reported_separately"] = \
+        (res.get("provenance") or {}).get("selector_episode_sources", [])
     man["extractor_worklist"] = {f: surv[f] for f in sorted(surv)}
     man["output_sha256"] = files
     body = _canon(man).encode()
@@ -939,8 +941,8 @@ def write(res: dict, out_dir: str, ready: bool = True) -> dict:
     if ready:
         tmp = os.path.join(out_dir, ".READY.tmp")
         with open(tmp, "w", encoding="utf-8") as fh:
-            json.dump({"schema": SCHEMA, "manifest_canonical_sha256": man_digest,
-                       "batch_id": res["batch_id"]}, fh, sort_keys=True)
+            json.dump(dict({"schema": SCHEMA, "manifest_canonical_sha256": man_digest,
+                            "batch_id": res["batch_id"]}, **(extra_ready or {})), fh, sort_keys=True)
         os.replace(tmp, os.path.join(out_dir, "READY"))
     return {"manifest_canonical_sha256": man_digest, "files": files}
 
@@ -965,6 +967,18 @@ def batch_from_frame(df, ts_col, price_col, features, train_end, domains=None, d
     ts, X, price = restrict_to_train(ts, X, df[price_col].to_numpy(dtype="float64"), te)
     return Batch(ts=ts, X=X, names=list(features), price=price, domains=dict(domains or {}),
                  declared=dict(declared or {}), batch_id=batch_id)
+
+
+SELECTOR_FAMILIES = ("event_calendar", "event_surprise", "event_surprise_by_release")
+SELECTOR_SOURCES = ("economic_calendar", "fxmacrodata", "macro_events", "causal_dossier")
+NOT_EXTRACTOR_FAMILIES = ("calendar_known",)  # time encodings: extractor conditioning, not a series
+
+
+def is_selector_episode_source(m) -> bool:
+    """Economic-calendar columns are PS3-C selector episode sources, not model inputs (plan 02434903)."""
+    return ("SELECTOR_EPISODE_SOURCE" in str(m.get("admissibility", "")).upper()
+            or str(m.get("family", "")) in SELECTOR_FAMILIES
+            or str(m.get("source", "")).lower() in SELECTOR_SOURCES)
 
 
 LANE_A_TARGETS = {"Y_s": [1, 2, 3, 4, 5, 6], "Y_l": [24, 48, 72, 96, 120, 144]}
@@ -1011,6 +1025,12 @@ def load_lane_a_batch(batch_dir: str) -> Batch:
         raise PS2Error("a decision row lies at or after READ_END; refusing")
     if np.any(np.diff(ts) <= 0):
         raise PS2Error("decision times are not strictly increasing")
+    selector = [{"feature_id": m["feature_id"], "family": m.get("family"),
+                 "admissibility": m.get("admissibility"), "status": "SELECTOR_EPISODE_SOURCE",
+                 "consumer": "lane C PS3-C episode selection; excluded from PS2 model-input ranking "
+                             "and denominators (plan 02434903; calendar as model input is I11)"}
+                for m in meta if is_selector_episode_source(m)]
+    meta = [m for m in meta if not is_selector_episode_source(m)]
     names = [m["feature_id"] for m in meta]
     missing = [f for f in names if f not in fx.columns]
     if missing:
@@ -1049,6 +1069,7 @@ def load_lane_a_batch(batch_dir: str) -> Batch:
             "lane_a_contract_sha256": contract.get("contract_sha256"),
             "read_end": str(read_end), "lane_a_artifacts_sha256": dig["artifacts_sha256"],
             "target_columns": sorted(f"{k[0]}|{k[1]}" for k in targets),
+            "selector_episode_sources": selector,
             "fit_rule": "lane A train rows AND label support end < eval start (per target)",
             "eval_rule": "lane A val rows AND label support end <= last val decision time"}
     return Batch(ts=ts, X=X, names=names, price=np.zeros(len(ts)), domains=domains,
@@ -1061,8 +1082,126 @@ def run_lane_a(batch_dir, out_dir, params=None, log=None):
     prm = dict(LANE_A_PARAMS)
     prm.update(params or {})
     res = build(b, prm, log=log)
-    w = write(res, out_dir)
+    os.makedirs(out_dir, exist_ok=True)
+    v1 = write_ps2_batch_v1(b, res, out_dir)
+    lc = lane_c_candidates(b, res)
+    with open(os.path.join(out_dir, "ps2_candidates_lane_c.json"), "w", encoding="utf-8") as fh:
+        json.dump(lc, fh, indent=1, sort_keys=True)
+    w = write(res, out_dir, extra_ready={"batch_manifest_sha256": v1["batch_manifest_sha256"]})
+    w["ps2_batch_v1"] = v1
     return res, w
+
+
+EXTRACTOR_FOLD_GAP_H = 720   # fit anchors end this many hours before val start: windows <= 720 and
+                             # the 144 h label support never overlap validation (validate_fold)
+
+
+def write_ps2_batch_v1(b: Batch, res: dict, out_dir: str) -> dict:
+    """Emit the lane D contract ps2_batch.v1 (series.npz, targets.npz, batch_manifest.json).
+
+    Decisions recorded in the manifest: the series is the regular UTC hourly grid from the first to
+    the last TRAIN decision row, NaN where no decision row exists (market closed); Y_b classes are
+    re-encoded 0=SL first, 1=timeout, 2=TP first and -1 = no support (the contract reserves -1);
+    calendar_known and selector episode columns are not extractor inputs."""
+    period = HOUR
+    t0, t1 = int(b.ts[0]), int(b.ts[-1])
+    grid = np.arange(t0, t1 + period, period, dtype="int64")
+    pos = ((b.ts - t0) // period).astype("int64")
+    if np.any((b.ts - t0) % period):
+        raise PS2Error("decision rows are not on the hourly grid")
+    col = {f: j for j, f in enumerate(b.names)}
+    fams = {f: domain_of(f, b.domains) for f in b.names}
+    keep = {r["feature"] for r in res["status"]
+            if r["status"] in ("PROVISIONAL_SURVIVOR", "EXPLORATION")}
+    feats = sorted(f for f in keep if fams[f] not in NOT_EXTRACTOR_FAMILIES)
+    series = {"timestamps": grid}
+    for f in feats:
+        v = np.full(len(grid), np.nan, dtype="float32")
+        v[pos] = b.X[:, col[f]].astype("float32")
+        series["x__" + f] = v
+    tg = {"timestamps": grid}
+    ys = sorted(k for k in (b.targets or {}) if k[0] == "Y_s")
+    yl = sorted(k for k in (b.targets or {}) if k[0] == "Y_l")
+    yb = sorted((k for k in (b.targets or {}) if k[0].startswith("Y_b")), key=lambda k: k[1])
+    for name, keys in (("Y_s", ys), ("Y_l", yl)):
+        a = np.full((len(grid), len(keys)), np.nan)
+        for j, k in enumerate(keys):
+            a[pos, j] = b.targets[k][0]
+        tg[name] = a
+    if yb:
+        a = np.full((len(grid), len(yb)), -1, dtype="int64")
+        for j, k in enumerate(yb):
+            y = b.targets[k][0]
+            ok = np.isfinite(y)
+            a[pos[ok], j] = (np.round(y[ok]).astype("int64") + 1)
+        tg["Y_b"] = a
+    np.savez(os.path.join(out_dir, "series.npz"), **series)
+    np.savez(os.path.join(out_dir, "targets.npz"), **tg)
+    gap = EXTRACTOR_FOLD_GAP_H * HOUR
+    folds = []
+    for fd in res["folds"]:
+        fs = t0 + gap
+        fe = fd["eval_start_time"] - gap - period
+        if fe <= fs:
+            continue
+        folds.append({"fold_id": fd["fold"], "split": "train", "fit": [int(fs), int(fe)],
+                      "val": [int(fd["eval_start_time"]), int(fd["eval_end_time"])]})
+
+    def fsha(fn):
+        with open(os.path.join(out_dir, fn), "rb") as fh:
+            return _sha(fh.read())
+    man = {"schema": "ps2_batch.v1", "batch_id": os.path.basename(os.path.normpath(out_dir)),
+           "asset": "EURUSD", "sampling_period_seconds": period,
+           "series": {"file": "series.npz", "sha256": fsha("series.npz")},
+           "targets": {"file": "targets.npz", "sha256": fsha("targets.npz")},
+           "features": feats, "feature_sources": {f: fams[f] for f in feats},
+           "known_calendar": [], "train_end_ts": t1, "folds": folds,
+           "producer": {"lane": "B", "schema": SCHEMA, "code_sha256": code_digest(),
+                        "parameter_digest": res["parameter_digest"],
+                        "train_data_digest": res["train_data_digest"],
+                        "lane_a_batch": b.provenance.get("lane_a_batch"),
+                        "lane_a_ready_digests_sha256": b.provenance.get("lane_a_ready_digests_sha256")},
+           "target_columns": {"Y_s": [f"{k[0]}_{k[1]}h" for k in ys],
+                              "Y_l": [f"{k[0]}_{k[1]}h" for k in yl],
+                              "Y_b": [f"{k[0]} (timeout {k[1]}h)" for k in yb]},
+           "decisions": {
+               "grid": "regular UTC hourly grid from the first to the last TRAIN decision row; NaN "
+                       "where no decision row exists (market closed); targets NaN / -1 there",
+               "Y_b_encoding": {"0": "SL first (-1)", "1": "timeout (0)", "2": "TP first (+1)",
+                                "-1": "no support (censored, ambiguous, no sigma, closed)"},
+               "fold_gap_h": EXTRACTOR_FOLD_GAP_H,
+               "fold_rule": "fit anchors [first row + gap, val start - gap - 1h]; val = lane A inner "
+                            "validation year inside TRAIN",
+               "features_rule": "PS2 PROVISIONAL_SURVIVOR in >=1 target/horizon or EXPLORATION "
+                                "sample; calendar_known excluded (conditioning, not a series); "
+                                "selector episode sources excluded",
+               "excluded_calendar_known": sorted(f for f in keep
+                                                 if fams[f] in NOT_EXTRACTOR_FAMILIES)}}
+    with open(os.path.join(out_dir, "batch_manifest.json"), "w", encoding="utf-8") as fh:
+        json.dump(man, fh, indent=2, sort_keys=True)
+    return {"batch_manifest_sha256": fsha("batch_manifest.json"), "features": feats,
+            "folds": folds}
+
+
+def lane_c_candidates(b: Batch, res: dict) -> dict:
+    """Per candidate the stable id and per target/horizon context lane C needs for its dossier."""
+    out = {}
+    for r in res["status"]:
+        if r["status"] not in ("PROVISIONAL_SURVIVOR", "EXPLORATION"):
+            continue
+        d = out.setdefault(r["feature"], {"feature_id": r["feature"], "family": r["domain"],
+                                          "cells": {}})
+        d["cells"][f"{r['target']}|h{r['horizon']}"] = {
+            "status": r["status"], "reasons": r["reasons"],
+            "oof_delta_median": r.get("oof_delta_median"),
+            "oof_delta_by_fold": r.get("oof_delta_by_fold"),
+            "spearman_by_fold": r.get("spearman_by_fold"),
+            "synergy_partners": r.get("synergy_partners", []),
+            "dependence_cluster": r.get("dependence_cluster")}
+    return {"schema": "ps2_lane_c_candidates.v1", "batch_id": b.batch_id,
+            "parameter_digest": res["parameter_digest"], "train_data_digest": res["train_data_digest"],
+            "causal_evidence_level": "NOT_EVALUATED (lane C owns the three-rung dossier)",
+            "candidates": [out[f] for f in sorted(out)]}
 
 
 def main(argv=None) -> int:
