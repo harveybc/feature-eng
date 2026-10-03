@@ -122,6 +122,9 @@ class Batch:
     domains: dict = field(default_factory=dict)      # feature -> domain group
     declared: dict = field(default_factory=dict)     # feature -> (code, detail) technical
     batch_id: str = "batch"
+    targets: dict | None = None   # {(target, h): (y, support_end_epoch_s)} supplied by PS0/PS1
+    folds: list | None = None     # inner folds supplied by PS0/PS1 (row positions + times)
+    provenance: dict = field(default_factory=dict)
 
 
 def restrict_to_train(ts, X, price, train_end: int):
@@ -142,6 +145,13 @@ def train_digest(b: Batch) -> str:
     h.update(np.ascontiguousarray(b.ts, dtype="int64").tobytes())
     h.update(np.ascontiguousarray(b.X, dtype="float64").tobytes())
     h.update(np.ascontiguousarray(b.price, dtype="float64").tobytes())
+    for k in sorted(b.targets or {}):
+        y, e = b.targets[k]
+        h.update(_canon(list(k)).encode())
+        h.update(np.ascontiguousarray(y, dtype="float64").tobytes())
+        h.update(np.ascontiguousarray(e, dtype="int64").tobytes())
+    if b.folds is not None:
+        h.update(_canon(b.folds).encode())
     return h.hexdigest()
 
 
@@ -222,7 +232,8 @@ def fold_rows(fold, ts, y, end):
     """Fit rows: label support ends before the eval segment starts. Eval rows: support ends by eval end."""
     i = np.arange(len(ts))
     good = np.isfinite(y)
-    fit = good & (i < fold["eval_start_row"]) & (end < fold["eval_start_time"])
+    fit = good & (i >= fold.get("fit_start_row", 0)) & (i < fold["eval_start_row"]) & \
+        (end < fold["eval_start_time"])
     ev = good & (i >= fold["eval_start_row"]) & (i < fold["eval_end_row"]) & \
         (end <= fold["eval_end_time"])
     return np.nonzero(fit)[0], np.nonzero(ev)[0]
@@ -513,8 +524,10 @@ def build(b: Batch, params: dict | None = None, log=None) -> dict:
     tech = technical_screen(b)
     adm = [f for f in names if f not in tech]
     col = {f: j for j, f in enumerate(names)}
-    targets = build_targets(b.ts, b.price, p)
-    folds = inner_folds(b.ts, p)
+    targets = b.targets if b.targets is not None else build_targets(b.ts, b.price, p)
+    folds = b.folds if b.folds is not None else inner_folds(b.ts, p)
+    if b.folds is not None:
+        p["fold_source"] = "supplied by PS0/PS1 batch"
     cells = []          # per feature x target x horizon x fold
     groups_rows, syn_rows = [], []
     fold_clusters = {}
@@ -527,7 +540,7 @@ def build(b: Batch, params: dict | None = None, log=None) -> dict:
         pcl = profile_clusters(b.X, adm, seg, p, acols)
         fold_clusters[fd["fold"]] = {"dependence": dcl, "profile": pcl}
         for (tn, h), (y, end) in sorted(targets.items()):
-            classes = tn == "Y_b"
+            classes = tn.startswith("Y_b")
             fr, er = fold_rows(fd, b.ts, y, end)
             fam = []
             for f in adm:
@@ -592,6 +605,7 @@ def build(b: Batch, params: dict | None = None, log=None) -> dict:
            "train_rows": int(len(b.ts)), "train_first_time": int(b.ts[0]),
            "train_last_time": int(b.ts[-1]), "train_data_digest": train_digest(b),
            "parameters": p, "parameter_digest": pdig, "code_digest": code_digest(),
+           "provenance": b.provenance,
            "folds": folds, "n_features": len(names), "n_admissible": len(adm),
            "control_all_admissible": adm, "technical_rejects": {f: tech[f] for f in sorted(tech)},
            "fold_clusters": fold_clusters, "multiplicity": {
@@ -908,7 +922,7 @@ def write(res: dict, out_dir: str, ready: bool = True) -> dict:
         if r["status"] in ("PROVISIONAL_SURVIVOR", "EXPLORATION"):
             surv.setdefault(r["feature"], []).append(f"{r['target']}_h{r['horizon']}:{r['status']}")
     man = {k: res[k] for k in ("schema", "batch_id", "fit_scope", "train_rows", "train_first_time",
-                               "train_last_time", "train_data_digest", "parameters",
+                               "train_last_time", "train_data_digest", "provenance", "parameters",
                                "parameter_digest", "code_digest", "folds", "n_features",
                                "n_admissible", "control_all_admissible", "technical_rejects",
                                "fold_clusters", "multiplicity", "counts", "status_policy",
@@ -953,20 +967,125 @@ def batch_from_frame(df, ts_col, price_col, features, train_end, domains=None, d
                  declared=dict(declared or {}), batch_id=batch_id)
 
 
+LANE_A_TARGETS = {"Y_s": [1, 2, 3, 4, 5, 6], "Y_l": [24, 48, 72, 96, 120, 144]}
+LANE_A_PARAMS = {"fold_majority": 3, "synergy_fold_min": 4}
+
+
+def _technical_from_admissibility(m):
+    adm = str(m.get("admissibility", ""))
+    if adm.startswith("ADMISSIBLE"):
+        return None
+    u = adm.upper()
+    code = "T_LEAK_DECLARED" if "LEAK" in u else (
+        "T_UNAVAILABLE" if "UNAVAILABLE" in u or "ABSENT" in u else "T_INVALID_DECLARED")
+    return (code, "lane A admissibility: " + adm)
+
+
+def load_lane_a_batch(batch_dir: str) -> Batch:
+    """Read a lane A PS0/PS1 batch (features_train/targets_train parquet, admissible_features.json,
+    folds.json, contract.json, digests.json, READY). Verifies every artifact digest; refuses any
+    decision row at or after the contract's READ_END; nothing outside TRAIN is read."""
+    import pandas as pd
+
+    def fsha(fn):
+        with open(os.path.join(batch_dir, fn), "rb") as fh:
+            return _sha(fh.read())
+    ready = json.load(open(os.path.join(batch_dir, "READY")))
+    if ready.get("digests_sha256") != fsha("digests.json"):
+        raise PS2Error("READY does not name digests.json's digest; refusing")
+    dig = json.load(open(os.path.join(batch_dir, "digests.json")))
+    for fn, d in dig["artifacts_sha256"].items():
+        if fsha(fn) != d:
+            raise PS2Error(f"artifact digest mismatch: {fn}; refusing")
+    contract = json.load(open(os.path.join(batch_dir, "contract.json")))
+    read_end = pd.Timestamp(contract["periods"]["read_end_for_ps0_ps1"])
+    meta = json.load(open(os.path.join(batch_dir, "admissible_features.json")))["features"]
+    fx = pd.read_parquet(os.path.join(batch_dir, "features_train.parquet"))
+    tg = pd.read_parquet(os.path.join(batch_dir, "targets_train.parquet"))
+    if not (fx["row_id"].to_numpy() == tg["row_id"].to_numpy()).all() or \
+            not (fx["t_decision_utc"].to_numpy() == tg["t_decision_utc"].to_numpy()).all():
+        raise PS2Error("features and targets are not aligned on row_id/t_decision_utc")
+    ts = epoch_seconds(fx["t_decision_utc"])
+    te = int(epoch_seconds([read_end])[0])
+    if ts.max() >= te:
+        raise PS2Error("a decision row lies at or after READ_END; refusing")
+    if np.any(np.diff(ts) <= 0):
+        raise PS2Error("decision times are not strictly increasing")
+    names = [m["feature_id"] for m in meta]
+    missing = [f for f in names if f not in fx.columns]
+    if missing:
+        raise PS2Error(f"features declared but absent from features_train: {missing[:5]}")
+    X = fx[names].to_numpy(dtype="float64")
+    X = np.where(np.isfinite(X), X, np.nan)
+    targets = {}
+    for fam, hs in LANE_A_TARGETS.items():
+        for h in hs:
+            col = f"{fam}_{h}h"
+            if col in tg.columns:
+                targets[(fam, h)] = (tg[col].to_numpy(dtype="float64"), ts + h * HOUR)
+    for spec in contract["targets"]["Y_b"]["specs"]:
+        nm, T = spec["name"], int(spec["timeout_h"])
+        if nm in tg.columns:
+            targets[(nm, T)] = (tg[nm].to_numpy(dtype="float64"), ts + T * HOUR)
+    fj = json.load(open(os.path.join(batch_dir, "folds.json")))
+    folds = []
+    for f in fj["folds"]:
+        if not f.get("train_rows") or not f.get("val_rows"):
+            continue
+        vs, ve = f["val_rows"]
+        folds.append({"fold": f["name"], "fit_start_row": int(f["train_rows"][0]),
+                      "fit_end_row_laneA": int(f["train_rows"][1]),
+                      "eval_start_row": int(vs), "eval_end_row": int(ve),
+                      "eval_start_time": int(ts[vs]), "eval_end_time": int(ts[ve - 1]),
+                      "label_purge_h_laneA": f.get("label_purge_h")})
+    declared = {}
+    for m in meta:
+        t = _technical_from_admissibility(m)
+        if t:
+            declared[m["feature_id"]] = t
+    domains = {m["feature_id"]: m.get("family") or "" for m in meta}
+    prov = {"lane_a_batch": ready.get("batch"), "lane_a_ready_digests_sha256": ready["digests_sha256"],
+            "lane_a_code_commit": dig.get("code_commit"),
+            "lane_a_contract_sha256": contract.get("contract_sha256"),
+            "read_end": str(read_end), "lane_a_artifacts_sha256": dig["artifacts_sha256"],
+            "target_columns": sorted(f"{k[0]}|{k[1]}" for k in targets),
+            "fit_rule": "lane A train rows AND label support end < eval start (per target)",
+            "eval_rule": "lane A val rows AND label support end <= last val decision time"}
+    return Batch(ts=ts, X=X, names=names, price=np.zeros(len(ts)), domains=domains,
+                 declared=declared, batch_id=str(ready.get("batch")), targets=targets,
+                 folds=folds, provenance=prov)
+
+
+def run_lane_a(batch_dir, out_dir, params=None, log=None):
+    b = load_lane_a_batch(batch_dir)
+    prm = dict(LANE_A_PARAMS)
+    prm.update(params or {})
+    res = build(b, prm, log=log)
+    w = write(res, out_dir)
+    return res, w
+
+
 def main(argv=None) -> int:
     import pandas as pd
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--data", required=True, help="CSV or parquet with timestamp, price, features")
-    ap.add_argument("--ts-col", required=True)
-    ap.add_argument("--price-col", required=True)
-    ap.add_argument("--train-end", required=True, help="exclusive TRAIN boundary (timestamp)")
-    ap.add_argument("--features-json", required=True,
+    ap.add_argument("--lane-a-batch", default=None, help="lane A PS0/PS1 batch directory")
+    ap.add_argument("--data", help="CSV or parquet with timestamp, price, features")
+    ap.add_argument("--ts-col")
+    ap.add_argument("--price-col")
+    ap.add_argument("--train-end", help="exclusive TRAIN boundary (timestamp)")
+    ap.add_argument("--features-json",
                     help="JSON: {features:[...], domains:{f:g}, declared:{f:[code,detail]}}")
     ap.add_argument("--params-json", default=None)
     ap.add_argument("--batch-id", default="batch")
     ap.add_argument("--out-dir", required=True)
     ap.add_argument("--no-ready", action="store_true")
     a = ap.parse_args(argv)
+    if a.lane_a_batch:
+        params = json.load(open(a.params_json)) if a.params_json else None
+        res, w = run_lane_a(a.lane_a_batch, a.out_dir, params, log=lambda s: print(s, flush=True))
+        print(json.dumps({"counts": res["counts"], "manifest": w["manifest_canonical_sha256"],
+                          "elapsed_seconds": res["elapsed_seconds_unhashed"]}, sort_keys=True))
+        return 0
     with open(a.features_json) as fh:
         spec = json.load(fh)
     feats = spec["features"]

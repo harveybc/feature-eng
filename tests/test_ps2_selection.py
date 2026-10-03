@@ -364,3 +364,72 @@ def test_cli_end_to_end_matches_library(tmp_path, base):
                      str(tmp_path / "cli")]) == 0
     a = (out / "ps2_status.csv").read_text()
     assert (tmp_path / "cli" / "ps2_status.csv").read_text() == a
+
+
+# ------------------------------------------------------------------ lane A batch adapter
+
+def _lane_a_dir(tmp, tamper=False, late_row=False):
+    import hashlib
+    df = _frame().iloc[:N_TRAIN].copy()
+    d = tmp / "laneA"
+    d.mkdir()
+    ts = pd.DatetimeIndex(df["ts"])
+    read_end = ts[-1] + pd.Timedelta(hours=1)
+    if late_row:
+        read_end = ts[-10]
+    b = ps2.batch_from_frame(df, "ts", "close", FEATS, ts[-1] + pd.Timedelta(hours=1))
+    tg = ps2.build_targets(b.ts, b.price, dict(ps2.DEFAULT_PARAMS, **SMALL))
+    feats = [f for f in FEATS if f != "next_return_label"]
+    fx = df[feats].copy()
+    fx.insert(0, "row_id", np.arange(len(df)))
+    fx.insert(0, "t_decision_utc", ts)
+    fx.to_parquet(d / "features_train.parquet", index=False)
+    t = pd.DataFrame({"t_decision_utc": ts, "row_id": np.arange(len(df)),
+                      "Y_s_1h": tg[("Y_s", 1)][0], "Y_s_3h": tg[("Y_s", 3)][0],
+                      "Y_l_24h": tg[("Y_l", 24)][0], "Y_b_l24": tg[("Y_b", 24)][0]})
+    t.to_parquet(d / "targets_train.parquet", index=False)
+    meta = [{"feature_id": f, "family": DOMAINS.get(f, f.split("_")[0]),
+             "admissibility": "ADMISSIBLE"} for f in feats]
+    meta[feats.index("bad_declared")]["admissibility"] = "EXCLUDED_ROLE:quality_excluded"
+    json.dump({"features": meta}, open(d / "admissible_features.json", "w"))
+    n = len(df)
+    folds = []
+    for k, (vs, ve) in enumerate([(int(n * .55), int(n * .7)), (int(n * .7), int(n * .85)),
+                                  (int(n * .85), n)]):
+        folds.append({"name": f"inner_{k}", "train_rows": [0, vs - 30], "val_rows": [vs, ve],
+                      "label_purge_h": 24})
+    json.dump({"folds": folds}, open(d / "folds.json", "w"))
+    json.dump({"contract_sha256": "c", "periods": {"read_end_for_ps0_ps1": str(read_end)},
+               "targets": {"Y_b": {"specs": [{"name": "Y_b_l24", "timeout_h": 24}]}}},
+              open(d / "contract.json", "w"))
+    sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()  # noqa: E731
+    arts = {fn: sha(d / fn) for fn in sorted(os.listdir(d))}
+    json.dump({"artifacts_sha256": arts, "code_commit": "x"}, open(d / "digests.json", "w"))
+    (d / "READY").write_text(json.dumps({"batch": "batch_t", "digests_sha256": sha(d / "digests.json")}))
+    if tamper:
+        fx.loc[5, "noise_1"] = 99.0
+        fx.to_parquet(d / "features_train.parquet", index=False)
+    return d
+
+
+def test_lane_a_adapter_runs_and_maps_exclusions(tmp_path):
+    d = _lane_a_dir(tmp_path)
+    res, w = ps2.run_lane_a(str(d), str(tmp_path / "out"), dict(SMALL, fold_majority=2,
+                                                                 synergy_fold_min=3))
+    st = {(r["feature"], r["target"], r["horizon"]): r for r in res["status"]}
+    assert st[("bad_declared", "Y_s", 1)]["status"] == "TECHNICAL_REJECT"
+    assert "EXCLUDED_ROLE" in st[("bad_declared", "Y_s", 1)]["reason_detail"][0]
+    assert {k[1] for k in st} == {"Y_s", "Y_l", "Y_b_l24"}
+    assert "S_SYNERGY_PAIR" in st[("syn_a", "Y_s", 1)]["reasons"]
+    assert res["provenance"]["lane_a_batch"] == "batch_t"
+    assert (tmp_path / "out" / "READY").exists()
+    assert any(c["target"] == "Y_b_l24" and c.get("loss_name") == "logloss" for c in res["cells"])
+
+
+def test_lane_a_adapter_refuses_tampered_or_late_rows(tmp_path):
+    (tmp_path / "x").mkdir()
+    (tmp_path / "y").mkdir()
+    with pytest.raises(ps2.PS2Error, match="digest"):
+        ps2.load_lane_a_batch(str(_lane_a_dir(tmp_path / "x", tamper=True)))
+    with pytest.raises(ps2.PS2Error, match="READ_END"):
+        ps2.load_lane_a_batch(str(_lane_a_dir(tmp_path / "y", late_row=True)))
