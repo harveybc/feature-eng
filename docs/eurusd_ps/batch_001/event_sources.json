@@ -1,0 +1,117 @@
+{
+ "fxmacrodata_field_requirements": [
+  {
+   "field": "event",
+   "column": "indicator",
+   "state": "PRESENT"
+  },
+  {
+   "field": "country_currency",
+   "column": "currency",
+   "state": "PRESENT"
+  },
+  {
+   "field": "consensus",
+   "column": null,
+   "state": "ABSENT: provider payload carries no consensus/forecast (consensus_or_forecast_columns_present=[])"
+  },
+  {
+   "field": "actual",
+   "column": "val",
+   "state": "PRESENT (186 rows null)"
+  },
+  {
+   "field": "previous",
+   "column": null,
+   "state": "NOT_PROVIDED: derivable only as the prior row of the same indicator (same vintage), not the as-published previous"
+  },
+  {
+   "field": "revision",
+   "column": null,
+   "state": "ABSENT: single snapshot (acquired 2026-05-01); RP150 found 45 VINTAGE_UNDECIDABLE keys, no revision field"
+  },
+  {
+   "field": "importance",
+   "column": null,
+   "state": "ABSENT: no importance/impact field"
+  },
+  {
+   "field": "published_time",
+   "column": "announcement_datetime_utc",
+   "state": "PRESENT: OBSERVED_ACTUAL_PUBLICATION, tz-aware UTC (132 rows null)"
+  },
+  {
+   "field": "received_time",
+   "column": null,
+   "state": "FILE_GRAIN_ONLY: acquired_at 2026-05-01T23:38:43Z for the whole file; per-release receipt clock exists only in the point-in-time capture store from 2026-09-25 (45 OBSERVED + 700 AWAITED rows at 2026-10-02, all releases >= 2026-02-05)"
+  },
+  {
+   "field": "unit",
+   "column": null,
+   "state": "ABSENT: nothing in the resource states the unit of val"
+  }
+ ],
+ "fxmacrodata_train_rows": 0,
+ "fxmacrodata_span": [
+  "2024-12-12 08:30:00+00:00",
+  "2026-05-01 23:36:47+00:00"
+ ],
+ "archive_load": {
+  "rows": 121658,
+  "unparseable_local": 0,
+  "excluded_clock_undetermined": 13937,
+  "outside_eras": 0,
+  "kept_rows": 107721,
+  "valid_windows_utc": [
+   [
+    "2012-05-01 05:00:00+00:00",
+    "2018-02-01 04:00:00+00:00"
+   ],
+   [
+    "2018-03-01 05:00:00+00:00",
+    "2018-09-01 04:00:00+00:00"
+   ],
+   [
+    "2018-10-01 05:00:00+00:00",
+    "2021-04-27 03:00:00+00:00"
+   ]
+  ]
+ },
+ "archive_eras": [
+  {
+   "from": "2011-01-01",
+   "to": "2012-04-30",
+   "status": "UNDETERMINED"
+  },
+  {
+   "from": "2012-05-01",
+   "to": "2018-01-31",
+   "status": "DETERMINED",
+   "utc_offset_seconds": -18000
+  },
+  {
+   "from": "2018-02-01",
+   "to": "2018-02-28",
+   "status": "UNDETERMINED"
+  },
+  {
+   "from": "2018-03-01",
+   "to": "2018-08-31",
+   "status": "DETERMINED",
+   "tz": "America/New_York"
+  },
+  {
+   "from": "2018-09-01",
+   "to": "2018-09-30",
+   "status": "UNDETERMINED"
+  },
+  {
+   "from": "2018-10-01",
+   "to": "2021-04-30",
+   "status": "DETERMINED",
+   "tz": "America/New_York"
+  }
+ ],
+ "archive_train_releases_with_consensus": 48736,
+ "archive_last_release_utc": "2021-04-27 03:00:00+00:00"
+}

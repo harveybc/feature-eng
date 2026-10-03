@@ -1,0 +1,147 @@
+{
+ "schema": "laneA_folds.v1",
+ "decision_rows": 71734,
+ "first": "2012-05-01 00:00:00+00:00",
+ "last": "2023-12-29 22:00:00+00:00",
+ "folds": [
+  {
+   "name": "inner_2019",
+   "train_rows": [
+    0,
+    41329
+   ],
+   "val_rows": [
+    41424,
+    47637
+   ],
+   "train_n": 41329,
+   "val_n": 6213,
+   "train_time": [
+    "2012-05-01 00:00:00+00:00",
+    "2018-12-25 23:00:00+00:00"
+   ],
+   "val_time": [
+    "2019-01-01 23:00:00+00:00",
+    "2019-12-31 22:00:00+00:00"
+   ],
+   "label_purge_h": 144,
+   "val_label_rule": "validation labels whose support crosses READ_END are NaN (censored), never filled"
+  },
+  {
+   "name": "inner_2020",
+   "train_rows": [
+    0,
+    47542
+   ],
+   "val_rows": [
+    47637,
+    53867
+   ],
+   "train_n": 47542,
+   "val_n": 6230,
+   "train_time": [
+    "2012-05-01 00:00:00+00:00",
+    "2019-12-25 23:00:00+00:00"
+   ],
+   "val_time": [
+    "2020-01-01 23:00:00+00:00",
+    "2020-12-31 22:00:00+00:00"
+   ],
+   "label_purge_h": 144,
+   "val_label_rule": "validation labels whose support crosses READ_END are NaN (censored), never filled"
+  },
+  {
+   "name": "inner_2021",
+   "train_rows": [
+    0,
+    53771
+   ],
+   "val_rows": [
+    53867,
+    60086
+   ],
+   "train_n": 53771,
+   "val_n": 6219,
+   "train_time": [
+    "2012-05-01 00:00:00+00:00",
+    "2020-12-25 08:00:00+00:00"
+   ],
+   "val_time": [
+    "2021-01-03 23:00:00+00:00",
+    "2021-12-31 22:00:00+00:00"
+   ],
+   "label_purge_h": 144,
+   "val_label_rule": "validation labels whose support crosses READ_END are NaN (censored), never filled"
+  },
+  {
+   "name": "inner_2022",
+   "train_rows": [
+    0,
+    59966
+   ],
+   "val_rows": [
+    60086,
+    66325
+   ],
+   "train_n": 59966,
+   "val_n": 6239,
+   "train_time": [
+    "2012-05-01 00:00:00+00:00",
+    "2021-12-24 22:00:00+00:00"
+   ],
+   "val_time": [
+    "2022-01-02 23:00:00+00:00",
+    "2022-12-30 22:00:00+00:00"
+   ],
+   "label_purge_h": 144,
+   "val_label_rule": "validation labels whose support crosses READ_END are NaN (censored), never filled"
+  },
+  {
+   "name": "inner_2023",
+   "train_rows": [
+    0,
+    66206
+   ],
+   "val_rows": [
+    66325,
+    71734
+   ],
+   "train_n": 66206,
+   "val_n": 5409,
+   "train_time": [
+    "2012-05-01 00:00:00+00:00",
+    "2022-12-25 23:00:00+00:00"
+   ],
+   "val_time": [
+    "2023-01-01 23:00:00+00:00",
+    "2023-12-29 22:00:00+00:00"
+   ],
+   "label_purge_h": 144,
+   "val_label_rule": "validation labels whose support crosses READ_END are NaN (censored), never filled"
+  }
+ ],
+ "purge": {
+  "label_purge_h": 144,
+  "label_purge_rule": "fold-train row t kept iff t + label_purge_h < validation block start",
+  "derived_from": "max target support (Y_s, Y_l, Y_b timeouts) in elapsed hours",
+  "feature_embargo_h": 0,
+  "feature_embargo_rule": "forward-chaining folds: no training row lies after a validation row, so window support needs no embargo",
+  "max_feature_support_h": 840,
+  "target_supports_h": {
+   "Y_s_1h": 1,
+   "Y_s_2h": 2,
+   "Y_s_3h": 3,
+   "Y_s_4h": 4,
+   "Y_s_5h": 5,
+   "Y_s_6h": 6,
+   "Y_l_24h": 24,
+   "Y_l_48h": 48,
+   "Y_l_72h": 72,
+   "Y_l_96h": 96,
+   "Y_l_120h": 120,
+   "Y_l_144h": 144,
+   "Y_b_s6": 6,
+   "Y_b_l144": 144
+  }
+ }
+}

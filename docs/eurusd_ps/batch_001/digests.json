@@ -1,0 +1,30 @@
+{
+ "inputs_sha256": {
+  "base_d2.csv": "b73a25e6182c34eb84615ce78247a0661f5c59dfba9cd27963630981c26923b5",
+  "base_d3.csv": "2379cdb18b6728e92cc3131e859af0bbe50d54e020702f20a4c1858967010f56",
+  "base_d5.csv": "f483b4af6b9ecd24492c58d07a5f2695136c6170dd7244015aab1baec98126c1",
+  "base_d6.csv": "d701af612eeada01df7ab7e7009d95ff8da6aeb270ff026eea7055b3de9adc95",
+  "economic_calendar_2011_2021.csv": "5172b322bfaf7bb568a0bb37cc2f806e8bd18ed51c5703c1098c8609a6249383",
+  "eurusd_1h_lake.parquet": "84485ea308ff18d1f194d8025445f7796d9f3969eac46c784763329e3d22ac49",
+  "eurusd_5m.parquet": "c746f344ac743768e8c7f20e2e4ef3b7fb8222d96b3660f196c0a1d74039f327",
+  "fxmacrodata_announcements.parquet": "d8dd8c13ed3cb4dea4265f058ef3020eff2587a3ceb6e9eec743fc5f2ca138a0",
+  "fxmacrodata_release_calendar.parquet": "8a50bf16ef06a423015a67b777a3e5feb961891b3506c39de27535f0471db226"
+ },
+ "artifacts_sha256": {
+  "admissible_features.csv": "7e0b795e3b23d176d22d0dded55ddf726a9021395e969029dfff4dca3cf55678",
+  "admissible_features.json": "438fb732cb071ded24a5107155baabb662373ed504895984d0d8600198742d2a",
+  "batch_report.json": "11761ccca071f52dc6731935d441f507d70d3587a5ff3b97a3b754a2dfdfe855",
+  "contract.json": "96dd26539b0491e09f14d44f96dd0623d42b96aebc11e294ab56505b47a83f87",
+  "coverage_matrix.csv": "d68146edf2d5b655f2beb51ced783e7a30209df64133c43301032c8f9a160125",
+  "event_sources.json": "c2fff6ce86890ce761db52a9758592f1992fc7abb774bbf5a8c376b06ef22b7d",
+  "features_train.parquet": "bd005701247dc181c81457037cbad6e6142f8171ad8c3595f1cd489986557aa2",
+  "folds.json": "a376bec1e0614db5d93ca601be1a3d16136a6b29d408e9738b0b9e7667337c2c",
+  "inventory_columns.csv": "58a2aae135a0748dca89901ecd80d42637b8ceae69be00b84d95e51f1897cfa5",
+  "inventory_sources.csv": "4a0a4a31b5900c617423771065784ff6f187f20125eaab754f2f9b4682bfd0ae",
+  "metric_state_matrix.csv": "c80bc48bdef555070ba59c0b611622ca549bf03e275c3d038d2a8bed77e61b7c",
+  "profile_cells.csv": "b8c5785cab51ea53e30fa61cf265de61b2bab19ec6b5a4fc9cb1dd5b7dc3e7d1",
+  "targets_train.parquet": "a838b81c72a291a45dac70ab4c69415c85d7ec1888691cae38817642188e84e5",
+  "transform_variants.csv": "45fc26ef0cbe5f8fd4211052f601ed1f0c7d561d9f30f6d01abe55ed2838cd68"
+ },
+ "code_commit": "79bb09d902e092d8ecfda858af881171a7799919"
+}

@@ -1,0 +1,122 @@
+{
+ "schema": "eurusd_business_contract.v1",
+ "asset": "EURUSD",
+ "decision_grid": {
+  "frequency": "1h",
+  "timezone": "UTC",
+  "row_time": "end of the hourly UTC bar",
+  "rows": "hours in which at least one 5-minute bar exists (market open)"
+ },
+ "periods": {
+  "warmup_past_only": [
+   "2012-01-01 00:00:00+00:00",
+   "2012-05-01 00:00:00+00:00"
+  ],
+  "train": [
+   "2012-05-01 00:00:00+00:00",
+   "2024-01-01 00:00:00+00:00"
+  ],
+  "external_validation": [
+   "2024-01-01 00:00:00+00:00",
+   "2025-01-01 00:00:00+00:00"
+  ],
+  "external_test_SEALED": [
+   "2025-01-01 00:00:00+00:00",
+   "2026-01-01 00:00:00+00:00"
+  ],
+  "read_end_for_ps0_ps1": "2024-01-01 00:00:00+00:00",
+  "recipe_window_4y": [
+   "2020-01-01 00:00:00+00:00",
+   "2024-01-01 00:00:00+00:00"
+  ]
+ },
+ "targets": {
+  "Y_s": {
+   "hours": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "definition": "ln(C_asof(t+h) / C(t)), C_asof = close of last bar ending <= t+h (elapsed hours, not rows)"
+  },
+  "Y_l": {
+   "hours": [
+    24,
+    48,
+    72,
+    96,
+    120,
+    144
+   ],
+   "definition": "same as Y_s at long horizons; staleness (weekend) recorded per row"
+  },
+  "Y_b": {
+   "specs": [
+    {
+     "name": "Y_b_s6",
+     "timeout_h": 6,
+     "width_sigma_mult": 1.0
+    },
+    {
+     "name": "Y_b_l144",
+     "timeout_h": 144,
+     "width_sigma_mult": 1.0
+    }
+   ],
+   "rules": {
+    "entry": "close of the bar ending at t",
+    "barrier_width": "w = width_sigma_mult * sigma_t * sqrt(timeout_h); TP = entry*exp(+w), SL = entry*exp(-w)",
+    "path": "5-minute bars whose start >= t and whose end <= t + timeout_h (elapsed time, weekends included)",
+    "label": "+1 TP touched first, -1 SL touched first, 0 neither by timeout",
+    "intrabar_ambiguity": "both touched inside one 5-minute bar -> AMBIGUOUS, label NaN, flag kept (version v1: no tick data)",
+    "censoring": "t + timeout_h >= READ_END -> CENSORED, label NaN",
+    "costs": "none inside the label; costs belong to J_policy",
+    "tp_sl_source": "fixed rule above; never an oracle forecast"
+   },
+   "sigma": {
+    "kind": "ewma_std_of_1h_log_returns",
+    "halflife_bars": 24,
+    "min_bars": 168,
+    "available_at": "t (includes the return of the bar ending at t)"
+   }
+  },
+  "J_policy": {
+   "status": "PLACEHOLDER_NOT_CONSTRUCTED",
+   "definition": "episode objective of the RL/heuristic environment: net PnL after spread, commission and swap, subject to declared risk limits; specified by the environment contract (gym-fx / heuristic-strategy)",
+   "blocked_on": "no historical EURUSD spread series in the lake (OHLC only); environment cost contract not bound here"
+  }
+ },
+ "purge": {
+  "label_purge_h": 144,
+  "label_purge_rule": "fold-train row t kept iff t + label_purge_h < validation block start",
+  "derived_from": "max target support (Y_s, Y_l, Y_b timeouts) in elapsed hours",
+  "feature_embargo_h": 0,
+  "feature_embargo_rule": "forward-chaining folds: no training row lies after a validation row, so window support needs no embargo",
+  "max_feature_support_h": 840,
+  "target_supports_h": {
+   "Y_s_1h": 1,
+   "Y_s_2h": 2,
+   "Y_s_3h": 3,
+   "Y_s_4h": 4,
+   "Y_s_5h": 5,
+   "Y_s_6h": 6,
+   "Y_l_24h": 24,
+   "Y_l_48h": 48,
+   "Y_l_72h": 72,
+   "Y_l_96h": 96,
+   "Y_l_120h": 120,
+   "Y_l_144h": 144,
+   "Y_b_s6": 6,
+   "Y_b_l144": 144
+  }
+ },
+ "asof_join": {
+  "rule": "value usable at t iff availability_time <= t; ties at equality admitted; age = t - availability_time in elapsed hours; no backfill, no forward fill past the declared max age",
+  "time_axis": "elapsed time, never row offsets"
+ },
+ "selection_scope": "selection and threshold fitting only on inner TRAIN folds; external validation does not select; test is never read",
+ "contract_sha256": "a4b1718b84c747d134fd55da4cc789ea541021b5815e0b49df8cfd6635acdcfc"
+}
