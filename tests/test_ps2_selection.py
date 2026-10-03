@@ -483,3 +483,36 @@ def test_synergy_pair_budget_is_a_hard_cap(tmp_path):
     rules = {s["pair_rule"] for s in res["synergy"]}
     assert all(s["pairs_evaluated_in_cell"] <= 5 for s in res["synergy"])
     assert rules <= {r for r in rules if "truncated" in r}
+
+
+def test_incremental_batch_uses_digest_pinned_base(tmp_path):
+    import hashlib
+    import shutil
+    base = _lane_a_dir(tmp_path)
+    root = tmp_path / "ps1"
+    root.mkdir()
+    shutil.move(str(base), str(root / "batch_001"))
+    inc = root / "batch_002"
+    inc.mkdir()
+    fx = pd.read_parquet(root / "batch_001" / "features_train.parquet")
+    fx[["t_decision_utc", "row_id", "noise_1", "noise_2", "syn_a", "syn_b"]].rename(
+        columns=lambda c: c.replace("noise_", "x_n").replace("syn_", "x_s")).to_parquet(
+        inc / "features_train.parquet", index=False)
+    json.dump({"features": [{"feature_id": f, "family": "x", "admissibility": "ADMISSIBLE"}
+                            for f in ("x_n1", "x_n2", "x_sa", "x_sb")]},
+              open(inc / "admissible_features.json", "w"))
+    sha = lambda p: hashlib.sha256(open(p, "rb").read()).hexdigest()  # noqa: E731
+    base_d = json.loads((root / "batch_001" / "READY").read_text())["digests_sha256"]
+    json.dump({"artifacts_sha256": {fn: sha(inc / fn) for fn in sorted(os.listdir(inc))},
+               "base_batch_digests_sha256": base_d}, open(inc / "digests.json", "w"))
+    (inc / "READY").write_text(json.dumps({"batch": "batch_002",
+                                           "digests_sha256": sha(inc / "digests.json")}))
+    b = ps2.load_lane_a_batch(str(inc))
+    assert b.names == ["x_n1", "x_n2", "x_sa", "x_sb"] and len(b.folds) == 3
+    assert b.provenance["lane_a_base_batch_digests_sha256"] == base_d
+    # tampering with the base targets refuses the incremental batch
+    t = pd.read_parquet(root / "batch_001" / "targets_train.parquet")
+    t.loc[3, "Y_s_1h"] = 0.5
+    t.to_parquet(root / "batch_001" / "targets_train.parquet", index=False)
+    with pytest.raises(ps2.PS2Error, match="digest"):
+        ps2.load_lane_a_batch(str(inc))

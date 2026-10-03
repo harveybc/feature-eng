@@ -1017,11 +1017,42 @@ def load_lane_a_batch(batch_dir: str) -> Batch:
     for fn, d in dig["artifacts_sha256"].items():
         if fsha(fn) != d:
             raise PS2Error(f"artifact digest mismatch: {fn}; refusing")
-    contract = json.load(open(os.path.join(batch_dir, "contract.json")))
+    base_dir = batch_dir
+    base_digest = None
+    if not os.path.isfile(os.path.join(batch_dir, "contract.json")):
+        # incremental batch: contract, folds and targets live in the digest-pinned base batch
+        base_digest = dig.get("base_batch_digests_sha256")
+        if not base_digest:
+            rep = json.load(open(os.path.join(batch_dir, "batch_report.json")))
+            base_digest = ((rep.get("base_batch") or {}).get("ready") or {}).get("digests_sha256")
+        if not base_digest:
+            raise PS2Error("batch has no contract.json and names no base batch; refusing")
+        parent = os.path.dirname(os.path.abspath(batch_dir))
+        hits = []
+        for d in sorted(os.listdir(parent)):
+            rp = os.path.join(parent, d, "READY")
+            if os.path.isfile(rp):
+                try:
+                    if json.load(open(rp)).get("digests_sha256") == base_digest:
+                        hits.append(os.path.join(parent, d))
+                except ValueError:
+                    continue
+        if len(hits) != 1:
+            raise PS2Error(f"base batch with digests {base_digest[:12]} not found exactly once")
+        base_dir = hits[0]
+        bdig = json.load(open(os.path.join(base_dir, "digests.json")))
+        with open(os.path.join(base_dir, "digests.json"), "rb") as fh:
+            if _sha(fh.read()) != base_digest:
+                raise PS2Error("base digests.json does not match the pinned digest; refusing")
+        for fn in ("contract.json", "folds.json", "targets_train.parquet"):
+            with open(os.path.join(base_dir, fn), "rb") as fh:
+                if _sha(fh.read()) != bdig["artifacts_sha256"][fn]:
+                    raise PS2Error(f"base artifact digest mismatch: {fn}; refusing")
+    contract = json.load(open(os.path.join(base_dir, "contract.json")))
     read_end = pd.Timestamp(contract["periods"]["read_end_for_ps0_ps1"])
     meta = json.load(open(os.path.join(batch_dir, "admissible_features.json")))["features"]
     fx = pd.read_parquet(os.path.join(batch_dir, "features_train.parquet"))
-    tg = pd.read_parquet(os.path.join(batch_dir, "targets_train.parquet"))
+    tg = pd.read_parquet(os.path.join(base_dir, "targets_train.parquet"))
     if not (fx["row_id"].to_numpy() == tg["row_id"].to_numpy()).all() or \
             not (fx["t_decision_utc"].to_numpy() == tg["t_decision_utc"].to_numpy()).all():
         raise PS2Error("features and targets are not aligned on row_id/t_decision_utc")
@@ -1053,7 +1084,7 @@ def load_lane_a_batch(batch_dir: str) -> Batch:
         nm, T = spec["name"], int(spec["timeout_h"])
         if nm in tg.columns:
             targets[(nm, T)] = (tg[nm].to_numpy(dtype="float64"), ts + T * HOUR)
-    fj = json.load(open(os.path.join(batch_dir, "folds.json")))
+    fj = json.load(open(os.path.join(base_dir, "folds.json")))
     folds = []
     for f in fj["folds"]:
         if not f.get("train_rows") or not f.get("val_rows"):
@@ -1073,6 +1104,7 @@ def load_lane_a_batch(batch_dir: str) -> Batch:
     prov = {"lane_a_batch": ready.get("batch"), "lane_a_ready_digests_sha256": ready["digests_sha256"],
             "lane_a_code_commit": dig.get("code_commit"),
             "lane_a_contract_sha256": contract.get("contract_sha256"),
+            "lane_a_base_batch_digests_sha256": base_digest,
             "read_end": str(read_end), "lane_a_artifacts_sha256": dig["artifacts_sha256"],
             "target_columns": sorted(f"{k[0]}|{k[1]}" for k in targets),
             "selector_episode_sources": selector,
