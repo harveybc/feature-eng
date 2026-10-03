@@ -181,3 +181,31 @@ def test_event_features_are_nan_outside_source_coverage_not_zero():
     early = d - pd.Timedelta(hours=24) < vw[0][0]
     assert f.loc[early, "ev.USD.high.count_24h"].isna().all()
     assert f.loc[(~early) & (~after), "ev.USD.high.count_24h"].notna().all()
+
+
+def test_daily_covariates_respect_availability_and_read_end(tmp_path):
+    from tools.eurusd_ps import covariates as CV
+    dates = pd.date_range("2023-12-01", "2024-02-01", freq="B", tz="America/Chicago")
+    df = pd.DataFrame({"Date": dates, "Close": np.where(dates >= pd.Timestamp("2024-01-01", tz="America/Chicago"), 1e9, 10.0 + np.arange(len(dates)))})
+    p = tmp_path / "y.parquet"; df.to_parquet(p)
+    s = CV.yahoo_series(str(p))
+    assert s["avail_utc"].max() < C.READ_END and s["close"].max() < 1e8      # test/validation values never read
+    d = pd.date_range("2023-12-04 00:00", "2023-12-06 00:00", freq="h", tz="UTC")
+    f, _ = CV.daily_features("yh.x", s, "close", d, "yahoo", "lic", "src", levels=True)
+    # the bar of trading date 2023-12-04 becomes usable only at 2023-12-05 00:00 UTC
+    assert f.loc[pd.Timestamp("2023-12-04 23:00", tz="UTC"), "yh.x.level"] == s.loc[s["date"] == "2023-12-01", "close"].iloc[0]
+    assert f.loc[pd.Timestamp("2023-12-05 00:00", tz="UTC"), "yh.x.level"] == s.loc[s["date"] == "2023-12-04", "close"].iloc[0]
+
+
+def test_calendar_columns_are_selector_episode_sources_not_model_inputs():
+    from tools.eurusd_ps import inventory as INV
+    d = pd.date_range("2021-04-01", "2021-04-10", freq="h", tz="UTC")
+    ev = pd.DataFrame({"avail_utc": pd.date_range("2021-04-01 12:30", periods=10, freq="12h", tz="UTC")})
+    ev["group"] = "EUR"; ev["volatility"] = F.TIERS["high"]; ev["key"] = "Germany|GDP"; ev["surprise_z"] = 1.0; ev["revision_z"] = 0.0
+    _, meta, _ = F.event_features(ev, d, top_k=1)
+    assert meta and all(m["role"] == "SELECTOR_EPISODE_SOURCE" for m in meta)
+    _, cm = F.calendar_features(d)
+    assert all(m["role"] == "feature" for m in cm)          # known time encodings unaffected
+    for fam in ("calendar_archive", "fxmacrodata_announcements", "fxmacrodata_calendar", "pit_capture"):
+        assert INV.source_role(fam) == "SELECTOR_EPISODE_SOURCE"
+    assert INV.source_role("yahoo_daily") == "MODEL_INPUT_CANDIDATE_SOURCE"

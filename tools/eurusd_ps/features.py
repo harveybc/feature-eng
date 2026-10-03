@@ -140,6 +140,10 @@ def calendar_features(decision: pd.DatetimeIndex) -> tuple[pd.DataFrame, list[di
 
 ARCHIVE_SRC = "feature-eng:tests/data/economic_calendar_2011_2021.csv"
 ARCHIVE_LIC = "UNKNOWN_PROVENANCE (no provenance sidecar; registered in data-gov with 12 absences)"
+# Plan update 02434903 (2026-10-03): the economic calendar locates PS3-C episodes
+# (treatments, controls, availability) and is NOT a model input; calendar as
+# input is I11, DEFERRED_FINAL_OPTIONAL. Every column built from it carries:
+SELECTOR_ROLE = "SELECTOR_EPISODE_SOURCE"
 GROUPS = {"USD": ["United States"], "EUR": ["Euro Zone", "Germany", "France", "Italy", "Spain"]}
 TIERS = {"high": "High Volatility Expected", "moderate": "Moderate Volatility Expected", "low": "Low Volatility Expected"}
 
@@ -197,8 +201,8 @@ def event_features(ev: pd.DataFrame, decision: pd.DatetimeIndex, top_k: int = 8,
             f[f"{p}.count_24h"] = cnt
             _, age = asof_last(decision, sub["avail_utc"], pd.Series(np.zeros(len(sub))))
             f[f"{p}.hours_since"] = np.minimum(age, 168.0)
-            meta.append(_meta(f"{p}.count_24h", "event_calendar", ARCHIVE_SRC, "count", 24, evt_t, av_t, "releases in (t-24h, t]", ARCHIVE_LIC))
-            meta.append(_meta(f"{p}.hours_since", "event_calendar", ARCHIVE_SRC, "hours", 168, evt_t, av_t, "min(168, hours since last release)", ARCHIVE_LIC))
+            meta.append(_meta(f"{p}.count_24h", "event_calendar", ARCHIVE_SRC, "count", 24, evt_t, av_t, "releases in (t-24h, t]", ARCHIVE_LIC, role=SELECTOR_ROLE))
+            meta.append(_meta(f"{p}.hours_since", "event_calendar", ARCHIVE_SRC, "hours", 168, evt_t, av_t, "min(168, hours since last release)", ARCHIVE_LIC, role=SELECTOR_ROLE))
             if tier == "low":
                 continue
             wc = sub[sub["surprise_z"].notna()]
@@ -212,7 +216,7 @@ def event_features(ev: pd.DataFrame, decision: pd.DatetimeIndex, top_k: int = 8,
             for nm, u, tr in (("last_surprise_z", "z", "causal z of (actual-forecast), age<=168h"),
                               ("sum_surprise_z_24h", "z", "sum of clipped surprise z in (t-24h,t]"),
                               ("last_revision_z", "z", "causal z of (previous - prior actual), age<=168h")):
-                meta.append(_meta(f"{p}.{nm}", "event_surprise", ARCHIVE_SRC, u, 168, evt_t, av_t, tr, ARCHIVE_LIC))
+                meta.append(_meta(f"{p}.{nm}", "event_surprise", ARCHIVE_SRC, u, 168, evt_t, av_t, tr, ARCHIVE_LIC, role=SELECTOR_ROLE))
     # per-description features for the most frequent high-impact releases per group (counts measured in the archive's TRAIN part)
     for g in GROUPS:
         hi = ev[(ev["group"] == g) & (ev["volatility"] == TIERS["high"]) & ev["surprise_z"].notna()]
@@ -224,7 +228,7 @@ def event_features(ev: pd.DataFrame, decision: pd.DatetimeIndex, top_k: int = 8,
             v, _ = asof_last(decision, sub["avail_utc"], sub["surprise_z"], max_age_h=24 * 35)
             f[fid] = v
             meta.append(_meta(fid, "event_surprise_by_release", ARCHIVE_SRC, "z", 24 * 35, evt_t, av_t,
-                              f"last causal surprise z of '{key}' within 35 days ({int(n)} releases with consensus)", ARCHIVE_LIC))
+                              f"last causal surprise z of '{key}' within 35 days ({int(n)} releases with consensus)", ARCHIVE_LIC, role=SELECTOR_ROLE))
     sup = {m["feature_id"]: m["support_h"] for m in meta}
     for col in f.columns:
         f.loc[~coverage_mask(decision, sup[col], valid_windows), col] = np.nan

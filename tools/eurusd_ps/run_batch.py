@@ -157,10 +157,11 @@ def main(argv=None):
 
     # admissibility
     for m in meta:
-        if m["role"] != "feature":
+        if m["role"] == F.SELECTOR_ROLE:
+            m["admissibility"] = ("SELECTOR_EPISODE_SOURCE: not a model-input candidate (I11 DEFERRED_FINAL_OPTIONAL); "
+                                  "profiled for PS3-C episode construction; archive clock measured, availability = scheduled+1min")
+        elif m["role"] != "feature":
             m["admissibility"] = "EXCLUDED_ROLE:" + m["role"]
-        elif m["source"] == F.ARCHIVE_SRC:
-            m["admissibility"] = "ADMISSIBLE_WITH_DECLARED_ASSUMPTION (archive clock measured; availability = scheduled+1min; provenance unknown)"
         else:
             m["admissibility"] = "ADMISSIBLE"
         x = X[m["feature_id"]]
@@ -171,6 +172,8 @@ def main(argv=None):
     t0 = time.time()
     lake_rows = [INV.classify_lake_source(r) for r in INV.scan_lake_metadata(os.path.join(a.inputs, "fd_meta"))]
     src_rows = lake_rows + INV.non_lake_sources()
+    for r in src_rows:
+        r["role"] = INV.source_role(r.get("family", ""))
     fxa = pd.read_parquet(os.path.join(a.inputs, "fxmacrodata_announcements.parquet"))
     fxc = pd.read_parquet(os.path.join(a.inputs, "fxmacrodata_release_calendar.parquet"))
     fxa_tr = (fxa["announcement_datetime_utc"] >= C.TRAIN_START) & (fxa["announcement_datetime_utc"] < C.TRAIN_END)
@@ -263,6 +266,8 @@ def main(argv=None):
         "clock_5m": clock, "clock_lake_1h": clock_1h, "reconciliation_pinned": recon,
         "denominators": {"sources_inventoried": len(src_rows), "source_columns_inventoried": len(col_rows),
                          "features": len(meta), "features_admissible": int(sum(m["admissibility"].startswith("ADMISSIBLE") for m in meta)),
+                         "model_input_candidates": int(sum(m["role"] == "feature" for m in meta)),
+                         "selector_episode_source_columns": int(sum(m["role"] == F.SELECTOR_ROLE for m in meta)),
                          "feature_families": fam_n, "metrics_per_feature": len(P.METRICS), "metric_cells": len(cdf),
                          "metric_cells_by_state": state_counts, "folds": len(folds), "decision_rows_train": int(len(decision)),
                          "transform_variants": len(tv_rows)},

@@ -71,6 +71,19 @@ def scan_lake_metadata(meta_root: str) -> list[dict]:
     return rows
 
 
+SELECTOR_FAMILIES = {"calendar_archive", "fxmacrodata_announcements", "fxmacrodata_calendar", "pit_capture", "fred_release_proxy"}
+
+
+def source_role(family: str) -> str:
+    if family in SELECTOR_FAMILIES:
+        return "SELECTOR_EPISODE_SOURCE"
+    if family in ("eurusd_price_pinned", "eurusd_price_raw"):
+        return "RECONCILIATION_ONLY"
+    if family in ("crypto", "us_equity_alt"):
+        return "NOT_APPLICABLE_TO_EURUSD"
+    return "MODEL_INPUT_CANDIDATE_SOURCE"
+
+
 def classify_lake_source(r: dict) -> dict:
     """Decide the lane-A disposition of a lake source for the EURUSD manifest."""
     p, prov = r["path"], r["provider"]
