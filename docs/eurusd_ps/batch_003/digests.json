@@ -1,0 +1,33 @@
+{
+ "inputs_sha256": {
+  "fut_disagg_txt_2010.zip": "fef4827fbaa1a2a72ad3fe7ef0ca659ee4c85bc6857fdc096f4320b8a096322b",
+  "fut_disagg_txt_2011.zip": "9e47499610532150edddc1f43f8fc37cd87718d70022a6db9284f0152f815cf3",
+  "fut_disagg_txt_2012.zip": "79db37521556a5aa8acc84bd3ca86aa6bf80fb4c5d4a8013dfb215fc760f1e95",
+  "fut_disagg_txt_2013.zip": "c9bc647013b9b2f1c18e96fdaed95dc94af57c3a949e9fe7dd94aee06f3837bc",
+  "fut_disagg_txt_2014.zip": "a29872d680f595078062130274374ecb38dc2a24d86f1531a59f52b8abca7eea",
+  "fut_disagg_txt_2015.zip": "36aacb4389831a89996ba5366c91eedeaa32a55abca8265325bc52d74b06ca34",
+  "fut_disagg_txt_2016.zip": "50f52674fd924d24c794b921c29342be7d35cbe0a241ac823925ccf43ca1a6d2",
+  "fut_disagg_txt_2017.zip": "6fc467b989df527a4fbea4ba07185e8951f35cb72563f156488904a37c100e43",
+  "fut_disagg_txt_2018.zip": "df4bf7d72e8984d6ea04087f793c9f2bf3503ea8c2149f4b01eedeef4fbe40a8",
+  "fut_disagg_txt_2019.zip": "942a438bcc6f66e65aaf594a1a1fdb8c1505fe4a0feece77a1fd97270317e753",
+  "fut_disagg_txt_2020.zip": "0aa03c0fd6360f56b6897b6eaff30e8dba774c826bf93cac61598312e19bd1cd",
+  "fut_disagg_txt_2021.zip": "12d5d49a8963367fd3439050e3e20e6a5338757dfa083432795c5556827ff8ae",
+  "fut_disagg_txt_2022.zip": "74205d75d4d7b75a9f4159ef2e6abed53eeb4771a74e5a4bf78bc0451410ab7f",
+  "fut_disagg_txt_2023.zip": "9fe75dba0256819d476bb0d01f9e8e5ac6ec2c4390f609a7e3259e85796b79ce",
+  "eurusd_5m.parquet": "c746f344ac743768e8c7f20e2e4ef3b7fb8222d96b3660f196c0a1d74039f327",
+  "regime_detector.py": "6241ee3e3ba3c69cfcbc489ce08c842a86b43211789ffcf6867e6296b85af19e"
+ },
+ "artifacts_sha256": {
+  "admissible_features.csv": "0c78507059e7b150af2a264f98f03441bb5e5009e32b7b2ed086c2658340d8f6",
+  "admissible_features.json": "151f05a39e23f825ae6eac59e70e44a065b6b5c51960045a1110f358de89ea66",
+  "batch_report.json": "5750195ca47919010fec0f385b4c60dc0c67daa2078279940fe491b65ace91de",
+  "coverage_matrix.csv": "cb2546ffb7c57a88c05ed393bdd094bced086d5df776b9030faff7ed84de2142",
+  "custody.csv": "2fcf0b1c9cb3961b59be7623e1e64a8e53d3d759beb3dcb3c5cd4b77bfb675b1",
+  "features_train.parquet": "fd0b4423db991cfb05cd4f9357a378648579d4c11552a1cac413ed711c3520bc",
+  "inventory_columns.csv": "8b6d871409ef4ba031f24e1362181f8b57dcf3b376d4b00b859f71b180b2a4c9",
+  "metric_state_matrix.csv": "6dba2f11ea297cecfaa4034a101a8ab42be8576a875afc4d11f7ed4b296fa897",
+  "profile_cells.csv": "0b5d8c2f435f691047b0fe2b9e0c53e259506bba8ffdf8f412185098f1e5f506"
+ },
+ "code_commit": "42272ad7f288d39d5b9f84c63bb219ef0b9a7b19",
+ "base_batch_digests_sha256": "449f4c3d5e992ee4f3221c7e6ac3078167fe5e31063a3d659fb2814db1c07eb4"
+}
