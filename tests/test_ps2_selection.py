@@ -308,3 +308,59 @@ def test_fs16_holds_across_seeds_and_noise_pairs_rarely_promoted(tmp_path, seed)
     noise_pairs = [r for r in res["status"] if r["feature"].startswith("noise")
                    and any(o.startswith("noise") for o in r.get("synergy_partners", []))]
     assert len(noise_pairs) <= 2
+
+
+# ------------------------------------------------------------------ contracts and CLI
+
+def test_not_evaluated_is_not_zero_and_not_reject(tmp_path):
+    df = _frame()
+    df.loc[df.index < int(N_TRAIN * 0.9), "noise_6"] = np.nan  # almost no TRAIN support
+    res, _, _ = _run(df, tmp_path, "sparse", write=False)
+    cs = [c for c in res["cells"] if c["feature"] == "noise_6"]
+    assert cs and all(c["cell_status"] == "NOT_EVALUATED" for c in cs if c["fold"] == "inner_1")
+    for c in cs:
+        if c["cell_status"] == "NOT_EVALUATED":
+            assert "oof_delta" not in c and "spearman" not in c and c["cell_reason"]
+    for r in res["status"]:
+        if r["feature"] == "noise_6":
+            assert r["status"] != "TECHNICAL_REJECT"
+
+
+def test_barrier_label_support_inside_train_and_classes():
+    df = _frame()
+    b = ps2.batch_from_frame(df, "ts", "close", FEATS, _train_end(df), DOMAINS, DECLARED)
+    p = dict(ps2.DEFAULT_PARAMS, **SMALL)
+    y, end = ps2.build_targets(b.ts, b.price, p)[("Y_b", 24)]
+    fin = np.isfinite(y)
+    assert set(np.unique(y[fin])) <= {-1.0, 0.0, 1.0} and len(np.unique(y[fin])) == 3
+    assert end[fin].max() <= b.ts[-1]
+    assert not fin[: p["barrier"]["min_vol_returns"]].any()  # no label without past volatility
+
+
+def test_ready_marker_names_the_manifest_digest(base):
+    _, out, w, _ = base
+    ready = json.loads((out / "READY").read_text())
+    assert ready["manifest_canonical_sha256"] == w["manifest_canonical_sha256"]
+    man = json.loads((out / "ps2_manifest.json").read_text())
+    assert ps2._sha(ps2._canon(man).encode()) == w["manifest_canonical_sha256"]
+    for fn, d in man["output_sha256"].items():
+        assert ps2._sha((out / fn).read_bytes()) == d
+    assert not (out / ".READY.tmp").exists()
+
+
+def test_cli_end_to_end_matches_library(tmp_path, base):
+    _, out, _, _ = base
+    df = _frame()
+    csv = tmp_path / "d.csv"
+    df.to_csv(csv, index=False)
+    spec = tmp_path / "f.json"
+    spec.write_text(json.dumps({"features": FEATS, "domains": DOMAINS,
+                                "declared": {k: list(v) for k, v in DECLARED.items()}}))
+    prm = tmp_path / "p.json"
+    prm.write_text(json.dumps(SMALL))
+    assert ps2.main(["--data", str(csv), "--ts-col", "ts", "--price-col", "close",
+                     "--train-end", str(_train_end(df)), "--features-json", str(spec),
+                     "--params-json", str(prm), "--batch-id", "t", "--out-dir",
+                     str(tmp_path / "cli")]) == 0
+    a = (out / "ps2_status.csv").read_text()
+    assert (tmp_path / "cli" / "ps2_status.csv").read_text() == a

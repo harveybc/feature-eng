@@ -972,7 +972,7 @@ def main(argv=None) -> int:
     feats = spec["features"]
     cols = [a.ts_col, a.price_col] + feats
     df = pd.read_parquet(a.data, columns=cols) if a.data.endswith(".parquet") else \
-        pd.read_csv(a.data, usecols=cols)
+        pd.read_csv(a.data, usecols=cols, float_precision="round_trip")
     b = batch_from_frame(df, a.ts_col, a.price_col, feats, a.train_end, spec.get("domains"),
                          {k: tuple(v) for k, v in (spec.get("declared") or {}).items()},
                          a.batch_id)
