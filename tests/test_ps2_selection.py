@@ -475,3 +475,11 @@ def test_ps2_batch_v1_contract_for_extractor_lanes(tmp_path):
         (out / "batch_manifest.json").read_bytes()).hexdigest()
     lc = json.loads((out / "ps2_candidates_lane_c.json").read_text())
     assert {c["feature_id"] for c in lc["candidates"]} == surv
+
+
+def test_synergy_pair_budget_is_a_hard_cap(tmp_path):
+    res, _, _ = _run(_frame(), tmp_path, "cap", {"synergy_max_pairs": 5, "synergy_top_k": 2},
+                     write=False)
+    rules = {s["pair_rule"] for s in res["synergy"]}
+    assert all(s["pairs_evaluated_in_cell"] <= 5 for s in res["synergy"])
+    assert rules <= {r for r in rules if "truncated" in r}

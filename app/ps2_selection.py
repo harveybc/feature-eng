@@ -689,13 +689,15 @@ def _synergy(b, adm, col, fd, tn, h, y, fr, er, p, cells, classes):
         top = sorted(adm, key=lambda f: (-mine.get(f, -np.inf), f))[: p["synergy_top_k"]]
         ts_ = set(top)
         dom = {f: domain_of(f, b.domains) for f in adm}
-        keep = [pr for pr in pairs if (pr[0] in ts_ and pr[1] in ts_) or dom[pr[0]] == dom[pr[1]]]
-        ks = set(keep)
-        rest = sorted((pr for pr in pairs if pr not in ks),
-                      key=lambda pr: _u(p["exploration_seed"], pr[0] + "|" + pr[1]))
-        keep += rest[: max(0, p["synergy_max_pairs"] - len(keep))]
-        pairs = keep
-        rule = "top_k by fold OOF delta + same-domain pairs + hash-ordered fill to synergy_max_pairs"
+        hk = lambda pr: _u(p["exploration_seed"], pr[0] + "|" + pr[1])  # noqa: E731
+        tier1 = [pr for pr in pairs if pr[0] in ts_ and pr[1] in ts_]
+        t1 = set(tier1)
+        tier2 = sorted((pr for pr in pairs if pr not in t1 and dom[pr[0]] == dom[pr[1]]), key=hk)
+        t2 = set(tier2)
+        tier3 = sorted((pr for pr in pairs if pr not in t1 and pr not in t2), key=hk)
+        pairs = (tier1 + tier2 + tier3)[: p["synergy_max_pairs"]]
+        rule = ("top_k by fold OOF delta, then hash-ordered same-domain pairs, then hash-ordered "
+                "other pairs, truncated at synergy_max_pairs")
     yf, ye = _yb_reg(y[fr]), _yb_reg(y[er])
     base = float(np.mean((ye - yf.mean()) ** 2))
     Z = {}
@@ -792,10 +794,14 @@ def _decide(b, names, adm, tech, cells, groups_rows, syn_rows, folds, targets, p
                     reasons.append("S_OOF_UTILITY")
                 else:
                     reasons.append("LP_OOF_GAIN_NOT_CALIBRATED")
+            qs_s = [c for c in meas if c["spearman_q"] is not None and c["spearman_q"] <= p["fdr_q"]]
             qs = [c for c in meas if (c["spearman_q"] is not None and c["spearman_q"] <= p["fdr_q"])
                   or (c["mi_q"] is not None and c["mi_q"] <= p["fdr_q"])]
             if meas and len(qs) >= min(maj, len(meas)):
                 reasons.append("S_ASSOC_ROBUST")
+                # monotone (Spearman) versus dependence seen only by MI (e.g. volatility vs |return|)
+                reasons.append("S_ASSOC_MONOTONE" if len(qs_s) >= min(maj, len(meas))
+                               else "S_ASSOC_MI_ONLY")
             partners = {o: fl for o, fl in syn.get((f, tn, h), {}).items()
                         if len(fl) >= min(int(p["synergy_fold_min"]), len(folds))}
             if partners:
