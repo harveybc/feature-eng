@@ -167,3 +167,17 @@ def test_transform_variant_prefix_test_separates_causal_from_global():
     assert V.prefix_test(V.IMPLS["tv.kalman_local_level_smoother"], x, probes)["status"] == "PREFIX_VIOLATION_MEASURED"
     assert V.prefix_test(V.IMPLS["tv.hilbert_trailing_lastsample"], x, probes)["status"] == "PREFIX_INVARIANT_MEASURED"
     assert V.prefix_test(V.IMPLS["tv.hilbert_global"], x, probes)["status"] == "PREFIX_VIOLATION_MEASURED"
+
+
+def test_event_features_are_nan_outside_source_coverage_not_zero():
+    d = pd.date_range("2021-04-01", "2021-05-15", freq="h", tz="UTC")
+    ev = pd.DataFrame({"avail_utc": pd.date_range("2021-04-01 12:30", "2021-04-26 12:30", freq="12h", tz="UTC")})
+    ev["group"] = "USD"; ev["volatility"] = F.TIERS["high"]; ev["key"] = "United States|NFP"
+    ev["surprise_z"] = 1.0; ev["revision_z"] = 0.0
+    vw = [(pd.Timestamp("2021-04-01", tz="UTC"), pd.Timestamp("2021-04-27", tz="UTC"))]
+    f, meta, _ = F.event_features(ev, d, top_k=1, valid_windows=vw)
+    after = d > vw[0][1]
+    assert f.loc[after].isna().all().all()                       # no invented 0 counts / 168 h ages
+    early = d - pd.Timedelta(hours=24) < vw[0][0]
+    assert f.loc[early, "ev.USD.high.count_24h"].isna().all()
+    assert f.loc[(~early) & (~after), "ev.USD.high.count_24h"].notna().all()

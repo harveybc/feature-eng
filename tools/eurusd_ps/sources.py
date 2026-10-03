@@ -159,6 +159,23 @@ def load_archive_calendar(path: str, eras: list[dict]) -> tuple[pd.DataFrame, di
     a = a[a["scheduled_utc"].notna()].copy()
     assert (a["scheduled_utc"] < C.READ_END).all()
     stats["kept_rows"] = int(len(a))
+    # complete-coverage windows in UTC: each DETERMINED era, start shifted +5 h and end +4 h (local midnight
+    # bounds converted conservatively), the last one cut at the last release present in the bytes
+    win = []
+    for e in eras:
+        if e["status"] != "DETERMINED":
+            continue
+        s0 = pd.Timestamp(e["from"], tz="UTC") + pd.Timedelta(hours=5)
+        s1 = pd.Timestamp(e["to"], tz="UTC") + pd.Timedelta(days=1, hours=4)
+        win.append([s0, min(s1, a["scheduled_utc"].max())])
+    merged = []
+    for w in sorted(win):
+        if merged and w[0] <= merged[-1][1] + pd.Timedelta(hours=10):
+            merged[-1][1] = max(merged[-1][1], w[1])
+        else:
+            merged.append(w)
+    stats["valid_windows_utc"] = [[str(x), str(y)] for x, y in merged]
+    a.attrs["valid_windows"] = [(x, y) for x, y in merged]
     return a.reset_index(drop=True), stats
 
 

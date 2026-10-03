@@ -57,12 +57,26 @@ def reconcile_pinned(hourly: pd.DataFrame, inputs: str) -> dict:
         st = pd.to_datetime(d["DATE_TIME"]).dt.tz_localize("UTC")
         d = d[st + pd.Timedelta(hours=1) <= C.READ_END]
         res = {"sha256": sha(p), "rows": int(len(d))}
-        for lab, off in (("as_UTC_bar_start", 1), ("as_UTC_bar_end", 0), ("as_UTC_start_minus1h", 2)):
+        res["offsets"] = {}
+        pr = np.log(d["CLOSE"].to_numpy(float))
+        for off in range(-6, 7):
+            # off = hours added to the pinned stamp to obtain the lake-derived bar END
             key = pd.to_datetime(d["DATE_TIME"]).dt.tz_localize("UTC") + pd.Timedelta(hours=off)
             j = hourly.reindex(pd.DatetimeIndex(key))
             m = j["close"].notna().to_numpy()
-            eq = np.isclose(j["close"].to_numpy()[m], d["CLOSE"].to_numpy()[m], atol=1e-5)
-            res[lab] = {"matched_rows": int(m.sum()), "close_equal_share": float(eq.mean()) if m.sum() else None}
+            if m.sum() < 100:
+                res["offsets"][off] = {"matched_rows": int(m.sum())}; continue
+            lc = np.log(j["close"].to_numpy(float))
+            dr_p, dr_l = np.diff(pr), np.diff(lc)
+            mm = np.isfinite(dr_p) & np.isfinite(dr_l)
+            pips = np.abs(j["close"].to_numpy(float)[m] - d["CLOSE"].to_numpy(float)[m]) * 1e4
+            res["offsets"][off] = {"matched_rows": int(m.sum()), "return_corr": float(np.corrcoef(dr_p[mm], dr_l[mm])[0, 1]),
+                                   "close_equal_share_1e-5": float(np.mean(pips < 0.1)), "median_abs_close_diff_pips": float(np.median(pips)),
+                                   "p95_abs_close_diff_pips": float(np.percentile(pips, 95))}
+        best = max((k for k, v in res["offsets"].items() if "return_corr" in v), key=lambda k: res["offsets"][k]["return_corr"], default=None)
+        res["best_offset_h"] = best
+        res["reading"] = (None if best is None else
+                          ("pinned stamp = UTC bar START (lake bar end = stamp + 1 h)" if best == 1 else f"best alignment at stamp + {best} h"))
         out["files"][nm] = res
     return out
 
@@ -119,8 +133,9 @@ def main(argv=None):
     feats.append(cf); meta += cm
     t0 = time.time()
     arch, arch_stats = S.load_archive_calendar(os.path.join(a.inputs, "economic_calendar_2011_2021.csv"), ARCHIVE_ERAS)
+    vw = arch.attrs["valid_windows"]
     ev = F.archive_event_table(arch)
-    ef, em, _ = F.event_features(ev, decision)
+    ef, em, _ = F.event_features(ev, decision, valid_windows=vw)
     build_s["events"] = time.time() - t0
     feats.append(ef); meta += em
     X = pd.concat(feats, axis=1)

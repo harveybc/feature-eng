@@ -169,7 +169,22 @@ def archive_event_table(a: pd.DataFrame, latency_min: int = 1) -> pd.DataFrame:
     return e
 
 
-def event_features(ev: pd.DataFrame, decision: pd.DatetimeIndex, top_k: int = 8) -> tuple[pd.DataFrame, list[dict], list[dict]]:
+def coverage_mask(decision: pd.DatetimeIndex, support_h: float, valid_windows) -> np.ndarray:
+    """True iff the whole look-back (t - support_h, t] lies inside one window in
+    which the source is known to be complete. Outside it a count of 0 or an
+    age of 168 h would be invented, so the value is NaN instead."""
+    d = pd.DatetimeIndex(decision)
+    lo = d - pd.Timedelta(hours=support_h)
+    ok = np.zeros(len(d), dtype=bool)
+    for a, b in valid_windows:
+        ok |= (lo >= a) & (d <= b)
+    return ok
+
+
+def event_features(ev: pd.DataFrame, decision: pd.DatetimeIndex, top_k: int = 8,
+                   valid_windows=None) -> tuple[pd.DataFrame, list[dict], list[dict]]:
+    if valid_windows is None:
+        valid_windows = [(ev["avail_utc"].min(), ev["avail_utc"].max())]
     f = pd.DataFrame(index=decision)
     meta, inv = [], []
     evt_t = "scheduled release instant (archive clock, measured era) "
@@ -210,4 +225,9 @@ def event_features(ev: pd.DataFrame, decision: pd.DatetimeIndex, top_k: int = 8)
             f[fid] = v
             meta.append(_meta(fid, "event_surprise_by_release", ARCHIVE_SRC, "z", 24 * 35, evt_t, av_t,
                               f"last causal surprise z of '{key}' within 35 days ({int(n)} releases with consensus)", ARCHIVE_LIC))
+    sup = {m["feature_id"]: m["support_h"] for m in meta}
+    for col in f.columns:
+        f.loc[~coverage_mask(decision, sup[col], valid_windows), col] = np.nan
+    for m in meta:
+        m["note"] = (m["note"] + "; " if m["note"] else "") + "NaN where (t-support, t] leaves the source's complete-coverage windows"
     return f, meta, inv
