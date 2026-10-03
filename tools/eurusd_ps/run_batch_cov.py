@@ -37,6 +37,7 @@ def main(argv=None):
     fd = os.path.join(a.inputs, "fd")
     meta_root = os.path.join(a.inputs, "fd_meta")
     feats, meta, custody, clocks, col_rows, skipped = [], [], [], [], [], []
+    seen = {}
     t0 = time.time()
     for _, r in b2.iterrows():
         rel = r["path"]
@@ -51,9 +52,13 @@ def main(argv=None):
                 got = sha(p)
                 custody.append({"path": fl["path"], "sha256": got, "provenance_sha256": fl.get("sha256"),
                                 "custody": "DIGEST_MATCHES_PROVENANCE" if got == fl.get("sha256") else "DIGEST_MISMATCH"})
-                name = ("yh." if r["family"] == "yahoo_daily" else "fred.") + os.path.basename(os.path.dirname(fl["path"]))
+                parts = fl["path"].split("/")
+                name = ("yh." + parts[-2]) if r["family"] == "yahoo_daily" else ("fred." + parts[-3] + "." + parts[-2])
                 if got != fl.get("sha256"):
                     skipped.append({"path": fl["path"], "reason": "DIGEST_MISMATCH: not profiled"}); continue
+                if got in seen:
+                    skipped.append({"path": fl["path"], "reason": f"DUPLICATE_BYTES_OF {seen[got]}: profiled once"}); continue
+                seen[got] = fl["path"]
                 if r["family"] == "yahoo_daily":
                     s = CV.yahoo_series(p)
                     lev = name in ("yh.vix",)
@@ -128,7 +133,9 @@ def main(argv=None):
               "base_batch": {"path_role": "worker_a ps1/batch_001", "ready": base_ready},
               "grid_targets_folds": "identical to batch_001 (row_id aligned); targets not rewritten",
               "fx_cross_clocks": clocks, "skipped": skipped,
-              "denominators": {"sources_in_batch": int(len(b2)), "files_profiled": len(custody) - sum(1 for s in skipped if "DIGEST" in s["reason"] or "UNDETERMINED" in s["reason"]),
+              "denominators": {"sources_in_batch": int(len(b2)), "files_transferred": len(custody),
+                               "files_profiled": len(custody) - sum(1 for s in skipped if s["reason"].startswith(("DIGEST", "DUPLICATE_BYTES", "FX_CLOCK"))),
+                               "skipped_by_reason": pd.Series([s["reason"].split(" ")[0].split(":")[0] for s in skipped]).value_counts().to_dict(),
                                "features": len(meta), "metric_cells": len(cdf), "metric_cells_by_state": cdf["state"].value_counts().to_dict(),
                                "folds": len(folds_doc["folds"]), "decision_rows_train": int(len(decision)),
                                "custody": pd.DataFrame(custody)["custody"].value_counts().to_dict()},
