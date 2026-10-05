@@ -1,0 +1,47 @@
+{
+ "schema": "laneA_folds.v1",
+ "decision_rows": 6243,
+ "first": "2024-01-01 23:00:00+00:00",
+ "last": "2024-12-31 22:00:00+00:00",
+ "folds": [
+  {
+   "name": "validation_2024",
+   "train_rows": null,
+   "val_rows": [
+    0,
+    6243
+   ],
+   "train_n": 0,
+   "val_n": 6243,
+   "val_time": [
+    "2024-01-01 23:00:00+00:00",
+    "2024-12-31 22:00:00+00:00"
+   ],
+   "rule": "EXTERNAL VALIDATION: read once by FS-CLOSE's declared closure rule; never used for selection"
+  }
+ ],
+ "purge": {
+  "label_purge_h": 144,
+  "label_purge_rule": "fold-train row t kept iff t + label_purge_h < validation block start",
+  "derived_from": "max target support (Y_s, Y_l, Y_b timeouts) in elapsed hours",
+  "feature_embargo_h": 0,
+  "feature_embargo_rule": "forward-chaining folds: no training row lies after a validation row, so window support needs no embargo",
+  "max_feature_support_h": 840,
+  "target_supports_h": {
+   "Y_s_1h": 1,
+   "Y_s_2h": 2,
+   "Y_s_3h": 3,
+   "Y_s_4h": 4,
+   "Y_s_5h": 5,
+   "Y_s_6h": 6,
+   "Y_l_24h": 24,
+   "Y_l_48h": 48,
+   "Y_l_72h": 72,
+   "Y_l_96h": 96,
+   "Y_l_120h": 120,
+   "Y_l_144h": 144,
+   "Y_b_s6": 6,
+   "Y_b_l144": 144
+  }
+ }
+}

@@ -1,0 +1,31 @@
+{
+ "inputs_sha256": {
+  "base_d2.csv": "b73a25e6182c34eb84615ce78247a0661f5c59dfba9cd27963630981c26923b5",
+  "base_d3.csv": "2379cdb18b6728e92cc3131e859af0bbe50d54e020702f20a4c1858967010f56",
+  "base_d5.csv": "f483b4af6b9ecd24492c58d07a5f2695136c6170dd7244015aab1baec98126c1",
+  "base_d6.csv": "d701af612eeada01df7ab7e7009d95ff8da6aeb270ff026eea7055b3de9adc95",
+  "economic_calendar_2011_2021.csv": "5172b322bfaf7bb568a0bb37cc2f806e8bd18ed51c5703c1098c8609a6249383",
+  "eurusd_1h_lake.parquet": "84485ea308ff18d1f194d8025445f7796d9f3969eac46c784763329e3d22ac49",
+  "eurusd_5m.parquet": "c746f344ac743768e8c7f20e2e4ef3b7fb8222d96b3660f196c0a1d74039f327",
+  "fe_regime_detector.py": "6241ee3e3ba3c69cfcbc489ce08c842a86b43211789ffcf6867e6296b85af19e",
+  "fxmacrodata_announcements.parquet": "d8dd8c13ed3cb4dea4265f058ef3020eff2587a3ceb6e9eec743fc5f2ca138a0",
+  "fxmacrodata_release_calendar.parquet": "8a50bf16ef06a423015a67b777a3e5feb961891b3506c39de27535f0471db226"
+ },
+ "artifacts_sha256": {
+  "admissible_features.csv": "a365a9ac6e77234cfe3c5eca2ffdb99562d016e7a7c70308277ac32bc5581d46",
+  "admissible_features.json": "2cf00a33f47ee0b866a1784fb244ec1b9e825cb5847115e509519387a2a4cf2a",
+  "batch_report.json": "1b97ec3ed99314f8a0024720b858324b0722c075a4b584f88e18da8e0a596ecd",
+  "contract.json": "614d8c95146a67e140ddc210a39269df258da08012fc4802ff6ace92addc226d",
+  "coverage_matrix.csv": "fc005ecef578b1aa752abaa1674637fcc01ed74eb1aaaa1709331be3c0c0ee5c",
+  "event_sources.json": "c2fff6ce86890ce761db52a9758592f1992fc7abb774bbf5a8c376b06ef22b7d",
+  "features_train.parquet": "1ccd6129f3a3846cb7d3745d5b84f9719f0fe1cf1da23417a71d7a570f559a64",
+  "folds.json": "aa495c495be4554c1ca7ee42861683c717693be259dec66f0a80e4be68b4112a",
+  "inventory_columns.csv": "bfbed291bec112f747f510027c9c76528391091e8ad14c24bf21fbe53f0b34eb",
+  "inventory_sources.csv": "7459aa89601024286dbd6d4ce445a0431ceb50525899cc0f0c103d115d7cff6b",
+  "metric_state_matrix.csv": "7673a4596717539dbe3eadb5f3ac7a718d3dd9498bea682bb75637860fb84b43",
+  "profile_cells.csv": "dcfdd6f77a12044553738a798cc518d16a966b64a7b369ed70a89c9c82e7bb21",
+  "targets_train.parquet": "9f6827bf5b90ffd4b52c6ad204bb00b6aa25bf7f30eeccb0c3d213f8c7454989",
+  "transform_variants.csv": "ee6c4b9d41929e25340f5ff5027d0ac6be2b868e331d7b6b644fa855a5890d02"
+ },
+ "code_commit": "cef8b6e"
+}

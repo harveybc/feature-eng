@@ -1,0 +1,330 @@
+{
+ "schema": "laneA_batch_report.v1",
+ "batch": "batch_002",
+ "code_commit": "cef8b6e",
+ "split": {
+  "split": "validation_2024",
+  "read_end": "2025-01-01 00:00:00+00:00",
+  "decision_window": [
+   "2024-01-01 00:00:00+00:00",
+   "2025-01-01 00:00:00+00:00"
+  ]
+ },
+ "base_batch": {
+  "path_role": "worker_a ps1/batch_001",
+  "ready": {
+   "batch": "batch_001",
+   "digests_sha256": "b2aac49285776554498c1adf64656d0911b7d1f3582603f97edca1ae666b3d64",
+   "written_utc": "2026-10-05T05:28:09.368207+00:00"
+  }
+ },
+ "grid_targets_folds": "identical to batch_001 (row_id aligned); targets not rewritten",
+ "fx_cross_clocks": [
+  {
+   "file": "lake:features/trading_asset_data/audusd/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9366515837104072,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9343891402714932
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9621848739495799,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9411764705882353
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/eurgbp/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9230769230769231,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9479638009049773
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9663865546218487,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9327731092436975
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/eurjpy/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9343891402714932,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9411764705882353
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9621848739495799,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9411764705882353
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/gbpjpy/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9298642533936652,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9343891402714932
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9747899159663865,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9327731092436975
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/gbpusd/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9253393665158371,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9366515837104072
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9621848739495799,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9369747899159664
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/nzdusd/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9343891402714932,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9366515837104072
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9621848739495799,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9369747899159664
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/usdcad/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 628,
+   "by_dst": {
+    "US_DST": {
+     "n": 408,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9264705882352942,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9362745098039216
+    },
+    "US_STD": {
+     "n": 220,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9545454545454546,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9318181818181818
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/usdchf/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9321266968325792,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9298642533936652
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9621848739495799,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9537815126050421
+    }
+   }
+  },
+  {
+   "file": "lake:features/trading_asset_data/usdjpy/1h.parquet",
+   "status": "DETERMINED",
+   "clock": "NEW_YORK_LOCAL/BAR_START",
+   "weeks": 680,
+   "by_dst": {
+    "US_DST": {
+     "n": 442,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9253393665158371,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9321266968325792
+    },
+    "US_STD": {
+     "n": 238,
+     "close_mode": "Fri 16:00",
+     "close_share": 0.9705882352941176,
+     "open_mode": "Sun 17:00",
+     "open_share": 0.9453781512605042
+    }
+   }
+  }
+ ],
+ "skipped": [
+  {
+   "path": "macro_economic/fred/rates/t10yie/observations.parquet",
+   "reason": "DUPLICATE_BYTES_OF macro_economic/fred/inflation_expectations/t10yie/observations.parquet: profiled once"
+  },
+  {
+   "path": "macro_economic/fred/rates/t5yie/observations.parquet",
+   "reason": "DUPLICATE_BYTES_OF macro_economic/fred/inflation_expectations/t5yie/observations.parquet: profiled once"
+  },
+  {
+   "path": "macro_economic/fred/rates/t5yifr/observations.parquet",
+   "reason": "DUPLICATE_BYTES_OF macro_economic/fred/inflation_expectations/t5yifr/observations.parquet: profiled once"
+  },
+  {
+   "path": "market_data/forex/g10/audusd",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/eurgbp",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/eurjpy",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/gbpjpy",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/gbpusd",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/nzdusd",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/usdcad",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/usdchf",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "market_data/forex/g10/usdjpy",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/holidays",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/trading_calendars/cme",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/trading_calendars/xetr",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/trading_calendars/xlon",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/trading_calendars/xnas",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/trading_calendars/xnys",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  },
+  {
+   "path": "reference_data/trading_calendars/xtks",
+   "reason": "DUPLICATE_LOCATION (market_data/forex copy of features/trading_asset_data)"
+  }
+ ],
+ "denominators": {
+  "sources_in_batch": 144,
+  "files_transferred": 128,
+  "files_profiled": 125,
+  "skipped_by_reason": {
+   "DUPLICATE_LOCATION": 16,
+   "DUPLICATE_BYTES_OF": 3
+  },
+  "features": 298,
+  "metric_cells": 3278,
+  "metric_cells_by_state": {
+   "MEASURED": 3193,
+   "NOT_APPLICABLE": 85
+  },
+  "folds": 1,
+  "decision_rows": 6243,
+  "decision_rows_train": 0,
+  "custody": {
+   "DIGEST_MATCHES_PROVENANCE": 119,
+   "DIGEST_RECORDED (provenance lists no per-file digest for derived timeframes)": 9
+  }
+ },
+ "cost": {
+  "build_s": 9.88236665725708,
+  "profile_s": 5.26051664352417,
+  "wall_s": 15.353161573410034,
+  "peak_rss_kb": 267364
+ },
+ "host_role": "worker_a",
+ "hardware": "CPU only"
+}

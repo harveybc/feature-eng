@@ -1,0 +1,90 @@
+{
+ "schema": "laneA_batch_report.v1",
+ "batch": "batch_003",
+ "code_commit": "cef8b6e",
+ "split": {
+  "split": "validation_2024",
+  "read_end": "2025-01-01 00:00:00+00:00",
+  "decision_window": [
+   "2024-01-01 00:00:00+00:00",
+   "2025-01-01 00:00:00+00:00"
+  ]
+ },
+ "kalman_q_fit_window": [
+  "2012-05-01 00:00:00+00:00",
+  "2024-01-01 00:00:00+00:00"
+ ],
+ "base_batch": {
+  "ready": {
+   "batch": "batch_001",
+   "digests_sha256": "b2aac49285776554498c1adf64656d0911b7d1f3582603f97edca1ae666b3d64",
+   "written_utc": "2026-10-05T05:28:09.368207+00:00"
+  }
+ },
+ "regime_module_sha256": "6241ee3e3ba3c69cfcbc489ce08c842a86b43211789ffcf6867e6296b85af19e",
+ "regime_labels_not_admitted": {
+  "classify_regime_v3": "NOT_ADMITTED: centroids fitted on the full 15-year EURUSD history (includes validation/test) and clusters mapped to regimes by forward returns -> test-period and target leakage",
+  "classify_regime / classify_regime_v2": "PENDING_PROVENANCE: fixed thresholds of unknown origin (described as hand-tuned or GA-optimized); a TRAIN-fold-fitted regime is a PS2/PS4 variant",
+  "duplicates_of_batch_001": "rsi, stoch_k, adx, plus_di, minus_di, bb_position, atr_raw, bands and EMAs duplicate ta.* or are price levels"
+ },
+ "kalman_q": 1.0920291647363414e-06,
+ "runtime_checks": {
+  "FS01_variants_truncation": {
+   "rows_checked": 41,
+   "max_abs_change": 0.0,
+   "note": "kalman q fitted on full TRAIN (declared): identical q used in both runs",
+   "status": "PASS"
+  },
+  "grid_equal_to_batch_001": true
+ },
+ "gaps": [
+  {
+   "item": "CFTC Traders in Financial Futures (EURO FX positioning)",
+   "state": "ACQUISITION_GAP",
+   "reason": "lake holds only the disaggregated (commodity) COT report; TFF is public (no credential) but not acquired through the lake"
+  },
+  {
+   "item": "EURUSD volume and spread",
+   "state": "ABSENT_IN_LAKE",
+   "reason": "HistData-derived bytes carry OHLC only; J_policy costs need a spread source"
+  },
+  {
+   "item": "FXMacroData history before 2024-12-12",
+   "state": "CREDENTIAL_BLOCKER_IF_ORDERED",
+   "reason": "the governed snapshot starts 2024-12-12; a deeper pull needs the FXMacroData API key, which is held outside the data-gov path (field: FXMACRODATA_API_KEY in financial-data _metadata/.env). Calendar is SELECTOR_EPISODE_SOURCE only, so not blocking selection"
+  },
+  {
+   "item": "holiday flags",
+   "state": "PENDING_EVIDENCE",
+   "reason": "python-holidays is retrospective code; publication-in-advance not evidenced"
+  }
+ ],
+ "denominators": {
+  "features": 22,
+  "families": {
+   "transform_variant": 10,
+   "regime_causal": 8,
+   "cftc_positioning": 4
+  },
+  "metric_cells": 242,
+  "metric_cells_by_state": {
+   "MEASURED": 234,
+   "NOT_APPLICABLE": 8
+  },
+  "folds": 1,
+  "decision_rows": 6243,
+  "decision_rows_train": 0
+ },
+ "cost": {
+  "load_s": 5.378070116043091,
+  "regime_s": 19.722448110580444,
+  "variants_s": 45.55116558074951,
+  "fs01_s": 0.3329503536224365,
+  "cot_s": 4.375854253768921,
+  "profile_s": 0.383190393447876,
+  "wall_s": 75.8061830997467,
+  "peak_rss_kb": 475464
+ },
+ "host_role": "worker_a",
+ "hardware": "CPU only"
+}

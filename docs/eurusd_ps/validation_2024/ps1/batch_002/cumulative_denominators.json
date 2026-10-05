@@ -1,0 +1,22 @@
+{
+ "schema": "laneA_cumulative_denominators.v1",
+ "through_batch": "batch_002",
+ "model_input_candidates": {
+  "batch_001": 46,
+  "batch_002": 298,
+  "total": 344
+ },
+ "selector_episode_source_columns": {
+  "batch_001": 37,
+  "batch_002": 0,
+  "total": 37
+ },
+ "excluded_role_quality": 1,
+ "metric_cells_model_input": {
+  "batch_001": 506,
+  "batch_002": 3278
+ },
+ "metric_cells_selector_source": {
+  "batch_001": 407
+ }
+}
