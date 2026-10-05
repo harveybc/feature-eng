@@ -105,11 +105,15 @@ def main(argv=None):
     ap.add_argument("--inputs", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--code-commit", default="UNCOMMITTED")
+    ap.add_argument("--split", default="train", choices=["train", "validation_2024"])
     a = ap.parse_args(argv)
     t_all = time.time()
+    split_doc = C.configure_split(a.split)
     os.makedirs(a.out, exist_ok=True)
     if os.path.exists(os.path.join(a.out, "READY")):
         raise SystemExit("REFUSED: batch already READY; a new batch number is required")
+    if a.split != "train" and "validation_2024" not in os.path.abspath(a.out):
+        raise SystemExit("REFUSED: a validation materialisation must be written under a validation_2024 directory (TRAIN artifacts stay untouched)")
     cost = {}
     t0 = time.time()
     b5, clock = S.load_lake_5m(os.path.join(a.inputs, "eurusd_5m.parquet"))
@@ -119,8 +123,9 @@ def main(argv=None):
                              filters=[("timestamp", "<", (C.READ_END - pd.Timedelta(days=1)))])
     clock_1h = S.infer_fx_clock(lake1h["timestamp"])
     recon = reconcile_pinned(hourly, a.inputs)
-    decision = hourly.index[(hourly.index >= C.TRAIN_START) & (hourly.index < C.TRAIN_END)]
-    assert decision.max() < C.TRAIN_END and b5["end_utc"].max() <= C.READ_END
+    decision = hourly.index[(hourly.index >= C.DECISION_START) & (hourly.index < C.DECISION_END)]
+    C.guard_rows(decision)
+    assert decision.max() < C.DECISION_END and b5["end_utc"].max() <= C.READ_END
 
     t0 = time.time()
     tg = T.build_targets(hourly, b5, decision)
@@ -142,8 +147,14 @@ def main(argv=None):
     cost["features_s"] = build_s
 
     sup = {m["feature_id"]: m["support_h"] for m in meta}
-    folds = C.inner_folds(decision)
+    if a.split == "train":
+        folds = C.inner_folds(decision)
+    else:
+        folds = [{"name": "validation_2024", "train_rows": None, "val_rows": [0, int(len(decision))], "train_n": 0,
+                  "val_n": int(len(decision)), "val_time": [str(decision[0]), str(decision[-1])],
+                  "rule": "EXTERNAL VALIDATION: read once by FS-CLOSE's declared closure rule; never used for selection"}]
     contract = C.contract_document(sup)
+    contract["materialised_split"] = split_doc
 
     fam_n = pd.Series([m["family"] for m in meta]).value_counts().to_dict()
     cells, cov = [], []
@@ -228,6 +239,7 @@ def main(argv=None):
     adm.to_csv(os.path.join(out, "admissible_features.csv"), index=False)
     jdump({"schema": "laneA_admissible_features.v1", "batch": a.batch, "features": meta}, os.path.join(out, "admissible_features.json"))
     cdf = pd.DataFrame(cells)
+    cdf["split"] = a.split
     cdf["value"] = cdf["value"].map(lambda v: json.dumps(v, default=str) if v is not None else "")
     cdf.to_csv(os.path.join(out, "profile_cells.csv"), index=False)
     piv = cdf.pivot(index="feature_id", columns="metric", values="state")[P.METRICS]
@@ -262,14 +274,15 @@ def main(argv=None):
               for c in tg.columns if c.startswith(("Y_s_", "Y_l_")) and not c.endswith("staleness_h")}
     state_counts = cdf["state"].value_counts().to_dict()
     report = {
-        "schema": "laneA_batch_report.v1", "batch": a.batch, "code_commit": a.code_commit,
+        "schema": "laneA_batch_report.v1", "batch": a.batch, "code_commit": a.code_commit, "split": split_doc,
+        "fitted_on_train_only": "no scaler is fitted by PS1; windows, EWMA sigma and causal z keep their TRAIN definitions; nothing refit on 2024",
         "clock_5m": clock, "clock_lake_1h": clock_1h, "reconciliation_pinned": recon,
         "denominators": {"sources_inventoried": len(src_rows), "source_columns_inventoried": len(col_rows),
                          "features": len(meta), "features_admissible": int(sum(m["admissibility"].startswith("ADMISSIBLE") for m in meta)),
                          "model_input_candidates": int(sum(m["role"] == "feature" for m in meta)),
                          "selector_episode_source_columns": int(sum(m["role"] == F.SELECTOR_ROLE for m in meta)),
                          "feature_families": fam_n, "metrics_per_feature": len(P.METRICS), "metric_cells": len(cdf),
-                         "metric_cells_by_state": state_counts, "folds": len(folds), "decision_rows_train": int(len(decision)),
+                         "metric_cells_by_state": state_counts, "folds": len(folds), "decision_rows": int(len(decision)), "decision_rows_train": int(len(decision)) if a.split == "train" else 0,
                          "transform_variants": len(tv_rows)},
         "targets": {"stats": tstats, "Y_b_states": tstate},
         "runtime_checks": {"FS01_future_perturbation_real_bytes": fp,

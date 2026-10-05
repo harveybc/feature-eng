@@ -209,3 +209,30 @@ def test_calendar_columns_are_selector_episode_sources_not_model_inputs():
     for fam in ("calendar_archive", "fxmacrodata_announcements", "fxmacrodata_calendar", "pit_capture"):
         assert INV.source_role(fam) == "SELECTOR_EPISODE_SOURCE"
     assert INV.source_role("yahoo_daily") == "MODEL_INPUT_CANDIDATE_SOURCE"
+
+
+def test_validation_split_reads_2024_only_refuses_2025_and_leaves_train_constants(tmp_path):
+    try:
+        doc = C.configure_split("validation_2024")
+        assert doc["read_end"] == str(C.VALIDATION_END) and C.READ_END == C.VALIDATION_END <= C.TEST_START
+        assert C.TRAIN_END == pd.Timestamp("2024-01-01T00:00:00Z")      # TRAIN definition untouched
+        df = synth_5m_ny("2023-06-01", "2025-06-01", poison_from="2025-01-01")
+        p = tmp_path / "x.parquet"; df.to_parquet(p)
+        b5, _ = S.load_lake_5m(str(p))
+        assert b5["end_utc"].max() <= C.VALIDATION_END and b5["close"].max() < 1e5   # no 2025 byte read
+        h = S.hourly_from_5m(b5)
+        d = h.index[(h.index >= C.DECISION_START) & (h.index < C.DECISION_END)]
+        C.guard_rows(d)
+        assert d.min() >= pd.Timestamp("2024-01-01", tz="UTC") and d.max() < pd.Timestamp("2025-01-01", tz="UTC")
+        with pytest.raises(ValueError):
+            C.guard_rows(pd.DatetimeIndex([pd.Timestamp("2025-01-01", tz="UTC")]))
+        with pytest.raises(ValueError):
+            C.guard_rows(pd.DatetimeIndex([pd.Timestamp("2023-12-31 23:00", tz="UTC")]))
+        with pytest.raises(ValueError):
+            C.configure_split("test_2025")
+        tg = T.build_targets(h, b5, d)
+        late = d + pd.Timedelta(hours=144) >= C.VALIDATION_END
+        assert (tg.loc[late, "Y_b_l144_state"] == "CENSORED").all() and tg.loc[late, "Y_l_144h"].isna().all()
+    finally:
+        C.configure_split("train")
+    assert C.READ_END == C.TRAIN_END

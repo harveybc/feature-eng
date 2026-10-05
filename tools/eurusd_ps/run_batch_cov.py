@@ -23,15 +23,21 @@ def main(argv=None):
     ap.add_argument("--inputs", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--code-commit", default="UNCOMMITTED")
+    ap.add_argument("--split", default="train", choices=["train", "validation_2024"])
     a = ap.parse_args(argv)
     t_all = time.time()
+    from . import contract as C
+    split_doc = C.configure_split(a.split)
     os.makedirs(a.out, exist_ok=True)
     if os.path.exists(os.path.join(a.out, "READY")):
         raise SystemExit("REFUSED: batch already READY")
+    if a.split != "train" and "validation_2024" not in os.path.abspath(a.out):
+        raise SystemExit("REFUSED: validation output must live under a validation_2024 directory")
     base_ready = json.load(open(os.path.join(a.base, "READY")))
     folds_doc = json.load(open(os.path.join(a.base, "folds.json")))
     grid = pd.read_parquet(os.path.join(a.base, "targets_train.parquet"), columns=["row_id", "t_decision_utc"])
     decision = pd.DatetimeIndex(grid["t_decision_utc"])
+    C.guard_rows(decision)
     srcs = pd.read_csv(os.path.join(a.base, "inventory_sources.csv"))
     b2 = srcs[srcs["batch"] == "batch_002"]
     fd = os.path.join(a.inputs, "fd")
@@ -100,6 +106,7 @@ def main(argv=None):
     pd.DataFrame(meta).to_csv(os.path.join(out, "admissible_features.csv"), index=False)
     jdump({"schema": "laneA_admissible_features.v1", "batch": a.batch, "features": meta}, os.path.join(out, "admissible_features.json"))
     cdf = pd.DataFrame(cells)
+    cdf["split"] = a.split
     cdf["value"] = cdf["value"].map(lambda v: json.dumps(v, default=str) if v is not None else "")
     cdf.to_csv(os.path.join(out, "profile_cells.csv"), index=False)
     cdf.pivot(index="feature_id", columns="metric", values="state")[P.METRICS].to_csv(os.path.join(out, "metric_state_matrix.csv"))
@@ -129,7 +136,7 @@ def main(argv=None):
            "metric_cells_model_input": {"batch_001": int(len(b1_model)) * len(P.METRICS), a.batch: len(cdf)},
            "metric_cells_selector_source": {"batch_001": int(sel.sum()) * len(P.METRICS)}}
     jdump(cum, os.path.join(out, "cumulative_denominators.json"))
-    report = {"schema": "laneA_batch_report.v1", "batch": a.batch, "code_commit": a.code_commit,
+    report = {"schema": "laneA_batch_report.v1", "batch": a.batch, "code_commit": a.code_commit, "split": split_doc,
               "base_batch": {"path_role": "worker_a ps1/batch_001", "ready": base_ready},
               "grid_targets_folds": "identical to batch_001 (row_id aligned); targets not rewritten",
               "fx_cross_clocks": clocks, "skipped": skipped,
@@ -137,7 +144,7 @@ def main(argv=None):
                                "files_profiled": len(custody) - sum(1 for s in skipped if s["reason"].startswith(("DIGEST", "DUPLICATE_BYTES", "FX_CLOCK"))),
                                "skipped_by_reason": pd.Series([s["reason"].split(" ")[0].split(":")[0] for s in skipped]).value_counts().to_dict(),
                                "features": len(meta), "metric_cells": len(cdf), "metric_cells_by_state": cdf["state"].value_counts().to_dict(),
-                               "folds": len(folds_doc["folds"]), "decision_rows_train": int(len(decision)),
+                               "folds": len(folds_doc["folds"]), "decision_rows": int(len(decision)), "decision_rows_train": int(len(decision)) if a.split == "train" else 0,
                                "custody": pd.DataFrame(custody)["custody"].value_counts().to_dict()},
               "cost": {"build_s": build_s, "profile_s": prof_s, "wall_s": time.time() - t_all,
                        "peak_rss_kb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss},

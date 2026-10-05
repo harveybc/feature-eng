@@ -109,14 +109,20 @@ def main(argv=None):
     ap.add_argument("--batch", required=True); ap.add_argument("--base", required=True)
     ap.add_argument("--inputs", required=True); ap.add_argument("--out", required=True)
     ap.add_argument("--regime-module", required=True); ap.add_argument("--code-commit", default="UNCOMMITTED")
+    ap.add_argument("--split", default="train", choices=["train", "validation_2024"])
     a = ap.parse_args(argv)
-    t_all = time.time(); os.makedirs(a.out, exist_ok=True)
+    t_all = time.time()
+    split_doc = C.configure_split(a.split)
+    os.makedirs(a.out, exist_ok=True)
     if os.path.exists(os.path.join(a.out, "READY")):
         raise SystemExit("REFUSED: batch already READY")
+    if a.split != "train" and "validation_2024" not in os.path.abspath(a.out):
+        raise SystemExit("REFUSED: validation output must live under a validation_2024 directory")
     base_ready = json.load(open(os.path.join(a.base, "READY")))
     folds = json.load(open(os.path.join(a.base, "folds.json")))["folds"]
     grid = pd.read_parquet(os.path.join(a.base, "targets_train.parquet"), columns=["row_id", "t_decision_utc"])
     decision = pd.DatetimeIndex(grid["t_decision_utc"])
+    C.guard_rows(decision)
     cost = {}
     t0 = time.time()
     b5, _ = S.load_lake_5m(os.path.join(a.inputs, "eurusd_5m.parquet"))
@@ -180,7 +186,7 @@ def main(argv=None):
     out = a.out
     pd.DataFrame(meta).to_csv(os.path.join(out, "admissible_features.csv"), index=False)
     jdump({"schema": "laneA_admissible_features.v1", "batch": a.batch, "features": meta}, os.path.join(out, "admissible_features.json"))
-    cdf = pd.DataFrame(cells); cdf["value"] = cdf["value"].map(lambda v: json.dumps(v, default=str) if v is not None else "")
+    cdf = pd.DataFrame(cells); cdf["split"] = a.split; cdf["value"] = cdf["value"].map(lambda v: json.dumps(v, default=str) if v is not None else "")
     cdf.to_csv(os.path.join(out, "profile_cells.csv"), index=False)
     cdf.pivot(index="feature_id", columns="metric", values="state")[P.METRICS].to_csv(os.path.join(out, "metric_state_matrix.csv"))
     pd.DataFrame(cov).to_csv(os.path.join(out, "coverage_matrix.csv"), index=False)
@@ -197,14 +203,15 @@ def main(argv=None):
                    "(field: FXMACRODATA_API_KEY in financial-data _metadata/.env). Calendar is SELECTOR_EPISODE_SOURCE only, so not blocking selection"},
         {"item": "holiday flags", "state": "PENDING_EVIDENCE", "reason": "python-holidays is retrospective code; publication-in-advance not evidenced"},
     ]
-    report = {"schema": "laneA_batch_report.v1", "batch": a.batch, "code_commit": a.code_commit,
+    report = {"schema": "laneA_batch_report.v1", "batch": a.batch, "code_commit": a.code_commit, "split": split_doc,
+              "kalman_q_fit_window": [str(C.TRAIN_START), str(C.TRAIN_END)],
               "base_batch": {"ready": base_ready}, "regime_module_sha256": sha(a.regime_module),
               "regime_labels_not_admitted": REGIME_NOT_ADMITTED, "kalman_q": q,
               "runtime_checks": {"FS01_variants_truncation": fs01, "grid_equal_to_batch_001": True},
               "gaps": gaps,
               "denominators": {"features": len(meta), "families": pd.Series([m["family"] for m in meta]).value_counts().to_dict(),
                                "metric_cells": len(cdf), "metric_cells_by_state": cdf["state"].value_counts().to_dict(),
-                               "folds": len(folds), "decision_rows_train": int(len(decision))},
+                               "folds": len(folds), "decision_rows": int(len(decision)), "decision_rows_train": int(len(decision)) if a.split == "train" else 0},
               "cost": cost | {"wall_s": time.time() - t_all, "peak_rss_kb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss},
               "host_role": "worker_a", "hardware": "CPU only"}
     jdump(report, os.path.join(out, "batch_report.json"))

@@ -38,6 +38,36 @@ VALIDATION_END = pd.Timestamp("2025-01-01T00:00:00Z")
 TEST_START = VALIDATION_END
 TEST_END = pd.Timestamp("2026-01-01T00:00:00Z")
 READ_END = TRAIN_END          # PS0/PS1 read nothing at or after this instant
+SPLIT = "train"
+DECISION_START, DECISION_END = TRAIN_START, TRAIN_END
+
+
+def configure_split(split: str) -> dict:
+    """Select the decision window and the read bound. 'train' is the default;
+    'validation_2024' is the one-time external-validation materialisation for
+    FS-CLOSE: decisions 2024-01-01 <= t < 2025-01-01, READ_END = 2025-01-01,
+    so TEST (2025) is never read. Nothing is fitted on 2024: every window,
+    sigma and Kalman parameter keeps its TRAIN definition."""
+    global SPLIT, READ_END, DECISION_START, DECISION_END
+    if split == "train":
+        SPLIT, READ_END, DECISION_START, DECISION_END = "train", TRAIN_END, TRAIN_START, TRAIN_END
+    elif split == "validation_2024":
+        SPLIT, READ_END, DECISION_START, DECISION_END = "validation_2024", VALIDATION_END, VALIDATION_START, VALIDATION_END
+    else:
+        raise ValueError(f"unknown split {split!r}; TEST is never materialised by this producer")
+    assert READ_END <= TEST_START, "the producer never reads TEST"
+    return {"split": SPLIT, "read_end": str(READ_END), "decision_window": [str(DECISION_START), str(DECISION_END)]}
+
+
+def guard_rows(index) -> None:
+    """Refuse any decision row at or after READ_END (and before the split's start)."""
+    idx = pd.DatetimeIndex(index)
+    if len(idx) == 0:
+        raise ValueError("no decision rows")
+    if idx.max() >= READ_END or idx.max() >= TEST_START:
+        raise ValueError(f"REFUSED: decision row {idx.max()} at or after READ_END {READ_END}")
+    if idx.min() < DECISION_START:
+        raise ValueError(f"REFUSED: decision row {idx.min()} before split start {DECISION_START}")
 WARMUP_START = pd.Timestamp("2012-01-01T00:00:00Z")  # past-only warm-up for windows
 RECIPE_WINDOW_4Y = (pd.Timestamp("2020-01-01T00:00:00Z"), TRAIN_END)
 
