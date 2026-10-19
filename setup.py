@@ -15,7 +15,8 @@ setup(
             'oracle_labels=app.plugins.oracle_labels:Plugin',
             'direction_labels=app.plugins.direction_labels:Plugin',
             'ssa=app.plugins.ssa:Plugin',
-            'fft=app.plugins.fft:Plugin'
+            'fft=app.plugins.fft:Plugin',
+            'causal_fractal=app.plugins.causal_fractal:Plugin'
         ]
     },
     install_requires=[

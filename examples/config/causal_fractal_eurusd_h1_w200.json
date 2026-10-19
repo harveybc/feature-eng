@@ -1,0 +1,21 @@
+{
+  "plugin": "causal_fractal",
+  "window_bars": 200,
+  "close_column": "CLOSE",
+  "include_diagnostic": true,
+  "include_intermediate": true,
+  "suffix_window": true,
+  "instrument": "EURUSD",
+  "bar": "1h",
+  "input_file": "market_data/forex/g10/eurusd/1h.parquet",
+  "input_sha256": "c6628375b2872f16dcdbd6b1b90ed8e68bc5bdd852efdef01f2515b8712d4e2e",
+  "input_root_env": "FINANCIAL_DATA_ROOT",
+  "warmup_start": "2019-12-01",
+  "splits": {
+    "train": {"start_inclusive": "2020-01-01", "end_exclusive": "2024-01-01"},
+    "validation": {"start_inclusive": "2024-01-01", "end_exclusive": "2025-01-01"}
+  },
+  "test_start_closed": "2025-01-01",
+  "output_dir": "/var/tmp/features-candidates/eurusd_h1_causal_fractal",
+  "manifest_copy": "docs/causal_fractal_eurusd/MANIFEST.json"
+}

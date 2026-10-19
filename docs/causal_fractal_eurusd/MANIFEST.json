@@ -1,0 +1,241 @@
+{
+  "schema": "causal_fractal_features.eurusd_h1.v1",
+  "instrument": "EURUSD",
+  "bar": "1h",
+  "source_name": "market_data/forex/g10/eurusd/1h.parquet",
+  "source_sha256": "c6628375b2872f16dcdbd6b1b90ed8e68bc5bdd852efdef01f2515b8712d4e2e",
+  "source_read_rule": "read-only; filtered at read to [warmup_start, test_start_closed); any request reaching TEST is refused",
+  "ported_from": {
+    "path": "agent-multi/tools/causal_fractal_features.py (untracked in that checkout when ported)",
+    "sha256": "703ffb5afb1d76073fdafeeb5f1e7f6ea27916f3b7777ee5e6f12ba72e09cef4"
+  },
+  "plugin": "feature-eng app/plugins/causal_fractal.py (entry point feature_eng.plugins:causal_fractal)",
+  "window_is_observed_bars_not_calendar_time": true,
+  "row_i_uses_closes": "[i-window+1, i] inclusive, and no later close",
+  "parameters_fit_on_validation": false,
+  "parameters_fit_on_test": false,
+  "global_scaler_fit": false,
+  "warmup": {
+    "start": "2019-12-01",
+    "rule": "each calendar year is computed with history from the previous 1 December; warm-up rows are dropped, never emitted"
+  },
+  "splits_utc": {
+    "train": {
+      "start_inclusive": "2020-01-01",
+      "end_exclusive": "2024-01-01"
+    },
+    "validation": {
+      "start_inclusive": "2024-01-01",
+      "end_exclusive": "2025-01-01"
+    }
+  },
+  "test_split_file": null,
+  "test_start_closed": "2025-01-01",
+  "store_dir": "/var/tmp/features-candidates/eurusd_h1_causal_fractal",
+  "store_is_outside_lake_and_git": true,
+  "columns_per_window": {
+    "candidates": [
+      "hurst_rs",
+      "fractal_dimension_graph",
+      "box_counting_dimension",
+      "variogram_hurst",
+      "hurst_spectrum_width"
+    ],
+    "diagnostic_only": [
+      "correlation_dimension",
+      "spectral_slope"
+    ],
+    "intermediate": [
+      "variogram_slope",
+      "hurst_q1",
+      "hurst_q2",
+      "hurst_q3"
+    ],
+    "naming": "<feature>_w<window_bars>"
+  },
+  "diagnostic_reason": "correlation_dimension and spectral_slope are past-only but fragile on one short window; correlation_dimension is NaN for window_bars < 60",
+  "windows": {
+    "200": {
+      "files": {
+        "train": "eurusd_h1_causal_fractal_w200_train.parquet",
+        "validation": "eurusd_h1_causal_fractal_w200_validation.parquet"
+      },
+      "sha256": {
+        "train": "92631fbcc80ba76fda5c73d8cc5d2e5401df8c65236756d13ff6d9c98c8785ef",
+        "validation": "c07aeb419f49f4c6cb26bf1aab4f01edc8e9717eca60e643f958bc6df59c32d5"
+      },
+      "row_counts": {
+        "train": 24097,
+        "validation": 6243
+      },
+      "finite_candidate_rows": {
+        "train": 24097,
+        "validation": 6243
+      },
+      "medians": {
+        "train": {
+          "hurst_rs_w200": 0.603796,
+          "fractal_dimension_graph_w200": 1.396204,
+          "box_counting_dimension_w200": 1.247457,
+          "variogram_slope_w200": 0.964277,
+          "variogram_hurst_w200": 0.482139,
+          "hurst_q1_w200": 0.529454,
+          "hurst_q2_w200": 0.482139,
+          "hurst_q3_w200": 0.438079,
+          "hurst_spectrum_width_w200": 0.089603,
+          "correlation_dimension_w200": 0.969802,
+          "spectral_slope_w200": 0.020209
+        },
+        "validation": {
+          "hurst_rs_w200": 0.600837,
+          "fractal_dimension_graph_w200": 1.399163,
+          "box_counting_dimension_w200": 1.239755,
+          "variogram_slope_w200": 0.943185,
+          "variogram_hurst_w200": 0.471593,
+          "hurst_q1_w200": 0.529901,
+          "hurst_q2_w200": 0.471593,
+          "hurst_q3_w200": 0.412031,
+          "hurst_spectrum_width_w200": 0.116059,
+          "correlation_dimension_w200": 0.939378,
+          "spectral_slope_w200": 0.052133
+        }
+      },
+      "years_chunked": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "rs_scales": [
+        8,
+        16,
+        32,
+        64
+      ],
+      "correlation_dimension_defined": true
+    },
+    "96": {
+      "files": {
+        "train": "eurusd_h1_causal_fractal_w96_train.parquet",
+        "validation": "eurusd_h1_causal_fractal_w96_validation.parquet"
+      },
+      "sha256": {
+        "train": "0654be1c9660bd775147bac8b320ba16d625385281e9d378a756d7c08bbb3447",
+        "validation": "ad2283716ec925c5bf0e77f89438af6a142b26e290dd6a4995408e9248965763"
+      },
+      "row_counts": {
+        "train": 24097,
+        "validation": 6243
+      },
+      "finite_candidate_rows": {
+        "train": 24097,
+        "validation": 6243
+      },
+      "medians": {
+        "train": {
+          "hurst_rs_w96": 0.597029,
+          "fractal_dimension_graph_w96": 1.402971,
+          "box_counting_dimension_w96": 1.099801,
+          "variogram_slope_w96": 0.931054,
+          "variogram_hurst_w96": 0.465527,
+          "hurst_q1_w96": 0.518716,
+          "hurst_q2_w96": 0.465527,
+          "hurst_q3_w96": 0.422282,
+          "hurst_spectrum_width_w96": 0.095206,
+          "correlation_dimension_w96": 1.054027,
+          "spectral_slope_w96": 0.014729
+        },
+        "validation": {
+          "hurst_rs_w96": 0.598183,
+          "fractal_dimension_graph_w96": 1.401817,
+          "box_counting_dimension_w96": 1.096578,
+          "variogram_slope_w96": 0.893422,
+          "variogram_hurst_w96": 0.446711,
+          "hurst_q1_w96": 0.510615,
+          "hurst_q2_w96": 0.446711,
+          "hurst_q3_w96": 0.390858,
+          "hurst_spectrum_width_w96": 0.113955,
+          "correlation_dimension_w96": 1.008845,
+          "spectral_slope_w96": 0.033187
+        }
+      },
+      "years_chunked": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "rs_scales": [
+        8,
+        16,
+        32,
+        64
+      ],
+      "correlation_dimension_defined": true
+    },
+    "48": {
+      "files": {
+        "train": "eurusd_h1_causal_fractal_w48_train.parquet",
+        "validation": "eurusd_h1_causal_fractal_w48_validation.parquet"
+      },
+      "sha256": {
+        "train": "a3632f5f0861445ebf3c27cc57ab15aab60b91e2f7b7c9cfb31437f319b246db",
+        "validation": "4b4a23119023dce325b319e2da2f222fdbeefa5bb6935dae4ffad5c5795de6b9"
+      },
+      "row_counts": {
+        "train": 24097,
+        "validation": 6243
+      },
+      "finite_candidate_rows": {
+        "train": 24097,
+        "validation": 6243
+      },
+      "medians": {
+        "train": {
+          "hurst_rs_w48": 0.628728,
+          "fractal_dimension_graph_w48": 1.371272,
+          "box_counting_dimension_w48": 0.901933,
+          "variogram_slope_w48": 0.849531,
+          "variogram_hurst_w48": 0.424765,
+          "hurst_q1_w48": 0.489725,
+          "hurst_q2_w48": 0.424765,
+          "hurst_q3_w48": 0.377378,
+          "hurst_spectrum_width_w48": 0.109255,
+          "correlation_dimension_w48": null,
+          "spectral_slope_w48": 0.014808
+        },
+        "validation": {
+          "hurst_rs_w48": 0.630013,
+          "fractal_dimension_graph_w48": 1.369987,
+          "box_counting_dimension_w48": 0.89959,
+          "variogram_slope_w48": 0.830557,
+          "variogram_hurst_w48": 0.415279,
+          "hurst_q1_w48": 0.487529,
+          "hurst_q2_w48": 0.415279,
+          "hurst_q3_w48": 0.356131,
+          "hurst_spectrum_width_w48": 0.119886,
+          "correlation_dimension_w48": null,
+          "spectral_slope_w48": 0.040583
+        }
+      },
+      "years_chunked": [
+        2020,
+        2021,
+        2022,
+        2023,
+        2024
+      ],
+      "rs_scales": [
+        8,
+        16,
+        32
+      ],
+      "correlation_dimension_defined": false
+    }
+  },
+  "does_not_select_a_feature": true,
+  "does_not_claim_predictive_value": true,
+  "does_not_authorize_a_strategy": true
+}

@@ -1,0 +1,867 @@
+{
+  "schema": "causal_fractal_redundancy.eurusd_h1.v1",
+  "split": "train",
+  "source_sha256": "c6628375b2872f16dcdbd6b1b90ed8e68bc5bdd852efdef01f2515b8712d4e2e",
+  "store_manifest_schema": "causal_fractal_features.eurusd_h1.v1",
+  "reference_columns": {
+    "rv5": "std(ddof=1) of hourly log returns over the trailing 5 observed bars",
+    "rv24": "same over the trailing 24 observed bars",
+    "atr_ratio": "Wilder ATR(14) / close"
+  },
+  "measures_predictive_value": false,
+  "windows": {
+    "200": {
+      "rows": 24097,
+      "medians": {
+        "hurst_rs": 0.603796,
+        "fractal_dimension_graph": 1.396204,
+        "box_counting_dimension": 1.247457,
+        "variogram_hurst": 0.482139,
+        "hurst_spectrum_width": 0.089603,
+        "correlation_dimension": 0.969802,
+        "spectral_slope": 0.020209
+      },
+      "vs_reference": {
+        "hurst_rs": {
+          "rv5": {
+            "pearson": -0.0565,
+            "spearman": -0.0605
+          },
+          "rv24": {
+            "pearson": -0.0922,
+            "spearman": -0.0929
+          },
+          "atr_ratio": {
+            "pearson": -0.1269,
+            "spearman": -0.1159
+          }
+        },
+        "fractal_dimension_graph": {
+          "rv5": {
+            "pearson": 0.0565,
+            "spearman": 0.0605
+          },
+          "rv24": {
+            "pearson": 0.0922,
+            "spearman": 0.0929
+          },
+          "atr_ratio": {
+            "pearson": 0.1269,
+            "spearman": 0.1159
+          }
+        },
+        "box_counting_dimension": {
+          "rv5": {
+            "pearson": 0.0243,
+            "spearman": 0.0514
+          },
+          "rv24": {
+            "pearson": -0.0,
+            "spearman": 0.0226
+          },
+          "atr_ratio": {
+            "pearson": 0.0366,
+            "spearman": 0.0465
+          }
+        },
+        "variogram_hurst": {
+          "rv5": {
+            "pearson": -0.087,
+            "spearman": -0.0855
+          },
+          "rv24": {
+            "pearson": -0.0939,
+            "spearman": -0.1248
+          },
+          "atr_ratio": {
+            "pearson": -0.0815,
+            "spearman": -0.114
+          }
+        },
+        "hurst_spectrum_width": {
+          "rv5": {
+            "pearson": 0.1058,
+            "spearman": 0.0593
+          },
+          "rv24": {
+            "pearson": 0.2268,
+            "spearman": 0.1872
+          },
+          "atr_ratio": {
+            "pearson": 0.154,
+            "spearman": 0.1749
+          }
+        },
+        "correlation_dimension": {
+          "rv5": {
+            "pearson": -0.0207,
+            "spearman": -0.0112
+          },
+          "rv24": {
+            "pearson": -0.0194,
+            "spearman": 0.0188
+          },
+          "atr_ratio": {
+            "pearson": -0.0459,
+            "spearman": -0.0026
+          }
+        },
+        "spectral_slope": {
+          "rv5": {
+            "pearson": 0.0397,
+            "spearman": 0.0276
+          },
+          "rv24": {
+            "pearson": 0.0444,
+            "spearman": 0.0386
+          },
+          "atr_ratio": {
+            "pearson": 0.0593,
+            "spearman": 0.0386
+          }
+        }
+      },
+      "within_day": {
+        "hurst_rs": {
+          "within_day_variance_share": 0.2404,
+          "mean_within_day_std": 0.024363,
+          "overall_std": 0.053661,
+          "days": 1249
+        },
+        "fractal_dimension_graph": {
+          "within_day_variance_share": 0.2404,
+          "mean_within_day_std": 0.024363,
+          "overall_std": 0.053661,
+          "days": 1249
+        },
+        "box_counting_dimension": {
+          "within_day_variance_share": 0.3,
+          "mean_within_day_std": 0.019942,
+          "overall_std": 0.045771,
+          "days": 1249
+        },
+        "variogram_hurst": {
+          "within_day_variance_share": 0.035,
+          "mean_within_day_std": 0.008732,
+          "overall_std": 0.066228,
+          "days": 1249
+        },
+        "hurst_spectrum_width": {
+          "within_day_variance_share": 0.0505,
+          "mean_within_day_std": 0.005616,
+          "overall_std": 0.0398,
+          "days": 1249
+        },
+        "correlation_dimension": {
+          "within_day_variance_share": 0.0845,
+          "mean_within_day_std": 0.043284,
+          "overall_std": 0.162442,
+          "days": 1249
+        },
+        "spectral_slope": {
+          "within_day_variance_share": 0.1143,
+          "mean_within_day_std": 0.045902,
+          "overall_std": 0.166228,
+          "days": 1249
+        }
+      },
+      "pearson_among": {
+        "hurst_rs": {
+          "hurst_rs": 1.0,
+          "fractal_dimension_graph": -1.0,
+          "box_counting_dimension": -0.2141,
+          "variogram_hurst": 0.46,
+          "hurst_spectrum_width": -0.0206,
+          "correlation_dimension": -0.0431,
+          "spectral_slope": -0.4271
+        },
+        "fractal_dimension_graph": {
+          "hurst_rs": -1.0,
+          "fractal_dimension_graph": 1.0,
+          "box_counting_dimension": 0.2141,
+          "variogram_hurst": -0.46,
+          "hurst_spectrum_width": 0.0206,
+          "correlation_dimension": 0.0431,
+          "spectral_slope": 0.4271
+        },
+        "box_counting_dimension": {
+          "hurst_rs": -0.2141,
+          "fractal_dimension_graph": 0.2141,
+          "box_counting_dimension": 1.0,
+          "variogram_hurst": -0.4813,
+          "hurst_spectrum_width": -0.2556,
+          "correlation_dimension": 0.2009,
+          "spectral_slope": 0.2265
+        },
+        "variogram_hurst": {
+          "hurst_rs": 0.46,
+          "fractal_dimension_graph": -0.46,
+          "box_counting_dimension": -0.4813,
+          "variogram_hurst": 1.0,
+          "hurst_spectrum_width": 0.0266,
+          "correlation_dimension": -0.5369,
+          "spectral_slope": -0.5275
+        },
+        "hurst_spectrum_width": {
+          "hurst_rs": -0.0206,
+          "fractal_dimension_graph": 0.0206,
+          "box_counting_dimension": -0.2556,
+          "variogram_hurst": 0.0266,
+          "hurst_spectrum_width": 1.0,
+          "correlation_dimension": 0.0116,
+          "spectral_slope": -0.0284
+        },
+        "correlation_dimension": {
+          "hurst_rs": -0.0431,
+          "fractal_dimension_graph": 0.0431,
+          "box_counting_dimension": 0.2009,
+          "variogram_hurst": -0.5369,
+          "hurst_spectrum_width": 0.0116,
+          "correlation_dimension": 1.0,
+          "spectral_slope": 0.2042
+        },
+        "spectral_slope": {
+          "hurst_rs": -0.4271,
+          "fractal_dimension_graph": 0.4271,
+          "box_counting_dimension": 0.2265,
+          "variogram_hurst": -0.5275,
+          "hurst_spectrum_width": -0.0284,
+          "correlation_dimension": 0.2042,
+          "spectral_slope": 1.0
+        }
+      },
+      "spearman_among": {
+        "hurst_rs": {
+          "hurst_rs": 1.0,
+          "fractal_dimension_graph": -1.0,
+          "box_counting_dimension": -0.2121,
+          "variogram_hurst": 0.4275,
+          "hurst_spectrum_width": -0.0293,
+          "correlation_dimension": -0.0238,
+          "spectral_slope": -0.3914
+        },
+        "fractal_dimension_graph": {
+          "hurst_rs": -1.0,
+          "fractal_dimension_graph": 1.0,
+          "box_counting_dimension": 0.2121,
+          "variogram_hurst": -0.4275,
+          "hurst_spectrum_width": 0.0293,
+          "correlation_dimension": 0.0238,
+          "spectral_slope": 0.3914
+        },
+        "box_counting_dimension": {
+          "hurst_rs": -0.2121,
+          "fractal_dimension_graph": 0.2121,
+          "box_counting_dimension": 1.0,
+          "variogram_hurst": -0.4816,
+          "hurst_spectrum_width": -0.2371,
+          "correlation_dimension": 0.204,
+          "spectral_slope": 0.2345
+        },
+        "variogram_hurst": {
+          "hurst_rs": 0.4275,
+          "fractal_dimension_graph": -0.4275,
+          "box_counting_dimension": -0.4816,
+          "variogram_hurst": 1.0,
+          "hurst_spectrum_width": 0.0316,
+          "correlation_dimension": -0.4998,
+          "spectral_slope": -0.492
+        },
+        "hurst_spectrum_width": {
+          "hurst_rs": -0.0293,
+          "fractal_dimension_graph": 0.0293,
+          "box_counting_dimension": -0.2371,
+          "variogram_hurst": 0.0316,
+          "hurst_spectrum_width": 1.0,
+          "correlation_dimension": 0.0304,
+          "spectral_slope": -0.0057
+        },
+        "correlation_dimension": {
+          "hurst_rs": -0.0238,
+          "fractal_dimension_graph": 0.0238,
+          "box_counting_dimension": 0.204,
+          "variogram_hurst": -0.4998,
+          "hurst_spectrum_width": 0.0304,
+          "correlation_dimension": 1.0,
+          "spectral_slope": 0.1685
+        },
+        "spectral_slope": {
+          "hurst_rs": -0.3914,
+          "fractal_dimension_graph": 0.3914,
+          "box_counting_dimension": 0.2345,
+          "variogram_hurst": -0.492,
+          "hurst_spectrum_width": -0.0057,
+          "correlation_dimension": 0.1685,
+          "spectral_slope": 1.0
+        }
+      }
+    },
+    "96": {
+      "rows": 24097,
+      "medians": {
+        "hurst_rs": 0.597029,
+        "fractal_dimension_graph": 1.402971,
+        "box_counting_dimension": 1.099801,
+        "variogram_hurst": 0.465527,
+        "hurst_spectrum_width": 0.095206,
+        "correlation_dimension": 1.054027,
+        "spectral_slope": 0.014729
+      },
+      "vs_reference": {
+        "hurst_rs": {
+          "rv5": {
+            "pearson": -0.0553,
+            "spearman": -0.059
+          },
+          "rv24": {
+            "pearson": -0.0558,
+            "spearman": -0.0719
+          },
+          "atr_ratio": {
+            "pearson": -0.0855,
+            "spearman": -0.0913
+          }
+        },
+        "fractal_dimension_graph": {
+          "rv5": {
+            "pearson": 0.0553,
+            "spearman": 0.059
+          },
+          "rv24": {
+            "pearson": 0.0558,
+            "spearman": 0.0719
+          },
+          "atr_ratio": {
+            "pearson": 0.0855,
+            "spearman": 0.0913
+          }
+        },
+        "box_counting_dimension": {
+          "rv5": {
+            "pearson": 0.0319,
+            "spearman": 0.0458
+          },
+          "rv24": {
+            "pearson": -0.0078,
+            "spearman": -0.0229
+          },
+          "atr_ratio": {
+            "pearson": 0.0317,
+            "spearman": -0.0028
+          }
+        },
+        "variogram_hurst": {
+          "rv5": {
+            "pearson": -0.0834,
+            "spearman": -0.0645
+          },
+          "rv24": {
+            "pearson": -0.091,
+            "spearman": -0.0999
+          },
+          "atr_ratio": {
+            "pearson": -0.0502,
+            "spearman": -0.0581
+          }
+        },
+        "hurst_spectrum_width": {
+          "rv5": {
+            "pearson": 0.1189,
+            "spearman": 0.0507
+          },
+          "rv24": {
+            "pearson": 0.2289,
+            "spearman": 0.1709
+          },
+          "atr_ratio": {
+            "pearson": 0.1245,
+            "spearman": 0.139
+          }
+        },
+        "correlation_dimension": {
+          "rv5": {
+            "pearson": 0.0095,
+            "spearman": 0.0145
+          },
+          "rv24": {
+            "pearson": -0.0037,
+            "spearman": 0.0324
+          },
+          "atr_ratio": {
+            "pearson": 0.0053,
+            "spearman": 0.0301
+          }
+        },
+        "spectral_slope": {
+          "rv5": {
+            "pearson": 0.0688,
+            "spearman": 0.0534
+          },
+          "rv24": {
+            "pearson": 0.0801,
+            "spearman": 0.0706
+          },
+          "atr_ratio": {
+            "pearson": 0.0807,
+            "spearman": 0.0637
+          }
+        }
+      },
+      "within_day": {
+        "hurst_rs": {
+          "within_day_variance_share": 0.2556,
+          "mean_within_day_std": 0.043914,
+          "overall_std": 0.098362,
+          "days": 1249
+        },
+        "fractal_dimension_graph": {
+          "within_day_variance_share": 0.2556,
+          "mean_within_day_std": 0.043914,
+          "overall_std": 0.098362,
+          "days": 1249
+        },
+        "box_counting_dimension": {
+          "within_day_variance_share": 0.4754,
+          "mean_within_day_std": 0.026259,
+          "overall_std": 0.044939,
+          "days": 1249
+        },
+        "variogram_hurst": {
+          "within_day_variance_share": 0.0703,
+          "mean_within_day_std": 0.019624,
+          "overall_std": 0.100207,
+          "days": 1249
+        },
+        "hurst_spectrum_width": {
+          "within_day_variance_share": 0.1008,
+          "mean_within_day_std": 0.010822,
+          "overall_std": 0.049346,
+          "days": 1249
+        },
+        "correlation_dimension": {
+          "within_day_variance_share": 0.2246,
+          "mean_within_day_std": 0.099167,
+          "overall_std": 0.227412,
+          "days": 1249
+        },
+        "spectral_slope": {
+          "within_day_variance_share": 0.1898,
+          "mean_within_day_std": 0.089644,
+          "overall_std": 0.249557,
+          "days": 1249
+        }
+      },
+      "pearson_among": {
+        "hurst_rs": {
+          "hurst_rs": 1.0,
+          "fractal_dimension_graph": -1.0,
+          "box_counting_dimension": -0.1286,
+          "variogram_hurst": 0.3925,
+          "hurst_spectrum_width": 0.0206,
+          "correlation_dimension": -0.1163,
+          "spectral_slope": -0.4075
+        },
+        "fractal_dimension_graph": {
+          "hurst_rs": -1.0,
+          "fractal_dimension_graph": 1.0,
+          "box_counting_dimension": 0.1286,
+          "variogram_hurst": -0.3925,
+          "hurst_spectrum_width": -0.0206,
+          "correlation_dimension": 0.1163,
+          "spectral_slope": 0.4075
+        },
+        "box_counting_dimension": {
+          "hurst_rs": -0.1286,
+          "fractal_dimension_graph": 0.1286,
+          "box_counting_dimension": 1.0,
+          "variogram_hurst": 0.0759,
+          "hurst_spectrum_width": -0.2514,
+          "correlation_dimension": -0.3004,
+          "spectral_slope": 0.1032
+        },
+        "variogram_hurst": {
+          "hurst_rs": 0.3925,
+          "fractal_dimension_graph": -0.3925,
+          "box_counting_dimension": 0.0759,
+          "variogram_hurst": 1.0,
+          "hurst_spectrum_width": 0.1649,
+          "correlation_dimension": -0.6034,
+          "spectral_slope": -0.424
+        },
+        "hurst_spectrum_width": {
+          "hurst_rs": 0.0206,
+          "fractal_dimension_graph": -0.0206,
+          "box_counting_dimension": -0.2514,
+          "variogram_hurst": 0.1649,
+          "hurst_spectrum_width": 1.0,
+          "correlation_dimension": -0.0736,
+          "spectral_slope": -0.0694
+        },
+        "correlation_dimension": {
+          "hurst_rs": -0.1163,
+          "fractal_dimension_graph": 0.1163,
+          "box_counting_dimension": -0.3004,
+          "variogram_hurst": -0.6034,
+          "hurst_spectrum_width": -0.0736,
+          "correlation_dimension": 1.0,
+          "spectral_slope": 0.1923
+        },
+        "spectral_slope": {
+          "hurst_rs": -0.4075,
+          "fractal_dimension_graph": 0.4075,
+          "box_counting_dimension": 0.1032,
+          "variogram_hurst": -0.424,
+          "hurst_spectrum_width": -0.0694,
+          "correlation_dimension": 0.1923,
+          "spectral_slope": 1.0
+        }
+      },
+      "spearman_among": {
+        "hurst_rs": {
+          "hurst_rs": 1.0,
+          "fractal_dimension_graph": -1.0,
+          "box_counting_dimension": -0.1396,
+          "variogram_hurst": 0.3782,
+          "hurst_spectrum_width": 0.0166,
+          "correlation_dimension": -0.1049,
+          "spectral_slope": -0.3939
+        },
+        "fractal_dimension_graph": {
+          "hurst_rs": -1.0,
+          "fractal_dimension_graph": 1.0,
+          "box_counting_dimension": 0.1396,
+          "variogram_hurst": -0.3782,
+          "hurst_spectrum_width": -0.0166,
+          "correlation_dimension": 0.1049,
+          "spectral_slope": 0.3939
+        },
+        "box_counting_dimension": {
+          "hurst_rs": -0.1396,
+          "fractal_dimension_graph": 0.1396,
+          "box_counting_dimension": 1.0,
+          "variogram_hurst": 0.0589,
+          "hurst_spectrum_width": -0.2547,
+          "correlation_dimension": -0.2936,
+          "spectral_slope": 0.1109
+        },
+        "variogram_hurst": {
+          "hurst_rs": 0.3782,
+          "fractal_dimension_graph": -0.3782,
+          "box_counting_dimension": 0.0589,
+          "variogram_hurst": 1.0,
+          "hurst_spectrum_width": 0.1756,
+          "correlation_dimension": -0.5876,
+          "spectral_slope": -0.3719
+        },
+        "hurst_spectrum_width": {
+          "hurst_rs": 0.0166,
+          "fractal_dimension_graph": -0.0166,
+          "box_counting_dimension": -0.2547,
+          "variogram_hurst": 0.1756,
+          "hurst_spectrum_width": 1.0,
+          "correlation_dimension": -0.0478,
+          "spectral_slope": -0.0536
+        },
+        "correlation_dimension": {
+          "hurst_rs": -0.1049,
+          "fractal_dimension_graph": 0.1049,
+          "box_counting_dimension": -0.2936,
+          "variogram_hurst": -0.5876,
+          "hurst_spectrum_width": -0.0478,
+          "correlation_dimension": 1.0,
+          "spectral_slope": 0.1567
+        },
+        "spectral_slope": {
+          "hurst_rs": -0.3939,
+          "fractal_dimension_graph": 0.3939,
+          "box_counting_dimension": 0.1109,
+          "variogram_hurst": -0.3719,
+          "hurst_spectrum_width": -0.0536,
+          "correlation_dimension": 0.1567,
+          "spectral_slope": 1.0
+        }
+      }
+    },
+    "48": {
+      "rows": 24097,
+      "medians": {
+        "hurst_rs": 0.628728,
+        "fractal_dimension_graph": 1.371272,
+        "box_counting_dimension": 0.901933,
+        "variogram_hurst": 0.424765,
+        "hurst_spectrum_width": 0.109255,
+        "correlation_dimension": null,
+        "spectral_slope": 0.014808
+      },
+      "vs_reference": {
+        "hurst_rs": {
+          "rv5": {
+            "pearson": -0.0147,
+            "spearman": -0.024
+          },
+          "rv24": {
+            "pearson": -0.0209,
+            "spearman": -0.0298
+          },
+          "atr_ratio": {
+            "pearson": -0.0139,
+            "spearman": -0.0239
+          }
+        },
+        "fractal_dimension_graph": {
+          "rv5": {
+            "pearson": 0.0147,
+            "spearman": 0.024
+          },
+          "rv24": {
+            "pearson": 0.0209,
+            "spearman": 0.0298
+          },
+          "atr_ratio": {
+            "pearson": 0.0139,
+            "spearman": 0.0239
+          }
+        },
+        "box_counting_dimension": {
+          "rv5": {
+            "pearson": -0.0171,
+            "spearman": -0.011
+          },
+          "rv24": {
+            "pearson": -0.0287,
+            "spearman": -0.0421
+          },
+          "atr_ratio": {
+            "pearson": -0.0301,
+            "spearman": -0.0298
+          }
+        },
+        "variogram_hurst": {
+          "rv5": {
+            "pearson": -0.0686,
+            "spearman": -0.0515
+          },
+          "rv24": {
+            "pearson": -0.0252,
+            "spearman": -0.0118
+          },
+          "atr_ratio": {
+            "pearson": -0.0083,
+            "spearman": 0.0039
+          }
+        },
+        "hurst_spectrum_width": {
+          "rv5": {
+            "pearson": 0.1034,
+            "spearman": 0.0384
+          },
+          "rv24": {
+            "pearson": 0.2759,
+            "spearman": 0.2102
+          },
+          "atr_ratio": {
+            "pearson": 0.1076,
+            "spearman": 0.1037
+          }
+        },
+        "correlation_dimension": {
+          "rv5": {
+            "pearson": null,
+            "spearman": null
+          },
+          "rv24": {
+            "pearson": null,
+            "spearman": null
+          },
+          "atr_ratio": {
+            "pearson": null,
+            "spearman": null
+          }
+        },
+        "spectral_slope": {
+          "rv5": {
+            "pearson": 0.0552,
+            "spearman": 0.0429
+          },
+          "rv24": {
+            "pearson": 0.0445,
+            "spearman": 0.0486
+          },
+          "atr_ratio": {
+            "pearson": 0.033,
+            "spearman": 0.0325
+          }
+        }
+      },
+      "within_day": {
+        "hurst_rs": {
+          "within_day_variance_share": 0.3697,
+          "mean_within_day_std": 0.087998,
+          "overall_std": 0.157031,
+          "days": 1249
+        },
+        "fractal_dimension_graph": {
+          "within_day_variance_share": 0.3697,
+          "mean_within_day_std": 0.087998,
+          "overall_std": 0.157031,
+          "days": 1249
+        },
+        "box_counting_dimension": {
+          "within_day_variance_share": 0.5462,
+          "mean_within_day_std": 0.035907,
+          "overall_std": 0.054508,
+          "days": 1249
+        },
+        "variogram_hurst": {
+          "within_day_variance_share": 0.2192,
+          "mean_within_day_std": 0.055935,
+          "overall_std": 0.148395,
+          "days": 1249
+        },
+        "hurst_spectrum_width": {
+          "within_day_variance_share": 0.2293,
+          "mean_within_day_std": 0.023486,
+          "overall_std": 0.060919,
+          "days": 1249
+        },
+        "correlation_dimension": null,
+        "spectral_slope": {
+          "within_day_variance_share": 0.3265,
+          "mean_within_day_std": 0.179154,
+          "overall_std": 0.372436,
+          "days": 1249
+        }
+      },
+      "pearson_among": {
+        "hurst_rs": {
+          "hurst_rs": 1.0,
+          "fractal_dimension_graph": -1.0,
+          "box_counting_dimension": -0.0017,
+          "variogram_hurst": 0.2355,
+          "hurst_spectrum_width": 0.0842,
+          "correlation_dimension": null,
+          "spectral_slope": -0.3811
+        },
+        "fractal_dimension_graph": {
+          "hurst_rs": -1.0,
+          "fractal_dimension_graph": 1.0,
+          "box_counting_dimension": 0.0017,
+          "variogram_hurst": -0.2355,
+          "hurst_spectrum_width": -0.0842,
+          "correlation_dimension": null,
+          "spectral_slope": 0.3811
+        },
+        "box_counting_dimension": {
+          "hurst_rs": -0.0017,
+          "fractal_dimension_graph": 0.0017,
+          "box_counting_dimension": 1.0,
+          "variogram_hurst": 0.5323,
+          "hurst_spectrum_width": 0.2039,
+          "correlation_dimension": null,
+          "spectral_slope": -0.0694
+        },
+        "variogram_hurst": {
+          "hurst_rs": 0.2355,
+          "fractal_dimension_graph": -0.2355,
+          "box_counting_dimension": 0.5323,
+          "variogram_hurst": 1.0,
+          "hurst_spectrum_width": 0.4146,
+          "correlation_dimension": null,
+          "spectral_slope": -0.3022
+        },
+        "hurst_spectrum_width": {
+          "hurst_rs": 0.0842,
+          "fractal_dimension_graph": -0.0842,
+          "box_counting_dimension": 0.2039,
+          "variogram_hurst": 0.4146,
+          "hurst_spectrum_width": 1.0,
+          "correlation_dimension": null,
+          "spectral_slope": -0.087
+        },
+        "correlation_dimension": {
+          "hurst_rs": null,
+          "fractal_dimension_graph": null,
+          "box_counting_dimension": null,
+          "variogram_hurst": null,
+          "hurst_spectrum_width": null,
+          "correlation_dimension": null,
+          "spectral_slope": null
+        },
+        "spectral_slope": {
+          "hurst_rs": -0.3811,
+          "fractal_dimension_graph": 0.3811,
+          "box_counting_dimension": -0.0694,
+          "variogram_hurst": -0.3022,
+          "hurst_spectrum_width": -0.087,
+          "correlation_dimension": null,
+          "spectral_slope": 1.0
+        }
+      },
+      "spearman_among": {
+        "hurst_rs": {
+          "hurst_rs": 1.0,
+          "fractal_dimension_graph": -1.0,
+          "box_counting_dimension": -0.0162,
+          "variogram_hurst": 0.2291,
+          "hurst_spectrum_width": 0.0905,
+          "correlation_dimension": null,
+          "spectral_slope": -0.3751
+        },
+        "fractal_dimension_graph": {
+          "hurst_rs": -1.0,
+          "fractal_dimension_graph": 1.0,
+          "box_counting_dimension": 0.0162,
+          "variogram_hurst": -0.2291,
+          "hurst_spectrum_width": -0.0905,
+          "correlation_dimension": null,
+          "spectral_slope": 0.3751
+        },
+        "box_counting_dimension": {
+          "hurst_rs": -0.0162,
+          "fractal_dimension_graph": 0.0162,
+          "box_counting_dimension": 1.0,
+          "variogram_hurst": 0.5203,
+          "hurst_spectrum_width": 0.1858,
+          "correlation_dimension": null,
+          "spectral_slope": -0.0553
+        },
+        "variogram_hurst": {
+          "hurst_rs": 0.2291,
+          "fractal_dimension_graph": -0.2291,
+          "box_counting_dimension": 0.5203,
+          "variogram_hurst": 1.0,
+          "hurst_spectrum_width": 0.4406,
+          "correlation_dimension": null,
+          "spectral_slope": -0.2869
+        },
+        "hurst_spectrum_width": {
+          "hurst_rs": 0.0905,
+          "fractal_dimension_graph": -0.0905,
+          "box_counting_dimension": 0.1858,
+          "variogram_hurst": 0.4406,
+          "hurst_spectrum_width": 1.0,
+          "correlation_dimension": null,
+          "spectral_slope": -0.0567
+        },
+        "correlation_dimension": {
+          "hurst_rs": null,
+          "fractal_dimension_graph": null,
+          "box_counting_dimension": null,
+          "variogram_hurst": null,
+          "hurst_spectrum_width": null,
+          "correlation_dimension": null,
+          "spectral_slope": null
+        },
+        "spectral_slope": {
+          "hurst_rs": -0.3751,
+          "fractal_dimension_graph": 0.3751,
+          "box_counting_dimension": -0.0553,
+          "variogram_hurst": -0.2869,
+          "hurst_spectrum_width": -0.0567,
+          "correlation_dimension": null,
+          "spectral_slope": 1.0
+        }
+      }
+    }
+  }
+}
