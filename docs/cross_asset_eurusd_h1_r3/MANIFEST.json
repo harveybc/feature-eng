@@ -18,7 +18,7 @@
  "test_read": false,
  "test_start_closed": "2025-01-01 00:00:00+00:00",
  "file": "cross_asset_eurusd_h1_2020_2024.parquet",
- "file_sha256": "4a2be4e27dcd32c50aa21129b7ed89587d3402471b4c5da475770608de4942f2",
+ "file_sha256": "262e3f1af74b888e46134cd01a5021031745379aa612e5c42f2f1b77e968c59e",
  "columns": [
   "fx.gbpusd.ret_1",
   "fx.gbpusd.ret_4",
@@ -1198,9 +1198,9 @@
     ]
    ]
   },
-  "fx_f1_q": 0.1,
-  "fx_f2_q": 0.1,
-  "fx_f3_q": 0.1,
+  "fx_f1_q": 1.0,
+  "fx_f2_q": 1.0,
+  "fx_f3_q": 1.0,
   "daily_pca": {
    "columns": [
     "dly.us2y.chg_1d",

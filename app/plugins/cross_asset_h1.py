@@ -244,7 +244,7 @@ def kalman_local_trend(y: np.ndarray, q: float) -> tuple[np.ndarray, np.ndarray]
     return lvl, slp
 
 
-def kalman_q_mle(y: np.ndarray, grid=(1e-4, 1e-3, 1e-2, 1e-1)) -> float:
+def kalman_q_mle(y: np.ndarray, grid=(1e-4, 1e-3, 1e-2, 1e-1, 1.0, 10.0, 100.0)) -> float:
     """Pick q on TRAIN data by the one-step Gaussian prediction likelihood (unit observation noise scale)."""
     best, bq = -np.inf, grid[0]
     yy = y[np.isfinite(y)]
