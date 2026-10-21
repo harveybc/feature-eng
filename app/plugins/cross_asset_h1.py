@@ -196,16 +196,127 @@ def hourly_available(index: pd.DatetimeIndex) -> pd.DatetimeIndex:
     return pd.DatetimeIndex(index) + HOUR
 
 
-def daily_available(dates, lag_days: int = 2) -> pd.DatetimeIndex:
+def daily_available(dates, lag_days: int = 2, offset_hours: float | None = None) -> pd.DatetimeIndex:
+    """r2 default: date D + ``lag_days`` 00:00 UTC. r3 (D2, release time): D 00:00 UTC + ``offset_hours`` (declared
+    per source from its publication time, e.g. US close data 22 h, FRED H.15 yields 45 h = next day 21:00 UTC)."""
     d = pd.DatetimeIndex(pd.to_datetime(dates))
     d = d.tz_localize(None) if d.tz is not None else d
+    if offset_hours is not None:
+        return (d.normalize() + pd.Timedelta(hours=float(offset_hours))).tz_localize("UTC")
     return (d.normalize() + pd.Timedelta(days=lag_days)).tz_localize("UTC")
 
 
-def cot_available(asof_tuesdays) -> pd.DatetimeIndex:
+def cot_available(asof_tuesdays, offset_hours: float | None = None) -> pd.DatetimeIndex:
+    """r2: Tuesday + 4 days 00:00 UTC. r3: Tuesday 00:00 UTC + ``offset_hours`` (Friday 21:00 UTC = 93 h; the CFTC
+    publishes Friday 15:30 ET = 19:30/20:30 UTC)."""
     d = pd.DatetimeIndex(pd.to_datetime(asof_tuesdays))
     d = d.tz_localize(None) if d.tz is not None else d
+    if offset_hours is not None:
+        return (d.normalize() + pd.Timedelta(hours=float(offset_hours))).tz_localize("UTC")
     return (d.normalize() + pd.Timedelta(days=4)).tz_localize("UTC")
+
+
+# ----------------------------------------------------------------------------- D3 / D6: factors and causal Kalman channels
+def kalman_local_trend(y: np.ndarray, q: float) -> tuple[np.ndarray, np.ndarray]:
+    """Causal local-linear-trend Kalman FILTER (never smoothed) on a series with unit observation noise and state
+    noise q (level and slope): returns the filtered level and slope at each t using y[:t+1] only. NaN observations
+    are skipped (prediction only)."""
+    n = len(y)
+    lvl, slp = np.full(n, np.nan), np.full(n, np.nan)
+    x = None
+    P = None
+    F = np.array([[1.0, 1.0], [0.0, 1.0]])
+    Q = np.diag([q, q * q])
+    H = np.array([1.0, 0.0])
+    for t in range(n):
+        if x is None:
+            if np.isfinite(y[t]):
+                x, P = np.array([y[t], 0.0]), np.eye(2)
+            continue
+        x = F @ x
+        P = F @ P @ F.T + Q
+        if np.isfinite(y[t]):
+            S = H @ P @ H + 1.0
+            K = P @ H / S
+            x = x + K * (y[t] - H @ x)
+            P = P - np.outer(K, H) @ P
+        lvl[t], slp[t] = x
+    return lvl, slp
+
+
+def kalman_q_mle(y: np.ndarray, grid=(1e-4, 1e-3, 1e-2, 1e-1)) -> float:
+    """Pick q on TRAIN data by the one-step Gaussian prediction likelihood (unit observation noise scale)."""
+    best, bq = -np.inf, grid[0]
+    yy = y[np.isfinite(y)]
+    sd = np.std(np.diff(yy)) or 1.0
+    z = yy / sd
+    for q in grid:
+        lvl, slp = kalman_local_trend(z, q)
+        pred = (lvl + slp)[:-1]
+        e = z[1:] - pred
+        e = e[np.isfinite(e)]
+        ll = -0.5 * np.sum(np.log(2 * np.pi) + e ** 2)
+        if ll > best:
+            best, bq = ll, q
+    return float(bq)
+
+
+def pca_fit(R_fit: pd.DataFrame, k: int) -> dict:
+    """PCA loadings fitted on a PRE-GRID period (rows with every column present); frozen afterwards."""
+    X = R_fit.to_numpy(float)
+    ok = np.isfinite(X).all(1)
+    mu, sd = X[ok].mean(0), X[ok].std(0)
+    Z = (X[ok] - mu) / np.where(sd > 0, sd, 1)
+    _, sv, vt = np.linalg.svd(Z, full_matrices=False)
+    W = vt[:k].T
+    for j in range(k):                                   # sign convention: largest |loading| positive
+        if W[np.argmax(np.abs(W[:, j])), j] < 0:
+            W[:, j] = -W[:, j]
+    return {"columns": list(R_fit.columns), "mu": mu, "sd": sd, "W": W, "rows": int(ok.sum()),
+            "explained": (sv[:k] ** 2 / (sv ** 2).sum()).round(4).tolist()}
+
+
+def pca_apply(R: pd.DataFrame, fit: dict) -> pd.DataFrame:
+    X = R[fit["columns"]].to_numpy(float)
+    F = ((X - fit["mu"]) / np.where(fit["sd"] > 0, fit["sd"], 1)) @ fit["W"]
+    F[~np.isfinite(X).all(1)] = np.nan
+    return pd.DataFrame(F, index=R.index, columns=[f"f{j + 1}" for j in range(fit["W"].shape[1])])
+
+
+def factor_features(grid_start, per_pair: dict, fit_returns: pd.DataFrame, eur_close_grid: pd.Series,
+                    daily_grid: pd.DataFrame | None, daily_fit: pd.DataFrame | None, k_fx: int = 3, k_daily: int = 2):
+    """D3: PCA factors of the six pairs' one-bar grid returns and of the daily cross-asset innovations, with loadings
+    and Kalman noise ratios fitted ONLY on the pre-grid period (sources' own history, before the first grid bar), so
+    every grid value is a function of data available at its decision; 4/24-bar sums and a causal Kalman slope of the
+    cumulated factor. D6: causal Kalman local-trend slope of the EURUSD grid log close at three fixed speeds."""
+    out, info = {}, {}
+    fx_fit = pca_fit(fit_returns, k_fx)
+    info["fx_pca"] = {k: v for k, v in fx_fit.items() if k in ("columns", "rows", "explained")} | {"W": fx_fit["W"].round(4).tolist()}
+    R1 = pd.DataFrame({k: per_pair[k][f"fx.{k}.ret_1"] for k in fx_fit["columns"]})
+    F = pca_apply(R1, fx_fit)
+    Ff = pca_apply(fit_returns, fx_fit)
+    for c in F.columns:
+        f = F[c]
+        out[f"fac.fx_{c}.ret_1"] = f
+        out[f"fac.fx_{c}.ret_4"] = f.rolling(4, min_periods=4).sum()
+        out[f"fac.fx_{c}.ret_24"] = f.rolling(24, min_periods=24).sum()
+        q = kalman_q_mle(Ff[c].fillna(0.0).cumsum().to_numpy()[-20000:])
+        cum = f.fillna(0.0).cumsum().where(f.notna())
+        _, slope = kalman_local_trend(cum.to_numpy() / (np.nanstd(Ff[c]) or 1.0), q)
+        out[f"fac.fx_{c}.kalman_slope"] = slope
+        info[f"fx_{c}_q"] = q
+    if daily_grid is not None and daily_fit is not None and len(daily_fit.columns):
+        d_fit = pca_fit(daily_fit, k_daily)
+        info["daily_pca"] = {k: v for k, v in d_fit.items() if k in ("columns", "rows", "explained")} | {"W": d_fit["W"].round(4).tolist()}
+        Fd = pca_apply(daily_grid, d_fit)
+        for c in Fd.columns:
+            out[f"fac.daily_{c}"] = Fd[c]
+    lc = np.log(eur_close_grid.to_numpy(float))
+    scale = np.nanstd(np.diff(lc)[:24 * 250]) or 1.0          # first grid year of one-bar moves (scale only)
+    for name, q in (("fast", 1e-1), ("mid", 1e-2), ("slow", 1e-3)):
+        _, slope = kalman_local_trend(lc / scale, q)
+        out[f"kal.eurusd.slope_{name}"] = slope
+    return pd.DataFrame(out, index=grid_start), info
 
 
 # ----------------------------------------------------------------------------- feature metadata
@@ -213,7 +324,8 @@ def feature_meta(columns) -> list[dict]:
     out = []
     for c in columns:
         fam = c.split(".")[0]
-        rule = {"fx": "source bar starting at the grid bar (complete at the decision), lake clock re-localized to UTC; returns over EURUSD grid bars, NaN when a source bar is missing",
+        rule = {"fac": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+                "kal": "causal Kalman local-trend filter of the EURUSD grid closes <= t (never smoothed)","fx": "source bar starting at the grid bar (complete at the decision), lake clock re-localized to UTC; returns over EURUSD grid bars, NaN when a source bar is missing",
                 "btc": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
                 "dly": "daily value dated D available from D + 2 days 00:00 UTC",
                 "cot": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC"}[fam]
@@ -226,7 +338,8 @@ def feature_meta(columns) -> list[dict]:
 class Plugin:
     """feature-eng plugin entry: builds the cross-asset frame on a given UTC hourly grid from pre-loaded sources."""
 
-    plugin_params = {"daily_lag_days": 2, "daily_max_stale_days": 7, "cot_max_stale_days": 14,
+    plugin_params = {"daily_lag_days": 2, "daily_max_stale_days": 7, "cot_max_stale_days": 14, "release_offset_hours": None,
+                     "factors": False, "factor_fit_start": "2015-01-01",
                      "min_share_lag0": 0.97, "min_median_corr": 0.98}
     plugin_debug_vars = list(plugin_params)
 
@@ -245,7 +358,8 @@ class Plugin:
         debug_info.update(self.get_debug_info())
 
     def build(self, grid_start: pd.DatetimeIndex, *, fx: dict[str, pd.DataFrame] | None = None, btc: pd.DataFrame | None = None,
-              daily: dict[str, tuple[pd.Series, str]] | None = None, cot: pd.DataFrame | None = None) -> pd.DataFrame:
+              daily: dict[str, tuple[pd.Series, str]] | None = None, cot: pd.DataFrame | None = None,
+              eur_close: pd.Series | None = None) -> pd.DataFrame:
         """Hourly sources are joined by EXACT bar start on the grid (missing bar -> NaN); daily / COT by availability.
         ``fx``: pair -> UTC-indexed OHLC frame (already re-localized); ``btc``: UTC-indexed Binance frame;
         ``daily``: name -> (date-indexed series, kind); ``cot``: raw CFTC frame. Returns grid-indexed features."""
@@ -258,12 +372,33 @@ class Plugin:
                 parts.append(composite(per, signs, name))
         if btc is not None:
             parts.append(btc_features(btc, grid_start))
+        offsets = p.get("release_offset_hours") or {}
+        dly_parts = []
         if daily:
             for name, (s, kind) in daily.items():
                 f = daily_features(s, name, kind)
-                parts.append(asof_join(grid_start, f, daily_available(f.index, p["daily_lag_days"]),
-                                       pd.Timedelta(days=p["daily_max_stale_days"])))
+                avail = daily_available(f.index, p["daily_lag_days"], offsets.get(name))
+                j = asof_join(grid_start, f, avail, pd.Timedelta(days=p["daily_max_stale_days"]))
+                parts.append(j)
+                dly_parts.append(j)
         if cot is not None:
             f = cot_features(cot)
-            parts.append(asof_join(grid_start, f, cot_available(f.index), pd.Timedelta(days=p["cot_max_stale_days"])))
+            parts.append(asof_join(grid_start, f, cot_available(f.index, offsets.get("cot")), pd.Timedelta(days=p["cot_max_stale_days"])))
+        if p.get("factors") and fx and eur_close is not None:
+            g0 = pd.DatetimeIndex(grid_start)[0]
+            f0 = pd.Timestamp(p["factor_fit_start"], tz="UTC")
+            own = {k: one_hour_returns(v["close"]) for k, v in fx.items()}
+            fit_ret = pd.concat(own, axis=1, join="inner")
+            fit_ret = fit_ret[(fit_ret.index >= f0) & (fit_ret.index < g0)]
+            dgrid = dfit = None
+            if dly_parts and daily:
+                D = pd.concat(dly_parts, axis=1)
+                dgrid = D[[c for c in D.columns if c.endswith(("chg_1d", "ret_1d"))]]
+                dd = pd.concat([daily_features(s_, nm, kd) for nm, (s_, kd) in daily.items()], axis=1)
+                dd = dd[[c for c in dgrid.columns]]
+                di = pd.DatetimeIndex(dd.index)
+                dfit = dd[(di >= f0.tz_localize(None)) & (di < g0.tz_localize(None))]
+            ff, self.factor_info = factor_features(grid_start, per, fit_ret, eur_close, dgrid, dfit)
+            self.factor_info["fit_period"] = [str(f0), str(g0)]
+            parts.append(ff)
         return pd.concat(parts, axis=1)

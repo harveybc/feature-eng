@@ -100,16 +100,25 @@ def admitted_grid(cfg: dict):
     return close.index, close
 
 
+_LAST_PLUGIN = None
+
+
 def build(cfg: dict, src: dict, grid) -> pd.DataFrame:
+    global _LAST_PLUGIN
     pl = CA.Plugin()
+    _LAST_PLUGIN = pl
     pl.set_params(**cfg.get("params", {}))
-    return pl.build(grid, fx=src["fx"], btc=src["btc"], daily=src["daily"], cot=src["cot"])
+    return pl.build(grid, fx=src["fx"], btc=src["btc"], daily=src["daily"], cot=src["cot"], eur_close=src.get("eur_close"))
+
+
+cfg_global: dict = {}
 
 
 def perturb_after(src: dict, cut: pd.Timestamp, seed: int = 7) -> dict:
     """Replace every source row AVAILABLE after ``cut`` by noise (same shape); availability rules as the plugin."""
     rng = np.random.default_rng(seed)
-    out = {"fx": {}, "daily": {}}
+    out = {"fx": {}, "daily": {}, "eur_close": src["eur_close"].where(~((src["eur_close"].index + CA.HOUR) > cut),
+                                                                    src["eur_close"] * np.exp(rng.normal(0, 0.01, len(src["eur_close"]))))}
     for k, df in src["fx"].items():
         d = df.copy()
         m = (d.index + CA.HOUR) > cut
@@ -122,11 +131,12 @@ def perturb_after(src: dict, cut: pd.Timestamp, seed: int = 7) -> dict:
     out["btc"] = b
     for name, (s, kind) in src["daily"].items():
         s2 = s.copy()
-        m = np.asarray(CA.daily_available(s2.index) > cut)
+        off = (cfg_global.get("params", {}).get("release_offset_hours") or {}).get(name)
+        m = np.asarray(CA.daily_available(s2.index, 2, off) > cut)
         s2[m] = s2[m] * (1 + rng.normal(0, 0.1, int(m.sum())))
         out["daily"][name] = (s2, kind)
     c = src["cot"].copy()
-    m = np.asarray(CA.cot_available(c["Date"]) > cut)
+    m = np.asarray(CA.cot_available(c["Date"], (cfg_global.get("params", {}).get("release_offset_hours") or {}).get("cot")) > cut)
     c.loc[m, "EUR_Net_Long"] = c["EUR_Net_Long"][m] + rng.integers(-50000, 50000, int(m.sum()))
     out["cot"] = c
     return out
@@ -137,10 +147,12 @@ def main():
     ap.add_argument("--config", required=True)
     a = ap.parse_args()
     cfg = json.loads(Path(a.config).read_text())
+    cfg_global.update(cfg)
     out_dir = Path(cfg["output_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
     grid, adm_close = admitted_grid(cfg)
     src = load_sources(cfg)
+    src["eur_close"] = adm_close.reindex(grid)                       # D6 channel input (admitted EURUSD, causal filter)
     # clock gate on the HistData EURUSD (re-localized exactly as the other pairs)
     root = Path(cfg["financial_data_root"])
     g = cfg["clock_gate"]
@@ -185,6 +197,7 @@ def main():
                 "source_pins": src["pins"], "params": CA.Plugin().plugin_params | {k: v for k, v in cfg.get("params", {}).items() if k != "hourly_max_stale_hours"},
                 "revision": "r2 2026-10-20: hourly features on the EURUSD grid by exact bar start (no span across a missing source bar); clock gate on exactly-one-hour returns (Musashi finding: HistData lacks 675 bars in 2023H1; shared OHLC identical)",
                 "clock_gate": gate, "future_perturbation": checks, "coverage_by_year": cov,
+                "factor_info": getattr(_LAST_PLUGIN, "factor_info", None),
                 "excluded": {"STLFSI4": "revised series; point-in-time leak already audited (I6N)",
                              "FRED DTWEX* / macro composites": "computed indices with revisions; not point-in-time",
                              "economic calendar 2020-2024 with consensus": "not available point-in-time (Investing.com export forbidden by its terms; FXMacroData only from 2024-12)"}}

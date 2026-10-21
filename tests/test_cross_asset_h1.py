@@ -97,3 +97,25 @@ def test_composite_signs():
              "usdchf": CA.hourly_features(up, "fx.usdchf"), "usdjpy": CA.hourly_features(up, "fx.usdjpy")}
     comp = CA.composite(feats, CA.USD_SIGN, "usd_strength")
     assert (comp["fx.usd_strength.ret_1"].dropna() > 0).all()        # USD rising on every leg -> positive
+
+
+def test_kalman_filter_is_causal_truncation_identity_and_pca_is_frozen():
+    rng = np.random.default_rng(4)
+    y = np.cumsum(rng.normal(0, 1, 600)) + np.linspace(0, 30, 600)
+    y[100:105] = np.nan
+    l1, s1 = CA.kalman_local_trend(y, 1e-2)
+    l2, s2 = CA.kalman_local_trend(y[:400], 1e-2)
+    assert np.allclose(l1[:400], l2, equal_nan=True) and np.allclose(s1[:400], s2, equal_nan=True)   # no look-ahead
+    yt = 0.5 * np.arange(300) + np.random.default_rng(5).normal(0, 0.2, 300)
+    _, st = CA.kalman_local_trend(yt, 1e-2)
+    assert abs(np.mean(st[200:]) - 0.5) < 0.05                                                      # tracks a clear trend
+    fit = pd.DataFrame(rng.normal(size=(500, 6)), columns=list("abcdef"))
+    fit["b"] = fit["a"] * 0.9 + rng.normal(0, 0.1, 500)
+    pf = CA.pca_fit(fit, 2)
+    new = pd.DataFrame(rng.normal(size=(50, 6)), columns=list("abcdef"))
+    F1 = CA.pca_apply(new, pf)
+    new2 = new.copy()
+    new2.iloc[30:] *= 10                                              # later rows change nothing earlier
+    F2 = CA.pca_apply(new2, pf)
+    assert np.allclose(F1.iloc[:30], F2.iloc[:30])
+    assert pf["W"][:, 0][np.argmax(np.abs(pf["W"][:, 0]))] > 0
