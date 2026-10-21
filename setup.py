@@ -16,7 +16,8 @@ setup(
             'direction_labels=app.plugins.direction_labels:Plugin',
             'ssa=app.plugins.ssa:Plugin',
             'fft=app.plugins.fft:Plugin',
-            'causal_fractal=app.plugins.causal_fractal:Plugin'
+            'causal_fractal=app.plugins.causal_fractal:Plugin',
+            'cross_asset_h1=app.plugins.cross_asset_h1:Plugin'
         ]
     },
     install_requires=[

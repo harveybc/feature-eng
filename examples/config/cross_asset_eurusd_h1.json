@@ -1,0 +1,34 @@
+{
+  "plugin": "cross_asset_h1",
+  "financial_data_root": "/home/harveybc/Documents/GitHub/financial-data",
+  "admitted": {"file": "/var/tmp/fs-timing/admitted/eurusd.parquet",
+               "sha256": "c80847bb149c7af1ad50e42301b5cd70608e6c37702ce8cc6a7b9eb70f36d2ca",
+               "time_column": "timestamp", "close_column": "BidClose"},
+  "grid_start": "2020-01-01",
+  "fx": {
+    "gbpusd": {"file": "market_data/forex/g10/gbpusd/1h.parquet", "sha256": "1f592325c162459ccf68a5cb75df4f72a47b3c8b6430a48a67c73e206771ab88"},
+    "usdchf": {"file": "market_data/forex/g10/usdchf/1h.parquet", "sha256": "d066d3dc64414706956d69a1659db8c651cb7fa03a51e195fdd8c66e529b22db"},
+    "usdjpy": {"file": "market_data/forex/g10/usdjpy/1h.parquet", "sha256": "1d93daa0a55290220a612098c427ec07e0b0996738e859288d2af91199018fd7"},
+    "eurgbp": {"file": "market_data/forex/g10/eurgbp/1h.parquet", "sha256": "a584c80adff84fdff5be829ef360e0c3ab2ece7abeb32dc0dae95445fff7ffa4"},
+    "eurjpy": {"file": "market_data/forex/g10/eurjpy/1h.parquet", "sha256": "36b2b48ffcb71bc64543e87e98359fd73fe9ec65950cbe322597e4b067e81977"},
+    "audusd": {"file": "market_data/forex/g10/audusd/1h.parquet", "sha256": "74ebc93e4858e909f93159ac4872ba3bc28a21c9478d36382eb379c7759d8752"}
+  },
+  "clock_gate": {"file": "market_data/forex/g10/eurusd/1h.parquet", "sha256": "c6628375b2872f16dcdbd6b1b90ed8e68bc5bdd852efdef01f2515b8712d4e2e",
+                 "window": ["2020-01-01", "2025-01-01"]},
+  "btc": {"file": "market_data/crypto/spot_top50/btcusdt/1h.parquet", "sha256": "9cfc25cf198e8122c8f1db7573e39257d9e9386e79c1e9c8137a38da05715760"},
+  "daily": {
+    "us2y":   {"file": "macro_economic/fred/rates/dgs2/observations.parquet", "sha256": "024b8547164d21ad0f21c5703c0e24eaabcb9bcf700bc91e01aea925d772c2c9", "date_column": "date", "value_column": "value", "kind": "yield"},
+    "us10y":  {"file": "macro_economic/fred/rates/dgs10/observations.parquet", "sha256": "8c3ec4c208a4824356c9bd42f32dc28fa414b6854e635d8f9f6abb2ac9e60919", "date_column": "date", "value_column": "value", "kind": "yield"},
+    "us10y2y":{"file": "macro_economic/fred/rates/t10y2y/observations.parquet", "sha256": "3562dd0c9c18f7d0d0ece4fef99ba82d749c4aa192da081c0015fcd567283981", "date_column": "date", "value_column": "value", "kind": "yield"},
+    "vix":    {"file": "market_data/equities/us_indices/vix/daily.parquet", "sha256": "e86f10f8ab79873fde2b599f99198a16e45d6761396c8c354d8913dba8940256", "date_column": "Date", "value_column": "Close", "kind": "vol"},
+    "spx":    {"file": "market_data/equities/us_indices/gspc/daily.parquet", "sha256": "74ad8c9a01c3e790a941b8c90b776a8acd536033e0762af74f74ddb0a1e99f22", "date_column": "Date", "value_column": "Close", "kind": "price"},
+    "dax":    {"file": "market_data/equities/global_indices/gdaxi/daily.parquet", "sha256": "a9b28d374a7fe687de3ce3d91f588745afb9b4edf877965b58f75f26069da313", "date_column": "Date", "value_column": "Close", "kind": "price"},
+    "gold":   {"file": "market_data/commodities/precious_metals/gc_f/daily.parquet", "sha256": "4d793e84e905492133169b629b1e8ba4b60bb9a95a878ee9bb1096a68145507d", "date_column": "Date", "value_column": "Close", "kind": "price"},
+    "oil":    {"file": "market_data/commodities/energy/cl_f/daily.parquet", "sha256": "d5336819eb42310f3db116ad2cf92224c67fb8dfd7c206890594f9ba8a2d2c78", "date_column": "Date", "value_column": "Close", "kind": "price"}
+  },
+  "cot": {"file": "trading_research/project2/part_II_redux/data/raw/cftc/eur_weekly_2000_2025.csv", "sha256": "0e9eb504965c16433518d3394d4a82805e7465272d9645caaa5da59a8c293cc2"},
+  "params": {"daily_lag_days": 2, "hourly_max_stale_hours": 3, "daily_max_stale_days": 7, "cot_max_stale_days": 14, "min_share_lag0": 0.97, "min_median_corr": 0.98},
+  "perturbation_cuts": ["2021-06-15T13:00:00Z", "2023-03-01T08:00:00Z"],
+  "output_dir": "/var/tmp/features-candidates/eurusd_h1_cross_asset",
+  "manifest_copy": "docs/cross_asset_eurusd_h1/MANIFEST.json"
+}
