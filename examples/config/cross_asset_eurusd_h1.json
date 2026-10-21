@@ -27,7 +27,7 @@
     "oil":    {"file": "market_data/commodities/energy/cl_f/daily.parquet", "sha256": "d5336819eb42310f3db116ad2cf92224c67fb8dfd7c206890594f9ba8a2d2c78", "date_column": "Date", "value_column": "Close", "kind": "price"}
   },
   "cot": {"file": "trading_research/project2/part_II_redux/data/raw/cftc/eur_weekly_2000_2025.csv", "sha256": "0e9eb504965c16433518d3394d4a82805e7465272d9645caaa5da59a8c293cc2"},
-  "params": {"daily_lag_days": 2, "hourly_max_stale_hours": 3, "daily_max_stale_days": 7, "cot_max_stale_days": 14, "min_share_lag0": 0.97, "min_median_corr": 0.98},
+  "params": {"daily_lag_days": 2, "daily_max_stale_days": 7, "cot_max_stale_days": 14, "min_share_lag0": 0.97, "min_median_corr": 0.98},
   "perturbation_cuts": ["2021-06-15T13:00:00Z", "2023-03-01T08:00:00Z"],
   "output_dir": "/var/tmp/features-candidates/eurusd_h1_cross_asset",
   "manifest_copy": "docs/cross_asset_eurusd_h1/MANIFEST.json"

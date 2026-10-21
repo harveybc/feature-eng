@@ -63,14 +63,22 @@ def relocalize_new_york(df: pd.DataFrame, time_col: str = "datetime") -> pd.Data
     return out
 
 
+def one_hour_returns(close: pd.Series) -> pd.Series:
+    """Log return of each bar over EXACTLY one hour: NaN unless the previous observation is exactly 1 h earlier
+    (a missing source bar must never turn a multi-hour move into a "1 h" return; Musashi finding 2026-10-20)."""
+    c = close.sort_index()
+    r = np.log(c).diff()
+    gap = c.index.to_series().diff()
+    return r.where(gap == HOUR)
+
+
 def clock_gate(hist_close: pd.Series, admitted_close: pd.Series, *, lags=range(-2, 3), min_share_lag0: float = 0.97,
                min_median_corr: float = 0.98, min_rows: int = 40) -> dict:
-    """WEEKLY alignment test of two UTC-indexed close series (hourly log returns): for every ISO week with enough
+    """WEEKLY alignment test of two UTC-indexed close series (log returns over EXACTLY one hour in each feed): for every ISO week with enough
     joint rows, the lag (hours) maximising the correlation. Refuses unless lag 0 wins in >= ``min_share_lag0`` of the
-    weeks and the median weekly lag-0 correlation is >= ``min_median_corr``. A week where the vendors' VALUES differ
-    lowers its correlation at every lag but does not move the best lag; a clock error moves it."""
-    a = np.log(admitted_close).diff()
-    h = np.log(hist_close).diff()
+    weeks and the median weekly lag-0 correlation is >= ``min_median_corr``. A clock error moves the best lag."""
+    a = one_hour_returns(admitted_close)
+    h = one_hour_returns(hist_close)
     weeks, best = [], []
     iso = a.index.isocalendar()
     key = pd.Series(iso.year.to_numpy().astype(int) * 100 + iso.week.to_numpy().astype(int), index=a.index)
@@ -101,9 +109,17 @@ def clock_gate(hist_close: pd.Series, admitted_close: pd.Series, *, lags=range(-
 
 
 # ----------------------------------------------------------------------------- per-source trailing features
+def on_grid(close: pd.Series, grid_start: pd.DatetimeIndex) -> pd.Series:
+    """The source close at EXACTLY each grid bar start (UTC); a source bar missing at that start stays NaN (no fill)."""
+    c = close[~close.index.duplicated(keep="first")]
+    return c.reindex(pd.DatetimeIndex(grid_start))
+
+
 def hourly_features(close: pd.Series, prefix: str) -> pd.DataFrame:
-    """Trailing log returns over 1/4/24 observed bars and 24-bar realized volatility, on the source's own bars.
-    Index = source bar start (UTC); the value is known at bar close (start + 1 h)."""
+    """On the EURUSD admitted grid (observed market bars; closures are part of the grid, not gaps): trailing log
+    returns over 1/4/24 grid bars and the 24-bar realized volatility. A missing source bar at either end of a
+    return makes it NaN; rv_24 needs all 24 one-bar returns. The value at grid bar t uses the source bar that
+    starts at t (complete at the decision t + 1 h)."""
     lc = np.log(close.astype(float))
     r1 = lc.diff()
     out = {f"{prefix}.ret_{w}": lc.diff(w) for w in HOURLY_WINDOWS}
@@ -112,22 +128,22 @@ def hourly_features(close: pd.Series, prefix: str) -> pd.DataFrame:
 
 
 def composite(feats: dict[str, pd.DataFrame], signs: dict[str, float], name: str) -> pd.DataFrame:
-    """Signed mean of the legs' trailing returns on the union of their bar starts (each leg forward-filled at most
-    one bar so a single missing leg-bar does not void the composite; values stay trailing)."""
+    """Signed mean of the legs' grid returns; NaN when any leg is missing at that bar (no fill)."""
     cols = {}
     for w in HOURLY_WINDOWS:
         legs = [signs[p] * feats[p][f"fx.{p}.ret_{w}"] for p in signs if p in feats]
-        frame = pd.concat(legs, axis=1).sort_index().ffill(limit=1)
-        cols[f"fx.{name}.ret_{w}"] = frame.mean(axis=1, skipna=False)
+        cols[f"fx.{name}.ret_{w}"] = pd.concat(legs, axis=1).mean(axis=1, skipna=False)
     return pd.DataFrame(cols)
 
 
-def btc_features(df: pd.DataFrame) -> pd.DataFrame:
-    """BTCUSDT hourly: trailing returns, rv_24, and the 24-bar mean taker-buy share of volume."""
-    close = df["close"].astype(float)
+def btc_features(df: pd.DataFrame, grid_start: pd.DatetimeIndex) -> pd.DataFrame:
+    """BTCUSDT on the EURUSD grid: returns over grid bars (a weekend grid step spans the FX closure, declared), rv_24,
+    and the mean taker-buy share of the 24 source hours ending with the grid bar (24 consecutive source hours)."""
+    close = on_grid(df["close"].astype(float), grid_start)
     f = hourly_features(close, "btc")
     share = (df["taker_buy_base_volume"].astype(float) / df["volume"].astype(float).replace(0.0, np.nan))
-    f["btc.taker_buy_share_24"] = share.rolling(24, min_periods=24).mean()
+    share = share[~share.index.duplicated(keep="first")].asfreq("h")          # BTC trades 24/7: true hourly grid
+    f["btc.taker_buy_share_24"] = on_grid(share.rolling(24, min_periods=24).mean(), grid_start)
     return f
 
 
@@ -197,12 +213,12 @@ def feature_meta(columns) -> list[dict]:
     out = []
     for c in columns:
         fam = c.split(".")[0]
-        rule = {"fx": "source bar close (start + 1 h), lake clock (London wall - 5 h) re-localized to UTC, weekly clock gate passed",
-                "btc": "source bar close (start + 1 h), Binance UTC open_time",
+        rule = {"fx": "source bar starting at the grid bar (complete at the decision), lake clock re-localized to UTC; returns over EURUSD grid bars, NaN when a source bar is missing",
+                "btc": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
                 "dly": "daily value dated D available from D + 2 days 00:00 UTC",
                 "cot": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC"}[fam]
         out.append({"feature_id": c, "family": f"cross_asset_{fam}", "availability_time": "timestamp",
-                    "availability_rule": rule, "transform": "trailing differences / rolling sums of the source's own past values",
+                    "availability_rule": rule, "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
                     "unit": "log return" if ".ret_" in c else ("percentage points" if c.startswith("dly.") and (".level" in c or ".chg_" in c) else "ratio/level")})
     return out
 
@@ -210,7 +226,7 @@ def feature_meta(columns) -> list[dict]:
 class Plugin:
     """feature-eng plugin entry: builds the cross-asset frame on a given UTC hourly grid from pre-loaded sources."""
 
-    plugin_params = {"daily_lag_days": 2, "hourly_max_stale_hours": 3, "daily_max_stale_days": 7, "cot_max_stale_days": 14,
+    plugin_params = {"daily_lag_days": 2, "daily_max_stale_days": 7, "cot_max_stale_days": 14,
                      "min_share_lag0": 0.97, "min_median_corr": 0.98}
     plugin_debug_vars = list(plugin_params)
 
@@ -230,21 +246,18 @@ class Plugin:
 
     def build(self, grid_start: pd.DatetimeIndex, *, fx: dict[str, pd.DataFrame] | None = None, btc: pd.DataFrame | None = None,
               daily: dict[str, tuple[pd.Series, str]] | None = None, cot: pd.DataFrame | None = None) -> pd.DataFrame:
-        """``fx``: pair -> UTC-indexed OHLC frame (already re-localized); ``btc``: UTC-indexed Binance frame;
+        """Hourly sources are joined by EXACT bar start on the grid (missing bar -> NaN); daily / COT by availability.
+        ``fx``: pair -> UTC-indexed OHLC frame (already re-localized); ``btc``: UTC-indexed Binance frame;
         ``daily``: name -> (date-indexed series, kind); ``cot``: raw CFTC frame. Returns grid-indexed features."""
         p = self.params
         parts = []
-        hstale = pd.Timedelta(hours=p["hourly_max_stale_hours"])
         if fx:
-            per = {k: hourly_features(v["close"], f"fx.{k}") for k, v in fx.items()}
-            for k, f in per.items():
-                parts.append(asof_join(grid_start, f, hourly_available(f.index), hstale))
+            per = {k: hourly_features(on_grid(v["close"], grid_start), f"fx.{k}") for k, v in fx.items()}
+            parts += list(per.values())
             for name, signs in (("usd_strength", USD_SIGN), ("eur_strength", EUR_SIGN)):
-                comp = composite(per, signs, name)
-                parts.append(asof_join(grid_start, comp, hourly_available(comp.index), hstale))
+                parts.append(composite(per, signs, name))
         if btc is not None:
-            f = btc_features(btc)
-            parts.append(asof_join(grid_start, f, hourly_available(f.index), hstale))
+            parts.append(btc_features(btc, grid_start))
         if daily:
             for name, (s, kind) in daily.items():
                 f = daily_features(s, name, kind)

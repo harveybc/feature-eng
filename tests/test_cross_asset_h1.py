@@ -43,13 +43,19 @@ def test_availability_rules_daily_and_cot():
     assert j["dly.x.level"].iloc[0] == 1.0 and j["dly.x.level"].iloc[-1] == 2.0
 
 
-def test_hourly_join_uses_only_bars_closed_by_the_decision_and_staleness():
-    src_idx = pd.date_range("2024-01-02 00:00", periods=10, freq="h", tz="UTC")
-    f = pd.DataFrame({"v": np.arange(10.0)}, index=src_idx)
-    grid = pd.DatetimeIndex(["2024-01-02 03:00", "2024-01-02 15:00"], tz="UTC")
-    j = CA.asof_join(grid, f, CA.hourly_available(f.index), pd.Timedelta(hours=3))
-    assert j["v"].iloc[0] == 3.0                                     # bar 03:00 closes at the 04:00 decision
-    assert np.isnan(j["v"].iloc[1])                                  # last source bar is too old
+def test_hourly_features_are_exact_on_the_grid_and_never_span_a_missing_source_bar():
+    grid = pd.date_range("2024-01-02 00:00", periods=10, freq="h", tz="UTC")
+    src = pd.Series(np.exp(np.arange(10) * 0.001), index=grid).drop(grid[5])         # source misses the 05:00 bar
+    f = CA.hourly_features(CA.on_grid(src, grid), "fx.x")
+    assert np.isnan(f["fx.x.ret_1"].iloc[5]) and np.isnan(f["fx.x.ret_1"].iloc[6])     # no 2-hour move posing as 1 h
+    assert f["fx.x.ret_1"].iloc[7] == pytest.approx(0.001)
+    assert np.isnan(f["fx.x.ret_4"].iloc[9]) and f["fx.x.ret_4"].iloc[8] == pytest.approx(0.004)   # endpoint 05:00 missing vs both endpoints present
+
+
+def test_one_hour_returns_mask_unequal_intervals():
+    idx = pd.DatetimeIndex(["2024-01-02 00:00", "2024-01-02 01:00", "2024-01-02 03:00", "2024-01-02 04:00"], tz="UTC")
+    r = CA.one_hour_returns(pd.Series([1.0, 1.01, 1.03, 1.04], index=idx))
+    assert np.isnan(r.iloc[2]) and r.iloc[1] == pytest.approx(np.log(1.01)) and r.iloc[3] == pytest.approx(np.log(1.04 / 1.03))
 
 
 def test_future_perturbation_never_changes_values_known_at_or_before_the_cut():
