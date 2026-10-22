@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -42,6 +43,47 @@ def pinned(root: Path, spec: dict) -> Path:
     return p
 
 
+def expand_root(value: str) -> Path:
+    """r4: roots may be written as ``${ENV_VAR}`` so that committed configs carry no host-specific path."""
+    expanded = os.path.expandvars(value)
+    if "$" in expanded:
+        raise SystemExit(f"ROOT_UNRESOLVED: {value} (set the environment variable)")
+    return Path(expanded)
+
+
+def source_root(cfg: dict, spec: dict) -> Path:
+    """The lake root by default; ``spec['root']`` names an entry of ``cfg['roots']`` (r4: recovered series)."""
+    if spec.get("root"):
+        return expand_root(cfg["roots"][spec["root"]])
+    return expand_root(cfg["financial_data_root"])
+
+
+def pin_key(spec: dict) -> str:
+    return f"{spec['root']}:{spec['file']}" if spec.get("root") else spec["file"]
+
+
+def load_hourly_fx(cfg: dict, spec: dict) -> tuple[pd.DataFrame, dict]:
+    """One hourly FX source with the TEST boundary enforced at read and its clock applied:
+    ``clock`` = "lake" (default, r2/r3: HistData label = Europe/London wall - 5 h, re-localized) or
+    "utc_bar_start" (r4: labels already UTC bar starts, NOT re-localized). ``time_column`` defaults to "datetime".
+    Returns the UTC-indexed frame and the source identity (file, sha256, clock, source column values)."""
+    p = pinned(source_root(cfg, spec), spec)
+    raw = pd.read_parquet(p)
+    tcol = spec.get("time_column", "datetime")
+    clock = spec.get("clock", "lake")
+    if clock not in CA.SOURCE_CLOCKS:
+        raise SystemExit(f"UNKNOWN_SOURCE_CLOCK: {clock}")
+    t = pd.DatetimeIndex(pd.to_datetime(raw[tcol]))
+    raw = _before_test(raw, t.tz_convert("UTC") if t.tz is not None else t.tz_localize("UTC"))
+    df = CA.SOURCE_CLOCKS[clock](raw, tcol)
+    df = df[df.index < TEST_START]
+    identity = {"file": pin_key(spec), "sha256": spec["sha256"], "clock": clock, "time_column": tcol,
+                "rows_before_test": int(len(df)), "span": [str(df.index[0]), str(df.index[-1])] if len(df) else None}
+    if "source" in df.columns:
+        identity["source_ids"] = sorted(str(v) for v in df["source"].unique())
+    return df, identity
+
+
 def _before_test(df: pd.DataFrame, t: pd.DatetimeIndex) -> pd.DataFrame:
     keep = np.asarray(t < TEST_START)
     out = df.loc[keep]
@@ -49,16 +91,11 @@ def _before_test(df: pd.DataFrame, t: pd.DatetimeIndex) -> pd.DataFrame:
 
 
 def load_sources(cfg: dict) -> dict:
-    root = Path(cfg["financial_data_root"])
-    src = {"fx": {}, "daily": {}, "pins": {}}
+    root = expand_root(cfg["financial_data_root"])
+    src = {"fx": {}, "daily": {}, "pins": {}, "identities": {"fx": {}}}
     for pair, spec in cfg["fx"].items():
-        p = pinned(root, spec)
-        raw = pd.read_parquet(p)
-        t = pd.DatetimeIndex(pd.to_datetime(raw["datetime"]))
-        raw = _before_test(raw, t.tz_convert("UTC") if t.tz is not None else t.tz_localize("UTC"))
-        src["fx"][pair] = CA.relocalize_lake_clock(raw, "datetime")
-        src["fx"][pair] = src["fx"][pair][src["fx"][pair].index < TEST_START]
-        src["pins"][spec["file"]] = spec["sha256"]
+        src["fx"][pair], src["identities"]["fx"][pair] = load_hourly_fx(cfg, spec)
+        src["pins"][pin_key(spec)] = spec["sha256"]
     b = cfg["btc"]
     p = pinned(root, b)
     raw = pd.read_parquet(p)
@@ -145,21 +182,25 @@ def perturb_after(src: dict, cut: pd.Timestamp, seed: int = 7) -> dict:
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--config", required=True)
+    ap.add_argument("--output-dir", default=None, help="override cfg['output_dir'] (reproduction runs)")
+    ap.add_argument("--no-manifest-copy", action="store_true", help="do not write cfg['manifest_copy'] into the repo")
     a = ap.parse_args()
     cfg = json.loads(Path(a.config).read_text())
+    if a.output_dir:
+        cfg["output_dir"] = a.output_dir
+    if a.no_manifest_copy:
+        cfg.pop("manifest_copy", None)
     cfg_global.update(cfg)
     out_dir = Path(cfg["output_dir"])
     out_dir.mkdir(parents=True, exist_ok=True)
     grid, adm_close = admitted_grid(cfg)
     src = load_sources(cfg)
     src["eur_close"] = adm_close.reindex(grid)                       # D6 channel input (admitted EURUSD, causal filter)
-    # clock gate on the HistData EURUSD (re-localized exactly as the other pairs)
-    root = Path(cfg["financial_data_root"])
+    # clock gate on the hourly EURUSD witness (same clock handling as the other pairs; r3: HistData lake re-localized,
+    # r4: the recovered independent series on its UTC bar-start labels)
     g = cfg["clock_gate"]
-    raw = pd.read_parquet(pinned(root, g))
-    t = pd.DatetimeIndex(pd.to_datetime(raw["datetime"]))
-    raw = _before_test(raw, t.tz_convert("UTC") if t.tz is not None else t.tz_localize("UTC"))
-    eu = CA.relocalize_lake_clock(raw, "datetime")["close"]
+    eu_frame, gate_identity = load_hourly_fx(cfg, g)
+    eu = eu_frame["close"]
     win = (eu.index >= pd.Timestamp(g["window"][0], tz="UTC")) & (eu.index < pd.Timestamp(g["window"][1], tz="UTC"))
     aw = (adm_close.index >= pd.Timestamp(g["window"][0], tz="UTC")) & (adm_close.index < pd.Timestamp(g["window"][1], tz="UTC"))
     pp = cfg.get("params", {})
@@ -189,13 +230,27 @@ def main():
     f = out_dir / "cross_asset_eurusd_h1_2020_2024.parquet"
     store.to_parquet(f, index=False)
     cov = {str(y): {c: float(X.loc[X.index.year == y, c].notna().mean()) for c in X.columns} for y in sorted(set(X.index.year))}
+    clock_verification = None
+    if cfg.get("clock_verification"):
+        cv = cfg["clock_verification"]
+        cv_path = pinned(source_root(cfg, cv), cv)
+        cv_json = json.loads(cv_path.read_text())
+        clock_verification = {"file": pin_key(cv), "sha256": cv["sha256"], "revision_sha": cv_json.get("revision_sha"),
+                              "pairs": {k: {"passed": v.get("passed"), "selected_offset_hours": v.get("selected_offset_hours"),
+                                            "reason": v.get("reason"),
+                                            "ohlc_pip_rule": {kk: vv for kk, vv in (v.get("ohlc_pip_rule") or {}).items() if kk != "rule"},
+                                            "exact_hour_return_rule": {kk: vv for kk, vv in (v.get("exact_hour_return_rule") or {}).items() if kk != "rule"}}
+                                        for k, v in cv_json.get("pairs", {}).items()}}
+    revision = cfg.get("revision_note", "r2 2026-10-20: hourly features on the EURUSD grid by exact bar start (no span across a missing source bar); clock gate on exactly-one-hour returns (Musashi finding: HistData lacks 675 bars in 2023H1; shared OHLC identical)")
     manifest = {"schema": "feature_eng.cross_asset_h1.store.v1", "plugin": "cross_asset_h1", "instrument": "EURUSD", "bar": "1h",
                 "grid": {"source": "admitted", "source_sha256": cfg["admitted"]["sha256"], "time": "UTC bar start",
                          "decision": "bar start + 1 h", "span": [str(grid[0]), str(grid[-1])], "rows": int(len(grid))},
                 "source_sha256": cfg["admitted"]["sha256"], "test_read": False, "test_start_closed": str(TEST_START),
-                "file": f.name, "file_sha256": sha256(f), "columns": list(X.columns), "features": CA.feature_meta(X.columns),
+                "file": f.name, "file_sha256": sha256(f), "columns": list(X.columns), "features": CA.feature_meta(X.columns, cfg.get("fx_availability_rule")),
                 "source_pins": src["pins"], "params": CA.Plugin().plugin_params | {k: v for k, v in cfg.get("params", {}).items() if k != "hourly_max_stale_hours"},
-                "revision": "r2 2026-10-20: hourly features on the EURUSD grid by exact bar start (no span across a missing source bar); clock gate on exactly-one-hour returns (Musashi finding: HistData lacks 675 bars in 2023H1; shared OHLC identical)",
+                "revision": revision,
+                "source_identities": {"fx": src["identities"]["fx"], "clock_gate": gate_identity},
+                "source_clock_verification": clock_verification,
                 "clock_gate": gate, "future_perturbation": checks, "coverage_by_year": cov,
                 "factor_info": getattr(_LAST_PLUGIN, "factor_info", None),
                 "excluded": {"STLFSI4": "revised series; point-in-time leak already audited (I6N)",

@@ -50,6 +50,22 @@ def relocalize_lake_clock(df: pd.DataFrame, time_col: str = "datetime", shift_ho
     return out
 
 
+def utc_bar_start(df: pd.DataFrame, time_col: str = "timestamp") -> pd.DataFrame:
+    """r4: a source whose labels ARE already UTC bar starts (the independent recovered series carry
+    ``timestamp`` tz-aware UTC). No re-localization; naive labels are read as UTC; duplicates keep the first row."""
+    t = pd.DatetimeIndex(pd.to_datetime(df[time_col]))
+    t = t.tz_convert("UTC") if t.tz is not None else t.tz_localize("UTC")
+    out = df.drop(columns=[time_col]).copy()
+    out.index = t
+    out = out[out.index.notna()]
+    out = out[~out.index.duplicated(keep="first")].sort_index()
+    out.index.name = "bar_start_utc"
+    return out
+
+
+SOURCE_CLOCKS = {"lake": relocalize_lake_clock, "utc_bar_start": utc_bar_start}
+
+
 def relocalize_new_york(df: pd.DataFrame, time_col: str = "datetime") -> pd.DataFrame:
     """REJECTED hypothesis kept for the record (one-hour error in the US-only DST weeks); not used by the builder."""
     t = pd.DatetimeIndex(pd.to_datetime(df[time_col]))
@@ -320,12 +336,13 @@ def factor_features(grid_start, per_pair: dict, fit_returns: pd.DataFrame, eur_c
 
 
 # ----------------------------------------------------------------------------- feature metadata
-def feature_meta(columns) -> list[dict]:
+def feature_meta(columns, fx_rule: str | None = None) -> list[dict]:
+    """``fx_rule`` (r4): availability text for the fx family when the hourly sources are not the lake files."""
     out = []
     for c in columns:
         fam = c.split(".")[0]
         rule = {"fac": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
-                "kal": "causal Kalman local-trend filter of the EURUSD grid closes <= t (never smoothed)","fx": "source bar starting at the grid bar (complete at the decision), lake clock re-localized to UTC; returns over EURUSD grid bars, NaN when a source bar is missing",
+                "kal": "causal Kalman local-trend filter of the EURUSD grid closes <= t (never smoothed)","fx": fx_rule or "source bar starting at the grid bar (complete at the decision), lake clock re-localized to UTC; returns over EURUSD grid bars, NaN when a source bar is missing",
                 "btc": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
                 "dly": "daily value dated D available from D + 2 days 00:00 UTC",
                 "cot": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC"}[fam]
@@ -339,7 +356,7 @@ class Plugin:
     """feature-eng plugin entry: builds the cross-asset frame on a given UTC hourly grid from pre-loaded sources."""
 
     plugin_params = {"daily_lag_days": 2, "daily_max_stale_days": 7, "cot_max_stale_days": 14, "release_offset_hours": None,
-                     "factors": False, "factor_fit_start": "2015-01-01",
+                     "factors": False, "factor_fit_start": "2015-01-01", "factor_pairs": None,
                      "min_share_lag0": 0.97, "min_median_corr": 0.98}
     plugin_debug_vars = list(plugin_params)
 
@@ -387,7 +404,10 @@ class Plugin:
         if p.get("factors") and fx and eur_close is not None:
             g0 = pd.DatetimeIndex(grid_start)[0]
             f0 = pd.Timestamp(p["factor_fit_start"], tz="UTC")
-            own = {k: one_hour_returns(v["close"]) for k, v in fx.items()}
+            # r4: ``factor_pairs`` restricts the PCA factors to the named pairs (an additional cross such as XAUUSD gets
+            # its own fx.* features only); None keeps every fx source in the factors (r2/r3 behaviour).
+            fpairs = [k for k in fx if p.get("factor_pairs") is None or k in p["factor_pairs"]]
+            own = {k: one_hour_returns(fx[k]["close"]) for k in fpairs}
             fit_ret = pd.concat(own, axis=1, join="inner")
             fit_ret = fit_ret[(fit_ret.index >= f0) & (fit_ret.index < g0)]
             dgrid = dfit = None
@@ -398,7 +418,7 @@ class Plugin:
                 dd = dd[[c for c in dgrid.columns]]
                 di = pd.DatetimeIndex(dd.index)
                 dfit = dd[(di >= f0.tz_localize(None)) & (di < g0.tz_localize(None))]
-            ff, self.factor_info = factor_features(grid_start, per, fit_ret, eur_close, dgrid, dfit)
+            ff, self.factor_info = factor_features(grid_start, {k: per[k] for k in fpairs}, fit_ret, eur_close, dgrid, dfit)
             self.factor_info["fit_period"] = [str(f0), str(g0)]
             parts.append(ff)
         return pd.concat(parts, axis=1)

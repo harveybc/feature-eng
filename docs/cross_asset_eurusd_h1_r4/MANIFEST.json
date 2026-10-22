@@ -1,0 +1,1649 @@
+{
+ "schema": "feature_eng.cross_asset_h1.store.v1",
+ "plugin": "cross_asset_h1",
+ "instrument": "EURUSD",
+ "bar": "1h",
+ "grid": {
+  "source": "admitted",
+  "source_sha256": "c80847bb149c7af1ad50e42301b5cd70608e6c37702ce8cc6a7b9eb70f36d2ca",
+  "time": "UTC bar start",
+  "decision": "bar start + 1 h",
+  "span": [
+   "2020-01-02 00:00:00+00:00",
+   "2024-12-31 20:00:00+00:00"
+  ],
+  "rows": 31116
+ },
+ "source_sha256": "c80847bb149c7af1ad50e42301b5cd70608e6c37702ce8cc6a7b9eb70f36d2ca",
+ "test_read": false,
+ "test_start_closed": "2025-01-01 00:00:00+00:00",
+ "file": "cross_asset_eurusd_h1_2020_2024.parquet",
+ "file_sha256": "9d59b20c845acd4545a519070a4281d2efca21b4bbbc5dc32c9f85cfe958c8cf",
+ "columns": [
+  "fx.gbpusd.ret_1",
+  "fx.gbpusd.ret_4",
+  "fx.gbpusd.ret_24",
+  "fx.gbpusd.rv_24",
+  "fx.usdchf.ret_1",
+  "fx.usdchf.ret_4",
+  "fx.usdchf.ret_24",
+  "fx.usdchf.rv_24",
+  "fx.usdjpy.ret_1",
+  "fx.usdjpy.ret_4",
+  "fx.usdjpy.ret_24",
+  "fx.usdjpy.rv_24",
+  "fx.eurgbp.ret_1",
+  "fx.eurgbp.ret_4",
+  "fx.eurgbp.ret_24",
+  "fx.eurgbp.rv_24",
+  "fx.eurjpy.ret_1",
+  "fx.eurjpy.ret_4",
+  "fx.eurjpy.ret_24",
+  "fx.eurjpy.rv_24",
+  "fx.audusd.ret_1",
+  "fx.audusd.ret_4",
+  "fx.audusd.ret_24",
+  "fx.audusd.rv_24",
+  "fx.xauusd.ret_1",
+  "fx.xauusd.ret_4",
+  "fx.xauusd.ret_24",
+  "fx.xauusd.rv_24",
+  "fx.usd_strength.ret_1",
+  "fx.usd_strength.ret_4",
+  "fx.usd_strength.ret_24",
+  "fx.eur_strength.ret_1",
+  "fx.eur_strength.ret_4",
+  "fx.eur_strength.ret_24",
+  "btc.ret_1",
+  "btc.ret_4",
+  "btc.ret_24",
+  "btc.rv_24",
+  "btc.taker_buy_share_24",
+  "dly.us2y.level",
+  "dly.us2y.chg_1d",
+  "dly.us2y.chg_5d",
+  "dly.us10y.level",
+  "dly.us10y.chg_1d",
+  "dly.us10y.chg_5d",
+  "dly.us10y2y.level",
+  "dly.us10y2y.chg_1d",
+  "dly.us10y2y.chg_5d",
+  "dly.vix.level",
+  "dly.vix.chg_1d",
+  "dly.spx.ret_1d",
+  "dly.spx.ret_5d",
+  "dly.dax.ret_1d",
+  "dly.dax.ret_5d",
+  "dly.gold.ret_1d",
+  "dly.gold.ret_5d",
+  "dly.oil.ret_1d",
+  "dly.oil.ret_5d",
+  "cot.eur.net_long",
+  "cot.eur.net_change",
+  "cot.eur.net_share",
+  "cot.eur.net_z156",
+  "fac.fx_f1.ret_1",
+  "fac.fx_f1.ret_4",
+  "fac.fx_f1.ret_24",
+  "fac.fx_f1.kalman_slope",
+  "fac.fx_f2.ret_1",
+  "fac.fx_f2.ret_4",
+  "fac.fx_f2.ret_24",
+  "fac.fx_f2.kalman_slope",
+  "fac.fx_f3.ret_1",
+  "fac.fx_f3.ret_4",
+  "fac.fx_f3.ret_24",
+  "fac.fx_f3.kalman_slope",
+  "fac.daily_f1",
+  "fac.daily_f2",
+  "kal.eurusd.slope_fast",
+  "kal.eurusd.slope_mid",
+  "kal.eurusd.slope_slow"
+ ],
+ "features": [
+  {
+   "feature_id": "fx.gbpusd.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.gbpusd.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.gbpusd.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.gbpusd.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.usdchf.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usdchf.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usdchf.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usdchf.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.usdjpy.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usdjpy.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usdjpy.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usdjpy.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.eurgbp.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eurgbp.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eurgbp.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eurgbp.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.eurjpy.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eurjpy.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eurjpy.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eurjpy.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.audusd.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.audusd.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.audusd.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.audusd.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.xauusd.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.xauusd.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.xauusd.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.xauusd.rv_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fx.usd_strength.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usd_strength.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.usd_strength.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eur_strength.ret_1",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eur_strength.ret_4",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fx.eur_strength.ret_24",
+   "family": "cross_asset_fx",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), independent recovered series on UTC bar-start labels (no re-localization; clock corroborated against the re-localized lake with -3..+3 h controls, see source_clock_verification); returns over EURUSD grid bars, NaN when a source bar is missing (XAUUSD: the daily 21:00-22:00 UTC metals break is a missing source bar)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "btc.ret_1",
+   "family": "cross_asset_btc",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "btc.ret_4",
+   "family": "cross_asset_btc",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "btc.ret_24",
+   "family": "cross_asset_btc",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "btc.rv_24",
+   "family": "cross_asset_btc",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "btc.taker_buy_share_24",
+   "family": "cross_asset_btc",
+   "availability_time": "timestamp",
+   "availability_rule": "source bar starting at the grid bar (complete at the decision), Binance UTC; returns over EURUSD grid bars",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "dly.us2y.level",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us2y.chg_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us2y.chg_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us10y.level",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us10y.chg_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us10y.chg_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us10y2y.level",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us10y2y.chg_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.us10y2y.chg_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.vix.level",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.vix.chg_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "percentage points"
+  },
+  {
+   "feature_id": "dly.spx.ret_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.spx.ret_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.dax.ret_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.dax.ret_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.gold.ret_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.gold.ret_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.oil.ret_1d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "dly.oil.ret_5d",
+   "family": "cross_asset_dly",
+   "availability_time": "timestamp",
+   "availability_rule": "daily value dated D available from D + 2 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "cot.eur.net_long",
+   "family": "cross_asset_cot",
+   "availability_time": "timestamp",
+   "availability_rule": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "cot.eur.net_change",
+   "family": "cross_asset_cot",
+   "availability_time": "timestamp",
+   "availability_rule": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "cot.eur.net_share",
+   "family": "cross_asset_cot",
+   "availability_time": "timestamp",
+   "availability_rule": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "cot.eur.net_z156",
+   "family": "cross_asset_cot",
+   "availability_time": "timestamp",
+   "availability_rule": "CFTC as-of Tuesday T available from T + 4 days 00:00 UTC",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fac.fx_f1.ret_1",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f1.ret_4",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f1.ret_24",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f1.kalman_slope",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fac.fx_f2.ret_1",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f2.ret_4",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f2.ret_24",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f2.kalman_slope",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fac.fx_f3.ret_1",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f3.ret_4",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f3.ret_24",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "log return"
+  },
+  {
+   "feature_id": "fac.fx_f3.kalman_slope",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fac.daily_f1",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "fac.daily_f2",
+   "family": "cross_asset_fac",
+   "availability_time": "timestamp",
+   "availability_rule": "TRAIN-frozen PCA loadings applied to inputs available at the decision; causal Kalman filter (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "kal.eurusd.slope_fast",
+   "family": "cross_asset_kal",
+   "availability_time": "timestamp",
+   "availability_rule": "causal Kalman local-trend filter of the EURUSD grid closes <= t (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "kal.eurusd.slope_mid",
+   "family": "cross_asset_kal",
+   "availability_time": "timestamp",
+   "availability_rule": "causal Kalman local-trend filter of the EURUSD grid closes <= t (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  },
+  {
+   "feature_id": "kal.eurusd.slope_slow",
+   "family": "cross_asset_kal",
+   "availability_time": "timestamp",
+   "availability_rule": "causal Kalman local-trend filter of the EURUSD grid closes <= t (never smoothed)",
+   "transform": "trailing differences / rolling sums over observed EURUSD grid bars (never filled across a missing source bar)",
+   "unit": "ratio/level"
+  }
+ ],
+ "source_pins": {
+  "recovered:gbpusd.parquet": "51ac45822868cc614e3cd417eeccb5a5ccd82714cef73acf073f3c72f504f54b",
+  "recovered:usdchf.parquet": "6f34db27788fc17d2ab75a2d206acdb64ff3bd29d9efe6dc3b2240ac1356e192",
+  "recovered:usdjpy.parquet": "6e985131d2591438685ffbc70021655f8bbff7eef465a6517ac3ad4e1ece9eec",
+  "recovered:eurgbp.parquet": "3c4958f6d3451647a28f13e217505467e4073d5863487a5168c87cb5dcfdbdd2",
+  "recovered:eurjpy.parquet": "f1f3a626ba8ca6a76bcd0c04575275dad54f47e52dccbbb14d3d9f6067daae07",
+  "recovered:audusd.parquet": "4973750c6d0ccebd05fa8332b37c0dba016de33feff784dbdfefd4bba39312a3",
+  "recovered:xauusd.parquet": "4b129bb45eb432b902342b650f00e7ae0b5d806012779d9a1f708aa36e34e11f",
+  "market_data/crypto/spot_top50/btcusdt/1h.parquet": "9cfc25cf198e8122c8f1db7573e39257d9e9386e79c1e9c8137a38da05715760",
+  "macro_economic/fred/rates/dgs2/observations.parquet": "024b8547164d21ad0f21c5703c0e24eaabcb9bcf700bc91e01aea925d772c2c9",
+  "macro_economic/fred/rates/dgs10/observations.parquet": "8c3ec4c208a4824356c9bd42f32dc28fa414b6854e635d8f9f6abb2ac9e60919",
+  "macro_economic/fred/rates/t10y2y/observations.parquet": "3562dd0c9c18f7d0d0ece4fef99ba82d749c4aa192da081c0015fcd567283981",
+  "market_data/equities/us_indices/vix/daily.parquet": "e86f10f8ab79873fde2b599f99198a16e45d6761396c8c354d8913dba8940256",
+  "market_data/equities/us_indices/gspc/daily.parquet": "74ad8c9a01c3e790a941b8c90b776a8acd536033e0762af74f74ddb0a1e99f22",
+  "market_data/equities/global_indices/gdaxi/daily.parquet": "a9b28d374a7fe687de3ce3d91f588745afb9b4edf877965b58f75f26069da313",
+  "market_data/commodities/precious_metals/gc_f/daily.parquet": "4d793e84e905492133169b629b1e8ba4b60bb9a95a878ee9bb1096a68145507d",
+  "market_data/commodities/energy/cl_f/daily.parquet": "d5336819eb42310f3db116ad2cf92224c67fb8dfd7c206890594f9ba8a2d2c78",
+  "trading_research/project2/part_II_redux/data/raw/cftc/eur_weekly_2000_2025.csv": "0e9eb504965c16433518d3394d4a82805e7465272d9645caaa5da59a8c293cc2"
+ },
+ "params": {
+  "daily_lag_days": 2,
+  "daily_max_stale_days": 7,
+  "cot_max_stale_days": 14,
+  "release_offset_hours": {
+   "us2y": 45,
+   "us10y": 45,
+   "us10y2y": 45,
+   "vix": 22,
+   "spx": 22,
+   "gold": 22,
+   "oil": 22,
+   "dax": 17,
+   "cot": 93
+  },
+  "factors": true,
+  "factor_fit_start": "2015-01-01",
+  "factor_pairs": [
+   "gbpusd",
+   "usdchf",
+   "usdjpy",
+   "eurgbp",
+   "eurjpy",
+   "audusd"
+  ],
+  "min_share_lag0": 0.97,
+  "min_median_corr": 0.98,
+  "release_offset_note": "D 00:00 UTC + hours: FRED H.15 yields next business day 21:00 UTC; US closes and CME settlements by 22:00 UTC; Xetra close by 17:00 UTC; CFTC Friday 21:00 UTC (Tuesday + 93 h)"
+ },
+ "revision": "r4 2026-10-22: the six FX crosses and the clock-gate EURUSD read from the independent recovered series (financial-data satoshi/fx-crosses-recovery-20261022, dataset revision 4e694887c7f63d7e2c15a66aeebc4f45450cb381) on UTC bar-start labels, repairing the 2023 HistData gaps; XAUUSD H1 added as fx.xauusd.* with the same recipe; PCA factors still of the six pairs (factor_pairs); everything else as r3",
+ "source_identities": {
+  "fx": {
+   "gbpusd": {
+    "file": "recovered:gbpusd.parquet",
+    "sha256": "51ac45822868cc614e3cd417eeccb5a5ccd82714cef73acf073f3c72f504f54b",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 91280,
+    "span": [
+     "2010-05-13 19:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   },
+   "usdchf": {
+    "file": "recovered:usdchf.parquet",
+    "sha256": "6f34db27788fc17d2ab75a2d206acdb64ff3bd29d9efe6dc3b2240ac1356e192",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 91277,
+    "span": [
+     "2010-05-14 00:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   },
+   "usdjpy": {
+    "file": "recovered:usdjpy.parquet",
+    "sha256": "6e985131d2591438685ffbc70021655f8bbff7eef465a6517ac3ad4e1ece9eec",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 91273,
+    "span": [
+     "2010-05-13 08:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   },
+   "eurgbp": {
+    "file": "recovered:eurgbp.parquet",
+    "sha256": "3c4958f6d3451647a28f13e217505467e4073d5863487a5168c87cb5dcfdbdd2",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 91271,
+    "span": [
+     "2010-05-14 05:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   },
+   "eurjpy": {
+    "file": "recovered:eurjpy.parquet",
+    "sha256": "f1f3a626ba8ca6a76bcd0c04575275dad54f47e52dccbbb14d3d9f6067daae07",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 91277,
+    "span": [
+     "2010-05-13 03:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   },
+   "audusd": {
+    "file": "recovered:audusd.parquet",
+    "sha256": "4973750c6d0ccebd05fa8332b37c0dba016de33feff784dbdfefd4bba39312a3",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 91284,
+    "span": [
+     "2010-05-11 20:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   },
+   "xauusd": {
+    "file": "recovered:xauusd.parquet",
+    "sha256": "4b129bb45eb432b902342b650f00e7ae0b5d806012779d9a1f708aa36e34e11f",
+    "clock": "utc_bar_start",
+    "time_column": "timestamp",
+    "rows_before_test": 92063,
+    "span": [
+     "2009-08-25 18:00:00+00:00",
+     "2024-12-31 21:00:00+00:00"
+    ],
+    "source_ids": [
+     "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+    ]
+   }
+  },
+  "clock_gate": {
+   "file": "recovered:eurusd.parquet",
+   "sha256": "79bb6e7188a73ea847117445fbfa2be2cc995dcdf48f0d6dea85226566f9a8c8",
+   "clock": "utc_bar_start",
+   "time_column": "timestamp",
+   "rows_before_test": 91273,
+   "span": [
+    "2010-05-14 15:00:00+00:00",
+    "2024-12-31 21:00:00+00:00"
+   ],
+   "source_ids": [
+    "independent-hf:4e694887c7f63d7e2c15a66aeebc4f45450cb381"
+   ]
+  }
+ },
+ "source_clock_verification": {
+  "file": "recovered:CLOCK.json",
+  "sha256": "f2792a13d88fd99c5c0e0345c45316e7c3035417f641abbc2e95537e39ea2462",
+  "revision_sha": "4e694887c7f63d7e2c15a66aeebc4f45450cb381",
+  "pairs": {
+   "eurusd": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28826,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999971168538953,
+     "offset0_joint_exact_hour_returns": 29387
+    }
+   },
+   "gbpusd": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28811,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999968260874859,
+     "offset0_joint_exact_hour_returns": 29371
+    }
+   },
+   "usdchf": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28803,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999875371230502,
+     "offset0_joint_exact_hour_returns": 29370
+    }
+   },
+   "usdjpy": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28802,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999825993305373,
+     "offset0_joint_exact_hour_returns": 29350
+    }
+   },
+   "eurgbp": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28815,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999917256042786,
+     "offset0_joint_exact_hour_returns": 29378
+    }
+   },
+   "eurjpy": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28800,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999849430022543,
+     "offset0_joint_exact_hour_returns": 29364
+    }
+   },
+   "audusd": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28801,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999952046489572,
+     "offset0_joint_exact_hour_returns": 29383
+    }
+   },
+   "usdcad": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28812,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999790655529254,
+     "offset0_joint_exact_hour_returns": 29394
+    }
+   },
+   "nzdusd": {
+    "passed": true,
+    "selected_offset_hours": 0,
+    "reason": null,
+    "ohlc_pip_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "common_support_hours": 28811,
+     "offset0_median_abs_diff_pips": 0.0,
+     "offset0_p95_abs_diff_pips": 0.0
+    },
+    "exact_hour_return_rule": {
+     "passed": true,
+     "reasons": [],
+     "failed_months": [],
+     "best_offset_hours": 0,
+     "offset0_return_corr": 0.9999794261855032,
+     "offset0_joint_exact_hour_returns": 29384
+    }
+   },
+   "xauusd": {
+    "passed": false,
+    "selected_offset_hours": null,
+    "reason": "NO_HOURLY_LAKE_WITNESS_FOR_PAIR",
+    "ohlc_pip_rule": {},
+    "exact_hour_return_rule": {}
+   }
+  }
+ },
+ "clock_gate": {
+  "weeks": 262,
+  "share_best_lag0": 1.0,
+  "median_corr_lag0": 1.0,
+  "min_share_lag0": 0.97,
+  "min_median_corr": 0.98,
+  "weeks_not_lag0": [],
+  "weeks_lag0_below_0p9": [],
+  "passed": true
+ },
+ "future_perturbation": [
+  {
+   "cut": "2021-06-15 13:00:00+00:00",
+   "rows_at_or_before": 9032,
+   "cells_changed_at_or_before": 0,
+   "cells_changed_after": 1715910
+  },
+  {
+   "cut": "2023-03-01 08:00:00+00:00",
+   "rows_at_or_before": 19707,
+   "cells_changed_at_or_before": 0,
+   "cells_changed_after": 886230
+  }
+ ],
+ "coverage_by_year": {
+  "2020": {
+   "fx.gbpusd.ret_1": 0.9998395378690629,
+   "fx.gbpusd.ret_4": 0.9993581514762516,
+   "fx.gbpusd.ret_24": 0.9961489088575096,
+   "fx.gbpusd.rv_24": 0.9961489088575096,
+   "fx.usdchf.ret_1": 0.9998395378690629,
+   "fx.usdchf.ret_4": 0.9993581514762516,
+   "fx.usdchf.ret_24": 0.9961489088575096,
+   "fx.usdchf.rv_24": 0.9961489088575096,
+   "fx.usdjpy.ret_1": 0.9998395378690629,
+   "fx.usdjpy.ret_4": 0.9993581514762516,
+   "fx.usdjpy.ret_24": 0.9961489088575096,
+   "fx.usdjpy.rv_24": 0.9961489088575096,
+   "fx.eurgbp.ret_1": 0.9998395378690629,
+   "fx.eurgbp.ret_4": 0.9993581514762516,
+   "fx.eurgbp.ret_24": 0.9961489088575096,
+   "fx.eurgbp.rv_24": 0.9961489088575096,
+   "fx.eurjpy.ret_1": 0.9998395378690629,
+   "fx.eurjpy.ret_4": 0.9993581514762516,
+   "fx.eurjpy.ret_24": 0.9961489088575096,
+   "fx.eurjpy.rv_24": 0.9961489088575096,
+   "fx.audusd.ret_1": 0.9998395378690629,
+   "fx.audusd.ret_4": 0.9993581514762516,
+   "fx.audusd.ret_24": 0.9961489088575096,
+   "fx.audusd.rv_24": 0.9961489088575096,
+   "fx.xauusd.ret_1": 0.9085365853658537,
+   "fx.xauusd.ret_4": 0.9042041078305519,
+   "fx.xauusd.ret_24": 0.9387034659820283,
+   "fx.xauusd.rv_24": 0.0,
+   "fx.usd_strength.ret_1": 0.9998395378690629,
+   "fx.usd_strength.ret_4": 0.9993581514762516,
+   "fx.usd_strength.ret_24": 0.9961489088575096,
+   "fx.eur_strength.ret_1": 0.9998395378690629,
+   "fx.eur_strength.ret_4": 0.9993581514762516,
+   "fx.eur_strength.ret_24": 0.9961489088575096,
+   "btc.ret_1": 0.9974326059050064,
+   "btc.ret_4": 0.9959884467265725,
+   "btc.ret_24": 0.9926187419768935,
+   "btc.rv_24": 0.9789794608472401,
+   "btc.taker_buy_share_24": 0.9817073170731707,
+   "dly.us2y.level": 1.0,
+   "dly.us2y.chg_1d": 1.0,
+   "dly.us2y.chg_5d": 1.0,
+   "dly.us10y.level": 1.0,
+   "dly.us10y.chg_1d": 1.0,
+   "dly.us10y.chg_5d": 1.0,
+   "dly.us10y2y.level": 1.0,
+   "dly.us10y2y.chg_1d": 1.0,
+   "dly.us10y2y.chg_5d": 1.0,
+   "dly.vix.level": 1.0,
+   "dly.vix.chg_1d": 1.0,
+   "dly.spx.ret_1d": 1.0,
+   "dly.spx.ret_5d": 1.0,
+   "dly.dax.ret_1d": 1.0,
+   "dly.dax.ret_5d": 1.0,
+   "dly.gold.ret_1d": 1.0,
+   "dly.gold.ret_5d": 1.0,
+   "dly.oil.ret_1d": 0.9922978177150192,
+   "dly.oil.ret_5d": 0.9922978177150192,
+   "cot.eur.net_long": 1.0,
+   "cot.eur.net_change": 1.0,
+   "cot.eur.net_share": 1.0,
+   "cot.eur.net_z156": 1.0,
+   "fac.fx_f1.ret_1": 0.9998395378690629,
+   "fac.fx_f1.ret_4": 0.9993581514762516,
+   "fac.fx_f1.ret_24": 0.9961489088575096,
+   "fac.fx_f1.kalman_slope": 0.9996790757381258,
+   "fac.fx_f2.ret_1": 0.9998395378690629,
+   "fac.fx_f2.ret_4": 0.9993581514762516,
+   "fac.fx_f2.ret_24": 0.9961489088575096,
+   "fac.fx_f2.kalman_slope": 0.9996790757381258,
+   "fac.fx_f3.ret_1": 0.9998395378690629,
+   "fac.fx_f3.ret_4": 0.9993581514762516,
+   "fac.fx_f3.ret_24": 0.9961489088575096,
+   "fac.fx_f3.kalman_slope": 0.9996790757381258,
+   "fac.daily_f1": 0.9922978177150192,
+   "fac.daily_f2": 0.9922978177150192,
+   "kal.eurusd.slope_fast": 0.9998395378690629,
+   "kal.eurusd.slope_mid": 0.9998395378690629,
+   "kal.eurusd.slope_slow": 0.9998395378690629
+  },
+  "2021": {
+   "fx.gbpusd.ret_1": 1.0,
+   "fx.gbpusd.ret_4": 1.0,
+   "fx.gbpusd.ret_24": 1.0,
+   "fx.gbpusd.rv_24": 1.0,
+   "fx.usdchf.ret_1": 1.0,
+   "fx.usdchf.ret_4": 1.0,
+   "fx.usdchf.ret_24": 1.0,
+   "fx.usdchf.rv_24": 1.0,
+   "fx.usdjpy.ret_1": 1.0,
+   "fx.usdjpy.ret_4": 1.0,
+   "fx.usdjpy.ret_24": 1.0,
+   "fx.usdjpy.rv_24": 1.0,
+   "fx.eurgbp.ret_1": 1.0,
+   "fx.eurgbp.ret_4": 1.0,
+   "fx.eurgbp.ret_24": 1.0,
+   "fx.eurgbp.rv_24": 1.0,
+   "fx.eurjpy.ret_1": 1.0,
+   "fx.eurjpy.ret_4": 1.0,
+   "fx.eurjpy.ret_24": 1.0,
+   "fx.eurjpy.rv_24": 1.0,
+   "fx.audusd.ret_1": 1.0,
+   "fx.audusd.ret_4": 1.0,
+   "fx.audusd.ret_24": 1.0,
+   "fx.audusd.rv_24": 1.0,
+   "fx.xauusd.ret_1": 0.9056936647955092,
+   "fx.xauusd.ret_4": 0.9013632718524459,
+   "fx.xauusd.ret_24": 0.9360064153969527,
+   "fx.xauusd.rv_24": 0.0,
+   "fx.usd_strength.ret_1": 1.0,
+   "fx.usd_strength.ret_4": 1.0,
+   "fx.usd_strength.ret_24": 1.0,
+   "fx.eur_strength.ret_1": 1.0,
+   "fx.eur_strength.ret_4": 1.0,
+   "fx.eur_strength.ret_24": 1.0,
+   "btc.ret_1": 0.9979149959903769,
+   "btc.ret_4": 0.9971130713712911,
+   "btc.ret_24": 0.9971130713712911,
+   "btc.rv_24": 0.983159582999198,
+   "btc.taker_buy_share_24": 0.9833199679230152,
+   "dly.us2y.level": 1.0,
+   "dly.us2y.chg_1d": 1.0,
+   "dly.us2y.chg_5d": 1.0,
+   "dly.us10y.level": 1.0,
+   "dly.us10y.chg_1d": 1.0,
+   "dly.us10y.chg_5d": 1.0,
+   "dly.us10y2y.level": 1.0,
+   "dly.us10y2y.chg_1d": 1.0,
+   "dly.us10y2y.chg_5d": 1.0,
+   "dly.vix.level": 1.0,
+   "dly.vix.chg_1d": 1.0,
+   "dly.spx.ret_1d": 1.0,
+   "dly.spx.ret_5d": 1.0,
+   "dly.dax.ret_1d": 1.0,
+   "dly.dax.ret_5d": 1.0,
+   "dly.gold.ret_1d": 1.0,
+   "dly.gold.ret_5d": 1.0,
+   "dly.oil.ret_1d": 1.0,
+   "dly.oil.ret_5d": 1.0,
+   "cot.eur.net_long": 1.0,
+   "cot.eur.net_change": 1.0,
+   "cot.eur.net_share": 1.0,
+   "cot.eur.net_z156": 1.0,
+   "fac.fx_f1.ret_1": 1.0,
+   "fac.fx_f1.ret_4": 1.0,
+   "fac.fx_f1.ret_24": 1.0,
+   "fac.fx_f1.kalman_slope": 1.0,
+   "fac.fx_f2.ret_1": 1.0,
+   "fac.fx_f2.ret_4": 1.0,
+   "fac.fx_f2.ret_24": 1.0,
+   "fac.fx_f2.kalman_slope": 1.0,
+   "fac.fx_f3.ret_1": 1.0,
+   "fac.fx_f3.ret_4": 1.0,
+   "fac.fx_f3.ret_24": 1.0,
+   "fac.fx_f3.kalman_slope": 1.0,
+   "fac.daily_f1": 1.0,
+   "fac.daily_f2": 1.0,
+   "kal.eurusd.slope_fast": 1.0,
+   "kal.eurusd.slope_mid": 1.0,
+   "kal.eurusd.slope_slow": 1.0
+  },
+  "2022": {
+   "fx.gbpusd.ret_1": 1.0,
+   "fx.gbpusd.ret_4": 1.0,
+   "fx.gbpusd.ret_24": 1.0,
+   "fx.gbpusd.rv_24": 1.0,
+   "fx.usdchf.ret_1": 0.9996790242336704,
+   "fx.usdchf.ret_4": 0.9996790242336704,
+   "fx.usdchf.ret_24": 0.9996790242336704,
+   "fx.usdchf.rv_24": 0.9959878029208795,
+   "fx.usdjpy.ret_1": 1.0,
+   "fx.usdjpy.ret_4": 1.0,
+   "fx.usdjpy.ret_24": 1.0,
+   "fx.usdjpy.rv_24": 1.0,
+   "fx.eurgbp.ret_1": 1.0,
+   "fx.eurgbp.ret_4": 1.0,
+   "fx.eurgbp.ret_24": 1.0,
+   "fx.eurgbp.rv_24": 1.0,
+   "fx.eurjpy.ret_1": 1.0,
+   "fx.eurjpy.ret_4": 1.0,
+   "fx.eurjpy.ret_24": 1.0,
+   "fx.eurjpy.rv_24": 1.0,
+   "fx.audusd.ret_1": 1.0,
+   "fx.audusd.ret_4": 1.0,
+   "fx.audusd.ret_24": 1.0,
+   "fx.audusd.rv_24": 1.0,
+   "fx.xauusd.ret_1": 0.9078799550633927,
+   "fx.xauusd.ret_4": 0.904028245867437,
+   "fx.xauusd.ret_24": 0.9402985074626866,
+   "fx.xauusd.rv_24": 0.0,
+   "fx.usd_strength.ret_1": 0.9996790242336704,
+   "fx.usd_strength.ret_4": 0.9996790242336704,
+   "fx.usd_strength.ret_24": 0.9996790242336704,
+   "fx.eur_strength.ret_1": 1.0,
+   "fx.eur_strength.ret_4": 1.0,
+   "fx.eur_strength.ret_24": 1.0,
+   "btc.ret_1": 1.0,
+   "btc.ret_4": 1.0,
+   "btc.ret_24": 1.0,
+   "btc.rv_24": 1.0,
+   "btc.taker_buy_share_24": 1.0,
+   "dly.us2y.level": 1.0,
+   "dly.us2y.chg_1d": 1.0,
+   "dly.us2y.chg_5d": 1.0,
+   "dly.us10y.level": 1.0,
+   "dly.us10y.chg_1d": 1.0,
+   "dly.us10y.chg_5d": 1.0,
+   "dly.us10y2y.level": 1.0,
+   "dly.us10y2y.chg_1d": 1.0,
+   "dly.us10y2y.chg_5d": 1.0,
+   "dly.vix.level": 1.0,
+   "dly.vix.chg_1d": 1.0,
+   "dly.spx.ret_1d": 1.0,
+   "dly.spx.ret_5d": 1.0,
+   "dly.dax.ret_1d": 1.0,
+   "dly.dax.ret_5d": 1.0,
+   "dly.gold.ret_1d": 1.0,
+   "dly.gold.ret_5d": 1.0,
+   "dly.oil.ret_1d": 1.0,
+   "dly.oil.ret_5d": 1.0,
+   "cot.eur.net_long": 1.0,
+   "cot.eur.net_change": 1.0,
+   "cot.eur.net_share": 1.0,
+   "cot.eur.net_z156": 1.0,
+   "fac.fx_f1.ret_1": 0.9996790242336704,
+   "fac.fx_f1.ret_4": 0.9991975605841759,
+   "fac.fx_f1.ret_24": 0.9959878029208795,
+   "fac.fx_f1.kalman_slope": 1.0,
+   "fac.fx_f2.ret_1": 0.9996790242336704,
+   "fac.fx_f2.ret_4": 0.9991975605841759,
+   "fac.fx_f2.ret_24": 0.9959878029208795,
+   "fac.fx_f2.kalman_slope": 1.0,
+   "fac.fx_f3.ret_1": 0.9996790242336704,
+   "fac.fx_f3.ret_4": 0.9991975605841759,
+   "fac.fx_f3.ret_24": 0.9959878029208795,
+   "fac.fx_f3.kalman_slope": 1.0,
+   "fac.daily_f1": 1.0,
+   "fac.daily_f2": 1.0,
+   "kal.eurusd.slope_fast": 1.0,
+   "kal.eurusd.slope_mid": 1.0,
+   "kal.eurusd.slope_slow": 1.0
+  },
+  "2023": {
+   "fx.gbpusd.ret_1": 0.999677263191867,
+   "fx.gbpusd.ret_4": 0.999677263191867,
+   "fx.gbpusd.ret_24": 0.999677263191867,
+   "fx.gbpusd.rv_24": 0.995965789898338,
+   "fx.usdchf.ret_1": 0.999677263191867,
+   "fx.usdchf.ret_4": 0.999677263191867,
+   "fx.usdchf.ret_24": 0.999677263191867,
+   "fx.usdchf.rv_24": 0.995965789898338,
+   "fx.usdjpy.ret_1": 0.999677263191867,
+   "fx.usdjpy.ret_4": 0.999677263191867,
+   "fx.usdjpy.ret_24": 0.999677263191867,
+   "fx.usdjpy.rv_24": 0.995965789898338,
+   "fx.eurgbp.ret_1": 0.999677263191867,
+   "fx.eurgbp.ret_4": 0.999677263191867,
+   "fx.eurgbp.ret_24": 0.999677263191867,
+   "fx.eurgbp.rv_24": 0.995965789898338,
+   "fx.eurjpy.ret_1": 0.999677263191867,
+   "fx.eurjpy.ret_4": 0.999677263191867,
+   "fx.eurjpy.ret_24": 0.999677263191867,
+   "fx.eurjpy.rv_24": 0.995965789898338,
+   "fx.audusd.ret_1": 0.999677263191867,
+   "fx.audusd.ret_4": 0.999677263191867,
+   "fx.audusd.ret_24": 0.999677263191867,
+   "fx.audusd.rv_24": 0.995965789898338,
+   "fx.xauusd.ret_1": 0.9073745360658383,
+   "fx.xauusd.ret_4": 0.9033403259641762,
+   "fx.xauusd.ret_24": 0.9394868484750686,
+   "fx.xauusd.rv_24": 0.002259157656930773,
+   "fx.usd_strength.ret_1": 0.999677263191867,
+   "fx.usd_strength.ret_4": 0.999677263191867,
+   "fx.usd_strength.ret_24": 0.999677263191867,
+   "fx.eur_strength.ret_1": 0.999677263191867,
+   "fx.eur_strength.ret_4": 0.999677263191867,
+   "fx.eur_strength.ret_24": 0.999677263191867,
+   "btc.ret_1": 0.999677263191867,
+   "btc.ret_4": 0.999677263191867,
+   "btc.ret_24": 0.999677263191867,
+   "btc.rv_24": 0.995965789898338,
+   "btc.taker_buy_share_24": 0.9985476843634017,
+   "dly.us2y.level": 1.0,
+   "dly.us2y.chg_1d": 1.0,
+   "dly.us2y.chg_5d": 1.0,
+   "dly.us10y.level": 1.0,
+   "dly.us10y.chg_1d": 1.0,
+   "dly.us10y.chg_5d": 1.0,
+   "dly.us10y2y.level": 1.0,
+   "dly.us10y2y.chg_1d": 1.0,
+   "dly.us10y2y.chg_5d": 1.0,
+   "dly.vix.level": 1.0,
+   "dly.vix.chg_1d": 1.0,
+   "dly.spx.ret_1d": 1.0,
+   "dly.spx.ret_5d": 1.0,
+   "dly.dax.ret_1d": 1.0,
+   "dly.dax.ret_5d": 1.0,
+   "dly.gold.ret_1d": 1.0,
+   "dly.gold.ret_5d": 1.0,
+   "dly.oil.ret_1d": 1.0,
+   "dly.oil.ret_5d": 1.0,
+   "cot.eur.net_long": 1.0,
+   "cot.eur.net_change": 1.0,
+   "cot.eur.net_share": 1.0,
+   "cot.eur.net_z156": 1.0,
+   "fac.fx_f1.ret_1": 0.999677263191867,
+   "fac.fx_f1.ret_4": 0.9991931579796676,
+   "fac.fx_f1.ret_24": 0.995965789898338,
+   "fac.fx_f1.kalman_slope": 1.0,
+   "fac.fx_f2.ret_1": 0.999677263191867,
+   "fac.fx_f2.ret_4": 0.9991931579796676,
+   "fac.fx_f2.ret_24": 0.995965789898338,
+   "fac.fx_f2.kalman_slope": 1.0,
+   "fac.fx_f3.ret_1": 0.999677263191867,
+   "fac.fx_f3.ret_4": 0.9991931579796676,
+   "fac.fx_f3.ret_24": 0.995965789898338,
+   "fac.fx_f3.kalman_slope": 1.0,
+   "fac.daily_f1": 1.0,
+   "fac.daily_f2": 1.0,
+   "kal.eurusd.slope_fast": 1.0,
+   "kal.eurusd.slope_mid": 1.0,
+   "kal.eurusd.slope_slow": 1.0
+  },
+  "2024": {
+   "fx.gbpusd.ret_1": 1.0,
+   "fx.gbpusd.ret_4": 1.0,
+   "fx.gbpusd.ret_24": 1.0,
+   "fx.gbpusd.rv_24": 1.0,
+   "fx.usdchf.ret_1": 1.0,
+   "fx.usdchf.ret_4": 1.0,
+   "fx.usdchf.ret_24": 1.0,
+   "fx.usdchf.rv_24": 1.0,
+   "fx.usdjpy.ret_1": 1.0,
+   "fx.usdjpy.ret_4": 1.0,
+   "fx.usdjpy.ret_24": 1.0,
+   "fx.usdjpy.rv_24": 1.0,
+   "fx.eurgbp.ret_1": 1.0,
+   "fx.eurgbp.ret_4": 1.0,
+   "fx.eurgbp.ret_24": 1.0,
+   "fx.eurgbp.rv_24": 1.0,
+   "fx.eurjpy.ret_1": 1.0,
+   "fx.eurjpy.ret_4": 1.0,
+   "fx.eurjpy.ret_24": 1.0,
+   "fx.eurjpy.rv_24": 1.0,
+   "fx.audusd.ret_1": 1.0,
+   "fx.audusd.ret_4": 1.0,
+   "fx.audusd.ret_24": 1.0,
+   "fx.audusd.rv_24": 1.0,
+   "fx.xauusd.ret_1": 0.910625301398489,
+   "fx.xauusd.ret_4": 0.9075711300434014,
+   "fx.xauusd.ret_24": 0.9456678990515994,
+   "fx.xauusd.rv_24": 0.002250442051117184,
+   "fx.usd_strength.ret_1": 1.0,
+   "fx.usd_strength.ret_4": 1.0,
+   "fx.usd_strength.ret_24": 1.0,
+   "fx.eur_strength.ret_1": 1.0,
+   "fx.eur_strength.ret_4": 1.0,
+   "fx.eur_strength.ret_24": 1.0,
+   "btc.ret_1": 1.0,
+   "btc.ret_4": 1.0,
+   "btc.ret_24": 1.0,
+   "btc.rv_24": 1.0,
+   "btc.taker_buy_share_24": 1.0,
+   "dly.us2y.level": 1.0,
+   "dly.us2y.chg_1d": 1.0,
+   "dly.us2y.chg_5d": 1.0,
+   "dly.us10y.level": 1.0,
+   "dly.us10y.chg_1d": 1.0,
+   "dly.us10y.chg_5d": 1.0,
+   "dly.us10y2y.level": 1.0,
+   "dly.us10y2y.chg_1d": 1.0,
+   "dly.us10y2y.chg_5d": 1.0,
+   "dly.vix.level": 1.0,
+   "dly.vix.chg_1d": 1.0,
+   "dly.spx.ret_1d": 1.0,
+   "dly.spx.ret_5d": 1.0,
+   "dly.dax.ret_1d": 1.0,
+   "dly.dax.ret_5d": 1.0,
+   "dly.gold.ret_1d": 1.0,
+   "dly.gold.ret_5d": 1.0,
+   "dly.oil.ret_1d": 1.0,
+   "dly.oil.ret_5d": 1.0,
+   "cot.eur.net_long": 1.0,
+   "cot.eur.net_change": 1.0,
+   "cot.eur.net_share": 1.0,
+   "cot.eur.net_z156": 1.0,
+   "fac.fx_f1.ret_1": 1.0,
+   "fac.fx_f1.ret_4": 1.0,
+   "fac.fx_f1.ret_24": 1.0,
+   "fac.fx_f1.kalman_slope": 1.0,
+   "fac.fx_f2.ret_1": 1.0,
+   "fac.fx_f2.ret_4": 1.0,
+   "fac.fx_f2.ret_24": 1.0,
+   "fac.fx_f2.kalman_slope": 1.0,
+   "fac.fx_f3.ret_1": 1.0,
+   "fac.fx_f3.ret_4": 1.0,
+   "fac.fx_f3.ret_24": 1.0,
+   "fac.fx_f3.kalman_slope": 1.0,
+   "fac.daily_f1": 1.0,
+   "fac.daily_f2": 1.0,
+   "kal.eurusd.slope_fast": 1.0,
+   "kal.eurusd.slope_mid": 1.0,
+   "kal.eurusd.slope_slow": 1.0
+  }
+ },
+ "factor_info": {
+  "fx_pca": {
+   "columns": [
+    "gbpusd",
+    "usdchf",
+    "usdjpy",
+    "eurgbp",
+    "eurjpy",
+    "audusd"
+   ],
+   "rows": 30871,
+   "explained": [
+    0.3221,
+    0.277,
+    0.224
+   ],
+   "W": [
+    [
+     0.6382,
+     -0.0817,
+     -0.2849
+    ],
+    [
+     -0.2525,
+     0.5205,
+     -0.2615
+    ],
+    [
+     0.1268,
+     0.6987,
+     0.2468
+    ],
+    [
+     -0.327,
+     -0.2827,
+     0.6733
+    ],
+    [
+     0.4457,
+     0.2835,
+     0.5689
+    ],
+    [
+     0.4553,
+     -0.2719,
+     0.1123
+    ]
+   ]
+  },
+  "fx_f1_q": 1.0,
+  "fx_f2_q": 1.0,
+  "fx_f3_q": 1.0,
+  "daily_pca": {
+   "columns": [
+    "dly.us2y.chg_1d",
+    "dly.us10y.chg_1d",
+    "dly.us10y2y.chg_1d",
+    "dly.vix.chg_1d",
+    "dly.spx.ret_1d",
+    "dly.dax.ret_1d",
+    "dly.gold.ret_1d",
+    "dly.oil.ret_1d"
+   ],
+   "rows": 1221,
+   "explained": [
+    0.4062,
+    0.1744
+   ],
+   "W": [
+    [
+     0.3817,
+     0.2566
+    ],
+    [
+     0.4446,
+     0.4458
+    ],
+    [
+     0.2277,
+     0.3873
+    ],
+    [
+     -0.4048,
+     0.4333
+    ],
+    [
+     0.4345,
+     -0.4041
+    ],
+    [
+     0.3714,
+     -0.2337
+    ],
+    [
+     -0.2508,
+     -0.3811
+    ],
+    [
+     0.2265,
+     -0.186
+    ]
+   ]
+  },
+  "fit_period": [
+   "2015-01-01 00:00:00+00:00",
+   "2020-01-02 00:00:00+00:00"
+  ]
+ },
+ "excluded": {
+  "STLFSI4": "revised series; point-in-time leak already audited (I6N)",
+  "FRED DTWEX* / macro composites": "computed indices with revisions; not point-in-time",
+  "economic calendar 2020-2024 with consensus": "not available point-in-time (Investing.com export forbidden by its terms; FXMacroData only from 2024-12)"
+ }
+}
