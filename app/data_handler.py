@@ -1,5 +1,46 @@
 import pandas as pd
 
+def parse_wall_clock(series):
+    """Timestamps of an input column: ISO 8601 when the whole column parses as such
+    (the form governed deliveries carry), else the legacy day-first parse.
+
+    `dayfirst=True` on ISO strings swaps month and day and turns days above 12 into
+    NaT, which silently emptied every governed run; the two families never mix in
+    one column, so trying ISO first is exact."""
+    text = series.astype(str).str.strip()
+    try:
+        return pd.to_datetime(text, format='ISO8601')
+    except (ValueError, TypeError):
+        return pd.to_datetime(text, dayfirst=True, errors='coerce')
+
+
+def apply_file_contract(data, config, file_key, *, main=False):
+    """Keep only what the roles declared **for this file** allow, and record the plan.
+
+    R1: the primary loader was not the only way a column reached the run. The hourly loader
+    re-reads the very same main input, and the auxiliary loaders bring their own files, all of
+    them outside the contract until now. Each file is resolved under its own declaration:
+    the main input under the run's `column_roles`, every other file under
+    `column_roles_by_file[<key>]`, or the explicitly declared legacy migration.
+    """
+    if config is None:
+        return data
+    from app.column_roles import (contract_for, resolve as resolve_roles, select_features)
+
+    declaration = config if main else contract_for(config, file_key)
+    index_name = data.index.name
+    plan = resolve_roles(declaration,
+                         ([index_name] if index_name else []) + list(data.columns))
+    if plan.migration is None:
+        select_features(data, plan)
+        keep = [name for name in
+                (([plan.time] if plan.time else []) + list(plan.features))
+                if name in data.columns]
+        data = data.loc[:, keep]
+    config.setdefault("column_roles_applied", {})[file_key] = plan.as_record()
+    return data
+
+
 def load_csv(file_path, config=None):
     """
     Load a CSV file dynamically based on header mappings and configurations.
@@ -19,8 +60,10 @@ def load_csv(file_path, config=None):
         dataset_type = config.get('dataset_type', 'default') if config else 'default'
         column_map = header_mappings.get(dataset_type, {})
 
-        # Load the CSV file
-        data = pd.read_csv(file_path, sep=',', parse_dates=[0], dayfirst=True)
+        # Load the CSV file; the first column is the wall clock (ISO 8601 as delivered by
+        # data-gov, or the legacy day-first exports)
+        data = pd.read_csv(file_path, sep=',')
+        data[data.columns[0]] = parse_wall_clock(data[data.columns[0]])
 
         # Apply column mappings
         if column_map:
@@ -30,6 +73,20 @@ def load_csv(file_path, config=None):
         if 'date' in data.columns:
             data['date'] = pd.to_datetime(data['date'], errors='coerce')
             data.set_index('date', inplace=True)
+
+        if config is not None:
+            # Declared roles, or an explicit migration: never a heuristic selection. Resolved
+            # BEFORE the coercion below (R1) — coercing first turns a timestamp declared as a
+            # feature into NaN and lets the run continue, which is what the contract exists
+            # to stop. `process_data` checks again; this is the file's own gate.
+            from app.column_roles import resolve as resolve_roles, select_features
+
+            plan = resolve_roles(config, list(data.columns))
+            if plan.migration is None:
+                select_features(data, plan)  # refuses a declared feature that is not numeric
+                keep = ([plan.time] if plan.time else []) + list(plan.features)
+                data = data.loc[:, keep]
+                config.setdefault("column_roles_applied", {})["input_file"] = plan.as_record()
 
         # Convert numeric columns
         for col in data.select_dtypes(include=['object', 'category']).columns:
@@ -68,6 +125,8 @@ def load_additional_csv(file_path, dataset_type, config=None):
         # Apply column mappings
         if column_map:
             data.rename(columns=column_map, inplace=True)
+
+        data = apply_file_contract(data, config, dataset_type)
 
         # Parse 'DATE_TIME' for Forex datasets
         if 'DATE_TIME' in data.columns:
@@ -183,8 +242,11 @@ def load_and_fix_hourly_data(file_path, config):
         if datetime_col not in data.columns:
             raise ValueError(f"The expected datetime column '{datetime_col}' is missing in the hourly dataset.")
 
-        # Parse and set datetime index
-        data[datetime_col] = pd.to_datetime(data[datetime_col], dayfirst=True, errors='coerce')
+        # the same file the primary loader reads: the same contract governs it
+        data = apply_file_contract(data, config, 'input_file', main=True)
+
+        # Parse and set datetime index (ISO 8601 first, legacy day-first otherwise)
+        data[datetime_col] = parse_wall_clock(data[datetime_col])
         invalid_rows = data[datetime_col].isna().sum()
         if invalid_rows > 0:
             print(f"Warning: Found {invalid_rows} rows with invalid datetime values. Dropping them.")
@@ -228,6 +290,8 @@ def load_high_frequency_data(file_path, config):
         # Load the CSV file
         data = pd.read_csv(file_path, sep=',', encoding='utf-8')
         print(f"Loaded columns: {list(data.columns)}")
+
+        data = apply_file_contract(data, config, 'high_frequency')
 
         # Check if the datetime column exists
         if datetime_col not in data.columns:
